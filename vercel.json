@@ -1,15 +1,21 @@
 {
   "version": 2,
   "cleanUrls": true,
+  {
   "rewrites": [
     {
-      "source": "/waterquality",
-  "destination": "https://daily-water-quality.vercel.app/?targetTab=manager&pin=3653"
-    },
+      "source": "/spawning-trial",
+      "destination": "KEEP_YOUR_ACTUAL_SPAWNING_TRIAL_URL_HERE"
+    }
+  ],
+  "redirects": [
     {
-      "source": "/water/:path*",
-      "destination": "https://daily-water-quality.vercel.app/:path*"
-    },
+      "source": "/waterquality",
+      "destination": "https://daily-water-quality-app-three.vercel.app/?targetTab=manager&pin=3653",
+      "permanent": false
+    }
+  ]
+}
     {
       "source": "/spawning",
       "destination": "https://abalone-spawning-and-purchasing-log.vercel.app/"
