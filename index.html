@@ -19,7 +19,6 @@
 </head>
 <body id="app-body" class="flex flex-col min-h-screen font-sans antialiased text-slate-900 bg-slate-50 dark:bg-[#0b1329] dark:text-white">
 
-    <!-- Top Global Header Control Bar -->
     <header class="sticky top-0 z-40 border-b-2 bg-white border-slate-200 dark:bg-[#0b1329] dark:border-[#1c2541] px-4 py-3 flex justify-between items-center shadow-sm">
         <div>
             <h1 class="text-xl font-black tracking-tight uppercase">Abalone Ops</h1>
@@ -31,7 +30,6 @@
         </div>
     </header>
 
-    <!-- 1. WORKER CORE ENTRY DASHBOARD VIEW -->
     <main id="dashboard-view" class="flex-1 p-4 space-y-4 pb-24 max-w-md mx-auto w-full">
         <section class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] rounded-xl p-4 shadow-sm">
             <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Operational Summary</h2>
@@ -50,7 +48,7 @@
         <section class="space-y-3">
             <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest px-1">Worker Entry Modules</h2>
 
-            <a href="/water" data-prefetch="/water" class="ops-link theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] flex items-center justify-between p-5 rounded-xl block shadow-sm">
+            <a href="https://daily-water-quality-app-three.vercel.app/?targetTab=entry" class="ops-link theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] flex items-center justify-between p-5 rounded-xl block shadow-sm">
                 <div class="flex items-center space-x-4">
                     <div class="p-3 bg-blue-500/10 rounded-lg border border-blue-500/30">
                         <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5l6.74-6.76z"></path></svg>
@@ -78,7 +76,6 @@
         </section>
     </main>
 
-    <!-- 2. MANAGEMENT ACCESS SECURITY WALL -->
     <main id="manager-auth-view" class="hidden flex-1 p-4 flex flex-col justify-center items-center max-w-md mx-auto w-full pb-24">
         <div class="w-full text-center space-y-4 max-w-xs">
             <div class="mx-auto w-12 h-12 bg-blue-500/10 dark:bg-[#1c2541] border-2 border-blue-500 dark:border-[#3a506b] rounded-full flex items-center justify-center text-blue-600 dark:text-[#5bc0be]">
@@ -113,10 +110,8 @@
         </div>
     </main>
 
-    <!-- 3. PREMIUM MANAGER SECURE HUB VIEW -->
     <main id="manager-dashboard-view" class="hidden flex-1 flex flex-col min-h-0 w-full">
         
-        <!-- SUB-VIEW A: PREMIUM CARD GRID SELECTION MENU (PREMIUM DUAL-LANGUAGE ARRAYS) -->
         <div id="manager-menu-grid" class="flex-1 p-4 space-y-4 pb-24 max-w-md mx-auto w-full overflow-y-auto">
             <div class="flex justify-between items-center px-1">
                 <div>
@@ -126,10 +121,8 @@
                 <button onclick="lockManagerView()" class="px-3 py-1.5 bg-rose-500/10 text-rose-500 border border-rose-500/20 text-xs font-black rounded-lg uppercase tracking-wider">Lock</button>
             </div>
 
-            <!-- Big Tactical Premium Cloud Button Selection Layout -->
             <div class="grid grid-cols-1 gap-3 pt-2">
                 
-                <!-- 1. Water Quality Data -->
                 <button onclick="loadManagerReport('water', 'default')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
                     <div class="flex items-center space-x-4">
                         <div class="p-3.5 bg-blue-500/10 rounded-xl border border-blue-500/20 text-blue-600 dark:text-blue-400">
@@ -143,7 +136,6 @@
                     <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
                 </button>
 
-                <!-- 2. Spawning Trials -->
                 <button onclick="loadManagerReport('spawning', 'spawning')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
                     <div class="flex items-center space-x-4">
                         <div class="p-3.5 bg-purple-500/10 rounded-xl border border-purple-500/20 text-purple-600 dark:text-purple-400">
@@ -157,7 +149,6 @@
                     <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
                 </button>
 
-                <!-- 3. Abalone Purchasing (Targets same sheet, passing custom structural query parameters) -->
                 <button onclick="loadManagerReport('spawning', 'purchasing')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
                     <div class="flex items-center space-x-4">
                         <div class="p-3.5 bg-amber-500/10 rounded-xl border border-amber-500/20 text-amber-600 dark:text-amber-400">
@@ -171,7 +162,6 @@
                     <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
                 </button>
 
-                <!-- 4. Workforce & HR Management Module -->
                 <button onclick="loadManagerReport('hr', 'default')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
                     <div class="flex items-center space-x-4">
                         <div class="p-3.5 bg-emerald-500/10 rounded-xl border border-emerald-500/20 text-emerald-600 dark:text-emerald-400">
@@ -187,7 +177,6 @@
             </div>
         </div>
 
-        <!-- SUB-VIEW B: ACTIVE APPLICATION RUNTIME TERMINAL FRAME -->
         <div id="manager-report-frame" class="hidden flex-1 flex flex-col min-h-0 w-full">
             <div class="p-3 border-b border-slate-200 dark:border-[#1c2541] bg-white dark:bg-[#0b1329] flex justify-between items-center px-4 shrink-0">
                 <button onclick="closeManagerReport()" class="flex items-center space-x-1.5 text-xs font-black uppercase text-blue-600 dark:text-[#5bc0be] py-1">
@@ -208,14 +197,12 @@
                 </div>
             </div>
 
-            <!-- Full-Screen Iframe Workspace -->
             <div class="w-full bg-slate-100 dark:bg-[#0b1329] p-1.5 relative h-[calc(100vh-150px)] min-h-[650px]">
                 <iframe id="mgr-iframe-engine" src="about:blank" class="w-full h-full rounded-xl border border-slate-200 dark:border-[#3a506b] bg-white dark:bg-[#1c2541]"></iframe>
             </div>
         </div>
     </main>
 
-    <!-- STICKY BOTTOM NAVIGATION -->
     <nav class="fixed bottom-0 left-0 right-0 z-40 border-t-2 bg-white border-slate-200 dark:bg-[#0b1329] dark:border-[#1c2541] px-6 py-2 flex justify-around items-center max-w-md mx-auto w-full shadow-lg">
         <button onclick="switchTab('ops')" id="nav-ops-btn" class="flex flex-col items-center space-y-1 py-1 text-blue-600 dark:text-[#5bc0be]">
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
@@ -227,13 +214,12 @@
         </button>
     </nav>
 
-    <!-- CORE SYSTEM INTELLIGENCE ENGINE -->
     <script>
         const MASTER_PIN = "3653";
         let inputPin = "";
         let isManagerAuthenticated = false;
         let activeSubPath = ""; 
-        let activeTabContext = "default"; // Caches the specific sub-tab target ('spawning' vs 'purchasing')
+        let activeTabContext = "default";
 
         function synchronizeSystemTheme() {
             const currentHour = new Date().getHours();
@@ -287,9 +273,15 @@
             }
         }
 
-        // DYNAMIC TUNNEL ROUTING: Captures both the chosen app and the target sub-tab parameter
+        // DYNAMIC TUNNEL ROUTING: Triggers direct window breakout for Water Quality
         function loadManagerReport(appKey, tabContext) {
             rumbleDevice(45);
+            
+            if (appKey === 'water') {
+                window.location.href = "https://daily-water-quality-app-three.vercel.app/?targetTab=manager&pin=3653";
+                return;
+            }
+            
             activeSubPath = appKey;
             activeTabContext = tabContext;
             
@@ -306,15 +298,10 @@
             document.getElementById('mgr-iframe-engine').src = "about:blank";
         }
 
-        // CHRONOLOGICAL QUERY AUTOMATION MOTOR
         function executeMonthFilterChange() {
             rumbleDevice(30);
             const selectedMonthValue = document.getElementById('mgr-month-select').value;
             const iframe = document.getElementById('mgr-iframe-engine');
-            
-            // Constructs and executes the path string with dual query arguments passed directly upstream
-            // Example Output for Spawning: "/spawning?targetTab=spawning&month=2026-06"
-            // Example Output for Purchasing: "/spawning?targetTab=purchasing&month=2026-06"
             iframe.src = `/${activeSubPath}?targetTab=${activeTabContext}&month=${selectedMonthValue}`;
         }
 
