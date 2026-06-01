@@ -13,20 +13,13 @@
         .theme-card {
             transition: background-color 0.3s ease, border-color 0.3s ease;
         }
-        iframe::-webkit-scrollbar {
-            display: none;
-        }
-        iframe {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        /* Custom scroller removal for crisp menu arrays */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        iframe::-webkit-scrollbar { display: none; }
+        iframe { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body id="app-body" class="flex flex-col min-h-screen font-sans antialiased text-slate-900 bg-slate-50 dark:bg-[#0b1329] dark:text-white">
 
+    <!-- Top Global Header Control Bar -->
     <header class="sticky top-0 z-40 border-b-2 bg-white border-slate-200 dark:bg-[#0b1329] dark:border-[#1c2541] px-4 py-3 flex justify-between items-center shadow-sm">
         <div>
             <h1 class="text-xl font-black tracking-tight uppercase">Abalone Ops</h1>
@@ -38,6 +31,7 @@
         </div>
     </header>
 
+    <!-- 1. WORKER CORE ENTRY DASHBOARD VIEW -->
     <main id="dashboard-view" class="flex-1 p-4 space-y-4 pb-24 max-w-md mx-auto w-full">
         <section class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] rounded-xl p-4 shadow-sm">
             <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Operational Summary</h2>
@@ -81,22 +75,10 @@
                 </div>
                 <span class="text-xs font-black bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded uppercase">Live</span>
             </a>
-
-            <a href="#" class="pointer-events-none opacity-40 theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] flex items-center justify-between p-5 rounded-xl block shadow-sm">
-                <div class="flex items-center space-x-4">
-                    <div class="p-3 bg-amber-500/10 rounded-lg border border-amber-500/30">
-                        <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                    </div>
-                    <div>
-                        <h3 class="text-base font-black text-slate-400 dark:text-slate-500 tracking-wide uppercase">HR Roster</h3>
-                        <p class="text-xs text-slate-400 dark:text-slate-500 font-medium">Shift Deployments & Teams</p>
-                    </div>
-                </div>
-                <span class="text-xs font-black bg-slate-200 dark:bg-slate-500/20 border border-slate-300 dark:border-slate-500/30 text-slate-500 dark:text-slate-400 px-2.5 py-1 rounded uppercase">Testing</span>
-            </a>
         </section>
     </main>
 
+    <!-- 2. MANAGEMENT ACCESS SECURITY WALL -->
     <main id="manager-auth-view" class="hidden flex-1 p-4 flex flex-col justify-center items-center max-w-md mx-auto w-full pb-24">
         <div class="w-full text-center space-y-4 max-w-xs">
             <div class="mx-auto w-12 h-12 bg-blue-500/10 dark:bg-[#1c2541] border-2 border-blue-500 dark:border-[#3a506b] rounded-full flex items-center justify-center text-blue-600 dark:text-[#5bc0be]">
@@ -115,86 +97,106 @@
             </div>
 
             <div class="grid grid-cols-3 gap-3 pt-4">
-                <button onclick="pressKey('1')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] active:bg-blue-600 dark:active:bg-[#5bc0be] active:text-white font-black py-4 rounded-xl text-lg shadow-sm">1</button>
-                <button onclick="pressKey('2')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] active:bg-blue-600 dark:active:bg-[#5bc0be] active:text-white font-black py-4 rounded-xl text-lg shadow-sm">2</button>
-                <button onclick="pressKey('3')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] active:bg-blue-600 dark:active:bg-[#5bc0be] active:text-white font-black py-4 rounded-xl text-lg shadow-sm">3</button>
-                <button onclick="pressKey('4')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] active:bg-blue-600 dark:active:bg-[#5bc0be] active:text-white font-black py-4 rounded-xl text-lg shadow-sm">4</button>
-                <button onclick="pressKey('5')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] active:bg-blue-600 dark:active:bg-[#5bc0be] active:text-white font-black py-4 rounded-xl text-lg shadow-sm">5</button>
-                <button onclick="pressKey('6')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] active:bg-blue-600 dark:active:bg-[#5bc0be] active:text-white font-black py-4 rounded-xl text-lg shadow-sm">6</button>
-                <button onclick="pressKey('7')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] active:bg-blue-600 dark:active:bg-[#5bc0be] active:text-white font-black py-4 rounded-xl text-lg shadow-sm">7</button>
-                <button onclick="pressKey('8')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] active:bg-blue-600 dark:active:bg-[#5bc0be] active:text-white font-black py-4 rounded-xl text-lg shadow-sm">8</button>
-                <button onclick="pressKey('9')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] active:bg-blue-600 dark:active:bg-[#5bc0be] active:text-white font-black py-4 rounded-xl text-lg shadow-sm">9</button>
+                <button onclick="pressKey('1')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">1</button>
+                <button onclick="pressKey('2')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">2</button>
+                <button onclick="pressKey('3')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">3</button>
+                <button onclick="pressKey('4')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">4</button>
+                <button onclick="pressKey('5')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">5</button>
+                <button onclick="pressKey('6')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">6</button>
+                <button onclick="pressKey('7')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">7</button>
+                <button onclick="pressKey('8')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">8</button>
+                <button onclick="pressKey('9')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">9</button>
                 <button onclick="clearPin()" class="theme-card bg-slate-100 dark:bg-[#0b1329] border-2 border-slate-300 dark:border-[#3a506b] font-bold py-4 rounded-xl text-xs uppercase text-rose-500 shadow-sm">Clear</button>
-                <button onclick="pressKey('0')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] active:bg-blue-600 dark:active:bg-[#5bc0be] active:text-white font-black py-4 rounded-xl text-lg shadow-sm">0</button>
+                <button onclick="pressKey('0')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">0</button>
                 <button class="theme-card bg-slate-100 dark:bg-[#0b1329] border-2 border-slate-300 dark:border-[#3a506b] opacity-30 font-bold py-4 rounded-xl text-xs uppercase shadow-sm" disabled>Bio</button>
             </div>
         </div>
     </main>
 
+    <!-- 3. PREMIUM MANAGER SECURE HUB VIEW -->
     <main id="manager-dashboard-view" class="hidden flex-1 flex flex-col min-h-0 w-full">
         
+        <!-- SUB-VIEW A: PREMIUM CARD GRID SELECTION MENU (PREMIUM DUAL-LANGUAGE ARRAYS) -->
         <div id="manager-menu-grid" class="flex-1 p-4 space-y-4 pb-24 max-w-md mx-auto w-full overflow-y-auto">
             <div class="flex justify-between items-center px-1">
                 <div>
-                    <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest">Executive Terminal</h2>
-                    <h3 class="text-xl font-black uppercase tracking-tight">Select Manager Log View</h3>
+                    <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest">Executive Terminal / 최고 경영자 콘솔</h2>
+                    <h3 class="text-xl font-black uppercase tracking-tight">Select Log View</h3>
                 </div>
                 <button onclick="lockManagerView()" class="px-3 py-1.5 bg-rose-500/10 text-rose-500 border border-rose-500/20 text-xs font-black rounded-lg uppercase tracking-wider">Lock</button>
             </div>
 
+            <!-- Big Tactical Premium Cloud Button Selection Layout -->
             <div class="grid grid-cols-1 gap-3 pt-2">
                 
-                <button onclick="loadManagerReport('water')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
+                <!-- 1. Water Quality Data -->
+                <button onclick="loadManagerReport('water', 'default')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
                     <div class="flex items-center space-x-4">
                         <div class="p-3.5 bg-blue-500/10 rounded-xl border border-blue-500/20 text-blue-600 dark:text-blue-400">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2z"></path></svg>
                         </div>
                         <div>
-                            <h4 class="text-base font-black uppercase tracking-wide text-slate-800 dark:text-white">Water Quality History</h4>
-                            <p class="text-xs text-slate-400 font-medium">Review master charts & DO thresholds</p>
+                            <span class="block text-[10px] font-black text-blue-500 uppercase tracking-wider">수질 관리 데이터</span>
+                            <h4 class="text-base font-black uppercase tracking-wide text-slate-800 dark:text-white">Water Quality Data</h4>
                         </div>
                     </div>
                     <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
                 </button>
 
-                <button onclick="loadManagerReport('spawning')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
+                <!-- 2. Spawning Trials -->
+                <button onclick="loadManagerReport('spawning', 'spawning')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
                     <div class="flex items-center space-x-4">
                         <div class="p-3.5 bg-purple-500/10 rounded-xl border border-purple-500/20 text-purple-600 dark:text-purple-400">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 11.518 1.352l-.145-.043L11.25 11.25zm0 0a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5zM12 18.75l3-3m0 0l-3-3m3 3H9"></path></svg>
                         </div>
                         <div>
-                            <h4 class="text-base font-black uppercase tracking-wide text-slate-800 dark:text-white">Spawning Metrics</h4>
-                            <p class="text-xs text-slate-400 font-medium">Conditioning success analytics metrics</p>
+                            <span class="block text-[10px] font-black text-purple-500 uppercase tracking-wider">산란 시험 관리</span>
+                            <h4 class="text-base font-black uppercase tracking-wide text-slate-800 dark:text-white">Spawning Trials</h4>
                         </div>
                     </div>
                     <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
                 </button>
 
-                <div class="opacity-40 theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm">
+                <!-- 3. Abalone Purchasing (Targets same sheet, passing custom structural query parameters) -->
+                <button onclick="loadManagerReport('spawning', 'purchasing')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
                     <div class="flex items-center space-x-4">
                         <div class="p-3.5 bg-amber-500/10 rounded-xl border border-amber-500/20 text-amber-600 dark:text-amber-400">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h16.5M4.5 9h15M5.25 14.25h13.5"></path></svg>
                         </div>
                         <div>
-                            <h4 class="text-base font-black uppercase tracking-wide text-slate-400 dark:text-slate-500">Abalone Purchasing Data</h4>
-                            <p class="text-xs text-slate-400 font-medium">Financial transaction auditing modules (v2.0)</p>
+                            <span class="block text-[10px] font-black text-amber-500 uppercase tracking-wider">전복 매입 로그</span>
+                            <h4 class="text-base font-black uppercase tracking-wide text-slate-800 dark:text-white">Abalone Purchasing</h4>
                         </div>
                     </div>
-                    <span class="text-[10px] font-black tracking-wider uppercase text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">Locked</span>
-                </div>
+                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
+                </button>
+
+                <!-- 4. Workforce & HR Management Module -->
+                <button onclick="loadManagerReport('hr', 'default')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
+                    <div class="flex items-center space-x-4">
+                        <div class="p-3.5 bg-emerald-500/10 rounded-xl border border-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"></path></svg>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] font-black text-emerald-500 uppercase tracking-wider">인사 및 근태 관리</span>
+                            <h4 class="text-base font-black uppercase tracking-wide text-slate-800 dark:text-white">Workforce & HR Management</h4>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
+                </button>
             </div>
         </div>
 
+        <!-- SUB-VIEW B: ACTIVE APPLICATION RUNTIME TERMINAL FRAME -->
         <div id="manager-report-frame" class="hidden flex-1 flex flex-col min-h-0 w-full">
-            
             <div class="p-3 border-b border-slate-200 dark:border-[#1c2541] bg-white dark:bg-[#0b1329] flex justify-between items-center px-4 shrink-0">
                 <button onclick="closeManagerReport()" class="flex items-center space-x-1.5 text-xs font-black uppercase text-blue-600 dark:text-[#5bc0be] py-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"></path></svg>
-                    <span>Menu</span>
+                    <span>뒤로가기 Menu</span>
                 </button>
                 
                 <div class="flex items-center space-x-2">
-                    <label for="mgr-month-select" class="text-[10px] font-black uppercase tracking-wider text-slate-400">Filter Period:</label>
+                    <label for="mgr-month-select" class="text-[10px] font-black uppercase tracking-wider text-slate-400">조회 월 Period:</label>
                     <select id="mgr-month-select" onchange="executeMonthFilterChange()" class="bg-slate-100 dark:bg-[#1c2541] text-slate-800 dark:text-white font-black text-xs py-1.5 px-3 rounded-lg border border-slate-300 dark:border-[#3a506b] focus:outline-none focus:border-blue-500 dark:focus:border-[#5bc0be]">
                         <option value="2026-06">June 2026</option>
                         <option value="2026-05">May 2026</option>
@@ -206,12 +208,14 @@
                 </div>
             </div>
 
+            <!-- Full-Screen Iframe Workspace -->
             <div class="flex-1 bg-slate-100 dark:bg-[#0b1329] p-1.5 relative h-full">
                 <iframe id="mgr-iframe-engine" src="about:blank" class="w-full h-full rounded-xl border border-slate-200 dark:border-[#3a506b] bg-white dark:bg-[#1c2541]"></iframe>
             </div>
         </div>
     </main>
 
+    <!-- STICKY BOTTOM NAVIGATION -->
     <nav class="fixed bottom-0 left-0 right-0 z-40 border-t-2 bg-white border-slate-200 dark:bg-[#0b1329] dark:border-[#1c2541] px-6 py-2 flex justify-around items-center max-w-md mx-auto w-full shadow-lg">
         <button onclick="switchTab('ops')" id="nav-ops-btn" class="flex flex-col items-center space-y-1 py-1 text-blue-600 dark:text-[#5bc0be]">
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
@@ -223,19 +227,18 @@
         </button>
     </nav>
 
+    <!-- CORE SYSTEM INTELLIGENCE ENGINE -->
     <script>
-        // 1. HARDWARE DATA MATRIX CONFIGURATIONS
-        const MASTER_PIN = "3653"; // Passcode credential
+        const MASTER_PIN = "3653";
         let inputPin = "";
         let isManagerAuthenticated = false;
-        let activeSubPath = ""; // Caches current sub-app ('water' or 'spawning')
+        let activeSubPath = ""; 
+        let activeTabContext = "default"; // Caches the specific sub-tab target ('spawning' vs 'purchasing')
 
-        // 2. AUTOMATED LIGHT/DARK CHRONO-THEME SWAPPER
         function synchronizeSystemTheme() {
             const currentHour = new Date().getHours();
             const bodyEl = document.getElementById('app-body');
             const themeInd = document.getElementById('theme-indicator');
-            
             if (currentHour >= 6 && currentHour < 18) {
                 bodyEl.classList.remove('dark');
                 themeInd.textContent = "Daylight Mode";
@@ -255,10 +258,8 @@
             if ('vibrate' in navigator) navigator.vibrate(durationMs);
         }
 
-        // 3. CORE APPLICATIVE TAB CONTROLLER
         function switchTab(target) {
             rumbleDevice(35);
-            
             const opsView = document.getElementById('dashboard-view');
             const authView = document.getElementById('manager-auth-view');
             const mgrView = document.getElementById('manager-dashboard-view');
@@ -286,15 +287,15 @@
             }
         }
 
-        // 4. MANAGER DYNAMIC REPORT VIEW LOGIC (IFRAME ENGINE MAPPING)
-        function loadManagerReport(appKey) {
+        // DYNAMIC TUNNEL ROUTING: Captures both the chosen app and the target sub-tab parameter
+        function loadManagerReport(appKey, tabContext) {
             rumbleDevice(45);
             activeSubPath = appKey;
+            activeTabContext = tabContext;
             
             document.getElementById('manager-menu-grid').classList.add('hidden');
             document.getElementById('manager-report-frame').classList.remove('hidden');
             
-            // Build and reload iframe with active path context parameters
             executeMonthFilterChange();
         }
 
@@ -302,27 +303,26 @@
             rumbleDevice(40);
             document.getElementById('manager-report-frame').classList.add('hidden');
             document.getElementById('manager-menu-grid').classList.remove('hidden');
-            document.getElementById('mgr-iframe-engine').src = "about:blank"; // Purges execution thread memory
+            document.getElementById('mgr-iframe-engine').src = "about:blank";
         }
 
-        // DYNAMIC FILTER ENGINE: Reconstructs routing targets upon dropdown change
+        // CHRONOLOGICAL QUERY AUTOMATION MOTOR
         function executeMonthFilterChange() {
             rumbleDevice(30);
             const selectedMonthValue = document.getElementById('mgr-month-select').value;
             const iframe = document.getElementById('mgr-iframe-engine');
             
-            // Appends the filter query argument automatically to your Vercel Proxy sub-app target paths
-            // Output example: "/water?month=2026-06" or "/spawning?month=2026-05"
-            iframe.src = `/${activeSubPath}?month=${selectedMonthValue}`;
+            // Constructs and executes the path string with dual query arguments passed directly upstream
+            // Example Output for Spawning: "/spawning?targetTab=spawning&month=2026-06"
+            // Example Output for Purchasing: "/spawning?targetTab=purchasing&month=2026-06"
+            iframe.src = `/${activeSubPath}?targetTab=${activeTabContext}&month=${selectedMonthValue}`;
         }
 
-        // 5. SECURITY CREDENTIAL KEYPAD MATRIX CONTROLLER
         function pressKey(num) {
             if (inputPin.length >= 4) return;
             rumbleDevice(40);
             inputPin += num;
             renderPinDots();
-
             if (inputPin.length === 4) {
                 setTimeout(verifyPin, 150);
             }
@@ -369,7 +369,6 @@
             switchTab('ops');
         }
 
-        // 6. STARTUP BOOT ROUTINES
         synchronizeSystemTheme();
         document.getElementById('live-clock').textContent = new Date().toTimeString().split(' ')[0].substring(0, 5);
     </script>

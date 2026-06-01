@@ -12,11 +12,11 @@
     },
     {
       "source": "/spawning",
-      "destination": "https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/"
+      "destination": "https://abalone-spawning-and-purchasing-log.vercel.app/"
     },
     {
       "source": "/spawning/:path*",
-      "destination": "https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/:path*"
+      "destination": "https://abalone-spawning-and-purchasing-log.vercel.app/:path*"
     }
   ]
 }
