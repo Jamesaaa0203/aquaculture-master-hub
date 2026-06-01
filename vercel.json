@@ -3,12 +3,12 @@
   "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/water",
-      "destination": "https://jamesaaa0203.github.io/daily-water-quality/"
+      "source": "/waterquality",
+  "destination": "https://daily-water-quality.vercel.app/?targetTab=manager&pin=3653"
     },
     {
       "source": "/water/:path*",
-      "destination": "https://jamesaaa0203.github.io/daily-water-quality/:path*"
+      "destination": "https://daily-water-quality.vercel.app/:path*"
     },
     {
       "source": "/spawning",
