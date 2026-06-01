@@ -13,7 +13,6 @@
         .theme-card {
             transition: background-color 0.3s ease, border-color 0.3s ease;
         }
-        /* Hides default scrollbars for an ultra-clean mobile dashboard look */
         iframe::-webkit-scrollbar {
             display: none;
         }
@@ -21,11 +20,13 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+        /* Custom scroller removal for crisp menu arrays */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body id="app-body" class="flex flex-col min-h-screen font-sans antialiased text-slate-900 bg-slate-50 dark:bg-[#0b1329] dark:text-white">
 
-    <!-- Header Control Bar -->
     <header class="sticky top-0 z-40 border-b-2 bg-white border-slate-200 dark:bg-[#0b1329] dark:border-[#1c2541] px-4 py-3 flex justify-between items-center shadow-sm">
         <div>
             <h1 class="text-xl font-black tracking-tight uppercase">Abalone Ops</h1>
@@ -37,10 +38,9 @@
         </div>
     </header>
 
-    <!-- 1. WORKER DASHBOARD VIEW -->
     <main id="dashboard-view" class="flex-1 p-4 space-y-4 pb-24 max-w-md mx-auto w-full">
         <section class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] rounded-xl p-4 shadow-sm">
-            <h2 class="text-xs font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest mb-2">Operational Summary</h2>
+            <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Operational Summary</h2>
             <div class="grid grid-cols-2 gap-3">
                 <div class="bg-slate-50 dark:bg-[#0b1329] p-3 rounded-lg border border-slate-200 dark:border-[#3a506b]">
                     <p class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase">Nodes</p>
@@ -97,7 +97,6 @@
         </section>
     </main>
 
-    <!-- 2. MANAGEMENT GATEWAY AUTH VIEW (Keypad Lock) -->
     <main id="manager-auth-view" class="hidden flex-1 p-4 flex flex-col justify-center items-center max-w-md mx-auto w-full pb-24">
         <div class="w-full text-center space-y-4 max-w-xs">
             <div class="mx-auto w-12 h-12 bg-blue-500/10 dark:bg-[#1c2541] border-2 border-blue-500 dark:border-[#3a506b] rounded-full flex items-center justify-center text-blue-600 dark:text-[#5bc0be]">
@@ -132,66 +131,87 @@
         </div>
     </main>
 
-    <!-- 3. PREMIUM SECURE MANAGER CONTROL CONSOLE (WITH EMBEDDED SUB-TABS) -->
     <main id="manager-dashboard-view" class="hidden flex-1 flex flex-col min-h-0 w-full">
         
-        <!-- Header Controls (Pinned at Top) -->
-        <div class="p-4 flex justify-between items-center max-w-md mx-auto w-full shrink-0">
-            <div>
-                <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest">Executive Dashboard</h2>
-                <h3 class="text-lg font-black uppercase tracking-tight">Farm Control Matrix</h3>
+        <div id="manager-menu-grid" class="flex-1 p-4 space-y-4 pb-24 max-w-md mx-auto w-full overflow-y-auto">
+            <div class="flex justify-between items-center px-1">
+                <div>
+                    <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest">Executive Terminal</h2>
+                    <h3 class="text-xl font-black uppercase tracking-tight">Select Manager Log View</h3>
+                </div>
+                <button onclick="lockManagerView()" class="px-3 py-1.5 bg-rose-500/10 text-rose-500 border border-rose-500/20 text-xs font-black rounded-lg uppercase tracking-wider">Lock</button>
             </div>
-            <button onclick="lockManagerView()" class="px-3 py-1.5 bg-rose-500/10 text-rose-500 border border-rose-500/20 text-xs font-black rounded-lg uppercase tracking-wider">Lock Console</button>
+
+            <div class="grid grid-cols-1 gap-3 pt-2">
+                
+                <button onclick="loadManagerReport('water')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
+                    <div class="flex items-center space-x-4">
+                        <div class="p-3.5 bg-blue-500/10 rounded-xl border border-blue-500/20 text-blue-600 dark:text-blue-400">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2z"></path></svg>
+                        </div>
+                        <div>
+                            <h4 class="text-base font-black uppercase tracking-wide text-slate-800 dark:text-white">Water Quality History</h4>
+                            <p class="text-xs text-slate-400 font-medium">Review master charts & DO thresholds</p>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
+                </button>
+
+                <button onclick="loadManagerReport('spawning')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
+                    <div class="flex items-center space-x-4">
+                        <div class="p-3.5 bg-purple-500/10 rounded-xl border border-purple-500/20 text-purple-600 dark:text-purple-400">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 11.518 1.352l-.145-.043L11.25 11.25zm0 0a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5zM12 18.75l3-3m0 0l-3-3m3 3H9"></path></svg>
+                        </div>
+                        <div>
+                            <h4 class="text-base font-black uppercase tracking-wide text-slate-800 dark:text-white">Spawning Metrics</h4>
+                            <p class="text-xs text-slate-400 font-medium">Conditioning success analytics metrics</p>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
+                </button>
+
+                <div class="opacity-40 theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm">
+                    <div class="flex items-center space-x-4">
+                        <div class="p-3.5 bg-amber-500/10 rounded-xl border border-amber-500/20 text-amber-600 dark:text-amber-400">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h16.5M4.5 9h15M5.25 14.25h13.5"></path></svg>
+                        </div>
+                        <div>
+                            <h4 class="text-base font-black uppercase tracking-wide text-slate-400 dark:text-slate-500">Abalone Purchasing Data</h4>
+                            <p class="text-xs text-slate-400 font-medium">Financial transaction auditing modules (v2.0)</p>
+                        </div>
+                    </div>
+                    <span class="text-[10px] font-black tracking-wider uppercase text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">Locked</span>
+                </div>
+            </div>
         </div>
 
-        <!-- Horizontal Sub-Tab Scroller for Managers -->
-        <div class="px-4 border-b border-slate-200 dark:border-[#1c2541] shrink-0">
-            <div class="flex space-x-2 overflow-x-auto max-w-md mx-auto w-full py-1 no-scrollbar">
-                <button onclick="switchManagerSubTab('water')" id="subtab-water" class="px-4 py-2 text-xs font-black uppercase rounded-lg border-2 bg-blue-600 border-blue-600 text-white dark:bg-[#5bc0be] dark:border-[#5bc0be] dark:text-[#0b1329] shrink-0">
-                    Water Quality
-                </button>
-                <button onclick="switchManagerSubTab('spawning')" id="subtab-spawning" class="px-4 py-2 text-xs font-black uppercase rounded-lg border-2 bg-white border-slate-200 text-slate-600 dark:bg-[#1c2541] dark:border-[#3a506b] dark:text-slate-300 shrink-0">
-                    Spawning Trials
-                </button>
-                <button onclick="switchManagerSubTab('purchasing')" id="subtab-purchasing" class="px-4 py-2 text-xs font-black uppercase rounded-lg border-2 bg-white border-slate-200 text-slate-600 dark:bg-[#1c2541] dark:border-[#3a506b] dark:text-slate-300 shrink-0 opacity-50">
-                    Purchasing Log
-                </button>
-                <button onclick="switchManagerSubTab('hr')" id="subtab-hr" class="px-4 py-2 text-xs font-black uppercase rounded-lg border-2 bg-white border-slate-200 text-slate-600 dark:bg-[#1c2541] dark:border-[#3a506b] dark:text-slate-300 shrink-0 opacity-50">
-                    HR Department
-                </button>
-            </div>
-        </div>
-
-        <!-- Dynamic Micro-Frontend Execution Views (Fills Entire Screen Below Sub-Nav) -->
-        <div class="flex-1 w-full bg-slate-100 dark:bg-[#0b1329] p-2 relative">
+        <div id="manager-report-frame" class="hidden flex-1 flex flex-col min-h-0 w-full">
             
-            <!-- Water Quality Manager View Container -->
-            <div id="panel-water" class="w-full h-full max-w-4xl mx-auto">
-                <!-- Change the src below to match whatever specific URL route handles your sub-app manager panel (e.g. /water/manager or /water?admin=true) -->
-                <iframe src="/water" class="w-full h-full rounded-xl border border-slate-200 dark:border-[#3a506b] shadow-inner bg-white dark:bg-[#1c2541]"></iframe>
+            <div class="p-3 border-b border-slate-200 dark:border-[#1c2541] bg-white dark:bg-[#0b1329] flex justify-between items-center px-4 shrink-0">
+                <button onclick="closeManagerReport()" class="flex items-center space-x-1.5 text-xs font-black uppercase text-blue-600 dark:text-[#5bc0be] py-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"></path></svg>
+                    <span>Menu</span>
+                </button>
+                
+                <div class="flex items-center space-x-2">
+                    <label for="mgr-month-select" class="text-[10px] font-black uppercase tracking-wider text-slate-400">Filter Period:</label>
+                    <select id="mgr-month-select" onchange="executeMonthFilterChange()" class="bg-slate-100 dark:bg-[#1c2541] text-slate-800 dark:text-white font-black text-xs py-1.5 px-3 rounded-lg border border-slate-300 dark:border-[#3a506b] focus:outline-none focus:border-blue-500 dark:focus:border-[#5bc0be]">
+                        <option value="2026-06">June 2026</option>
+                        <option value="2026-05">May 2026</option>
+                        <option value="2026-04">April 2026</option>
+                        <option value="2026-03">March 2026</option>
+                        <option value="2026-02">February 2026</option>
+                        <option value="2026-01">January 2026</option>
+                    </select>
+                </div>
             </div>
 
-            <!-- Spawning Trial Manager View Container -->
-            <div id="panel-spawning" class="hidden w-full h-full max-w-4xl mx-auto">
-                <iframe src="/spawning" class="w-full h-full rounded-xl border border-slate-200 dark:border-[#3a506b] shadow-inner bg-white dark:bg-[#1c2541]"></iframe>
+            <div class="flex-1 bg-slate-100 dark:bg-[#0b1329] p-1.5 relative h-full">
+                <iframe id="mgr-iframe-engine" src="about:blank" class="w-full h-full rounded-xl border border-slate-200 dark:border-[#3a506b] bg-white dark:bg-[#1c2541]"></iframe>
             </div>
-
-            <!-- Roadmap Placeholder 1: Purchasing -->
-            <div id="panel-purchasing" class="hidden w-full h-full max-w-md mx-auto flex flex-col justify-center items-center p-6 text-center">
-                <p class="text-sm font-black uppercase tracking-wider text-amber-500">Logistics Node Pipeline</p>
-                <p class="text-xs text-slate-400 mt-1">Purchasing module database streaming layout hooks link directly here inside future v2.0 update parameters.</p>
-            </div>
-
-            <!-- Roadmap Placeholder 2: HR -->
-            <div id="panel-hr" class="hidden w-full h-full max-w-md mx-auto flex flex-col justify-center items-center p-6 text-center">
-                <p class="text-sm font-black uppercase tracking-wider text-purple-500">HR Deployment Frame</p>
-                <p class="text-xs text-slate-400 mt-1">Staff management tracking dashboard embeds natively upon validation of core component rollout arrays.</p>
-            </div>
-
         </div>
     </main>
 
-    <!-- PREMIUM BOTTOM STICKY NAVIGATION BAR -->
     <nav class="fixed bottom-0 left-0 right-0 z-40 border-t-2 bg-white border-slate-200 dark:bg-[#0b1329] dark:border-[#1c2541] px-6 py-2 flex justify-around items-center max-w-md mx-auto w-full shadow-lg">
         <button onclick="switchTab('ops')" id="nav-ops-btn" class="flex flex-col items-center space-y-1 py-1 text-blue-600 dark:text-[#5bc0be]">
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
@@ -203,20 +223,19 @@
         </button>
     </nav>
 
-    <!-- CORE SYSTEM LOGIC ENGINE -->
     <script>
-        // 1. CONFIGURATION PATH MATRIX
-        const MASTER_PIN = "5555"; // Your modified password goes here
+        // 1. HARDWARE DATA MATRIX CONFIGURATIONS
+        const MASTER_PIN = "3653"; // Passcode credential
         let inputPin = "";
         let isManagerAuthenticated = false;
+        let activeSubPath = ""; // Caches current sub-app ('water' or 'spawning')
 
-        // 2. TIME-BASED AUTOMATIC LIGHT/DARK THEME CONTROLLER
+        // 2. AUTOMATED LIGHT/DARK CHRONO-THEME SWAPPER
         function synchronizeSystemTheme() {
             const currentHour = new Date().getHours();
             const bodyEl = document.getElementById('app-body');
             const themeInd = document.getElementById('theme-indicator');
             
-            // LIGHT: 06:00 to 17:59 | DARK: 18:00 to 05:59
             if (currentHour >= 6 && currentHour < 18) {
                 bodyEl.classList.remove('dark');
                 themeInd.textContent = "Daylight Mode";
@@ -232,19 +251,17 @@
             synchronizeSystemTheme();
         }, 1000);
 
-        // 3. PHYSICAL TACTILE RUMBLE MOTOR
         function rumbleDevice(durationMs) {
             if ('vibrate' in navigator) navigator.vibrate(durationMs);
         }
 
-        // 4. MAIN NAVIGATION TAB ENGINE
+        // 3. CORE APPLICATIVE TAB CONTROLLER
         function switchTab(target) {
             rumbleDevice(35);
             
             const opsView = document.getElementById('dashboard-view');
             const authView = document.getElementById('manager-auth-view');
             const mgrView = document.getElementById('manager-dashboard-view');
-            
             const opsBtn = document.getElementById('nav-ops-btn');
             const mgrBtn = document.getElementById('nav-mgr-btn');
 
@@ -252,7 +269,6 @@
                 opsView.classList.remove('hidden');
                 authView.classList.add('hidden');
                 mgrView.classList.add('hidden');
-                
                 opsBtn.className = "flex flex-col items-center space-y-1 py-1 text-blue-600 dark:text-[#5bc0be]";
                 mgrBtn.className = "flex flex-col items-center space-y-1 py-1 text-slate-400 dark:text-slate-500";
             } else if (target === 'mgr') {
@@ -270,30 +286,37 @@
             }
         }
 
-        // 5. MANAGER INTERNAL SUB-TAB NAVIGATION ARCHITECTURE
-        function switchManagerSubTab(activeSubTab) {
-            rumbleDevice(40);
+        // 4. MANAGER DYNAMIC REPORT VIEW LOGIC (IFRAME ENGINE MAPPING)
+        function loadManagerReport(appKey) {
+            rumbleDevice(45);
+            activeSubPath = appKey;
             
-            // List of all possible panel and button IDs
-            const subTabs = ['water', 'spawning', 'purchasing', 'hr'];
+            document.getElementById('manager-menu-grid').classList.add('hidden');
+            document.getElementById('manager-report-frame').classList.remove('hidden');
             
-            subTabs.forEach(tab => {
-                const panel = document.getElementById(`panel-${tab}`);
-                const button = document.getElementById(`subtab-${tab}`);
-                
-                if (tab === activeSubTab) {
-                    panel.classList.remove('hidden');
-                    // Active High-Contrast Styling
-                    button.className = "px-4 py-2 text-xs font-black uppercase rounded-lg border-2 bg-blue-600 border-blue-600 text-white dark:bg-[#5bc0be] dark:border-[#5bc0be] dark:text-[#0b1329] shrink-0";
-                } else {
-                    panel.classList.add('hidden');
-                    // Inactive Clean Minimal Styling
-                    button.className = "px-4 py-2 text-xs font-black uppercase rounded-lg border-2 bg-white border-slate-200 text-slate-600 dark:bg-[#1c2541] dark:border-[#3a506b] dark:text-slate-300 shrink-0";
-                }
-            });
+            // Build and reload iframe with active path context parameters
+            executeMonthFilterChange();
         }
 
-        // 6. NUMERIC PASSCODE INTERCEPT ENGINE
+        function closeManagerReport() {
+            rumbleDevice(40);
+            document.getElementById('manager-report-frame').classList.add('hidden');
+            document.getElementById('manager-menu-grid').classList.remove('hidden');
+            document.getElementById('mgr-iframe-engine').src = "about:blank"; // Purges execution thread memory
+        }
+
+        // DYNAMIC FILTER ENGINE: Reconstructs routing targets upon dropdown change
+        function executeMonthFilterChange() {
+            rumbleDevice(30);
+            const selectedMonthValue = document.getElementById('mgr-month-select').value;
+            const iframe = document.getElementById('mgr-iframe-engine');
+            
+            // Appends the filter query argument automatically to your Vercel Proxy sub-app target paths
+            // Output example: "/water?month=2026-06" or "/spawning?month=2026-05"
+            iframe.src = `/${activeSubPath}?month=${selectedMonthValue}`;
+        }
+
+        // 5. SECURITY CREDENTIAL KEYPAD MATRIX CONTROLLER
         function pressKey(num) {
             if (inputPin.length >= 4) return;
             rumbleDevice(40);
@@ -330,7 +353,7 @@
                 renderPinDots();
                 switchTab('mgr');
             } else {
-                rumbleDevice([300, 100, 300]); // Rejection feedback vibration rhythm
+                rumbleDevice([300, 100, 300]);
                 inputPin = "";
                 renderPinDots();
                 const dotsContainer = document.getElementById('pin-dots');
@@ -342,10 +365,11 @@
         function lockManagerView() {
             rumbleDevice(100);
             isManagerAuthenticated = false;
+            closeManagerReport();
             switchTab('ops');
         }
 
-        // 7. BOOT INITIALIZERS
+        // 6. STARTUP BOOT ROUTINES
         synchronizeSystemTheme();
         document.getElementById('live-clock').textContent = new Date().toTimeString().split(' ')[0].substring(0, 5);
     </script>
