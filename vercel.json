@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/water",
+      "destination": "https://jamesaaa0203.github.io/daily-water-quality/"
+    },
+    {
+      "source": "/water/:path*",
+      "destination": "https://jamesaaa0203.github.io/daily-water-quality/:path*"
+    },
+    {
+      "source": "/spawning",
+      "destination": "https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/"
+    },
+    {
+      "source": "/spawning/:path*",
+      "destination": "https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/:path*"
+    }
+  ]
+}
