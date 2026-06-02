@@ -110,7 +110,7 @@
                 <button onclick="pressKey('9')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">9</button>
                 <button onclick="clearPin()" class="theme-card bg-slate-100 dark:bg-[#0b1329] border-2 border-slate-300 dark:border-[#3a506b] font-bold py-4 rounded-xl text-xs uppercase text-rose-500 shadow-sm">Clear</button>
                 <button onclick="pressKey('0')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">0</button>
-                <button class="theme-card bg-slate-100 dark:bg-[#0b1329] border-2 border-slate-300 dark:border-[#3a506b] opacity-30 font-bold py-4 rounded-xl text-xs uppercase shadow-sm" disabled>Bio</button>
+                <button onclick="authenticateWithBio()" class="theme-card bg-slate-100 dark:bg-[#0b1329] border-2 border-slate-300 dark:border-[#3a506b] font-bold py-4 rounded-xl text-xs uppercase shadow-sm text-blue-600 dark:text-[#5bc0be]">Bio</button>
             </div>
         </div>
     </main>
@@ -346,11 +346,9 @@
 
         function verifyPin() {
             if (inputPin === MASTER_PIN) {
-                rumbleDevice([80, 50, 80]);
-                isManagerAuthenticated = true;
                 inputPin = "";
                 renderPinDots();
-                switchTab('mgr');
+                completeManagerAuth();
             } else {
                 rumbleDevice([300, 100, 300]);
                 inputPin = "";
@@ -364,12 +362,86 @@
         function lockManagerView() {
             rumbleDevice(100);
             isManagerAuthenticated = false;
+            sessionStorage.removeItem('mgr_auth');
             closeManagerReport();
             switchTab('ops');
         }
 
+        // ─── SESSION RESTORE: skip PIN if manager was already authenticated ───
+        if (sessionStorage.getItem('mgr_auth') === '1') {
+            isManagerAuthenticated = true;
+        }
+
         synchronizeSystemTheme();
         document.getElementById('live-clock').textContent = new Date().toTimeString().split(' ')[0].substring(0, 5);
+
+        // ─── SHARED AUTH COMPLETION ───────────────────────────────────────────
+        function completeManagerAuth() {
+            rumbleDevice([80, 50, 80]);
+            isManagerAuthenticated = true;
+            sessionStorage.setItem('mgr_auth', '1');
+            switchTab('mgr');
+        }
+
+        // ─── BIOMETRIC AUTHENTICATION (WebAuthn) ─────────────────────────────
+        async function authenticateWithBio() {
+            if (!window.PublicKeyCredential) {
+                flashPinError(); return;
+            }
+            try {
+                const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+                if (!available) { flashPinError(); return; }
+
+                const storedCred = localStorage.getItem('abalone_bio_cred');
+                if (!storedCred) {
+                    await registerBiometric();
+                } else {
+                    await verifyBiometric(storedCred);
+                }
+            } catch(e) { flashPinError(); }
+        }
+
+        async function registerBiometric() {
+            const challenge = crypto.getRandomValues(new Uint8Array(32));
+            const userId    = crypto.getRandomValues(new Uint8Array(16));
+            try {
+                const cred = await navigator.credentials.create({ publicKey: {
+                    challenge,
+                    rp: { name: 'Abalone Ops', id: window.location.hostname },
+                    user: { id: userId, name: 'manager', displayName: 'Farm Manager' },
+                    pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+                    authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'preferred' },
+                    timeout: 60000,
+                    attestation: 'none'
+                }});
+                localStorage.setItem('abalone_bio_cred', btoa(String.fromCharCode(...new Uint8Array(cred.rawId))));
+                completeManagerAuth();
+            } catch(e) { flashPinError(); }
+        }
+
+        async function verifyBiometric(credB64) {
+            const credId = Uint8Array.from(atob(credB64), c => c.charCodeAt(0));
+            try {
+                await navigator.credentials.get({ publicKey: {
+                    challenge: crypto.getRandomValues(new Uint8Array(32)),
+                    allowCredentials: [{ id: credId, type: 'public-key', transports: ['internal'] }],
+                    userVerification: 'required',
+                    timeout: 60000
+                }});
+                completeManagerAuth();
+            } catch(e) {
+                // If credential no longer valid, clear and ask to re-register next time
+                if (e.name !== 'NotAllowedError') localStorage.removeItem('abalone_bio_cred');
+                flashPinError();
+            }
+        }
+
+        function flashPinError() {
+            rumbleDevice([300, 100, 300]);
+            const d = document.getElementById('pin-dots');
+            d.classList.add('animate-bounce');
+            setTimeout(() => d.classList.remove('animate-bounce'), 400);
+        }
     </script>
 </body>
 </html>
