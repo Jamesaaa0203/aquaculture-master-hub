@@ -285,7 +285,8 @@
             const selectedMonth = document.getElementById('mgr-month-select').value;
 
             if (appKey === 'water') {
-                window.location.href = "https://jamesaaa0203.github.io/daily-water-quality/?targetTab=manager&pin=3653";
+                const selectedMonth = document.getElementById('mgr-month-select').value;
+                window.location.href = `https://jamesaaa0203.github.io/daily-water-quality/?targetTab=manager&pin=3653&month=${selectedMonth}`;
                 return;
             }
 
