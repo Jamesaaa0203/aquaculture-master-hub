@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,13 +10,8 @@
     <title>Aquaculture Operations Hub</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        body {
-            transition: background-color 0.3s ease, color 0.3s ease;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .theme-card {
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-        }
+        body { transition: background-color 0.3s ease, color 0.3s ease; -webkit-tap-highlight-color: transparent; }
+        .theme-card { transition: background-color 0.3s ease, border-color 0.3s ease; }
         iframe::-webkit-scrollbar { display: none; }
         iframe { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -33,6 +29,7 @@
         </div>
     </header>
 
+    <!-- ── OPS HOME ──────────────────────────────────────────── -->
     <main id="dashboard-view" class="flex-1 p-4 space-y-4 pb-24 max-w-md mx-auto w-full">
         <section class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] rounded-xl p-4 shadow-sm">
             <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Operational Summary</h2>
@@ -97,7 +94,7 @@
                 <div class="flex items-center space-x-4">
                     <div class="p-3 bg-indigo-500/10 rounded-lg border border-indigo-500/30">
                         <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
                         </svg>
                     </div>
                     <div>
@@ -110,6 +107,7 @@
         </section>
     </main>
 
+    <!-- ── MANAGER AUTH ──────────────────────────────────────── -->
     <main id="manager-auth-view" class="hidden flex-1 p-4 flex flex-col justify-center items-center max-w-md mx-auto w-full pb-24">
         <div class="w-full text-center space-y-4 max-w-xs">
             <div class="mx-auto w-12 h-12 bg-blue-500/10 dark:bg-[#1c2541] border-2 border-blue-500 dark:border-[#3a506b] rounded-full flex items-center justify-center text-blue-600 dark:text-[#5bc0be]">
@@ -119,14 +117,12 @@
                 <h2 class="text-lg font-black uppercase tracking-wide">Manager Terminal</h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Enter secure operational pin code</p>
             </div>
-            
             <div class="flex justify-center gap-4 py-2" id="pin-dots">
                 <span class="w-4 h-4 rounded-full border-2 border-slate-400 dark:border-slate-600"></span>
                 <span class="w-4 h-4 rounded-full border-2 border-slate-400 dark:border-slate-600"></span>
                 <span class="w-4 h-4 rounded-full border-2 border-slate-400 dark:border-slate-600"></span>
                 <span class="w-4 h-4 rounded-full border-2 border-slate-400 dark:border-slate-600"></span>
             </div>
-
             <div class="grid grid-cols-3 gap-3 pt-4">
                 <button onclick="pressKey('1')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">1</button>
                 <button onclick="pressKey('2')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">2</button>
@@ -144,7 +140,9 @@
         </div>
     </main>
 
+    <!-- ── MANAGER DASHBOARD ─────────────────────────────────── -->
     <main id="manager-dashboard-view" class="hidden flex-1 flex flex-col min-h-0 w-full">
+
         <div id="manager-menu-grid" class="flex-1 p-4 space-y-4 pb-24 max-w-md mx-auto w-full overflow-y-auto">
             <div class="flex justify-between items-center px-1">
                 <div>
@@ -155,6 +153,7 @@
             </div>
 
             <div class="grid grid-cols-1 gap-3 pt-2">
+
                 <button onclick="loadManagerReport('daily-water-quality', 'manager')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
                     <div class="flex items-center space-x-4">
                         <div class="p-3.5 bg-blue-500/10 rounded-xl border border-blue-500/20 text-blue-600 dark:text-blue-400">
@@ -222,6 +221,7 @@
                     </div>
                     <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
                 </button>
+
             </div>
         </div>
 
@@ -231,10 +231,10 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"></path></svg>
                     <span>뒤로가기 Menu</span>
                 </button>
-                
                 <div class="flex items-center space-x-2">
                     <label for="mgr-month-select" class="text-[10px] font-black uppercase tracking-wider text-slate-400">조회 월 Period:</label>
-                    <select id="mgr-month-select" onchange="executeMonthFilterChange()" class="bg-slate-100 dark:bg-[#1c2541] text-slate-800 dark:text-white font-black text-xs py-1.5 px-3 rounded-lg border border-slate-300 dark:border-[#3a506b] focus:outline-none focus:border-blue-500 dark:focus:border-[#5bc0be]">
+                    <select id="mgr-month-select" onchange="executeMonthFilterChange()" class="bg-slate-100 dark:bg-[#1c2541] text-slate-800 dark:text-white font-black text-xs py-1.5 px-3 rounded-lg border border-slate-300 dark:border-[#3a506b] focus:outline-none">
+                        <option value="2026-07">July 2026</option>
                         <option value="2026-06" selected>June 2026</option>
                         <option value="2026-05">May 2026</option>
                         <option value="2026-04">April 2026</option>
@@ -244,20 +244,21 @@
                     </select>
                 </div>
             </div>
-
             <div class="w-full bg-slate-100 dark:bg-[#0b1329] p-1.5 relative h-[calc(100vh-150px)] min-h-[650px]">
                 <iframe id="mgr-iframe-engine" src="about:blank" class="w-full h-full rounded-xl border border-slate-200 dark:border-[#3a506b] bg-white dark:bg-[#1c2541]"></iframe>
             </div>
         </div>
     </main>
 
+    <!-- ── BOTTOM NAV ────────────────────────────────────────── -->
+    <!-- BUG FIX: was </nav> instead of </svg> which broke the entire bottom bar -->
     <nav class="fixed bottom-0 left-0 right-0 z-40 border-t-2 bg-white border-slate-200 dark:bg-[#0b1329] dark:border-[#1c2541] px-6 py-2 flex justify-around items-center max-w-md mx-auto w-full shadow-lg">
         <button onclick="switchTab('ops')" id="nav-ops-btn" class="flex flex-col items-center space-y-1 py-1 text-blue-600 dark:text-[#5bc0be]">
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
             <span class="text-[10px] font-black uppercase tracking-wider">Ops Home</span>
         </button>
         <button onclick="switchTab('mgr')" id="nav-mgr-btn" class="flex flex-col items-center space-y-1 py-1 text-slate-400 dark:text-slate-500">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-7.618 3.013C5.4 14.828 9.214 20.218 12 22a11.954 11.954 0 007.618-16.043z"></path></nav>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-7.618 3.013C5.4 14.828 9.214 20.218 12 22a11.954 11.954 0 007.618-16.043z"></path></svg>
             <span class="text-[10px] font-black uppercase tracking-wider">Manager Only</span>
         </button>
     </nav>
@@ -266,69 +267,79 @@
         const MASTER_PIN = "3653";
         let inputPin = "";
         let isManagerAuthenticated = false;
-        let activeSubPath = ""; 
+        let activeSubPath = "";
         let activeTabContext = "default";
 
         function synchronizeSystemTheme() {
-            const currentHour = new Date().getHours();
-            const bodyEl = document.getElementById('app-body');
-            const themeInd = document.getElementById('theme-indicator');
-            if (currentHour >= 6 && currentHour < 18) {
-                bodyEl.classList.remove('dark');
-                themeInd.textContent = "Daylight Mode";
+            const h = new Date().getHours();
+            const body = document.getElementById('app-body');
+            const ind  = document.getElementById('theme-indicator');
+            if (h >= 6 && h < 18) {
+                body.classList.remove('dark');
+                ind.textContent = "Daylight Mode";
             } else {
-                bodyEl.classList.add('dark');
-                themeInd.textContent = "Night Ops Mode";
+                body.classList.add('dark');
+                ind.textContent = "Night Ops Mode";
             }
         }
-        
+
         setInterval(() => {
-            const now = new Date();
-            document.getElementById('live-clock').textContent = now.toTimeString().split(' ')[0].substring(0, 5);
+            document.getElementById('live-clock').textContent =
+                new Date().toTimeString().split(' ')[0].substring(0, 5);
             synchronizeSystemTheme();
         }, 1000);
 
-        function rumbleDevice(durationMs) {
-            if ('vibrate' in navigator) navigator.vibrate(durationMs);
-        }
+        function rumbleDevice(d) { if ('vibrate' in navigator) navigator.vibrate(d); }
 
         function switchTab(target) {
             rumbleDevice(35);
-            const opsView = document.getElementById('dashboard-view');
-            const authView = document.getElementById('manager-auth-view');
-            const mgrView = document.getElementById('manager-dashboard-view');
-            const opsBtn = document.getElementById('nav-ops-btn');
-            const mgrBtn = document.getElementById('nav-mgr-btn');
+            const ops  = document.getElementById('dashboard-view');
+            const auth = document.getElementById('manager-auth-view');
+            const mgr  = document.getElementById('manager-dashboard-view');
+            const oBtn = document.getElementById('nav-ops-btn');
+            const mBtn = document.getElementById('nav-mgr-btn');
 
             if (target === 'ops') {
-                opsView.classList.remove('hidden');
-                authView.classList.add('hidden');
-                mgrView.classList.add('hidden');
-                opsBtn.className = "flex flex-col items-center space-y-1 py-1 text-blue-600 dark:text-[#5bc0be]";
-                mgrBtn.className = "flex flex-col items-center space-y-1 py-1 text-slate-400 dark:text-slate-500";
-            } else if (target === 'mgr') {
-                opsView.classList.add('hidden');
-                opsBtn.className = "flex flex-col items-center space-y-1 py-1 text-slate-400 dark:text-slate-500";
-                mgrBtn.className = "flex flex-col items-center space-y-1 py-1 text-blue-600 dark:text-[#5bc0be]";
-                
+                ops.classList.remove('hidden');
+                auth.classList.add('hidden');
+                mgr.classList.add('hidden');
+                oBtn.className = "flex flex-col items-center space-y-1 py-1 text-blue-600 dark:text-[#5bc0be]";
+                mBtn.className = "flex flex-col items-center space-y-1 py-1 text-slate-400 dark:text-slate-500";
+            } else {
+                ops.classList.add('hidden');
+                oBtn.className = "flex flex-col items-center space-y-1 py-1 text-slate-400 dark:text-slate-500";
+                mBtn.className = "flex flex-col items-center space-y-1 py-1 text-blue-600 dark:text-[#5bc0be]";
                 if (isManagerAuthenticated) {
-                    mgrView.classList.remove('hidden');
-                    authView.classList.add('hidden');
+                    mgr.classList.remove('hidden'); auth.classList.add('hidden');
                 } else {
-                    authView.classList.remove('hidden');
-                    mgrView.classList.add('hidden');
+                    auth.classList.remove('hidden'); mgr.classList.add('hidden');
                 }
+            }
+        }
+
+        // Build dynamic month options starting from current month + 1 back 12 months
+        function populateMonthSelector() {
+            const sel = document.getElementById('mgr-month-select');
+            const now = new Date();
+            sel.innerHTML = '';
+            for (let i = -1; i <= 12; i++) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const val   = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+                const label = d.toLocaleDateString('en-US', { month:'long', year:'numeric' });
+                const opt   = document.createElement('option');
+                opt.value   = val;
+                opt.textContent = label;
+                if (i === 0) opt.selected = true;
+                sel.appendChild(opt);
             }
         }
 
         function loadManagerReport(appKey, tabContext) {
             rumbleDevice(45);
-            activeSubPath = appKey;
+            activeSubPath   = appKey;
             activeTabContext = tabContext;
-            
             document.getElementById('manager-menu-grid').classList.add('hidden');
             document.getElementById('manager-report-frame').classList.remove('hidden');
-            
             executeMonthFilterChange();
         }
 
@@ -341,11 +352,9 @@
 
         function executeMonthFilterChange() {
             rumbleDevice(30);
-            const selectedMonthValue = document.getElementById('mgr-month-select').value;
+            const month  = document.getElementById('mgr-month-select').value;
             const iframe = document.getElementById('mgr-iframe-engine');
-            
-            // Unified parameters pipeline injection inside iframe sandbox
-            iframe.src = `https://jamesaaa0203.github.io/${activeSubPath}/?targetTab=${activeTabContext}&pin=${MASTER_PIN}&month=${selectedMonthValue}`;
+            iframe.src = `https://jamesaaa0203.github.io/${activeSubPath}/?targetTab=${activeTabContext}&pin=${MASTER_PIN}&month=${month}`;
         }
 
         function pressKey(num) {
@@ -353,40 +362,28 @@
             rumbleDevice(40);
             inputPin += num;
             renderPinDots();
-            if (inputPin.length === 4) {
-                setTimeout(verifyPin, 150);
-            }
+            if (inputPin.length === 4) setTimeout(verifyPin, 150);
         }
 
-        function clearPin() {
-            rumbleDevice(60);
-            inputPin = "";
-            renderPinDots();
-        }
+        function clearPin() { rumbleDevice(60); inputPin = ""; renderPinDots(); }
 
         function renderPinDots() {
             const dots = document.getElementById('pin-dots').children;
             for (let i = 0; i < 4; i++) {
-                if (i < inputPin.length) {
-                    dots[i].className = "w-4 h-4 rounded-full bg-blue-600 dark:bg-[#5bc0be] border-2 border-blue-600 dark:border-[#5bc0be]";
-                } else {
-                    dots[i].className = "w-4 h-4 rounded-full border-2 border-slate-400 dark:border-slate-600";
-                }
+                dots[i].className = i < inputPin.length
+                    ? "w-4 h-4 rounded-full bg-blue-600 dark:bg-[#5bc0be] border-2 border-blue-600 dark:border-[#5bc0be]"
+                    : "w-4 h-4 rounded-full border-2 border-slate-400 dark:border-slate-600";
             }
         }
 
         function verifyPin() {
             if (inputPin === MASTER_PIN) {
-                inputPin = "";
-                renderPinDots();
-                completeManagerAuth();
+                inputPin = ""; renderPinDots(); completeManagerAuth();
             } else {
-                rumbleDevice([300, 100, 300]);
-                inputPin = "";
-                renderPinDots();
-                const dotsContainer = document.getElementById('pin-dots');
-                dotsContainer.classList.add('animate-bounce');
-                setTimeout(() => dotsContainer.classList.remove('animate-bounce'), 400);
+                rumbleDevice([300,100,300]); inputPin = ""; renderPinDots();
+                const d = document.getElementById('pin-dots');
+                d.classList.add('animate-bounce');
+                setTimeout(() => d.classList.remove('animate-bounce'), 400);
             }
         }
 
@@ -398,15 +395,8 @@
             switchTab('ops');
         }
 
-        if (sessionStorage.getItem('mgr_auth') === '1') {
-            isManagerAuthenticated = true;
-        }
-
-        synchronizeSystemTheme();
-        document.getElementById('live-clock').textContent = new Date().toTimeString().split(' ')[0].substring(0, 5);
-
         function completeManagerAuth() {
-            rumbleDevice([80, 50, 80]);
+            rumbleDevice([80,50,80]);
             isManagerAuthenticated = true;
             sessionStorage.setItem('mgr_auth', '1');
             switchTab('mgr');
@@ -415,39 +405,34 @@
         async function authenticateWithBio() {
             if (!window.PublicKeyCredential) { flashPinError(); return; }
             try {
-                const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-                if (!available) { flashPinError(); return; }
-                const storedCred = localStorage.getItem('abalone_bio_cred');
-                if (!storedCred) { await registerBiometric(); } else { await verifyBiometric(storedCred); }
+                const avail = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+                if (!avail) { flashPinError(); return; }
+                const cred = localStorage.getItem('abalone_bio_cred');
+                if (!cred) { await registerBiometric(); } else { await verifyBiometric(cred); }
             } catch(e) { flashPinError(); }
         }
 
         async function registerBiometric() {
-            const challenge = crypto.getRandomValues(new Uint8Array(32));
-            const userId = crypto.getRandomValues(new Uint8Array(16));
             try {
-                const cred = await navigator.credentials.create({ publicKey: {
-                    challenge,
-                    rp: { name: 'Abalone Ops', id: window.location.hostname },
-                    user: { id: userId, name: 'manager', displayName: 'Farm Manager' },
-                    pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
-                    authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'preferred' },
-                    timeout: 60000,
-                    attestation: 'none'
+                const c = await navigator.credentials.create({ publicKey: {
+                    challenge: crypto.getRandomValues(new Uint8Array(32)),
+                    rp: { name:'Abalone Ops', id: window.location.hostname },
+                    user: { id: crypto.getRandomValues(new Uint8Array(16)), name:'manager', displayName:'Farm Manager' },
+                    pubKeyCredParams: [{ type:'public-key', alg:-7 },{ type:'public-key', alg:-257 }],
+                    authenticatorSelection: { authenticatorAttachment:'platform', userVerification:'required', residentKey:'preferred' },
+                    timeout: 60000, attestation:'none'
                 }});
-                localStorage.setItem('abalone_bio_cred', btoa(String.fromCharCode(...new Uint8Array(cred.rawId))));
+                localStorage.setItem('abalone_bio_cred', btoa(String.fromCharCode(...new Uint8Array(c.rawId))));
                 completeManagerAuth();
             } catch(e) { flashPinError(); }
         }
 
-        async function verifyBiometric(credB64) {
-            const credId = Uint8Array.from(atob(credB64), c => c.charCodeAt(0));
+        async function verifyBiometric(b64) {
             try {
                 await navigator.credentials.get({ publicKey: {
                     challenge: crypto.getRandomValues(new Uint8Array(32)),
-                    allowCredentials: [{ id: credId, type: 'public-key', transports: ['internal'] }],
-                    userVerification: 'required',
-                    timeout: 60000
+                    allowCredentials: [{ id: Uint8Array.from(atob(b64), c=>c.charCodeAt(0)), type:'public-key', transports:['internal'] }],
+                    userVerification:'required', timeout:60000
                 }});
                 completeManagerAuth();
             } catch(e) {
@@ -457,11 +442,17 @@
         }
 
         function flashPinError() {
-            rumbleDevice([300, 100, 300]);
+            rumbleDevice([300,100,300]);
             const d = document.getElementById('pin-dots');
             d.classList.add('animate-bounce');
             setTimeout(() => d.classList.remove('animate-bounce'), 400);
         }
+
+        // Init
+        if (sessionStorage.getItem('mgr_auth') === '1') isManagerAuthenticated = true;
+        synchronizeSystemTheme();
+        document.getElementById('live-clock').textContent = new Date().toTimeString().split(' ')[0].substring(0,5);
+        populateMonthSelector();
     </script>
 </body>
 </html>
