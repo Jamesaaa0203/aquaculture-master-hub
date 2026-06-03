@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,7 +39,7 @@
             <div class="grid grid-cols-2 gap-3">
                 <div class="bg-slate-50 dark:bg-[#0b1329] p-3 rounded-lg border border-slate-200 dark:border-[#3a506b]">
                     <p class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase">Nodes</p>
-                    <p class="text-sm font-black text-slate-800 dark:text-white">3 Live / 1 Testing</p>
+                    <p class="text-sm font-black text-slate-800 dark:text-white">4 Live</p>
                 </div>
                 <div class="bg-slate-50 dark:bg-[#0b1329] p-3 rounded-lg border border-slate-200 dark:border-[#3a506b]">
                     <p class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase">System Clock</p>
@@ -78,7 +77,6 @@
                 <span class="text-xs font-black bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded uppercase">Live</span>
             </a>
 
-            <!-- ── MODULE 4: Processing Log ───────────────────────────── -->
             <a href="https://jamesaaa0203.github.io/Abalone-Processing-Log/" class="ops-link theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] flex items-center justify-between p-5 rounded-xl shadow-sm">
                 <div class="flex items-center space-x-4">
                     <div class="p-3 bg-teal-500/10 rounded-lg border border-teal-500/30">
@@ -94,11 +92,7 @@
                 </div>
                 <span class="text-xs font-black bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded uppercase">Live</span>
             </a>
-            <!-- ── END MODULE 4 ───────────────────────────────────────── -->
 
-            <a href="https://jamesaaa0203.github.io/Abalone-Processing-Log/" class="ops-link theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] flex items-center justify-between p-5 rounded-xl shadow-sm">
-                ... (keep your existing processing code here) ...
-            </a>
             <a href="https://jamesaaa0203.github.io/hatchery-hr/" class="ops-link theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] flex items-center justify-between p-5 rounded-xl shadow-sm">
                 <div class="flex items-center space-x-4">
                     <div class="p-3 bg-indigo-500/10 rounded-lg border border-indigo-500/30">
@@ -113,8 +107,6 @@
                 </div>
                 <span class="text-xs font-black bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded uppercase">Live</span>
             </a>
-            </section>
-
         </section>
     </main>
 
@@ -153,7 +145,6 @@
     </main>
 
     <main id="manager-dashboard-view" class="hidden flex-1 flex flex-col min-h-0 w-full">
-        
         <div id="manager-menu-grid" class="flex-1 p-4 space-y-4 pb-24 max-w-md mx-auto w-full overflow-y-auto">
             <div class="flex justify-between items-center px-1">
                 <div>
@@ -164,7 +155,6 @@
             </div>
 
             <div class="grid grid-cols-1 gap-3 pt-2">
-                
                 <button onclick="loadManagerReport('water', 'default')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
                     <div class="flex items-center space-x-4">
                         <div class="p-3.5 bg-blue-500/10 rounded-xl border border-blue-500/20 text-blue-600 dark:text-blue-400">
@@ -204,7 +194,6 @@
                     <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
                 </button>
 
-                <!-- ── MODULE 4: Processing Log ───────────────────────── -->
                 <button onclick="loadManagerReport('processing', 'manager')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
                     <div class="flex items-center space-x-4">
                         <div class="p-3.5 bg-teal-500/10 rounded-xl border border-teal-500/20 text-teal-600 dark:text-teal-400">
@@ -220,15 +209,14 @@
                     </div>
                     <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
                 </button>
-                <!-- ── END MODULE 4 ────────────────────────────────────── -->
 
-                <button onclick="loadManagerReport('hr', 'default')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
+                <button onclick="loadManagerReport('hr', 'mgr-tab')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
                     <div class="flex items-center space-x-4">
-                        <div class="p-3.5 bg-emerald-500/10 rounded-xl border border-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                        <div class="p-3.5 bg-indigo-500/10 rounded-xl border border-indigo-500/20 text-indigo-600 dark:text-indigo-400">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"></path></svg>
                         </div>
                         <div>
-                            <span class="block text-[10px] font-black text-emerald-500 uppercase tracking-wider">인사 및 근태 관리</span>
+                            <span class="block text-[10px] font-black text-indigo-500 uppercase tracking-wider">인사 및 근태 관리</span>
                             <h4 class="text-base font-black uppercase tracking-wide text-slate-800 dark:text-white">Workforce & HR Management</h4>
                         </div>
                     </div>
@@ -336,20 +324,12 @@
         function loadManagerReport(appKey, tabContext) {
             rumbleDevice(45);
             
-            // 👇 PASTE THIS REDIRECT RULE HERE 👇
+            // REDIRECT TARGET TO THE STANDALONE HR MANAGER VIEW IF APPMATCH IS DETECTED
             if (appKey === 'hr') {
                 window.location.href = "https://jamesaaa0203.github.io/hatchery-hr/?targetTab=mgr-tab";
                 return;
             }
-            // 👆 END OF REDIRECT RULE 👆
 
-            const selectedMonth = document.getElementById('mgr-month-select').value;
-
-            if (appKey === 'water') {
-                window.location.href = `https://jamesaaa0203.github.io/daily-water-quality/?targetTab=manager&pin=3653&month=${selectedMonth}`;
-                return;
-            }
-            
             const selectedMonth = document.getElementById('mgr-month-select').value;
 
             if (appKey === 'water') {
@@ -362,12 +342,10 @@
                 return;
             }
 
-            // ── MODULE 4: Processing Log ──────────────────────────────
             if (appKey === 'processing') {
                 window.location.href = `https://jamesaaa0203.github.io/Abalone-Processing-Log/?targetTab=manager`;
                 return;
             }
-            // ─────────────────────────────────────────────────────────
             
             activeSubPath = appKey;
             activeTabContext = tabContext;
