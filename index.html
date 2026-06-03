@@ -324,9 +324,9 @@
         function loadManagerReport(appKey, tabContext) {
             rumbleDevice(45);
             
-            // REDIRECT TARGET TO THE STANDALONE HR MANAGER VIEW IF APPMATCH IS DETECTED
+            // REDIRECT TARGET WITH AUTOMATIC PIN BYPASS INCLUDED
             if (appKey === 'hr') {
-                window.location.href = "https://jamesaaa0203.github.io/hatchery-hr/?targetTab=mgr-tab";
+                window.location.href = "https://jamesaaa0203.github.io/hatchery-hr/?targetTab=mgr-tab&pin=3653";
                 return;
             }
 
