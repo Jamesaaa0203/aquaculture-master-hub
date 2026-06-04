@@ -154,7 +154,8 @@
 
             <div class="grid grid-cols-1 gap-3 pt-2">
 
-                <button onclick="openManagerReport('daily-water-quality', 'manager')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
+                <!-- Water Quality: opens directly in new tab — GAS auto-fetch blocked in cross-origin iframe -->
+                <button onclick="openWaterQualityInTab()" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-blue-400/40 dark:border-blue-500/30 p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
                     <div class="flex items-center space-x-4">
                         <div class="p-3.5 bg-blue-500/10 rounded-xl border border-blue-500/20 text-blue-600 dark:text-blue-400">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2z"></path></svg>
@@ -162,9 +163,10 @@
                         <div>
                             <span class="block text-[10px] font-black text-blue-500 uppercase tracking-wider">수질 관리 데이터</span>
                             <h4 class="text-base font-black uppercase tracking-wide text-slate-800 dark:text-white">Water Quality Data</h4>
+                            <p class="text-[10px] text-blue-400 dark:text-blue-500 font-bold mt-0.5 uppercase tracking-wide">Opens in new tab ↗</p>
                         </div>
                     </div>
-                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
+                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"></path></svg>
                 </button>
 
                 <button onclick="openManagerReport('Abalone-Spawning-and-Purchasing-Log', 'spawning')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
@@ -351,6 +353,15 @@
                 if (i === 0) opt.selected = true;
                 sel.appendChild(opt);
             }
+        }
+
+        // Water Quality: GAS auto-fetch is blocked by browsers in cross-origin iframes.
+        // Skip the iframe entirely — open directly in a new tab with full params.
+        function openWaterQualityInTab() {
+            rumbleDevice(45);
+            const month = document.getElementById('mgr-month-select').value;
+            const url = `https://jamesaaa0203.github.io/daily-water-quality?targetTab=manager&pin=${MASTER_PIN}&month=${month}`;
+            window.open(url, '_blank', 'noopener,noreferrer');
         }
 
         // FIX: Renamed from loadManagerReport — cleaner intent, also stores the full URL
