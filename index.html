@@ -152,10 +152,39 @@
                 <button onclick="lockManagerView()" class="px-3 py-1.5 bg-rose-500/10 text-rose-500 border border-rose-500/20 text-xs font-black rounded-lg uppercase tracking-wider">Lock</button>
             </div>
 
+            <!-- ── MODULE GAS URL SETTINGS ── -->
+            <!-- FIX: Chrome Storage Partitioning isolates localStorage across origins (Vercel vs GitHub Pages).
+                 GAS URLs must be stored here and passed as ?gasUrl= params to each iframe. -->
+            <div class="theme-card bg-amber-50 dark:bg-[#1c2541] border-2 border-amber-200 dark:border-amber-800/40 rounded-xl p-4 shadow-sm">
+                <button onclick="toggleGasSettings()" class="w-full flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"></path></svg>
+                        <span class="text-xs font-black text-amber-800 dark:text-amber-300 uppercase tracking-wider">Module GAS Connections</span>
+                    </div>
+                    <span id="gas-settings-status" class="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase">▼ Configure</span>
+                </button>
+                <div id="gas-settings-drawer" class="hidden mt-3 space-y-2.5 pt-3 border-t border-amber-200 dark:border-amber-800/40">
+                    <p class="text-[10px] text-amber-700 dark:text-amber-400 font-medium">Paste each module's GAS /exec URL below. Required for iframe data loading.</p>
+                    <div>
+                        <label class="block text-[10px] font-black text-amber-800 dark:text-amber-300 uppercase tracking-wider mb-1">Spawning & Purchasing</label>
+                        <input type="password" id="gas-spawning-url" placeholder="/exec URL for Spawning & Purchasing GAS..." onchange="saveGasUrls()" class="w-full bg-white dark:bg-[#0b1329] border border-amber-300 dark:border-amber-700 rounded-lg px-3 py-2 text-xs text-slate-700 dark:text-white focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-amber-800 dark:text-amber-300 uppercase tracking-wider mb-1">Processing Log</label>
+                        <input type="password" id="gas-processing-url" placeholder="/exec URL for Processing Log GAS..." onchange="saveGasUrls()" class="w-full bg-white dark:bg-[#0b1329] border border-amber-300 dark:border-amber-700 rounded-lg px-3 py-2 text-xs text-slate-700 dark:text-white focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-amber-800 dark:text-amber-300 uppercase tracking-wider mb-1">Hatchery HR Suite</label>
+                        <input type="password" id="gas-hr-url" placeholder="/exec URL for Hatchery HR GAS..." onchange="saveGasUrls()" class="w-full bg-white dark:bg-[#0b1329] border border-amber-300 dark:border-amber-700 rounded-lg px-3 py-2 text-xs text-slate-700 dark:text-white focus:outline-none focus:border-amber-500">
+                    </div>
+                    <button onclick="saveGasUrls()" class="w-full py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-black rounded-lg uppercase tracking-wider transition-all">Save All URLs</button>
+                    <p id="gas-save-confirm" class="hidden text-[10px] text-emerald-600 font-bold text-center">✓ URLs saved to master hub</p>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 gap-3 pt-2">
 
-                <!-- Water Quality: opens directly in new tab — GAS auto-fetch blocked in cross-origin iframe -->
-                <button onclick="openWaterQualityInTab()" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-blue-400/40 dark:border-blue-500/30 p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
+                <button onclick="openManagerReport('daily-water-quality', 'manager')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
                     <div class="flex items-center space-x-4">
                         <div class="p-3.5 bg-blue-500/10 rounded-xl border border-blue-500/20 text-blue-600 dark:text-blue-400">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2z"></path></svg>
@@ -163,10 +192,9 @@
                         <div>
                             <span class="block text-[10px] font-black text-blue-500 uppercase tracking-wider">수질 관리 데이터</span>
                             <h4 class="text-base font-black uppercase tracking-wide text-slate-800 dark:text-white">Water Quality Data</h4>
-                            <p class="text-[10px] text-blue-400 dark:text-blue-500 font-bold mt-0.5 uppercase tracking-wide">Opens in new tab ↗</p>
                         </div>
                     </div>
-                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"></path></svg>
+                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
                 </button>
 
                 <button onclick="openManagerReport('Abalone-Spawning-and-Purchasing-Log', 'spawning')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
@@ -230,7 +258,6 @@
         <!-- ── MANAGER REPORT FRAME ───────────────────────────── -->
         <div id="manager-report-frame" class="hidden flex-1 flex flex-col min-h-0 w-full">
 
-            <!-- Top bar: back + module label + month picker + open-in-tab -->
             <div class="p-3 border-b border-slate-200 dark:border-[#1c2541] bg-white dark:bg-[#0b1329] shrink-0">
                 <div class="flex justify-between items-center px-1 gap-2">
                     <button onclick="closeManagerReport()" class="flex items-center space-x-1.5 text-xs font-black uppercase text-blue-600 dark:text-[#5bc0be] py-1 shrink-0">
@@ -244,7 +271,6 @@
                         </select>
                     </div>
 
-                    <!-- FIX: "Open in New Tab" button — bypasses cross-origin iframe GAS fetch restrictions -->
                     <button onclick="openCurrentInNewTab()" title="Open in new tab for full data access"
                         class="flex items-center gap-1 shrink-0 px-2.5 py-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[10px] font-black rounded-lg uppercase tracking-wide">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"></path></svg>
@@ -252,7 +278,6 @@
                     </button>
                 </div>
 
-                <!-- FIX: Inline "Failed to fetch" warning banner — shown when GAS data load fails in iframe -->
                 <div id="fetch-fail-banner" class="hidden mt-2 mx-1 flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-600/40 rounded-lg px-3 py-2">
                     <svg class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"></path></svg>
                     <div>
@@ -287,9 +312,51 @@
         const MASTER_PIN = "3653";
         let inputPin = "";
         let isManagerAuthenticated = false;
-
-        // FIX: Track the full current URL (not just path parts) so openCurrentInNewTab works correctly
         let currentReportURL = "";
+
+        // GAS URL lookup by module appKey
+        // FIX: Chrome Storage Partitioning isolates sub-app localStorage when loaded in iframe
+        // from a different origin (Vercel vs GitHub Pages). Store GAS URLs here in master hub
+        // localStorage and pass them as ?gasUrl= params so sub-apps can fetch data.
+        const GAS_URL_KEYS = {
+            'Abalone-Spawning-and-Purchasing-Log': 'mgr_spawning_gas_url',
+            'Abalone-Processing-Log':              'mgr_processing_gas_url',
+            'hatchery-hr':                         'mgr_hr_gas_url',
+            'daily-water-quality':                 'mgr_wq_gas_url'
+        };
+
+        function getModuleGasUrl(appKey) {
+            const key = GAS_URL_KEYS[appKey];
+            return key ? localStorage.getItem(key) : null;
+        }
+
+        function toggleGasSettings() {
+            const drawer = document.getElementById('gas-settings-drawer');
+            const status = document.getElementById('gas-settings-status');
+            drawer.classList.toggle('hidden');
+            status.textContent = drawer.classList.contains('hidden') ? '▼ Configure' : '▲ Close';
+        }
+
+        function saveGasUrls() {
+            const spawning   = document.getElementById('gas-spawning-url').value.trim();
+            const processing = document.getElementById('gas-processing-url').value.trim();
+            const hr         = document.getElementById('gas-hr-url').value.trim();
+            if (spawning)   localStorage.setItem('mgr_spawning_gas_url', spawning);
+            if (processing) localStorage.setItem('mgr_processing_gas_url', processing);
+            if (hr)         localStorage.setItem('mgr_hr_gas_url', hr);
+            const confirm = document.getElementById('gas-save-confirm');
+            confirm.classList.remove('hidden');
+            setTimeout(() => confirm.classList.add('hidden'), 3000);
+        }
+
+        function loadSavedGasUrls() {
+            const spawning   = localStorage.getItem('mgr_spawning_gas_url');
+            const processing = localStorage.getItem('mgr_processing_gas_url');
+            const hr         = localStorage.getItem('mgr_hr_gas_url');
+            if (spawning)   document.getElementById('gas-spawning-url').value   = spawning;
+            if (processing) document.getElementById('gas-processing-url').value = processing;
+            if (hr)         document.getElementById('gas-hr-url').value          = hr;
+        }
 
         function synchronizeSystemTheme() {
             const h = new Date().getHours();
@@ -338,7 +405,6 @@
             }
         }
 
-        // FIX: Dynamic month selector — generates 14 options (next month + current + 12 back)
         function populateMonthSelector() {
             const sel = document.getElementById('mgr-month-select');
             const now = new Date();
@@ -355,16 +421,6 @@
             }
         }
 
-        // Water Quality: GAS auto-fetch is blocked by browsers in cross-origin iframes.
-        // Skip the iframe entirely — open directly in a new tab with full params.
-        function openWaterQualityInTab() {
-            rumbleDevice(45);
-            const month = document.getElementById('mgr-month-select').value;
-            const url = `https://jamesaaa0203.github.io/daily-water-quality?targetTab=manager&pin=${MASTER_PIN}&month=${month}`;
-            window.open(url, '_blank', 'noopener,noreferrer');
-        }
-
-        // FIX: Renamed from loadManagerReport — cleaner intent, also stores the full URL
         function openManagerReport(appKey, tabContext) {
             rumbleDevice(45);
             document.getElementById('manager-menu-grid').classList.add('hidden');
@@ -373,29 +429,31 @@
             buildAndLoadURL(appKey, tabContext);
         }
 
-        // FIX: URL now uses ?targetTab= (no trailing slash before ?) to prevent GitHub Pages
-        //      canonical redirect that can silently strip query parameters.
+        // FIX: Appends &gasUrl=ENCODED_URL so the sub-app can fetch data
+        // even when its own localStorage is partitioned by Chrome (cross-origin iframe).
         function buildAndLoadURL(appKey, tabContext) {
             const month  = document.getElementById('mgr-month-select').value;
             const iframe = document.getElementById('mgr-iframe-engine');
 
-            // Store on module-level vars so closeManagerReport / onchange still work
             iframe.dataset.appKey     = appKey;
             iframe.dataset.tabContext = tabContext;
 
-            // CRITICAL FIX: removed the "/" before "?" — was "/${appKey}/?targetTab=..."
-            const url = `https://jamesaaa0203.github.io/${appKey}?targetTab=${tabContext}&pin=${MASTER_PIN}&month=${month}`;
+            let url = `https://jamesaaa0203.github.io/${appKey}?targetTab=${tabContext}&pin=${MASTER_PIN}&month=${month}`;
+
+            // Append module GAS URL so sub-app can use it even if localStorage is partitioned
+            const gasUrl = getModuleGasUrl(appKey);
+            if (gasUrl) url += `&gasUrl=${encodeURIComponent(gasUrl)}`;
+
             currentReportURL = url;
             iframe.src = url;
         }
 
-        // Called by the month <select> onchange
         function executeMonthFilterChange() {
             rumbleDevice(30);
             const iframe = document.getElementById('mgr-iframe-engine');
             const appKey     = iframe.dataset.appKey;
             const tabContext = iframe.dataset.tabContext;
-            if (!appKey) return; // selector changed before any report was opened
+            if (!appKey) return;
             document.getElementById('fetch-fail-banner').classList.add('hidden');
             buildAndLoadURL(appKey, tabContext);
         }
@@ -412,29 +470,18 @@
             document.getElementById('fetch-fail-banner').classList.add('hidden');
         }
 
-        // FIX: New function — opens the current manager report in a full browser tab.
-        //      Bypasses cross-origin iframe restrictions that block Google Apps Script fetches.
         function openCurrentInNewTab() {
             rumbleDevice(40);
             if (currentReportURL) window.open(currentReportURL, '_blank', 'noopener,noreferrer');
         }
 
-        // FIX: iframe onload handler — listens for a postMessage from the sub-app
-        //      containing "fetch_failed" and surfaces the warning banner.
-        //      Sub-apps that catch "Failed to fetch" can call:
-        //        window.parent.postMessage({ type: 'fetch_failed' }, '*');
-        function onIframeLoad() {
-            // Listen once per load cycle; old listeners are cleaned up automatically
-            // because this is on the parent window and sub-apps are cross-origin.
-        }
+        function onIframeLoad() {}
 
         window.addEventListener('message', function(event) {
             if (!event.data || typeof event.data !== 'object') return;
-            // Sub-apps signal "fetch_failed" → show the warning banner
             if (event.data.type === 'fetch_failed') {
                 document.getElementById('fetch-fail-banner').classList.remove('hidden');
             }
-            // Sub-apps can also signal "fetch_ok" to hide the banner after a successful refresh
             if (event.data.type === 'fetch_ok') {
                 document.getElementById('fetch-fail-banner').classList.add('hidden');
             }
@@ -482,6 +529,7 @@
             rumbleDevice([80, 50, 80]);
             isManagerAuthenticated = true;
             sessionStorage.setItem('mgr_auth', '1');
+            loadSavedGasUrls();
             switchTab('mgr');
         }
 
@@ -532,7 +580,10 @@
         }
 
         // ── Init ──────────────────────────────────────────────
-        if (sessionStorage.getItem('mgr_auth') === '1') isManagerAuthenticated = true;
+        if (sessionStorage.getItem('mgr_auth') === '1') {
+            isManagerAuthenticated = true;
+            loadSavedGasUrls();
+        }
         synchronizeSystemTheme();
         document.getElementById('live-clock').textContent = new Date().toTimeString().split(' ')[0].substring(0, 5);
         populateMonthSelector();
