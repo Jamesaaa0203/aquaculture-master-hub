@@ -55,7 +55,7 @@
                     </div>
                     <div>
                         <h3 class="text-base font-black tracking-wide uppercase">Water Quality</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">DO, Temp, & Salinity Logs</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">DO, Temp, &amp; Salinity Logs</p>
                     </div>
                 </div>
                 <span class="text-xs font-black bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded uppercase">Live</span>
@@ -68,7 +68,7 @@
                     </div>
                     <div>
                         <h3 class="text-base font-black tracking-wide uppercase">Spawning Trials</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Induction & Conditioning</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Induction &amp; Conditioning</p>
                     </div>
                 </div>
                 <span class="text-xs font-black bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded uppercase">Live</span>
@@ -84,7 +84,7 @@
                     </div>
                     <div>
                         <h3 class="text-base font-black tracking-wide uppercase">Processing Log</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Cooking Sessions & Yield</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Cooking Sessions &amp; Yield</p>
                     </div>
                 </div>
                 <span class="text-xs font-black bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded uppercase">Live</span>
@@ -99,7 +99,7 @@
                     </div>
                     <div>
                         <h3 class="text-base font-black tracking-wide uppercase">Hatchery HR Suite</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Log OT, Leave, & Balances</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Log OT, Leave, &amp; Balances</p>
                     </div>
                 </div>
                 <span class="text-xs font-black bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded uppercase">Live</span>
@@ -123,6 +123,7 @@
                 <span class="w-4 h-4 rounded-full border-2 border-slate-400 dark:border-slate-600"></span>
                 <span class="w-4 h-4 rounded-full border-2 border-slate-400 dark:border-slate-600"></span>
             </div>
+            <!-- PIN pad: Bio button replaced with empty spacer to keep grid balanced -->
             <div class="grid grid-cols-3 gap-3 pt-4">
                 <button onclick="pressKey('1')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">1</button>
                 <button onclick="pressKey('2')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">2</button>
@@ -135,7 +136,7 @@
                 <button onclick="pressKey('9')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">9</button>
                 <button onclick="clearPin()" class="theme-card bg-slate-100 dark:bg-[#0b1329] border-2 border-slate-300 dark:border-[#3a506b] font-bold py-4 rounded-xl text-xs uppercase text-rose-500 shadow-sm">Clear</button>
                 <button onclick="pressKey('0')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">0</button>
-                <button onclick="authenticateWithBio()" class="theme-card bg-slate-100 dark:bg-[#0b1329] border-2 border-slate-300 dark:border-[#3a506b] font-bold py-4 rounded-xl text-xs uppercase shadow-sm text-blue-600 dark:text-[#5bc0be]">Bio</button>
+                <div class="py-4 rounded-xl"></div>
             </div>
         </div>
     </main>
@@ -153,8 +154,6 @@
             </div>
 
             <!-- ── MODULE GAS URL SETTINGS ── -->
-            <!-- FIX: Chrome Storage Partitioning isolates localStorage across origins (Vercel vs GitHub Pages).
-                 GAS URLs must be stored here and passed as ?gasUrl= params to each iframe. -->
             <div class="theme-card bg-amber-50 dark:bg-[#1c2541] border-2 border-amber-200 dark:border-amber-800/40 rounded-xl p-4 shadow-sm">
                 <button onclick="toggleGasSettings()" class="w-full flex items-center justify-between">
                     <div class="flex items-center gap-2">
@@ -166,7 +165,7 @@
                 <div id="gas-settings-drawer" class="hidden mt-3 space-y-2.5 pt-3 border-t border-amber-200 dark:border-amber-800/40">
                     <p class="text-[10px] text-amber-700 dark:text-amber-400 font-medium">Paste each module's GAS /exec URL below. Required for iframe data loading.</p>
                     <div>
-                        <label class="block text-[10px] font-black text-amber-800 dark:text-amber-300 uppercase tracking-wider mb-1">Spawning & Purchasing</label>
+                        <label class="block text-[10px] font-black text-amber-800 dark:text-amber-300 uppercase tracking-wider mb-1">Spawning &amp; Purchasing</label>
                         <input type="password" id="gas-spawning-url" placeholder="/exec URL for Spawning & Purchasing GAS..." onchange="saveGasUrls()" class="w-full bg-white dark:bg-[#0b1329] border border-amber-300 dark:border-amber-700 rounded-lg px-3 py-2 text-xs text-slate-700 dark:text-white focus:outline-none focus:border-amber-500">
                     </div>
                     <div>
@@ -246,7 +245,7 @@
                         </div>
                         <div>
                             <span class="block text-[10px] font-black text-indigo-500 uppercase tracking-wider">인사 및 근태 관리</span>
-                            <h4 class="text-base font-black uppercase tracking-wide text-slate-800 dark:text-white">Workforce & HR Management</h4>
+                            <h4 class="text-base font-black uppercase tracking-wide text-slate-800 dark:text-white">Workforce &amp; HR Management</h4>
                         </div>
                     </div>
                     <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
@@ -315,9 +314,6 @@
         let currentReportURL = "";
 
         // GAS URL lookup by module appKey
-        // FIX: Chrome Storage Partitioning isolates sub-app localStorage when loaded in iframe
-        // from a different origin (Vercel vs GitHub Pages). Store GAS URLs here in master hub
-        // localStorage and pass them as ?gasUrl= params so sub-apps can fetch data.
         const GAS_URL_KEYS = {
             'Abalone-Spawning-and-Purchasing-Log': 'mgr_spawning_gas_url',
             'Abalone-Processing-Log':              'mgr_processing_gas_url',
@@ -429,8 +425,6 @@
             buildAndLoadURL(appKey, tabContext);
         }
 
-        // FIX: Appends &gasUrl=ENCODED_URL so the sub-app can fetch data
-        // even when its own localStorage is partitioned by Chrome (cross-origin iframe).
         function buildAndLoadURL(appKey, tabContext) {
             const month  = document.getElementById('mgr-month-select').value;
             const iframe = document.getElementById('mgr-iframe-engine');
@@ -440,7 +434,6 @@
 
             let url = `https://jamesaaa0203.github.io/${appKey}?targetTab=${tabContext}&pin=${MASTER_PIN}&month=${month}`;
 
-            // Append module GAS URL so sub-app can use it even if localStorage is partitioned
             const gasUrl = getModuleGasUrl(appKey);
             if (gasUrl) url += `&gasUrl=${encodeURIComponent(gasUrl)}`;
 
@@ -531,52 +524,6 @@
             sessionStorage.setItem('mgr_auth', '1');
             loadSavedGasUrls();
             switchTab('mgr');
-        }
-
-        async function authenticateWithBio() {
-            if (!window.PublicKeyCredential) { flashPinError(); return; }
-            try {
-                const avail = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-                if (!avail) { flashPinError(); return; }
-                const cred = localStorage.getItem('abalone_bio_cred');
-                if (!cred) { await registerBiometric(); } else { await verifyBiometric(cred); }
-            } catch(e) { flashPinError(); }
-        }
-
-        async function registerBiometric() {
-            try {
-                const c = await navigator.credentials.create({ publicKey: {
-                    challenge: crypto.getRandomValues(new Uint8Array(32)),
-                    rp: { name: 'Abalone Ops', id: window.location.hostname },
-                    user: { id: crypto.getRandomValues(new Uint8Array(16)), name: 'manager', displayName: 'Farm Manager' },
-                    pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
-                    authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'preferred' },
-                    timeout: 60000, attestation: 'none'
-                }});
-                localStorage.setItem('abalone_bio_cred', btoa(String.fromCharCode(...new Uint8Array(c.rawId))));
-                completeManagerAuth();
-            } catch(e) { flashPinError(); }
-        }
-
-        async function verifyBiometric(b64) {
-            try {
-                await navigator.credentials.get({ publicKey: {
-                    challenge: crypto.getRandomValues(new Uint8Array(32)),
-                    allowCredentials: [{ id: Uint8Array.from(atob(b64), c => c.charCodeAt(0)), type: 'public-key', transports: ['internal'] }],
-                    userVerification: 'required', timeout: 60000
-                }});
-                completeManagerAuth();
-            } catch(e) {
-                if (e.name !== 'NotAllowedError') localStorage.removeItem('abalone_bio_cred');
-                flashPinError();
-            }
-        }
-
-        function flashPinError() {
-            rumbleDevice([300, 100, 300]);
-            const d = document.getElementById('pin-dots');
-            d.classList.add('animate-bounce');
-            setTimeout(() => d.classList.remove('animate-bounce'), 400);
         }
 
         // ── Init ──────────────────────────────────────────────
