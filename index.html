@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,306 +6,588 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aquaculture Operations Hub</title>
+    <title>Aquaculture Operations Hub - Abalone Ops</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <style>
-        body { transition: background-color 0.3s ease, color 0.3s ease; -webkit-tap-highlight-color: transparent; }
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-ocean-navy: #002B49;
+            --color-coastal-teal: #009DAE;
+            --color-bio-green: #34C759;
+            --color-deep-obsidian: #121214;
+            --color-pure-white: #FFFFFF;
+            
+            --color-surface-dim: #d9dade;
+            --color-surface-bright: #f9f9fe;
+            --color-surface-container: #ededf2;
+            --color-surface-container-low: #f3f3f8;
+            --color-surface-container-lowest: #ffffff;
+            --color-surface-container-highest: #e2e2e7;
+            --color-surface-container-high: #e8e8ed;
+            
+            --color-on-surface: #1a1c1f;
+            --color-on-surface-variant: #42474d;
+            --color-outline: #73777e;
+            --color-outline-variant: #c3c7ce;
+            
+            --radius-xl: 8px; /* For 8px component rounding */
+            
+            --spacing-stack-tight: 8px;
+            --spacing-outer-padding: 16px;
+            --spacing-gutter: 16px;
+            --spacing-container-gap: 24px;
+            --spacing-stack-loose: 32px;
+        }
+
+        body { 
+            transition: background-color 0.3s ease, color 0.3s ease; 
+            -webkit-tap-highlight-color: transparent; 
+            background-color: #F2F2F7;
+            font-family: 'Inter', sans-serif;
+        }
         .theme-card { transition: background-color 0.3s ease, border-color 0.3s ease; }
         iframe::-webkit-scrollbar { display: none; }
         iframe { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .status-ring-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .terminal-grid button:active {
+            transform: scale(0.95);
+            background-color: #009DAE;
+            color: white;
+        }
     </style>
 </head>
-<body id="app-body" class="flex flex-col min-h-screen font-sans antialiased text-slate-900 bg-slate-50 dark:bg-[#0b1329] dark:text-white">
+<body id="app-body" class="flex flex-col min-h-screen text-on-surface bg-surface-container-low dark:bg-deep-obsidian dark:text-white transition-colors duration-300">
 
-    <header class="sticky top-0 z-40 border-b-2 bg-white border-slate-200 dark:bg-[#0b1329] dark:border-[#1c2541] px-4 py-3 flex justify-between items-center shadow-sm">
-        <div>
-            <h1 class="text-xl font-black tracking-tight uppercase">Abalone Ops</h1>
-            <p id="theme-indicator" class="text-xs font-bold text-blue-600 dark:text-[#5bc0be] tracking-widest uppercase">Daylight Mode</p>
+    <!-- ── TOP HEADER ────────────────────────────────────────── -->
+    <header class="fixed top-0 left-0 right-0 w-full z-50 flex justify-between items-center px-outer-padding h-16 bg-pure-white dark:bg-deep-obsidian border-b border-outline-variant dark:border-outline-variant/20 shadow-sm transition-colors duration-300">
+        <div class="flex items-center gap-4">
+            <div>
+                <h1 class="text-headline-md font-bold uppercase tracking-tight text-coastal-teal">Abalone Ops</h1>
+                <p id="theme-indicator" class="text-[10px] font-bold text-on-surface-variant tracking-wider uppercase">Daylight Mode</p>
+            </div>
+            <!-- Desktop tabs -->
+            <div class="hidden md:flex gap-6 ml-8">
+                <button id="nav-ops-btn-desktop" onclick="switchTab('ops')" class="text-coastal-teal border-b-2 border-coastal-teal pb-1 font-bold text-[12px] tracking-wider uppercase cursor-pointer transition-all">Ops Home</button>
+                <button id="nav-mgr-btn-desktop" onclick="switchTab('mgr')" class="text-on-surface-variant hover:text-coastal-teal transition-colors pb-1 font-bold text-[12px] tracking-wider uppercase cursor-pointer transition-all">Manager Only</button>
+            </div>
         </div>
-        <div class="flex items-center gap-2 bg-slate-100 dark:bg-[#1c2541] px-3 py-1.5 rounded-full border border-slate-300 dark:border-[#3a506b]">
-            <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
-            <span class="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">System Live</span>
+        <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 bg-surface-container dark:bg-[#1c2541] px-3 py-1.5 rounded-full border border-outline-variant dark:border-outline-variant/20">
+                <span class="w-2.5 h-2.5 bg-bio-green rounded-full animate-pulse"></span>
+                <span class="text-[10px] font-bold text-bio-green uppercase tracking-wider">System Live</span>
+            </div>
+            <div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant bg-surface-container">
+                <img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0ddqMdnMJ7ku_sdbobXK9wvcIbDKddrgEOmnsi6dRd0ng93N8_Q1C6SHmH2rXbzLm1kPqB8wF3LvZiuhodM9oEJON72Ajd0usF0MxQOjhvc-bWxtuZaeKJ9neUseYlfBQIDn5gbDRMa0hU94Is2OzYsydP7zTY5KJFlJFvNFqWWlo1dV-ZGgpVp5-mZ5IpOHjWZv9rlCY6LdH6Oa8p_7rvkwgB8vEmRRmMZpimYGtLzCgrO--m3sH7Ga-6Zq1u1fxz9n5LQZ3hFo"/>
+            </div>
         </div>
     </header>
 
-    <!-- ── OPS HOME ──────────────────────────────────────────── -->
-    <main id="dashboard-view" class="flex-1 p-4 space-y-4 pb-24 max-w-md mx-auto w-full">
-        <section class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] rounded-xl p-4 shadow-sm">
-            <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Operational Summary</h2>
-            <div class="grid grid-cols-2 gap-3">
-                <div class="bg-slate-50 dark:bg-[#0b1329] p-3 rounded-lg border border-slate-200 dark:border-[#3a506b]">
-                    <p class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase">Nodes</p>
-                    <p class="text-sm font-black text-slate-800 dark:text-white">4 Live</p>
-                </div>
-                <div class="bg-slate-50 dark:bg-[#0b1329] p-3 rounded-lg border border-slate-200 dark:border-[#3a506b]">
-                    <p class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase">System Clock</p>
-                    <p id="live-clock" class="text-sm font-black text-blue-600 dark:text-[#5bc0be]">00:00</p>
-                </div>
-            </div>
-        </section>
+    <!-- ── DESKTOP SIDEBAR ───────────────────────────────────── -->
+    <aside class="hidden lg:flex flex-col h-screen fixed left-0 top-0 pt-20 pb-4 w-64 bg-pure-white dark:bg-deep-obsidian border-r border-outline-variant dark:border-outline-variant/20 shadow-sm transition-colors duration-300 z-40">
+        <div class="px-6 mb-6">
+            <h2 class="text-xs font-bold text-coastal-teal tracking-widest uppercase">Operations Menu</h2>
+            <p class="text-[10px] font-bold text-on-surface-variant opacity-70 tracking-wider">Live Telemetry Active</p>
+        </div>
+        
+        <nav class="flex-grow space-y-1.5 px-3">
+            <button onclick="handleNavClick('daily-water-quality', 'manager', 'water-card')" class="w-full text-left text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-[#1c2541] rounded-xl px-4 py-3 flex items-center gap-3 transition-all cursor-pointer">
+                <span class="material-symbols-outlined text-coastal-teal" data-icon="waves">waves</span>
+                <span class="font-bold text-xs uppercase tracking-wider">Water Quality</span>
+            </button>
+            <button onclick="handleNavClick('Abalone-Spawning-and-Purchasing-Log', 'spawning', 'spawning-card')" class="w-full text-left text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-[#1c2541] rounded-xl px-4 py-3 flex items-center gap-3 transition-all cursor-pointer">
+                <span class="material-symbols-outlined text-coastal-teal" data-icon="biotech">biotech</span>
+                <span class="font-bold text-xs uppercase tracking-wider">Spawning Trials</span>
+            </button>
+            <button onclick="handleNavClick('Abalone-Spawning-and-Purchasing-Log', 'purchasing', 'purchasing-card')" class="w-full text-left text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-[#1c2541] rounded-xl px-4 py-3 flex items-center gap-3 transition-all cursor-pointer">
+                <span class="material-symbols-outlined text-coastal-teal" data-icon="shopping_cart">shopping_cart</span>
+                <span class="font-bold text-xs uppercase tracking-wider">Purchasing</span>
+            </button>
+            <button onclick="handleNavClick('Abalone-Processing-Log', 'manager', 'processing-card')" class="w-full text-left text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-[#1c2541] rounded-xl px-4 py-3 flex items-center gap-3 transition-all cursor-pointer">
+                <span class="material-symbols-outlined text-coastal-teal" data-icon="factory">factory</span>
+                <span class="font-bold text-xs uppercase tracking-wider">Processing</span>
+            </button>
+            <button onclick="handleNavClick('hatchery-hr', 'mgr-tab', 'hr-card')" class="w-full text-left text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-[#1c2541] rounded-xl px-4 py-3 flex items-center gap-3 transition-all cursor-pointer">
+                <span class="material-symbols-outlined text-coastal-teal" data-icon="groups">groups</span>
+                <span class="font-bold text-xs uppercase tracking-wider">HR Suite</span>
+            </button>
+        </nav>
 
-        <section class="space-y-3">
-            <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest px-1">Worker Entry Modules</h2>
-
-            <a href="https://jamesaaa0203.github.io/daily-water-quality/" class="ops-link theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] flex items-center justify-between p-5 rounded-xl shadow-sm">
-                <div class="flex items-center space-x-4">
-                    <div class="p-3 bg-blue-500/10 rounded-lg border border-blue-500/30">
-                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5l6.74-6.76z"></path></svg>
-                    </div>
-                    <div>
-                        <h3 class="text-base font-black tracking-wide uppercase">Water Quality</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">DO, Temp, &amp; Salinity Logs</p>
-                    </div>
-                </div>
-                <span class="text-xs font-black bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded uppercase">Live</span>
-            </a>
-
-            <a href="https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/" class="ops-link theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] flex items-center justify-between p-5 rounded-xl shadow-sm">
-                <div class="flex items-center space-x-4">
-                    <div class="p-3 bg-purple-500/10 rounded-lg border border-purple-500/30">
-                        <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.656 48.656 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3"></path></svg>
-                    </div>
-                    <div>
-                        <h3 class="text-base font-black tracking-wide uppercase">Spawning Trials</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Induction &amp; Conditioning</p>
-                    </div>
-                </div>
-                <span class="text-xs font-black bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded uppercase">Live</span>
-            </a>
-
-            <a href="https://jamesaaa0203.github.io/Abalone-Processing-Log/" class="ops-link theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] flex items-center justify-between p-5 rounded-xl shadow-sm">
-                <div class="flex items-center space-x-4">
-                    <div class="p-3 bg-teal-500/10 rounded-lg border border-teal-500/30">
-                        <svg class="w-6 h-6 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 00.495-7.467 5.99 5.99 0 00-1.925 3.546 5.974 5.974 0 01-2.133-1A3.75 3.75 0 0012 18z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-base font-black tracking-wide uppercase">Processing Log</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Cooking Sessions &amp; Yield</p>
-                    </div>
-                </div>
-                <span class="text-xs font-black bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded uppercase">Live</span>
-            </a>
-
-            <a href="https://jamesaaa0203.github.io/hatchery-hr/" class="ops-link theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] flex items-center justify-between p-5 rounded-xl shadow-sm">
-                <div class="flex items-center space-x-4">
-                    <div class="p-3 bg-indigo-500/10 rounded-lg border border-indigo-500/30">
-                        <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-base font-black tracking-wide uppercase">Hatchery HR Suite</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Log OT, Leave, &amp; Balances</p>
-                    </div>
-                </div>
-                <span class="text-xs font-black bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded uppercase">Live</span>
-            </a>
-        </section>
-    </main>
-
-    <!-- ── MANAGER AUTH ──────────────────────────────────────── -->
-    <main id="manager-auth-view" class="hidden flex-1 p-4 flex flex-col justify-center items-center max-w-md mx-auto w-full pb-24">
-        <div class="w-full text-center space-y-4 max-w-xs">
-            <div class="mx-auto w-12 h-12 bg-blue-500/10 dark:bg-[#1c2541] border-2 border-blue-500 dark:border-[#3a506b] rounded-full flex items-center justify-center text-blue-600 dark:text-[#5bc0be]">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v-6.75a2.25 2.25 0 002.25-2.25z"></path></svg>
-            </div>
-            <div>
-                <h2 class="text-lg font-black uppercase tracking-wide">Manager Terminal</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Enter secure operational pin code</p>
-            </div>
-            <div class="flex justify-center gap-4 py-2" id="pin-dots">
-                <span class="w-4 h-4 rounded-full border-2 border-slate-400 dark:border-slate-600"></span>
-                <span class="w-4 h-4 rounded-full border-2 border-slate-400 dark:border-slate-600"></span>
-                <span class="w-4 h-4 rounded-full border-2 border-slate-400 dark:border-slate-600"></span>
-                <span class="w-4 h-4 rounded-full border-2 border-slate-400 dark:border-slate-600"></span>
-            </div>
-            <!-- PIN pad: Bio button replaced with empty spacer to keep grid balanced -->
-            <div class="grid grid-cols-3 gap-3 pt-4">
-                <button onclick="pressKey('1')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">1</button>
-                <button onclick="pressKey('2')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">2</button>
-                <button onclick="pressKey('3')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">3</button>
-                <button onclick="pressKey('4')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">4</button>
-                <button onclick="pressKey('5')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">5</button>
-                <button onclick="pressKey('6')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">6</button>
-                <button onclick="pressKey('7')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">7</button>
-                <button onclick="pressKey('8')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">8</button>
-                <button onclick="pressKey('9')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">9</button>
-                <button onclick="clearPin()" class="theme-card bg-slate-100 dark:bg-[#0b1329] border-2 border-slate-300 dark:border-[#3a506b] font-bold py-4 rounded-xl text-xs uppercase text-rose-500 shadow-sm">Clear</button>
-                <button onclick="pressKey('0')" class="theme-card bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] font-black py-4 rounded-xl text-lg shadow-sm">0</button>
-                <div class="py-4 rounded-xl"></div>
+        <div class="px-4 mt-auto space-y-3">
+            <div class="border-t border-outline-variant dark:border-outline-variant/20 pt-3">
+                <button id="nav-ops-btn-sidebar" onclick="switchTab('ops')" class="w-full text-left rounded-xl px-4 py-3 flex items-center gap-3 transition-all bg-coastal-teal/10 text-coastal-teal font-bold text-xs uppercase tracking-wider cursor-pointer">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span>Ops Home</span>
+                </button>
+                <button id="nav-mgr-btn-sidebar" onclick="switchTab('mgr')" class="w-full text-left rounded-xl px-4 py-3 flex items-center gap-3 transition-all text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-[#1c2541] font-bold text-xs uppercase tracking-wider mt-1.5 cursor-pointer">
+                    <span class="material-symbols-outlined">shield_person</span>
+                    <span>Manager Only</span>
+                </button>
             </div>
         </div>
-    </main>
+    </aside>
 
-    <!-- ── MANAGER DASHBOARD ─────────────────────────────────── -->
-    <main id="manager-dashboard-view" class="hidden flex-1 flex flex-col min-h-0 w-full">
-
-        <div id="manager-menu-grid" class="flex-1 p-4 space-y-4 pb-24 max-w-md mx-auto w-full overflow-y-auto">
-            <div class="flex justify-between items-center px-1">
+    <!-- ── MAIN CONTENT CONTAINER ────────────────────────────── -->
+    <div class="lg:ml-64 pt-20 pb-20 lg:pb-10 px-outer-padding min-h-screen flex flex-col w-auto transition-all duration-300">
+        
+        <!-- ── OPS HOME (DASHBOARD VIEW) ────────────────────────── -->
+        <main id="dashboard-view" class="flex-1 w-full max-w-[1280px] mx-auto space-y-6">
+            <!-- Header/Summary Section -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-outline-variant dark:border-outline-variant/20 pb-4">
                 <div>
-                    <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest">Executive Terminal / 최고 경영자 콘솔</h2>
-                    <h3 class="text-xl font-black uppercase tracking-tight">Select Log View</h3>
+                    <h2 class="text-headline-xl font-bold text-ocean-navy dark:text-white">Abalone Ops Hub</h2>
+                    <div class="flex items-center gap-3 mt-1">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-bio-green/10 text-bio-green border border-bio-green/20">
+                            <span class="w-1.5 h-1.5 rounded-full bg-bio-green mr-1.5 status-ring-pulse"></span> SYSTEM LIVE
+                        </span>
+                        <span class="text-body-md text-on-surface-variant">Command Center Active</span>
+                    </div>
                 </div>
-                <button onclick="lockManagerView()" class="px-3 py-1.5 bg-rose-500/10 text-rose-500 border border-rose-500/20 text-xs font-black rounded-lg uppercase tracking-wider">Lock</button>
-            </div>
-
-            <!-- ── MODULE GAS URL SETTINGS ── -->
-            <div class="theme-card bg-amber-50 dark:bg-[#1c2541] border-2 border-amber-200 dark:border-amber-800/40 rounded-xl p-4 shadow-sm">
-                <button onclick="toggleGasSettings()" class="w-full flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"></path></svg>
-                        <span class="text-xs font-black text-amber-800 dark:text-amber-300 uppercase tracking-wider">Module GAS Connections</span>
+                
+                <div class="flex gap-4 w-full md:w-auto">
+                    <div class="bg-pure-white dark:bg-[#1c2541] p-3 rounded-xl border border-outline-variant dark:border-outline-variant/20 flex items-center gap-6 shadow-sm flex-grow md:flex-grow-0 justify-around md:justify-start">
+                        <div class="text-right">
+                            <p class="text-label-caps text-on-surface-variant">NODES</p>
+                            <p class="text-headline-md font-bold text-ocean-navy dark:text-white">4 Live</p>
+                        </div>
+                        <div class="h-8 w-px bg-outline-variant dark:bg-outline-variant/20"></div>
+                        <div class="text-right">
+                            <p class="text-label-caps text-on-surface-variant">SYSTEM CLOCK</p>
+                            <p id="live-clock" class="text-headline-md font-bold font-data-mono text-coastal-teal">00:00</p>
+                        </div>
                     </div>
-                    <span id="gas-settings-status" class="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase">▼ Configure</span>
-                </button>
-                <div id="gas-settings-drawer" class="hidden mt-3 space-y-2.5 pt-3 border-t border-amber-200 dark:border-amber-800/40">
-                    <p class="text-[10px] text-amber-700 dark:text-amber-400 font-medium">Paste each module's GAS /exec URL below. Required for iframe data loading.</p>
-                    <div>
-                        <label class="block text-[10px] font-black text-amber-800 dark:text-amber-300 uppercase tracking-wider mb-1">Spawning &amp; Purchasing</label>
-                        <input type="password" id="gas-spawning-url" placeholder="/exec URL for Spawning & Purchasing GAS..." onchange="saveGasUrls()" class="w-full bg-white dark:bg-[#0b1329] border border-amber-300 dark:border-amber-700 rounded-lg px-3 py-2 text-xs text-slate-700 dark:text-white focus:outline-none focus:border-amber-500">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black text-amber-800 dark:text-amber-300 uppercase tracking-wider mb-1">Processing Log</label>
-                        <input type="password" id="gas-processing-url" placeholder="/exec URL for Processing Log GAS..." onchange="saveGasUrls()" class="w-full bg-white dark:bg-[#0b1329] border border-amber-300 dark:border-amber-700 rounded-lg px-3 py-2 text-xs text-slate-700 dark:text-white focus:outline-none focus:border-amber-500">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black text-amber-800 dark:text-amber-300 uppercase tracking-wider mb-1">Hatchery HR Suite</label>
-                        <input type="password" id="gas-hr-url" placeholder="/exec URL for Hatchery HR GAS..." onchange="saveGasUrls()" class="w-full bg-white dark:bg-[#0b1329] border border-amber-300 dark:border-amber-700 rounded-lg px-3 py-2 text-xs text-slate-700 dark:text-white focus:outline-none focus:border-amber-500">
-                    </div>
-                    <button onclick="saveGasUrls()" class="w-full py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-black rounded-lg uppercase tracking-wider transition-all">Save All URLs</button>
-                    <p id="gas-save-confirm" class="hidden text-[10px] text-emerald-600 font-bold text-center">✓ URLs saved to master hub</p>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 gap-3 pt-2">
+            <!-- Responsive 5-Column Grid -->
+            <section class="space-y-4">
+                <h3 class="text-xs font-bold text-on-surface-variant uppercase tracking-widest px-1">Worker Entry Modules</h3>
 
-                <button onclick="openManagerReport('daily-water-quality', 'manager')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
-                    <div class="flex items-center space-x-4">
-                        <div class="p-3.5 bg-blue-500/10 rounded-xl border border-blue-500/20 text-blue-600 dark:text-blue-400">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2z"></path></svg>
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-gutter items-stretch">
+                    <!-- Water Quality -->
+                    <div id="water-card" class="theme-card bg-pure-white dark:bg-[#1c2541] rounded-xl border border-outline-variant dark:border-outline-variant/20 flex flex-col p-4 shadow-sm overflow-hidden relative transition-all duration-300 hover:shadow-md">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-coastal-teal"></div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-12 h-12 rounded-lg bg-coastal-teal/10 flex items-center justify-center text-coastal-teal">
+                                <span class="material-symbols-outlined" data-icon="waves">waves</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 bg-bio-green/10 px-2 py-0.5 rounded border border-bio-green/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-bio-green animate-pulse"></span>
+                                <span class="text-[9px] font-bold text-bio-green uppercase">LIVE</span>
+                            </div>
                         </div>
-                        <div>
-                            <span class="block text-[10px] font-black text-blue-500 uppercase tracking-wider">수질 관리 데이터</span>
-                            <h4 class="text-base font-black uppercase tracking-wide text-slate-800 dark:text-white">Water Quality Data</h4>
+                        <h3 class="text-label-caps text-coastal-teal mb-1">WATER QUALITY / 수질 관리 데이터</h3>
+                        <h2 class="text-headline-md font-bold text-ocean-navy dark:text-white mb-4 leading-tight">Water Quality</h2>
+                        <div class="space-y-3 flex-grow">
+                            <div class="p-3 bg-surface-container-low dark:bg-deep-obsidian/40 rounded-lg border border-outline-variant/30">
+                                <p class="text-label-caps text-on-surface-variant mb-1">DO LEVEL</p>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-headline-lg font-bold text-ocean-navy dark:text-white">8.4</span>
+                                    <span class="text-body-md text-on-surface-variant">mg/L</span>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-surface-container-low dark:bg-deep-obsidian/40 rounded-lg border border-outline-variant/30">
+                                <p class="text-label-caps text-on-surface-variant mb-1">TEMPERATURE</p>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-headline-lg font-bold text-ocean-navy dark:text-white">16.2</span>
+                                    <span class="text-body-md text-on-surface-variant">°C</span>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-surface-container-low dark:bg-deep-obsidian/40 rounded-lg border border-outline-variant/30">
+                                <p class="text-label-caps text-on-surface-variant mb-1">SALINITY</p>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-headline-lg font-bold text-ocean-navy dark:text-white">34.8</span>
+                                    <span class="text-body-md text-on-surface-variant">ppt</span>
+                                </div>
+                            </div>
                         </div>
+                        <a class="mt-6 w-full py-3 bg-coastal-teal text-pure-white text-center rounded-lg font-bold text-xs uppercase hover:opacity-95 transition-opacity block shadow-sm" href="https://jamesaaa0203.github.io/daily-water-quality/">
+                            FULL TAB ↗
+                        </a>
                     </div>
-                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
-                </button>
 
-                <button onclick="openManagerReport('Abalone-Spawning-and-Purchasing-Log', 'spawning')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
-                    <div class="flex items-center space-x-4">
-                        <div class="p-3.5 bg-purple-500/10 rounded-xl border border-purple-500/20 text-purple-600 dark:text-purple-400">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 11.518 1.352l-.145-.043L11.25 11.25zm0 0a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5zM12 18.75l3-3m0 0l-3-3m3 3H9"></path></svg>
+                    <!-- Spawning Trials -->
+                    <div id="spawning-card" class="theme-card bg-pure-white dark:bg-[#1c2541] rounded-xl border border-outline-variant dark:border-outline-variant/20 flex flex-col p-4 shadow-sm overflow-hidden relative transition-all duration-300 hover:shadow-md">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-coastal-teal"></div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-12 h-12 rounded-lg bg-coastal-teal/10 flex items-center justify-center text-coastal-teal">
+                                <span class="material-symbols-outlined" data-icon="biotech">biotech</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 bg-bio-green/10 px-2 py-0.5 rounded border border-bio-green/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-bio-green animate-pulse"></span>
+                                <span class="text-[9px] font-bold text-bio-green uppercase">LIVE</span>
+                            </div>
                         </div>
-                        <div>
-                            <span class="block text-[10px] font-black text-purple-500 uppercase tracking-wider">산란 시험 관리</span>
-                            <h4 class="text-base font-black uppercase tracking-wide text-slate-800 dark:text-white">Spawning Trials</h4>
+                        <h3 class="text-label-caps text-coastal-teal mb-1">SPAWNING TRIALS / 산란 시험 관리</h3>
+                        <h2 class="text-headline-md font-bold text-ocean-navy dark:text-white mb-4 leading-tight">Spawning Trials</h2>
+                        <div class="space-y-3 flex-grow">
+                            <div class="p-3 bg-surface-container-low dark:bg-deep-obsidian/40 rounded-lg border border-outline-variant/30">
+                                <p class="text-label-caps text-on-surface-variant mb-1">INDUCTION RATE</p>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-headline-lg font-bold text-ocean-navy dark:text-white">92</span>
+                                    <span class="text-body-md text-on-surface-variant">%</span>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-surface-container-low dark:bg-deep-obsidian/40 rounded-lg border border-outline-variant/30">
+                                <p class="text-label-caps text-on-surface-variant mb-1">CONDITIONING</p>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-headline-lg font-bold text-ocean-navy dark:text-white">14</span>
+                                    <span class="text-body-md text-on-surface-variant">days</span>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-surface-container-low dark:bg-deep-obsidian/40 rounded-lg border border-outline-variant/30">
+                                <p class="text-label-caps text-on-surface-variant mb-1">SURVIVAL (L)</p>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-headline-lg font-bold text-ocean-navy dark:text-white">78</span>
+                                    <span class="text-body-md text-on-surface-variant">%</span>
+                                </div>
+                            </div>
                         </div>
+                        <a class="mt-6 w-full py-3 bg-coastal-teal text-pure-white text-center rounded-lg font-bold text-xs uppercase hover:opacity-95 transition-opacity block shadow-sm" href="https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/">
+                            FULL TAB ↗
+                        </a>
                     </div>
-                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
-                </button>
 
-                <button onclick="openManagerReport('Abalone-Spawning-and-Purchasing-Log', 'purchasing')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
-                    <div class="flex items-center space-x-4">
-                        <div class="p-3.5 bg-amber-500/10 rounded-xl border border-amber-500/20 text-amber-600 dark:text-amber-400">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h16.5M4.5 9h15M5.25 14.25h13.5"></path></svg>
+                    <!-- Purchasing -->
+                    <div id="purchasing-card" class="theme-card bg-pure-white dark:bg-[#1c2541] rounded-xl border border-outline-variant dark:border-outline-variant/20 flex flex-col p-4 shadow-sm overflow-hidden relative transition-all duration-300 hover:shadow-md">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-coastal-teal"></div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-12 h-12 rounded-lg bg-coastal-teal/10 flex items-center justify-center text-coastal-teal">
+                                <span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 bg-bio-green/10 px-2 py-0.5 rounded border border-bio-green/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-bio-green animate-pulse"></span>
+                                <span class="text-[9px] font-bold text-bio-green uppercase">LIVE</span>
+                            </div>
                         </div>
-                        <div>
-                            <span class="block text-[10px] font-black text-amber-500 uppercase tracking-wider">전복 매입 로그</span>
-                            <h4 class="text-base font-black uppercase tracking-wide text-slate-800 dark:text-white">Abalone Purchasing</h4>
+                        <h3 class="text-label-caps text-coastal-teal mb-1">PURCHASING / 전복 매입 로그</h3>
+                        <h2 class="text-headline-md font-bold text-ocean-navy dark:text-white mb-4 leading-tight">Abalone Purchasing</h2>
+                        <div class="space-y-3 flex-grow">
+                            <div class="p-3 bg-surface-container-low dark:bg-deep-obsidian/40 rounded-lg border border-outline-variant/30">
+                                <p class="text-label-caps text-on-surface-variant mb-1">DAILY VOLUME</p>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-headline-lg font-bold text-ocean-navy dark:text-white">1,240</span>
+                                    <span class="text-body-md text-on-surface-variant">kg</span>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-surface-container-low dark:bg-deep-obsidian/40 rounded-lg border border-outline-variant/30">
+                                <p class="text-label-caps text-on-surface-variant mb-1">AVG PRICE</p>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-headline-lg font-bold text-ocean-navy dark:text-white">42.50</span>
+                                    <span class="text-body-md text-on-surface-variant">$</span>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-surface-container-low dark:bg-deep-obsidian/40 rounded-lg border border-outline-variant/30">
+                                <p class="text-label-caps text-on-surface-variant mb-1">GRADE A %</p>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-headline-lg font-bold text-ocean-navy dark:text-white">64</span>
+                                    <span class="text-body-md text-on-surface-variant">%</span>
+                                </div>
+                            </div>
                         </div>
+                        <a class="mt-6 w-full py-3 bg-coastal-teal text-pure-white text-center rounded-lg font-bold text-xs uppercase hover:opacity-95 transition-opacity block shadow-sm" href="https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/">
+                            LOG DATA ↗
+                        </a>
                     </div>
-                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
-                </button>
 
-                <button onclick="openManagerReport('Abalone-Processing-Log', 'manager')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
-                    <div class="flex items-center space-x-4">
-                        <div class="p-3.5 bg-teal-500/10 rounded-xl border border-teal-500/20 text-teal-600 dark:text-teal-400">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 00.495-7.467 5.99 5.99 0 00-1.925 3.546 5.974 5.974 0 01-2.133-1A3.75 3.75 0 0012 18z"/>
-                            </svg>
+                    <!-- Processing -->
+                    <div id="processing-card" class="theme-card bg-pure-white dark:bg-[#1c2541] rounded-xl border border-outline-variant dark:border-outline-variant/20 flex flex-col p-4 shadow-sm overflow-hidden relative transition-all duration-300 hover:shadow-md">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-coastal-teal"></div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-12 h-12 rounded-lg bg-coastal-teal/10 flex items-center justify-center text-coastal-teal">
+                                <span class="material-symbols-outlined" data-icon="factory">factory</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 bg-bio-green/10 px-2 py-0.5 rounded border border-bio-green/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-bio-green animate-pulse"></span>
+                                <span class="text-[9px] font-bold text-bio-green uppercase">LIVE</span>
+                            </div>
                         </div>
-                        <div>
-                            <span class="block text-[10px] font-black text-teal-500 uppercase tracking-wider">가공 처리 로그</span>
-                            <h4 class="text-base font-black uppercase tracking-wide text-slate-800 dark:text-white">Processing Log</h4>
+                        <h3 class="text-label-caps text-coastal-teal mb-1">PROCESSING / 가공 처리 로그</h3>
+                        <h2 class="text-headline-md font-bold text-ocean-navy dark:text-white mb-4 leading-tight">Processing Log</h2>
+                        <div class="space-y-3 flex-grow">
+                            <div class="p-3 bg-surface-container-low dark:bg-deep-obsidian/40 rounded-lg border border-outline-variant/30">
+                                <p class="text-label-caps text-on-surface-variant mb-1">BATCH YIELD</p>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-headline-lg font-bold text-ocean-navy dark:text-white">88.4</span>
+                                    <span class="text-body-md text-on-surface-variant">%</span>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-surface-container-low dark:bg-deep-obsidian/40 rounded-lg border border-outline-variant/30">
+                                <p class="text-label-caps text-on-surface-variant mb-1">COOK SESSIONS</p>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-headline-lg font-bold text-ocean-navy dark:text-white">12</span>
+                                    <span class="text-body-md text-on-surface-variant">Active</span>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-surface-container-low dark:bg-deep-obsidian/40 rounded-lg border border-outline-variant/30">
+                                <p class="text-label-caps text-on-surface-variant mb-1">TEMP STABILITY</p>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-headline-lg font-bold text-ocean-navy dark:text-white">99.2</span>
+                                    <span class="text-body-md text-on-surface-variant">%</span>
+                                </div>
+                            </div>
                         </div>
+                        <a class="mt-6 w-full py-3 bg-coastal-teal text-pure-white text-center rounded-lg font-bold text-xs uppercase hover:opacity-95 transition-opacity block shadow-sm" href="https://jamesaaa0203.github.io/Abalone-Processing-Log/">
+                            FULL TAB ↗
+                        </a>
                     </div>
-                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
-                </button>
 
-                <button onclick="openManagerReport('hatchery-hr', 'mgr-tab')" class="theme-card text-left bg-white dark:bg-[#1c2541] border-2 border-slate-200 dark:border-[#3a506b] p-5 rounded-2xl flex items-center justify-between shadow-sm active:scale-98 transition-transform">
-                    <div class="flex items-center space-x-4">
-                        <div class="p-3.5 bg-indigo-500/10 rounded-xl border border-indigo-500/20 text-indigo-600 dark:text-indigo-400">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"></path></svg>
+                    <!-- HR -->
+                    <div id="hr-card" class="theme-card bg-pure-white dark:bg-[#1c2541] rounded-xl border border-outline-variant dark:border-outline-variant/20 flex flex-col p-4 shadow-sm overflow-hidden relative transition-all duration-300 hover:shadow-md">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-coastal-teal"></div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-12 h-12 rounded-lg bg-coastal-teal/10 flex items-center justify-center text-coastal-teal">
+                                <span class="material-symbols-outlined" data-icon="groups">groups</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 bg-bio-green/10 px-2 py-0.5 rounded border border-bio-green/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-bio-green animate-pulse"></span>
+                                <span class="text-[9px] font-bold text-bio-green uppercase">LIVE</span>
+                            </div>
                         </div>
-                        <div>
-                            <span class="block text-[10px] font-black text-indigo-500 uppercase tracking-wider">인사 및 근태 관리</span>
-                            <h4 class="text-base font-black uppercase tracking-wide text-slate-800 dark:text-white">Workforce &amp; HR Management</h4>
+                        <h3 class="text-label-caps text-coastal-teal mb-1">WORKFORCE / 인사 및 근태 관리</h3>
+                        <h2 class="text-headline-md font-bold text-ocean-navy dark:text-white mb-4 leading-tight">Hatchery HR Suite</h2>
+                        <div class="space-y-3 flex-grow">
+                            <div class="p-3 bg-surface-container-low dark:bg-deep-obsidian/40 rounded-lg border border-outline-variant/30">
+                                <p class="text-label-caps text-on-surface-variant mb-1">STAFF ON SITE</p>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-headline-lg font-bold text-ocean-navy dark:text-white">24</span>
+                                    <span class="text-body-md text-on-surface-variant">/ 30</span>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-surface-container-low dark:bg-deep-obsidian/40 rounded-lg border border-outline-variant/30">
+                                <p class="text-label-caps text-on-surface-variant mb-1">TOTAL OT HOURS</p>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-headline-lg font-bold text-ocean-navy dark:text-white">156</span>
+                                    <span class="text-body-md text-on-surface-variant">Hrs</span>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-surface-container-low dark:bg-deep-obsidian/40 rounded-lg border border-outline-variant/30">
+                                <p class="text-label-caps text-on-surface-variant mb-1">SAFETY RECORD</p>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-headline-lg font-bold text-ocean-navy dark:text-white">365+</span>
+                                    <span class="text-body-md text-on-surface-variant">Days</span>
+                                </div>
+                            </div>
                         </div>
+                        <a class="mt-6 w-full py-3 bg-coastal-teal text-pure-white text-center rounded-lg font-bold text-xs uppercase hover:opacity-95 transition-opacity block shadow-sm" href="https://jamesaaa0203.github.io/hatchery-hr/">
+                            FULL TAB ↗
+                        </a>
                     </div>
-                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
-                </button>
+                </div>
+            </section>
+        </main>
 
+        <!-- ── SECURE MANAGER AUTH (PIN PAD VIEW) ────────────────── -->
+        <main id="manager-auth-view" class="hidden flex-grow w-full max-w-md mx-auto flex flex-col justify-center items-center py-12 transition-all">
+            <div class="w-full text-center space-y-6 max-w-xs bg-pure-white dark:bg-[#1c2541] border border-outline-variant dark:border-outline-variant/20 p-6 rounded-2xl shadow-sm">
+                <div class="mx-auto w-12 h-12 bg-coastal-teal/10 border border-coastal-teal rounded-full flex items-center justify-center text-coastal-teal">
+                    <span class="material-symbols-outlined">lock</span>
+                </div>
+                <div>
+                    <h2 class="text-headline-md font-bold uppercase tracking-wide text-ocean-navy dark:text-white">Manager Terminal</h2>
+                    <p class="text-xs text-on-surface-variant">Enter secure operational pin code</p>
+                </div>
+                <div class="flex justify-center gap-4 py-2" id="pin-dots">
+                    <span class="w-4 h-4 rounded-full border-2 border-slate-400 dark:border-slate-600 transition-colors duration-200"></span>
+                    <span class="w-4 h-4 rounded-full border-2 border-slate-400 dark:border-slate-600 transition-colors duration-200"></span>
+                    <span class="w-4 h-4 rounded-full border-2 border-slate-400 dark:border-slate-600 transition-colors duration-200"></span>
+                    <span class="w-4 h-4 rounded-full border-2 border-slate-400 dark:border-slate-600 transition-colors duration-200"></span>
+                </div>
+                <div class="grid grid-cols-3 gap-3 pt-2">
+                    <button onclick="pressKey('1')" class="theme-card bg-surface-container-low dark:bg-deep-obsidian/60 hover:bg-surface-container border border-outline-variant dark:border-outline-variant/20 font-bold py-4 rounded-xl text-lg shadow-sm cursor-pointer active:scale-95 transition-all text-ocean-navy dark:text-white">1</button>
+                    <button onclick="pressKey('2')" class="theme-card bg-surface-container-low dark:bg-deep-obsidian/60 hover:bg-surface-container border border-outline-variant dark:border-outline-variant/20 font-bold py-4 rounded-xl text-lg shadow-sm cursor-pointer active:scale-95 transition-all text-ocean-navy dark:text-white">2</button>
+                    <button onclick="pressKey('3')" class="theme-card bg-surface-container-low dark:bg-deep-obsidian/60 hover:bg-surface-container border border-outline-variant dark:border-outline-variant/20 font-bold py-4 rounded-xl text-lg shadow-sm cursor-pointer active:scale-95 transition-all text-ocean-navy dark:text-white">3</button>
+                    <button onclick="pressKey('4')" class="theme-card bg-surface-container-low dark:bg-deep-obsidian/60 hover:bg-surface-container border border-outline-variant dark:border-outline-variant/20 font-bold py-4 rounded-xl text-lg shadow-sm cursor-pointer active:scale-95 transition-all text-ocean-navy dark:text-white">4</button>
+                    <button onclick="pressKey('5')" class="theme-card bg-surface-container-low dark:bg-deep-obsidian/60 hover:bg-surface-container border border-outline-variant dark:border-outline-variant/20 font-bold py-4 rounded-xl text-lg shadow-sm cursor-pointer active:scale-95 transition-all text-ocean-navy dark:text-white">5</button>
+                    <button onclick="pressKey('6')" class="theme-card bg-surface-container-low dark:bg-deep-obsidian/60 hover:bg-surface-container border border-outline-variant dark:border-outline-variant/20 font-bold py-4 rounded-xl text-lg shadow-sm cursor-pointer active:scale-95 transition-all text-ocean-navy dark:text-white">6</button>
+                    <button onclick="pressKey('7')" class="theme-card bg-surface-container-low dark:bg-deep-obsidian/60 hover:bg-surface-container border border-outline-variant dark:border-outline-variant/20 font-bold py-4 rounded-xl text-lg shadow-sm cursor-pointer active:scale-95 transition-all text-ocean-navy dark:text-white">7</button>
+                    <button onclick="pressKey('8')" class="theme-card bg-surface-container-low dark:bg-deep-obsidian/60 hover:bg-surface-container border border-outline-variant dark:border-outline-variant/20 font-bold py-4 rounded-xl text-lg shadow-sm cursor-pointer active:scale-95 transition-all text-ocean-navy dark:text-white">8</button>
+                    <button onclick="pressKey('9')" class="theme-card bg-surface-container-low dark:bg-deep-obsidian/60 hover:bg-surface-container border border-outline-variant dark:border-outline-variant/20 font-bold py-4 rounded-xl text-lg shadow-sm cursor-pointer active:scale-95 transition-all text-ocean-navy dark:text-white">9</button>
+                    <button onclick="clearPin()" class="theme-card bg-surface-container dark:bg-deep-obsidian hover:bg-surface-container border border-outline-variant dark:border-outline-variant/20 font-bold py-4 rounded-xl text-xs uppercase text-rose-500 shadow-sm cursor-pointer active:scale-95 transition-all">Clear</button>
+                    <button onclick="pressKey('0')" class="theme-card bg-surface-container-low dark:bg-deep-obsidian/60 hover:bg-surface-container border border-outline-variant dark:border-outline-variant/20 font-bold py-4 rounded-xl text-lg shadow-sm cursor-pointer active:scale-95 transition-all text-ocean-navy dark:text-white">0</button>
+                    <div class="py-4"></div>
+                </div>
             </div>
-        </div>
+        </main>
 
-        <!-- ── MANAGER REPORT FRAME ───────────────────────────── -->
-        <div id="manager-report-frame" class="hidden flex-1 flex flex-col min-h-0 w-full">
+        <!-- ── SECURE MANAGER DASHBOARD VIEW ─────────────────────── -->
+        <main id="manager-dashboard-view" class="hidden flex-1 flex flex-col min-h-0 w-full max-w-[1280px] mx-auto transition-all">
+            
+            <!-- Report Lists / Menu -->
+            <div id="manager-menu-grid" class="w-full space-y-6">
+                <div class="flex justify-between items-center gap-4 border-b border-outline-variant dark:border-outline-variant/20 pb-4">
+                    <div>
+                        <h2 class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Executive Dashboard / 최고 경영자 콘솔</h2>
+                        <h3 class="text-headline-lg font-bold text-ocean-navy dark:text-white uppercase tracking-tight">Select Log View</h3>
+                    </div>
+                    <button onclick="lockManagerView()" class="px-4 py-2 bg-rose-500/10 text-rose-500 border border-rose-500/20 text-xs font-bold rounded-lg uppercase tracking-wider hover:bg-rose-500/20 transition-all cursor-pointer">Lock</button>
+                </div>
 
-            <div class="p-3 border-b border-slate-200 dark:border-[#1c2541] bg-white dark:bg-[#0b1329] shrink-0">
-                <div class="flex justify-between items-center px-1 gap-2">
-                    <button onclick="closeManagerReport()" class="flex items-center space-x-1.5 text-xs font-black uppercase text-blue-600 dark:text-[#5bc0be] py-1 shrink-0">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"></path></svg>
-                        <span>뒤로가기 Menu</span>
+                <!-- Module GAS Connections (Configure Drawer) -->
+                <div class="theme-card bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 shadow-sm max-w-xl">
+                    <button onclick="toggleGasSettings()" class="w-full flex items-center justify-between cursor-pointer">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-amber-500">settings_suggest</span>
+                            <span class="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Module GAS Connections</span>
+                        </div>
+                        <span id="gas-settings-status" class="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase">▼ Configure</span>
+                    </button>
+                    <div id="gas-settings-drawer" class="hidden mt-3 space-y-3 pt-3 border-t border-amber-500/20">
+                        <p class="text-[10px] text-amber-700 dark:text-amber-400 font-medium">Paste each module's Google Apps Script (GAS) Web App /exec URL below. Required for secure iframe data updates.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-[9px] font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider mb-1">Spawning &amp; Purchasing</label>
+                                <input type="password" id="gas-spawning-url" placeholder="exec URL..." onchange="saveGasUrls()" class="w-full bg-pure-white dark:bg-deep-obsidian border border-outline-variant dark:border-outline-variant/30 rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-coastal-teal">
+                            </div>
+                            <div>
+                                <label class="block text-[9px] font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider mb-1">Processing Log</label>
+                                <input type="password" id="gas-processing-url" placeholder="exec URL..." onchange="saveGasUrls()" class="w-full bg-pure-white dark:bg-deep-obsidian border border-outline-variant dark:border-outline-variant/30 rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-coastal-teal">
+                            </div>
+                            <div>
+                                <label class="block text-[9px] font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider mb-1">Hatchery HR Suite</label>
+                                <input type="password" id="gas-hr-url" placeholder="exec URL..." onchange="saveGasUrls()" class="w-full bg-pure-white dark:bg-deep-obsidian border border-outline-variant dark:border-outline-variant/30 rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-coastal-teal">
+                            </div>
+                        </div>
+                        <div class="flex gap-3 items-center">
+                            <button onclick="saveGasUrls()" class="flex-grow py-2 bg-coastal-teal text-pure-white text-xs font-bold rounded-lg uppercase tracking-wider transition-all hover:opacity-95 cursor-pointer">Save All URLs</button>
+                            <p id="gas-save-confirm" class="hidden text-[10px] text-bio-green font-bold">✓ Saved</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Manager Modules Select List -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <button onclick="openManagerReport('daily-water-quality', 'manager')" class="theme-card text-left bg-pure-white dark:bg-[#1c2541] border border-outline-variant dark:border-outline-variant/20 p-5 rounded-xl flex items-center justify-between shadow-sm active:scale-98 transition-transform hover:shadow-md cursor-pointer">
+                        <div class="flex items-center space-x-4">
+                            <div class="p-3 bg-coastal-teal/10 rounded-lg border border-coastal-teal/20 text-coastal-teal">
+                                <span class="material-symbols-outlined">waves</span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] font-bold text-coastal-teal uppercase tracking-wider">수질 관리 데이터</span>
+                                <h4 class="text-base font-bold uppercase tracking-wide text-ocean-navy dark:text-white">Water Quality Data</h4>
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined text-on-surface-variant">arrow_forward_ios</span>
                     </button>
 
-                    <div class="flex items-center gap-2">
-                        <label for="mgr-month-select" class="text-[10px] font-black uppercase tracking-wider text-slate-400 hidden sm:block">조회 월:</label>
-                        <select id="mgr-month-select" onchange="executeMonthFilterChange()" class="bg-slate-100 dark:bg-[#1c2541] text-slate-800 dark:text-white font-black text-xs py-1.5 px-2 rounded-lg border border-slate-300 dark:border-[#3a506b] focus:outline-none">
-                        </select>
-                    </div>
+                    <button onclick="openManagerReport('Abalone-Spawning-and-Purchasing-Log', 'spawning')" class="theme-card text-left bg-pure-white dark:bg-[#1c2541] border border-outline-variant dark:border-outline-variant/20 p-5 rounded-xl flex items-center justify-between shadow-sm active:scale-98 transition-transform hover:shadow-md cursor-pointer">
+                        <div class="flex items-center space-x-4">
+                            <div class="p-3 bg-coastal-teal/10 rounded-lg border border-coastal-teal/20 text-coastal-teal">
+                                <span class="material-symbols-outlined">biotech</span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] font-bold text-coastal-teal uppercase tracking-wider">산란 시험 관리</span>
+                                <h4 class="text-base font-bold uppercase tracking-wide text-ocean-navy dark:text-white">Spawning Trials</h4>
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined text-on-surface-variant">arrow_forward_ios</span>
+                    </button>
 
-                    <button onclick="openCurrentInNewTab()" title="Open in new tab for full data access"
-                        class="flex items-center gap-1 shrink-0 px-2.5 py-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[10px] font-black rounded-lg uppercase tracking-wide">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"></path></svg>
-                        <span>Full Tab</span>
+                    <button onclick="openManagerReport('Abalone-Spawning-and-Purchasing-Log', 'purchasing')" class="theme-card text-left bg-pure-white dark:bg-[#1c2541] border border-outline-variant dark:border-outline-variant/20 p-5 rounded-xl flex items-center justify-between shadow-sm active:scale-98 transition-transform hover:shadow-md cursor-pointer">
+                        <div class="flex items-center space-x-4">
+                            <div class="p-3 bg-coastal-teal/10 rounded-lg border border-coastal-teal/20 text-coastal-teal">
+                                <span class="material-symbols-outlined">shopping_cart</span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] font-bold text-coastal-teal uppercase tracking-wider">전복 매입 로그</span>
+                                <h4 class="text-base font-bold uppercase tracking-wide text-ocean-navy dark:text-white">Abalone Purchasing</h4>
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined text-on-surface-variant">arrow_forward_ios</span>
+                    </button>
+
+                    <button onclick="openManagerReport('Abalone-Processing-Log', 'manager')" class="theme-card text-left bg-pure-white dark:bg-[#1c2541] border border-outline-variant dark:border-outline-variant/20 p-5 rounded-xl flex items-center justify-between shadow-sm active:scale-98 transition-transform hover:shadow-md cursor-pointer">
+                        <div class="flex items-center space-x-4">
+                            <div class="p-3 bg-coastal-teal/10 rounded-lg border border-coastal-teal/20 text-coastal-teal">
+                                <span class="material-symbols-outlined">factory</span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] font-bold text-coastal-teal uppercase tracking-wider">가공 처리 로그</span>
+                                <h4 class="text-base font-bold uppercase tracking-wide text-ocean-navy dark:text-white">Processing Log</h4>
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined text-on-surface-variant">arrow_forward_ios</span>
+                    </button>
+
+                    <button onclick="openManagerReport('hatchery-hr', 'mgr-tab')" class="theme-card text-left bg-pure-white dark:bg-[#1c2541] border border-outline-variant dark:border-outline-variant/20 p-5 rounded-xl flex items-center justify-between shadow-sm active:scale-98 transition-transform hover:shadow-md cursor-pointer">
+                        <div class="flex items-center space-x-4">
+                            <div class="p-3 bg-coastal-teal/10 rounded-lg border border-coastal-teal/20 text-coastal-teal">
+                                <span class="material-symbols-outlined">groups</span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] font-bold text-coastal-teal uppercase tracking-wider">인사 및 근태 관리</span>
+                                <h4 class="text-base font-bold uppercase tracking-wide text-ocean-navy dark:text-white">Workforce &amp; HR</h4>
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined text-on-surface-variant">arrow_forward_ios</span>
                     </button>
                 </div>
+            </div>
 
-                <div id="fetch-fail-banner" class="hidden mt-2 mx-1 flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-600/40 rounded-lg px-3 py-2">
-                    <svg class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"></path></svg>
-                    <div>
-                        <p class="text-[10px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-wide">Data Load Restricted in Iframe</p>
-                        <p class="text-[10px] text-amber-600 dark:text-amber-500 mt-0.5">Browser blocked the Google Sheets fetch from inside this frame. Tap <strong>Full Tab ↗</strong> to open with full data access.</p>
+            <!-- Manager Report Frame (IFrame view) -->
+            <div id="manager-report-frame" class="hidden flex-grow flex flex-col min-h-0 w-full space-y-4">
+                <div class="p-3 border border-outline-variant dark:border-outline-variant/20 rounded-xl bg-pure-white dark:bg-[#1c2541] flex flex-wrap justify-between items-center gap-3">
+                    <button onclick="closeManagerReport()" class="flex items-center space-x-1.5 text-xs font-bold uppercase text-coastal-teal py-1.5 cursor-pointer">
+                        <span class="material-symbols-outlined">arrow_back_ios</span>
+                        <span>Back to Menu</span>
+                    </button>
+
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <label for="mgr-month-select" class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Filter Month:</label>
+                            <select id="mgr-month-select" onchange="executeMonthFilterChange()" class="bg-surface-container-low dark:bg-deep-obsidian text-on-surface dark:text-white font-bold text-xs py-1.5 px-3 rounded-lg border border-outline-variant dark:border-outline-variant/20 focus:outline-none focus:ring-1 focus:ring-coastal-teal cursor-pointer">
+                            </select>
+                        </div>
+                        <button onclick="openCurrentInNewTab()" title="Open report in new tab for full features"
+                            class="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[10px] font-bold rounded-lg uppercase tracking-wide cursor-pointer hover:bg-amber-500/20 transition-all">
+                            <span class="material-symbols-outlined">open_in_new</span>
+                            <span>Full Tab</span>
+                        </button>
+                    </div>
+
+                    <div id="fetch-fail-banner" class="hidden w-full flex items-start gap-2 bg-amber-500/5 border border-amber-500/20 rounded-lg p-3">
+                        <span class="material-symbols-outlined text-amber-500 shrink-0">warning</span>
+                        <div>
+                            <p class="text-[10px] font-bold text-amber-600 uppercase tracking-wide">Data Load Restricted inside Frame</p>
+                            <p class="text-[9px] text-on-surface-variant mt-0.5">Browser policies may block updates inside this view. Tap <strong>Full Tab ↗</strong> to view with direct access.</p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="w-full bg-slate-100 dark:bg-[#0b1329] p-1.5 relative h-[calc(100vh-150px)] min-h-[650px]">
-                <iframe id="mgr-iframe-engine" src="about:blank"
-                    class="w-full h-full rounded-xl border border-slate-200 dark:border-[#3a506b] bg-white dark:bg-[#1c2541]"
-                    onload="onIframeLoad()">
-                </iframe>
+                <div class="w-full bg-pure-white dark:bg-deep-obsidian rounded-xl border border-outline-variant dark:border-outline-variant/20 p-1 relative h-[650px] min-h-[650px]">
+                    <iframe id="mgr-iframe-engine" src="about:blank"
+                        class="w-full h-full rounded-lg bg-pure-white dark:bg-[#1c2541]"
+                        onload="onIframeLoad()">
+                    </iframe>
+                </div>
             </div>
-        </div>
-    </main>
+        </main>
+        
+    </div>
 
-    <!-- ── BOTTOM NAV ────────────────────────────────────────── -->
-    <nav class="fixed bottom-0 left-0 right-0 z-40 border-t-2 bg-white border-slate-200 dark:bg-[#0b1329] dark:border-[#1c2541] px-6 py-2 flex justify-around items-center max-w-md mx-auto w-full shadow-lg">
-        <button onclick="switchTab('ops')" id="nav-ops-btn" class="flex flex-col items-center space-y-1 py-1 text-blue-600 dark:text-[#5bc0be]">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
-            <span class="text-[10px] font-black uppercase tracking-wider">Ops Home</span>
+    <!-- ── BOTTOM NAVIGATION (MOBILE ONLY) ───────────────────── -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t bg-pure-white dark:bg-deep-obsidian border-outline-variant dark:border-outline-variant/20 px-6 py-2 flex justify-around items-center max-w-md mx-auto w-full shadow-lg transition-colors duration-300">
+        <button onclick="switchTab('ops')" id="nav-ops-btn" class="flex flex-col items-center space-y-1 py-1 text-coastal-teal cursor-pointer">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="text-[9px] font-bold uppercase tracking-wider">Ops Home</span>
         </button>
-        <button onclick="switchTab('mgr')" id="nav-mgr-btn" class="flex flex-col items-center space-y-1 py-1 text-slate-400 dark:text-slate-500">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-7.618 3.013C5.4 14.828 9.214 20.218 12 22a11.954 11.954 0 007.618-16.043z"></path></svg>
-            <span class="text-[10px] font-black uppercase tracking-wider">Manager Only</span>
+        <button onclick="switchTab('mgr')" id="nav-mgr-btn" class="flex flex-col items-center space-y-1 py-1 text-slate-400 dark:text-slate-500 cursor-pointer">
+            <span class="material-symbols-outlined">shield_person</span>
+            <span class="text-[9px] font-bold uppercase tracking-wider">Manager Only</span>
         </button>
     </nav>
 
+    <!-- ── SYSTEM SCRIPTS ────────────────────────────────────── -->
     <script>
         const MASTER_PIN = "3653";
         let inputPin = "";
@@ -380,19 +661,41 @@
             const ops  = document.getElementById('dashboard-view');
             const auth = document.getElementById('manager-auth-view');
             const mgr  = document.getElementById('manager-dashboard-view');
+            
             const oBtn = document.getElementById('nav-ops-btn');
             const mBtn = document.getElementById('nav-mgr-btn');
+            
+            const oBtnDesk = document.getElementById('nav-ops-btn-desktop');
+            const mBtnDesk = document.getElementById('nav-mgr-btn-desktop');
+            
+            const oBtnSide = document.getElementById('nav-ops-btn-sidebar');
+            const mBtnSide = document.getElementById('nav-mgr-btn-sidebar');
 
             if (target === 'ops') {
                 ops.classList.remove('hidden');
                 auth.classList.add('hidden');
                 mgr.classList.add('hidden');
-                oBtn.className = "flex flex-col items-center space-y-1 py-1 text-blue-600 dark:text-[#5bc0be]";
-                mBtn.className = "flex flex-col items-center space-y-1 py-1 text-slate-400 dark:text-slate-500";
+                
+                if (oBtn) oBtn.className = "flex flex-col items-center space-y-1 py-1 text-coastal-teal cursor-pointer";
+                if (mBtn) mBtn.className = "flex flex-col items-center space-y-1 py-1 text-slate-400 dark:text-slate-500 cursor-pointer";
+                
+                if (oBtnDesk) oBtnDesk.className = "text-coastal-teal border-b-2 border-coastal-teal pb-1 font-bold text-[12px] tracking-wider uppercase cursor-pointer transition-all";
+                if (mBtnDesk) mBtnDesk.className = "text-on-surface-variant hover:text-coastal-teal transition-colors pb-1 font-bold text-[12px] tracking-wider uppercase cursor-pointer transition-all";
+                
+                if (oBtnSide) oBtnSide.className = "w-full text-left rounded-xl px-4 py-3 flex items-center gap-3 transition-all bg-coastal-teal/10 text-coastal-teal font-bold text-xs uppercase tracking-wider cursor-pointer";
+                if (mBtnSide) mBtnSide.className = "w-full text-left rounded-xl px-4 py-3 flex items-center gap-3 transition-all text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-[#1c2541] font-bold text-xs uppercase tracking-wider cursor-pointer";
             } else {
                 ops.classList.add('hidden');
-                oBtn.className = "flex flex-col items-center space-y-1 py-1 text-slate-400 dark:text-slate-500";
-                mBtn.className = "flex flex-col items-center space-y-1 py-1 text-blue-600 dark:text-[#5bc0be]";
+                
+                if (oBtn) oBtn.className = "flex flex-col items-center space-y-1 py-1 text-slate-400 dark:text-slate-500 cursor-pointer";
+                if (mBtn) mBtn.className = "flex flex-col items-center space-y-1 py-1 text-coastal-teal cursor-pointer";
+                
+                if (oBtnDesk) oBtnDesk.className = "text-on-surface-variant hover:text-coastal-teal transition-colors pb-1 font-bold text-[12px] tracking-wider uppercase cursor-pointer transition-all";
+                if (mBtnDesk) mBtnDesk.className = "text-coastal-teal border-b-2 border-coastal-teal pb-1 font-bold text-[12px] tracking-wider uppercase cursor-pointer transition-all";
+                
+                if (oBtnSide) oBtnSide.className = "w-full text-left rounded-xl px-4 py-3 flex items-center gap-3 transition-all text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-[#1c2541] font-bold text-xs uppercase tracking-wider cursor-pointer";
+                if (mBtnSide) mBtnSide.className = "w-full text-left rounded-xl px-4 py-3 flex items-center gap-3 transition-all bg-coastal-teal/10 text-coastal-teal font-bold text-xs uppercase tracking-wider cursor-pointer";
+                
                 if (isManagerAuthenticated) {
                     mgr.classList.remove('hidden'); auth.classList.add('hidden');
                 } else {
@@ -494,7 +797,7 @@
             const dots = document.getElementById('pin-dots').children;
             for (let i = 0; i < 4; i++) {
                 dots[i].className = i < inputPin.length
-                    ? "w-4 h-4 rounded-full bg-blue-600 dark:bg-[#5bc0be] border-2 border-blue-600 dark:border-[#5bc0be]"
+                    ? "w-4 h-4 rounded-full bg-coastal-teal border-2 border-coastal-teal"
                     : "w-4 h-4 rounded-full border-2 border-slate-400 dark:border-slate-600";
             }
         }
@@ -524,6 +827,28 @@
             sessionStorage.setItem('mgr_auth', '1');
             loadSavedGasUrls();
             switchTab('mgr');
+        }
+
+        // ── Navigation Helper for Sidebar ───────────────────────
+        function handleNavClick(appKey, tabContext, cardId) {
+            rumbleDevice(25);
+            const dashboard = document.getElementById('dashboard-view');
+            if (dashboard && !dashboard.classList.contains('hidden')) {
+                const card = document.getElementById(cardId);
+                if (card) {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Add quick visual highlight ring
+                    card.classList.add('ring-2', 'ring-coastal-teal');
+                    setTimeout(() => card.classList.remove('ring-2', 'ring-coastal-teal'), 1500);
+                }
+            } else {
+                // Switch to dashboard tab and then scroll to module card
+                switchTab('ops');
+                setTimeout(() => {
+                    const card = document.getElementById(cardId);
+                    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 150);
+            }
         }
 
         // ── Init ──────────────────────────────────────────────
