@@ -239,7 +239,7 @@
                 <button onclick="closeView()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:var(--accent);"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"></path></svg><span class="ko">뒤로</span> Menu</button>
                 <div class="flex gap-2"><button onclick="loadSpawnPurchase()" class="icon-btn"><svg id="spawn-refresh-ic" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356M3.985 19.644V14.65h4.992m-4.969-3.65a8.25 8.25 0 0113.803-3.7L21 8.25m-18 7.5l3.181 3.182a8.25 8.25 0 0013.803-3.7"/></svg></button><button onclick="openFullTab('spawn')" class="icon-btn"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg></button></div>
             </div>
-            <div><span class="eyebrow" style="color:#8B5CF6;">산란 시험 관리 · Spawning Trials</span><h3 class="text-2xl font-semibold tracking-tight" id="spawn-month-title" style="margin-top:1px;">This Month</h3></div>
+            <div><span class="eyebrow" style="color:#8B5CF6;">산란 시험 관리 · Spawning Trials</span><div class="flex items-center justify-between mt-1"><h3 class="text-2xl font-semibold tracking-tight" id="spawn-month-title">This Month</h3><select id="spawn-month-select" onchange="changeSpawnMonth(this.value)" class="text-xs font-semibold py-1.5 px-2.5 rounded-lg num" style="background:var(--surface-2);color:var(--text);border:1px solid var(--border);outline:none;max-width:148px;"></select></div></div>
             <div id="spawn-body"></div>
         </div>
 
@@ -249,7 +249,7 @@
                 <button onclick="closeView()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:var(--accent);"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"></path></svg><span class="ko">뒤로</span> Menu</button>
                 <div class="flex gap-2"><button onclick="loadSpawnPurchase()" class="icon-btn"><svg id="purchase-refresh-ic" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356M3.985 19.644V14.65h4.992m-4.969-3.65a8.25 8.25 0 0113.803-3.7L21 8.25m-18 7.5l3.181 3.182a8.25 8.25 0 0013.803-3.7"/></svg></button><button onclick="openFullTab('purchase')" class="icon-btn"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg></button></div>
             </div>
-            <div><span class="eyebrow" style="color:#D97706;">전복 매입 · Purchasing</span><h3 class="text-2xl font-semibold tracking-tight" id="purchase-month-title" style="margin-top:1px;">This Month</h3></div>
+            <div><span class="eyebrow" style="color:#D97706;">전복 매입 · Purchasing</span><div class="flex items-center justify-between mt-1"><h3 class="text-2xl font-semibold tracking-tight" id="purchase-month-title">This Month</h3><select id="purchase-month-select" onchange="changePurchaseMonth(this.value)" class="text-xs font-semibold py-1.5 px-2.5 rounded-lg num" style="background:var(--surface-2);color:var(--text);border:1px solid var(--border);outline:none;max-width:148px;"></select></div></div>
             <div id="purchase-body"></div>
         </div>
 
@@ -295,6 +295,8 @@
         const MASTER_PIN = "3653";
         let inputPin="", isManagerAuthenticated=false, currentReportURL="";
         let wqSessions=[], spawnLogs=[], purchaseLogs=[];
+        function currentMonthStr(){ const n=new Date(); return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`; }
+        let spawnMonth=currentMonthStr(), purchaseMonth=currentMonthStr();
 
         /* ── Storage ─────────────────────────────────────────── */
         const store={get(k){try{return localStorage.getItem(k);}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}},sget(k){try{return sessionStorage.getItem(k);}catch(e){return null;}},sset(k,v){try{sessionStorage.setItem(k,v);}catch(e){}},srem(k){try{sessionStorage.removeItem(k);}catch(e){}}};
@@ -307,6 +309,10 @@
         function fmtCleanDate(v){const d=parseAnyDate(v);if(!d)return String(v||'—');return `${ordinal(d.getDate())} ${MONTHS_SHORT[d.getMonth()]}`;}
         function fmtPeriod(start,end){const s=parseAnyDate(start),e=parseAnyDate(end);if(!s)return '—';if(!e)return fmtCleanDate(start);if(s.getMonth()===e.getMonth()&&s.getFullYear()===e.getFullYear())return `${ordinal(s.getDate())} – ${ordinal(e.getDate())} ${MONTHS_LONG[s.getMonth()]}`;return `${fmtCleanDate(start)} – ${fmtCleanDate(end)}`;}
         function isCurrentMonth(v){const d=parseAnyDate(v);if(!d)return false;const n=new Date();return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear();}
+        function isMonthMatch(v,ms){const d=parseAnyDate(v);if(!d)return false;return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`===ms;}
+        function getAvailableMonths(logs){const s=new Set();logs.forEach(r=>{const d=parseAnyDate(r.date);if(d)s.add(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);});return[...s].sort().reverse();}
+        function monthLabel(ms){if(!ms)return'';const[y,m]=ms.split('-');return`${MONTHS_LONG[parseInt(m)-1]} ${y}`;}
+        function populateMonthSelect(id,logs,selected){const el=document.getElementById(id);if(!el)return;const months=getAvailableMonths(logs);if(!months.includes(selected))months.unshift(selected);el.innerHTML=months.map(m=>`<option value="${m}"${m===selected?' selected':''}>${monthLabel(m)}</option>`).join('');}
         function currentMonthLabel(){const n=new Date();return `${MONTHS_LONG[n.getMonth()]} ${n.getFullYear()}`;}
         function fmtLogTime(t){if(!t&&t!==0)return '';const s=String(t);if(s.includes(':')&&s.length<=8)return s.substring(0,5);if(s.includes('T')){const d=new Date(s);if(!isNaN(d))return d.toTimeString().substring(0,5);}const f=parseFloat(s);if(isFinite(f)&&f>0&&f<1){const m=Math.round(f*1440);return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;}return s.substring(0,5);}
         function normalizeMoon(mc){if(!mc)return 'Other';const l=mc.toLowerCase();if(l.includes('full'))return 'Full Moon';if(l.includes('new'))return 'New Moon';return mc;}
@@ -410,12 +416,13 @@
         function openSpawning(){rumbleDevice(45);showView('spawn-data-view');if(!spawnLogs.length)loadSpawnPurchase();else renderSpawning(spawnLogs);}
         function renderSpawning(logs){
             const body=document.getElementById('spawn-body');
-            document.getElementById('spawn-month-title').textContent=currentMonthLabel();
-            // Filter to current month
-            const monthLogs=logs.filter(r=>isCurrentMonth(r.date));
+            document.getElementById('spawn-month-title').textContent=monthLabel(spawnMonth);
+            populateMonthSelect('spawn-month-select', logs, spawnMonth);
+            // Filter to selected month
+            const monthLogs=logs.filter(r=>isMonthMatch(r.date,spawnMonth));
             if(!monthLogs.length){
                 // Try showing most recent month if nothing this month
-                const noDataHtml=msgCard(`<p class="text-sm font-semibold">No trials recorded this month yet.</p><p class="text-xs mt-1" style="color:var(--text-mut);">Use Full tab to see historical records.</p>`);
+                const noDataHtml=msgCard(`<p class="text-sm font-semibold">No trials in ${monthLabel(spawnMonth)}.</p><p class="text-xs mt-1" style="color:var(--text-mut);">Select a different month using the dropdown above.</p>`);
                 body.innerHTML=noDataHtml;return;
             }
             // Group by moon cycle
@@ -458,7 +465,7 @@
             // Recent trials table (current month)
             const trialRows=monthLogs.slice(0,10).map(r=>{const eggs=parseInt(r.totalEggs)||0;return`<tr><td>${fmtCleanDate(r.date)}<br><span style="color:var(--text-dim);font-size:10px;">${normalizeMoon(r.moonCycle)}</span></td><td style="color:${statusColor(r.statusOutcome)};">${r.statusOutcome||'—'}</td><td>${eggs>0?eggs.toLocaleString():'—'}</td><td style="color:${qualityColor(r.eggQuality)};">${r.eggQuality||'—'}</td></tr>`;}).join('');
             const trialTable=`<div class="card" style="padding:14px;"><div class="eyebrow mb-2">All trials this month</div><table class="data-table"><thead><tr><th>Date · Moon</th><th>Status</th><th>Eggs</th><th>Quality</th></tr></thead><tbody>${trialRows}</tbody></table></div>`;
-            body.innerHTML=`<div class="space-y-3">${moonCards}</div><div class="mt-4 space-y-3">${wqBlock}${trialTable}</div><p class="text-xs mt-3 px-1" style="color:var(--text-dim);">Showing ${currentMonthLabel()} only — tap Full tab for full history.</p>`;
+            body.innerHTML=`<div class="space-y-3">${moonCards}</div><div class="mt-4 space-y-3">${wqBlock}${trialTable}</div><p class="text-xs mt-3 px-1" style="color:var(--text-dim);">Showing ${monthLabel(spawnMonth)} — use dropdown to change month.</p>`;
         }
 
         // Moon trial detail panel
@@ -517,9 +524,10 @@
         function openPurchasing(){rumbleDevice(45);showView('purchase-data-view');if(!purchaseLogs.length)loadSpawnPurchase();else renderPurchasing(purchaseLogs);}
         function renderPurchasing(logs){
             const body=document.getElementById('purchase-body');
-            document.getElementById('purchase-month-title').textContent=currentMonthLabel();
-            const monthLogs=logs.filter(r=>isCurrentMonth(r.date));
-            if(!monthLogs.length){body.innerHTML=msgCard(`<p class="text-sm font-semibold">No batches this month yet.</p><p class="text-xs mt-1" style="color:var(--text-mut);">Use Full tab to see historical records.</p>`);return;}
+            document.getElementById('purchase-month-title').textContent=monthLabel(purchaseMonth);
+            populateMonthSelect('purchase-month-select', logs, purchaseMonth);
+            const monthLogs=logs.filter(r=>isMonthMatch(r.date,purchaseMonth));
+            if(!monthLogs.length){body.innerHTML=msgCard(`<p class="text-sm font-semibold">No batches in ${monthLabel(purchaseMonth)}.</p><p class="text-xs mt-1" style="color:var(--text-mut);">Select a different month using the dropdown above.</p>`);return;}
             const latest=monthLogs[0];
             const mort=num(latest.mortality||latest['mortality%']);
             const mortCol=mortalityColor(mort);
@@ -550,7 +558,7 @@
             // Recent batches — current month only
             const batchRows=monthLogs.map(l=>{const m=num(l.mortality||l['mortality%']);const bkg=num(l.totalBatchWeightKg||l.totalBatchWeight);return`<tr><td>${fmtCleanDate(l.date)}<br><span style="color:var(--text-dim);font-size:10px;">${l.supplierCategory||l.supplierCat||'—'}</span></td><td>${bkg!=null?bkg.toFixed(1):'—'} kg</td><td style="color:${mortalityColor(m)};">${m!=null?m.toFixed(1)+'%':'—'}</td><td style="color:${qualityColor(l.overallQuality)};">${l.overallQuality||'—'}</td></tr>`;}).join('');
             const batchTable=`<div class="card" style="padding:14px;"><div class="eyebrow mb-2">Batches this month</div><table class="data-table"><thead><tr><th>Date · Supplier</th><th>Weight</th><th>Mortality</th><th>Quality</th></tr></thead><tbody>${batchRows}</tbody></table></div>`;
-            body.innerHTML=`${tiles}<div class="mt-3 space-y-3">${batchTable}</div><p class="text-xs mt-3 px-1" style="color:var(--text-dim);">Showing ${currentMonthLabel()} only — tap Full tab for full history.</p>`;
+            body.innerHTML=`${tiles}<div class="mt-3 space-y-3">${batchTable}</div><p class="text-xs mt-3 px-1" style="color:var(--text-dim);">Showing ${monthLabel(purchaseMonth)} — use dropdown to change month.</p>`;
         }
 
         // Broodstock breakdown detail
@@ -633,6 +641,10 @@
         function verifyPin(){if(inputPin===MASTER_PIN){inputPin="";renderPinDots();completeManagerAuth();}else{rumbleDevice([300,100,300]);inputPin="";renderPinDots();const d=document.getElementById('pin-dots');d.animate([{transform:'translateX(0)'},{transform:'translateX(-8px)'},{transform:'translateX(8px)'},{transform:'translateX(0)'}],{duration:360});}}
         function lockManagerView(){rumbleDevice(100);isManagerAuthenticated=false;store.srem('mgr_auth');closeManagerReport();switchTab('ops');}
         function completeManagerAuth(){rumbleDevice([80,50,80]);isManagerAuthenticated=true;store.sset('mgr_auth','1');loadSavedGasUrls();switchTab('mgr');}
+
+        /* ── Month change handlers ───────────────────────────── */
+        function changeSpawnMonth(val){ rumbleDevice(25); spawnMonth=val; renderSpawning(spawnLogs); }
+        function changePurchaseMonth(val){ rumbleDevice(25); purchaseMonth=val; renderPurchasing(purchaseLogs); }
 
         /* ── iOS install banner ──────────────────────────────── */
         function initIOSInstallBanner(){
