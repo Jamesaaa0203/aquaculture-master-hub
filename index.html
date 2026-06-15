@@ -33,23 +33,23 @@
         body.hc { --text:#04101F; --text-mut:#243349; --text-dim:#3A4D66; --border:#94A6BC; --border-2:#6E8298; --accent:#0A6B61; }
         body.hc.dark { --text:#FFFFFF; --text-mut:#D4E0F0; --text-dim:#9DB0CC; --border:#3E567E; --border-2:#54709C; --accent:#5EEAD4; }
 
-        * { -webkit-tap-highlight-color:transparent; }
-        body { background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sans-serif; transition:background-color .4s ease,color .4s ease; }
+        * { -webkit-tap-highlight-color:transparent; box-sizing:border-box; }
+        body { background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sans-serif; transition:background-color .4s,color .4s; }
         h1,h2,h3,h4,.num { font-family:'Space Grotesk','Inter',sans-serif; }
         .ko { font-family:'Noto Sans KR','Inter',sans-serif; font-weight:600; }
         .eyebrow { font-size:11px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--text-dim); }
-        .card { background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); transition:background-color .4s ease,border-color .4s ease; }
+        .card { background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); }
         .wordmark { font-weight:700; letter-spacing:-.02em; font-size:19px; line-height:1; }
         .wordmark .sub { color:var(--accent); }
         .chip { display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border-radius:999px; background:var(--surface-2); border:1px solid var(--border); font-size:11px; font-weight:600; color:var(--text-mut); }
-        .icon-btn { width:36px; height:36px; border-radius:999px; display:flex; align-items:center; justify-content:center; background:var(--surface-2); border:1px solid var(--border); color:var(--text-mut); transition:color .2s,background-color .2s; }
+        .icon-btn { width:36px; height:36px; border-radius:999px; display:flex; align-items:center; justify-content:center; background:var(--surface-2); border:1px solid var(--border); color:var(--text-mut); transition:color .2s,background .2s; }
         .icon-btn.on { color:var(--accent); border-color:color-mix(in srgb,var(--accent) 40%,transparent); background:color-mix(in srgb,var(--accent) 12%,transparent); }
         .dot { width:8px; height:8px; border-radius:999px; flex:none; }
         .dot.ok { background:var(--ok); box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 22%,transparent); animation:breathe 2.4s ease-in-out infinite; }
         @keyframes breathe { 0%,100%{opacity:1;} 50%{opacity:.45;} }
 
-        /* Module buttons (worker) */
-        .module { position:relative; display:flex; align-items:center; justify-content:space-between; gap:14px; padding:18px; padding-left:18px; background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); transition:transform .12s ease; overflow:hidden; width:100%; text-align:left; }
+        /* Worker module buttons */
+        .module { position:relative; display:flex; align-items:center; justify-content:space-between; gap:14px; padding:18px 18px 18px 18px; background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); transition:transform .12s; overflow:hidden; width:100%; text-align:left; }
         .module::before { content:''; position:absolute; left:0; top:14px; bottom:14px; width:3px; border-radius:0 3px 3px 0; background:var(--hue,var(--accent)); opacity:.85; }
         .module:active { transform:scale(.985); }
         .module-ic { width:50px; height:50px; flex:none; border-radius:14px; display:flex; align-items:center; justify-content:center; background:color-mix(in srgb,var(--hue,var(--accent)) 12%,transparent); color:var(--hue,var(--accent)); border:1px solid color-mix(in srgb,var(--hue,var(--accent)) 26%,transparent); }
@@ -58,47 +58,76 @@
         .module-title { font-size:17px; font-weight:600; letter-spacing:-.01em; color:var(--text); margin-top:1px; }
         .module-desc { font-size:12px; color:var(--text-mut); margin-top:2px; }
 
-        .keypad-btn { background:var(--surface); border:1px solid var(--border-2); border-radius:16px; box-shadow:var(--shadow); font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:22px; color:var(--text); padding:16px 0; transition:transform .1s,background-color .15s; }
+        .keypad-btn { background:var(--surface); border:1px solid var(--border-2); border-radius:16px; box-shadow:var(--shadow); font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:22px; color:var(--text); padding:16px 0; transition:transform .1s,background .15s; }
         .keypad-btn:active { transform:scale(.93); background:var(--surface-2); }
-
-        .mgr-row { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px; text-align:left; background:var(--surface); border:1px solid var(--border); border-radius:18px; box-shadow:var(--shadow); transition:transform .12s ease; }
+        .mgr-row { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px; text-align:left; background:var(--surface); border:1px solid var(--border); border-radius:18px; box-shadow:var(--shadow); transition:transform .12s; }
         .mgr-row:active { transform:scale(.985); }
 
-        /* KPI tiles (manager WQ dashboard) */
-        .kpi { background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); padding:13px 14px; }
-        .kpi-label { font-size:11px; font-weight:600; color:var(--text-mut); }
-        .kpi-ko { font-size:10px; color:var(--text-dim); }
-        .kpi-val { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:26px; line-height:1; letter-spacing:-.02em; }
-        .kpi-unit { font-size:12px; font-weight:600; color:var(--text-dim); }
-        .pill { font-size:10px; font-weight:700; letter-spacing:.03em; padding:2px 7px; border-radius:999px; }
-        .trend { font-size:11px; font-weight:600; display:inline-flex; align-items:center; gap:2px; color:var(--text-dim); }
+        /* ── KPI tiles ────────────────────────────────────────── */
+        .kpi {
+            background:var(--surface); border:1px solid var(--border); border-radius:18px;
+            box-shadow:var(--shadow); padding:16px; width:100%; text-align:left;
+            transition:transform .12s, border-color .2s;
+            position:relative; overflow:hidden;
+        }
+        .kpi::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--kpi-hue, var(--accent)); opacity:.7; }
+        .kpi:active { transform:scale(.97); }
+        .kpi-label { font-size:12px; font-weight:600; color:var(--text-mut); }
+        .kpi-ko { font-size:10.5px; color:var(--text-dim); margin-top:1px; }
+        .kpi-val { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:30px; line-height:1; letter-spacing:-.02em; margin-top:10px; }
+        .kpi-unit { font-size:13px; font-weight:600; color:var(--text-dim); margin-left:2px; }
+        .pill { font-size:10px; font-weight:700; letter-spacing:.04em; padding:3px 8px; border-radius:999px; }
+        .kpi-hint { font-size:10.5px; font-weight:500; color:var(--text-dim); margin-top:10px; display:flex; align-items:center; gap:4px; }
 
+        /* Data table */
         .data-table { width:100%; border-collapse:collapse; font-size:12px; }
         .data-table th { font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--text-dim); text-align:right; padding:7px 8px; border-bottom:1px solid var(--border); }
         .data-table th:first-child, .data-table td:first-child { text-align:left; }
         .data-table td { padding:8px; border-bottom:1px solid var(--border); color:var(--text); font-weight:500; text-align:right; font-family:'Space Grotesk',sans-serif; }
         .data-table tr:last-child td { border-bottom:0; }
 
+        /* ── Chart overlay ────────────────────────────────────── */
+        #chart-overlay {
+            position:fixed; inset:0; z-index:200;
+            background:rgba(0,0,0,.55); backdrop-filter:blur(4px);
+            display:flex; align-items:flex-end;
+            opacity:0; pointer-events:none; transition:opacity .25s;
+        }
+        #chart-overlay.open { opacity:1; pointer-events:all; }
+        #chart-sheet {
+            width:100%; max-width:480px; margin:0 auto;
+            background:var(--surface); border-radius:24px 24px 0 0;
+            padding:0 0 calc(24px + env(safe-area-inset-bottom));
+            transform:translateY(100%); transition:transform .3s cubic-bezier(.32,0,.15,1);
+            max-height:88dvh; display:flex; flex-direction:column;
+        }
+        #chart-overlay.open #chart-sheet { transform:translateY(0); }
+        .chart-handle { width:36px; height:4px; border-radius:2px; background:var(--border-2); margin:12px auto 16px; flex:none; }
+        #chart-canvas-wrap { flex:1; overflow:hidden; padding:0 16px 16px; min-height:0; }
+
+        /* GAS input */
+        .gas-input { width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:9px 12px; font-size:13px; color:var(--text); outline:none; transition:border-color .2s; }
+        .gas-input:focus { border-color:var(--accent); }
+        .gas-input::placeholder { color:var(--text-dim); }
+
+        /* Nav */
         .navbar { background:color-mix(in srgb,var(--surface) 88%,transparent); backdrop-filter:saturate(1.4) blur(14px); -webkit-backdrop-filter:saturate(1.4) blur(14px); border-top:1px solid var(--border); padding-bottom:calc(.6rem + env(safe-area-inset-bottom)); }
         .nav-btn { color:var(--text-dim); transition:color .2s; }
         .nav-btn.active { color:var(--accent); }
         .nav-btn .nb-ic { width:22px; height:22px; }
         .nav-label { font-size:10px; font-weight:600; letter-spacing:.03em; }
-
         .iframe-shell { height:calc(100dvh - 156px); min-height:560px; }
-        .gas-input { width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:9px 12px; font-size:13px; color:var(--text); outline:none; transition:border-color .2s; }
-        .gas-input:focus { border-color:var(--accent); }
-        .gas-input::placeholder { color:var(--text-dim); }
         .pin-on { background:var(--accent) !important; }
-        .spin { animation:spin 1s linear infinite; } @keyframes spin { to { transform:rotate(360deg); } }
+        .spin { animation:spin 1s linear infinite; } @keyframes spin { to{transform:rotate(360deg);} }
         ::-webkit-scrollbar { width:0; height:0; }
-        @media (prefers-reduced-motion:reduce){ *,::before { animation:none !important; transition:none !important; } }
+        @media (prefers-reduced-motion:reduce){ *,::before{animation:none !important;transition:none !important;} }
     </style>
 </head>
 <body id="app-body" class="flex flex-col min-h-screen antialiased">
 
     <!-- ── HEADER ─────────────────────────────────────────────── -->
-    <header class="sticky top-0 z-40 px-4 py-3 flex justify-between items-center" style="background:color-mix(in srgb,var(--surface) 90%,transparent); backdrop-filter:saturate(1.4) blur(14px); -webkit-backdrop-filter:saturate(1.4) blur(14px); border-bottom:1px solid var(--border); padding-top:calc(.75rem + env(safe-area-inset-top));">
+    <header class="sticky top-0 z-40 px-4 py-3 flex justify-between items-center"
+            style="background:color-mix(in srgb,var(--surface) 90%,transparent); backdrop-filter:saturate(1.4) blur(14px); -webkit-backdrop-filter:saturate(1.4) blur(14px); border-bottom:1px solid var(--border); padding-top:calc(.75rem + env(safe-area-inset-top));">
         <div class="flex items-center gap-2.5">
             <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
                 <defs><linearGradient id="shell" x1="4" y1="6" x2="28" y2="26" gradientUnits="userSpaceOnUse"><stop stop-color="#2DD4BF"/><stop offset=".5" stop-color="#818CF8"/><stop offset="1" stop-color="#FCD34D"/></linearGradient></defs>
@@ -109,7 +138,7 @@
             <div><div class="wordmark">Bon Aqua <span class="sub">Ops</span></div><div id="theme-indicator" class="eyebrow" style="margin-top:2px;">Daylight Mode</div></div>
         </div>
         <div class="flex items-center gap-2">
-            <button id="hc-btn" onclick="toggleContrast()" class="icon-btn" title="High-contrast outdoor mode" aria-label="Toggle high-contrast mode">
+            <button id="hc-btn" onclick="toggleContrast()" class="icon-btn" title="High-contrast outdoor mode">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg>
             </button>
             <div class="chip"><span class="dot ok"></span><span class="num" id="live-clock" style="font-weight:600; color:var(--text);">00:00</span></div>
@@ -142,7 +171,7 @@
                 <button onclick="pressKey('1')" class="keypad-btn">1</button><button onclick="pressKey('2')" class="keypad-btn">2</button><button onclick="pressKey('3')" class="keypad-btn">3</button>
                 <button onclick="pressKey('4')" class="keypad-btn">4</button><button onclick="pressKey('5')" class="keypad-btn">5</button><button onclick="pressKey('6')" class="keypad-btn">6</button>
                 <button onclick="pressKey('7')" class="keypad-btn">7</button><button onclick="pressKey('8')" class="keypad-btn">8</button><button onclick="pressKey('9')" class="keypad-btn">9</button>
-                <button onclick="clearPin()" class="keypad-btn" style="font-family:'Inter'; font-size:13px; font-weight:600; color:var(--alert);">Clear</button>
+                <button onclick="clearPin()" class="keypad-btn" style="font-family:'Inter';font-size:13px;font-weight:600;color:var(--alert);">Clear</button>
                 <button onclick="pressKey('0')" class="keypad-btn">0</button><div></div>
             </div>
         </div>
@@ -150,19 +179,25 @@
 
     <!-- ── MANAGER DASHBOARD ──────────────────────────────────── -->
     <main id="manager-dashboard-view" class="hidden flex-1 flex flex-col min-h-0 w-full">
+
         <!-- Menu -->
         <div id="manager-menu-grid" class="flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full overflow-y-auto">
             <div class="flex justify-between items-start px-1">
                 <div><span class="eyebrow ko">최고 경영자 콘솔</span><h3 class="text-2xl font-semibold tracking-tight" style="margin-top:2px;">Executive Terminal</h3></div>
-                <button onclick="lockManagerView()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold" style="background:color-mix(in srgb,var(--alert) 12%,transparent); color:var(--alert); border:1px solid color-mix(in srgb,var(--alert) 26%,transparent);"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"></path></svg>Lock</button>
+                <button onclick="lockManagerView()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold" style="background:color-mix(in srgb,var(--alert) 12%,transparent);color:var(--alert);border:1px solid color-mix(in srgb,var(--alert) 26%,transparent);">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"></path></svg>Lock
+                </button>
             </div>
             <div class="card" style="padding:14px;">
                 <button onclick="toggleGasSettings()" class="w-full flex items-center justify-between">
-                    <div class="flex items-center gap-2.5"><span class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:color-mix(in srgb,var(--attention) 14%,transparent); color:var(--attention);"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"></path></svg></span><span class="text-sm font-semibold">Module GAS connections</span></div>
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:color-mix(in srgb,var(--attention) 14%,transparent);color:var(--attention);"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"></path></svg></span>
+                        <span class="text-sm font-semibold">Module GAS connections</span>
+                    </div>
                     <span id="gas-settings-status" class="text-xs font-semibold" style="color:var(--text-dim);">Configure ▾</span>
                 </button>
                 <div id="gas-settings-drawer" class="hidden mt-3 space-y-3 pt-3" style="border-top:1px solid var(--border);">
-                    <p class="text-xs" style="color:var(--text-mut);">Paste each module's GAS <span class="num">/exec</span> URL. Powers the live dashboards and in-frame data.</p>
+                    <p class="text-xs" style="color:var(--text-mut);">Paste each module's GAS <span class="num">/exec</span> URL. Powers the live dashboards.</p>
                     <div><label class="eyebrow block mb-1.5">Water Quality</label><input type="password" id="gas-wq-url" placeholder="/exec URL for Water Quality" onchange="saveGasUrls()" class="gas-input"></div>
                     <div><label class="eyebrow block mb-1.5">Spawning &amp; Purchasing</label><input type="password" id="gas-spawning-url" placeholder="/exec URL for Spawning & Purchasing" onchange="saveGasUrls()" class="gas-input"></div>
                     <div><label class="eyebrow block mb-1.5">Processing Log</label><input type="password" id="gas-processing-url" placeholder="/exec URL for Processing Log" onchange="saveGasUrls()" class="gas-input"></div>
@@ -178,27 +213,51 @@
         <!-- Water Quality native dashboard -->
         <div id="wq-data-view" class="hidden flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full overflow-y-auto">
             <div class="flex items-center justify-between gap-2">
-                <button onclick="closeWaterQuality()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:var(--accent);"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"></path></svg><span class="ko">뒤로</span><span>Menu</span></button>
+                <button onclick="closeWaterQuality()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:var(--accent);">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"></path></svg>
+                    <span class="ko">뒤로</span><span>Menu</span>
+                </button>
                 <div class="flex items-center gap-2">
-                    <button onclick="loadWaterQuality()" class="icon-btn" title="Refresh"><svg id="wq-refresh-ic" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356M3.985 19.644V14.65h4.992m-4.969-3.65a8.25 8.25 0 0113.803-3.7L21 8.25m-18 7.5l3.181 3.182a8.25 8.25 0 0013.803-3.7"/></svg></button>
-                    <button onclick="openWqFullTab()" class="icon-btn" title="Open full module"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg></button>
+                    <button onclick="loadWaterQuality()" class="icon-btn" title="Refresh">
+                        <svg id="wq-refresh-ic" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356M3.985 19.644V14.65h4.992m-4.969-3.65a8.25 8.25 0 0113.803-3.7L21 8.25m-18 7.5l3.181 3.182a8.25 8.25 0 0013.803-3.7"/></svg>
+                    </button>
+                    <button onclick="openWqFullTab()" class="icon-btn" title="Open full module">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                    </button>
                 </div>
             </div>
-            <div><span class="eyebrow" style="color:#3B82F6;">수질 관리 · Water Quality</span><h3 class="text-2xl font-semibold tracking-tight" style="margin-top:1px;">Live Readings</h3></div>
+            <div>
+                <span class="eyebrow" style="color:#3B82F6;">수질 관리 · Water Quality</span>
+                <h3 class="text-2xl font-semibold tracking-tight" style="margin-top:1px;">Live Readings</h3>
+            </div>
             <div id="wq-body"></div>
         </div>
 
         <!-- Generic iframe frame (other modules) -->
         <div id="manager-report-frame" class="hidden flex-1 flex flex-col min-h-0 w-full">
-            <div class="p-3 shrink-0" style="background:var(--surface); border-bottom:1px solid var(--border);">
+            <div class="p-3 shrink-0" style="background:var(--surface);border-bottom:1px solid var(--border);">
                 <div class="flex justify-between items-center px-1 gap-2">
-                    <button onclick="closeManagerReport()" class="flex items-center gap-1.5 text-sm font-semibold py-1 shrink-0" style="color:var(--accent);"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"></path></svg><span class="ko">뒤로</span><span>Menu</span></button>
-                    <div class="flex items-center gap-2"><label for="mgr-month-select" class="eyebrow ko hidden sm:block">조회 월</label><select id="mgr-month-select" onchange="executeMonthFilterChange()" class="text-xs font-semibold py-2 px-2.5 rounded-lg num" style="background:var(--surface-2); color:var(--text); border:1px solid var(--border); outline:none;"></select></div>
-                    <button onclick="openCurrentInNewTab()" title="Open in new tab" class="flex items-center gap-1 shrink-0 px-2.5 py-2 text-xs font-semibold rounded-lg" style="background:color-mix(in srgb,var(--attention) 12%,transparent); color:var(--attention); border:1px solid color-mix(in srgb,var(--attention) 26%,transparent);"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"></path></svg><span>Full tab</span></button>
+                    <button onclick="closeManagerReport()" class="flex items-center gap-1.5 text-sm font-semibold py-1 shrink-0" style="color:var(--accent);">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"></path></svg>
+                        <span class="ko">뒤로</span><span>Menu</span>
+                    </button>
+                    <div class="flex items-center gap-2">
+                        <label for="mgr-month-select" class="eyebrow ko hidden sm:block">조회 월</label>
+                        <select id="mgr-month-select" onchange="executeMonthFilterChange()" class="text-xs font-semibold py-2 px-2.5 rounded-lg num" style="background:var(--surface-2);color:var(--text);border:1px solid var(--border);outline:none;"></select>
+                    </div>
+                    <button onclick="openCurrentInNewTab()" class="flex items-center gap-1 shrink-0 px-2.5 py-2 text-xs font-semibold rounded-lg" style="background:color-mix(in srgb,var(--attention) 12%,transparent);color:var(--attention);border:1px solid color-mix(in srgb,var(--attention) 26%,transparent);">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"></path></svg>
+                        <span>Full tab</span>
+                    </button>
                 </div>
-                <div id="fetch-fail-banner" class="hidden mt-2 mx-1 flex items-start gap-2 rounded-xl px-3 py-2.5" style="background:color-mix(in srgb,var(--attention) 12%,transparent); border:1px solid color-mix(in srgb,var(--attention) 30%,transparent);"><svg class="w-4 h-4 shrink-0 mt-0.5" style="color:var(--attention);" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"></path></svg><div><p class="text-xs font-semibold" style="color:var(--attention);">Data load restricted in frame</p><p class="text-xs mt-0.5" style="color:var(--text-mut);">Tap <strong>Full tab ↗</strong> to open with full data access.</p></div></div>
+                <div id="fetch-fail-banner" class="hidden mt-2 mx-1 flex items-start gap-2 rounded-xl px-3 py-2.5" style="background:color-mix(in srgb,var(--attention) 12%,transparent);border:1px solid color-mix(in srgb,var(--attention) 30%,transparent);">
+                    <svg class="w-4 h-4 shrink-0 mt-0.5" style="color:var(--attention);" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"></path></svg>
+                    <div><p class="text-xs font-semibold" style="color:var(--attention);">Data load restricted in frame</p><p class="text-xs mt-0.5" style="color:var(--text-mut);">Tap <strong>Full tab ↗</strong> to open with full data access.</p></div>
+                </div>
             </div>
-            <div class="w-full p-1.5 relative iframe-shell" style="background:var(--bg-soft);"><iframe id="mgr-iframe-engine" src="about:blank" class="w-full h-full rounded-2xl" style="border:1px solid var(--border); background:var(--surface);" onload="onIframeLoad()"></iframe></div>
+            <div class="w-full p-1.5 relative iframe-shell" style="background:var(--bg-soft);">
+                <iframe id="mgr-iframe-engine" src="about:blank" class="w-full h-full rounded-2xl" style="border:1px solid var(--border);background:var(--surface);" onload="onIframeLoad()"></iframe>
+            </div>
         </div>
     </main>
 
@@ -208,21 +267,33 @@
         <button onclick="switchTab('mgr')" id="nav-mgr-btn" class="nav-btn flex flex-col items-center gap-1 py-1"><svg class="nb-ic" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-7.618 3.013C5.4 14.828 9.214 20.218 12 22a11.954 11.954 0 007.618-16.043z"></path></svg><span class="nav-label">Manager</span></button>
     </nav>
 
+    <!-- ── CHART OVERLAY (tap-to-expand) ─────────────────────── -->
+    <div id="chart-overlay" onclick="closeChart(event)">
+        <div id="chart-sheet">
+            <div class="chart-handle"></div>
+            <div style="padding:0 20px 12px; flex:none;">
+                <div id="chart-title" class="text-lg font-semibold tracking-tight"></div>
+                <div id="chart-subtitle" class="text-xs mt-0.5" style="color:var(--text-mut);"></div>
+            </div>
+            <div id="chart-canvas-wrap"></div>
+        </div>
+    </div>
+
     <script>
         const MASTER_PIN = "3653";
         let inputPin = "", isManagerAuthenticated = false, currentReportURL = "";
+        let wqSessions = []; // stored globally so chart taps can access
 
         /* ════════════════════════════════════════════════════════
-           WATER QUALITY REFERENCE RANGES — please confirm/adjust!
-           A reading outside these shows an amber "review" tag.
-           Defaults are deliberately wide so your normal readings
-           don't false-alarm. Tighten them to your real targets.
+           WATER QUALITY REFERENCE RANGES
+           Adjust min/max to your real targets.
+           A reading outside these shows an amber "review" pill.
            ════════════════════════════════════════════════════════ */
         const WQ_RANGES = {
-            do:       { min:5.0,  max:99,  unit:'mg/L', dp:2, label:'Dissolved O₂', ko:'용존산소' },
-            temp:     { min:24,   max:32,  unit:'°C',   dp:1, label:'Temperature',  ko:'수온' },
-            salinity: { min:30,   max:37,  unit:'ppt',  dp:0, label:'Salinity',     ko:'염분' },
-            ph:       { min:7.7,  max:8.7, unit:'',     dp:1, label:'pH',           ko:'산도' }
+            do:       { min:5.0, max:99,  unit:'mg/L', dp:2, label:'Dissolved O₂', ko:'용존산소', color:'#3B82F6' },
+            temp:     { min:24,  max:32,  unit:'°C',   dp:1, label:'Temperature',  ko:'수온',    color:'#F59E0B' },
+            salinity: { min:30,  max:37,  unit:'ppt',  dp:0, label:'Salinity',     ko:'염분',    color:'#14B8A6' },
+            ph:       { min:7.7, max:8.7, unit:'',     dp:1, label:'pH',           ko:'산도',    color:'#8B5CF6' }
         };
 
         const store = {
@@ -240,7 +311,7 @@
             hr:"M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
         };
 
-        /* Worker module buttons */
+        /* ── Worker modules ──────────────────────────────────── */
         const MODULES = [
             { hue:'#3B82F6', href:'https://jamesaaa0203.github.io/daily-water-quality/', title:'Water Quality', bm:'Kualiti Air', desc:'DO, temperature & salinity logs', icon:lineIcon(ICONS.water) },
             { hue:'#8B5CF6', href:'https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/', title:'Spawning Trials', bm:'Ujian Pemijahan', desc:'Induction & conditioning', icon:lineIcon(ICONS.spawn) },
@@ -255,9 +326,9 @@
                     <svg class="w-5 h-5" style="color:var(--text-dim);" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
                 </button>`).join('');
         }
-        function openModule(href){ rumbleDevice(35); window.location.href = href; }
+        function openModule(href){ rumbleDevice(35); window.location.href=href; }
 
-        /* Manager log-view rows */
+        /* ── Manager log-view rows ───────────────────────────── */
         const MGR_VIEWS = [
             { action:'wq', hue:'#3B82F6', ko:'수질 관리 데이터', title:'Water Quality Data', sub:'Live dashboard', icon:lineIcon("M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14") },
             { appKey:'Abalone-Spawning-and-Purchasing-Log', tab:'spawning', hue:'#8B5CF6', ko:'산란 시험 관리', title:'Spawning Trials', icon:lineIcon("M11.25 11.25l.041-.02a.75.75 0 11.518 1.352l-.145-.043L11.25 11.25zm0 0a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5zM12 18.75l3-3m0 0l-3-3m3 3H9") },
@@ -266,11 +337,11 @@
             { appKey:'hatchery-hr', tab:'mgr-tab', hue:'#6366F1', ko:'인사 및 근태 관리', title:'Workforce & HR', icon:lineIcon(ICONS.hr) }
         ];
         function renderMgrList(){
-            document.getElementById('mgr-list').innerHTML = MGR_VIEWS.map((v)=>{
-                const onclick = v.action==='wq' ? 'openWaterQuality()' : `openManagerReport('${v.appKey}','${v.tab}')`;
-                const sub = v.sub ? `<div class="text-xs" style="color:var(--text-mut); margin-top:1px;">${v.sub}</div>` : '';
+            document.getElementById('mgr-list').innerHTML = MGR_VIEWS.map(v=>{
+                const onclick=v.action==='wq'?'openWaterQuality()':`openManagerReport('${v.appKey}','${v.tab}')`;
+                const sub=v.sub?`<div class="text-xs" style="color:var(--text-mut);margin-top:1px;">${v.sub}</div>`:'';
                 return `<button onclick="${onclick}" class="mgr-row" style="--hue:${v.hue}">
-                    <div class="flex items-center gap-3.5"><span class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:color-mix(in srgb,${v.hue} 12%,transparent); color:${v.hue}; border:1px solid color-mix(in srgb,${v.hue} 24%,transparent);"><span style="width:22px;height:22px;display:inline-flex">${v.icon}</span></span>
+                    <div class="flex items-center gap-3.5"><span class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:color-mix(in srgb,${v.hue} 12%,transparent);color:${v.hue};border:1px solid color-mix(in srgb,${v.hue} 24%,transparent);"><span style="width:22px;height:22px;display:inline-flex">${v.icon}</span></span>
                     <div><div class="eyebrow ko" style="color:${v.hue};">${v.ko}</div><div class="text-base font-semibold tracking-tight" style="margin-top:1px;">${v.title}</div>${sub}</div></div>
                     <svg class="w-5 h-5" style="color:var(--text-dim);" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
                 </button>`;
@@ -278,33 +349,48 @@
         }
 
         /* ── Water Quality dashboard ─────────────────────────── */
-        const num = (v)=>{ const n=parseFloat(v); return isFinite(n)?n:null; };
-        const avg = (a)=>{ const v=a.filter(x=>x!=null); return v.length? v.reduce((p,c)=>p+c,0)/v.length : null; };
-        const rnd = (v,dp)=> v==null? '—' : v.toFixed(dp);
-        function fmtTimeCell(t){ if(typeof t==='string' && t.includes('T')){ const d=new Date(t); if(!isNaN(d)) return d.toTimeString().substring(0,5); } return t!=null?String(t):''; }
+        const num=(v)=>{ const n=parseFloat(v); return isFinite(n)?n:null; };
+        const avg=(a)=>{ const v=a.filter(x=>x!=null); return v.length?v.reduce((p,c)=>p+c,0)/v.length:null; };
+        const rnd=(v,dp)=>v==null?'—':v.toFixed(dp);
+
+        function fmtLogTime(t){
+            // t can be a Sheets serial string like "0.482638..." or "11:35" or ISO
+            if(t==null||t==='') return '';
+            const s=String(t);
+            if(s.includes(':') && s.length<=8) return s.substring(0,5); // already HH:MM
+            if(s.includes('T')){ const d=new Date(s); if(!isNaN(d)) return d.toTimeString().substring(0,5); }
+            // Sheets serial fraction (fraction of day)
+            const f=parseFloat(s);
+            if(isFinite(f) && f>0 && f<1){
+                const mins=Math.round(f*24*60);
+                return `${String(Math.floor(mins/60)).padStart(2,'0')}:${String(mins%60).padStart(2,'0')}`;
+            }
+            return s.substring(0,5);
+        }
 
         function openWaterQuality(){ rumbleDevice(45); document.getElementById('manager-menu-grid').classList.add('hidden'); document.getElementById('wq-data-view').classList.remove('hidden'); loadWaterQuality(); }
         function closeWaterQuality(){ rumbleDevice(40); document.getElementById('wq-data-view').classList.add('hidden'); document.getElementById('manager-menu-grid').classList.remove('hidden'); }
         function openWqFullTab(){ const url=getModuleGasUrl('daily-water-quality'); const page=`https://jamesaaa0203.github.io/daily-water-quality/?targetTab=manager&pin=${MASTER_PIN}`+(url?`&gasUrl=${encodeURIComponent(url)}`:''); window.open(page,'_blank','noopener,noreferrer'); }
 
-        function wqMsg(html){ return `<div class="card" style="padding:22px; text-align:center;">${html}</div>`; }
+        function wqMsg(html){ return `<div class="card" style="padding:22px;text-align:center;">${html}</div>`; }
+
         async function loadWaterQuality(){
-            const body = document.getElementById('wq-body');
-            const ic = document.getElementById('wq-refresh-ic'); ic && ic.classList.add('spin');
-            const url = getModuleGasUrl('daily-water-quality');
-            if(!url){ body.innerHTML = wqMsg(`<p class="text-sm font-semibold" style="color:var(--text);">Water Quality not linked yet</p><p class="text-xs mt-1" style="color:var(--text-mut);">Open <strong>Module GAS connections</strong> and paste the Water Quality /exec URL.</p>`); ic&&ic.classList.remove('spin'); return; }
-            body.innerHTML = wqMsg(`<p class="text-sm" style="color:var(--text-mut);">Loading readings…</p>`);
+            const body=document.getElementById('wq-body');
+            const ic=document.getElementById('wq-refresh-ic'); ic&&ic.classList.add('spin');
+            const url=getModuleGasUrl('daily-water-quality');
+            if(!url){ body.innerHTML=wqMsg(`<p class="text-sm font-semibold" style="color:var(--text);">Water Quality not linked yet</p><p class="text-xs mt-1" style="color:var(--text-mut);">Open <strong>Module GAS connections</strong> and paste the Water Quality /exec URL.</p>`); ic&&ic.classList.remove('spin'); return; }
+            body.innerHTML=wqMsg(`<p class="text-sm" style="color:var(--text-mut);">Loading readings…</p>`);
             try{
                 const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),12000);
-                const res = await fetch(`${url}${url.includes('?')?'&':'?'}pin=${MASTER_PIN}`,{signal:ctrl.signal, redirect:'follow'});
+                const res=await fetch(`${url}${url.includes('?')?'&':'?'}pin=${MASTER_PIN}`,{signal:ctrl.signal,redirect:'follow'});
                 clearTimeout(t);
-                const data = await res.json();
-                if(data && data.error){ body.innerHTML = wqMsg(`<p class="text-sm font-semibold" style="color:var(--attention);">Access denied by module</p><p class="text-xs mt-1" style="color:var(--text-mut);">The saved URL or PIN didn't match. Re-check the Water Quality /exec URL.</p>`); return; }
-                if(!Array.isArray(data) || !data.length){ body.innerHTML = wqMsg(`<p class="text-sm font-semibold">No readings yet</p><p class="text-xs mt-1" style="color:var(--text-mut);">Once workers log data it'll appear here.</p>`); return; }
+                const data=await res.json();
+                if(data&&data.error){ body.innerHTML=wqMsg(`<p class="text-sm font-semibold" style="color:var(--attention);">Access denied</p><p class="text-xs mt-1" style="color:var(--text-mut);">Check the Water Quality /exec URL or PIN.</p>`); return; }
+                if(!Array.isArray(data)||!data.length){ body.innerHTML=wqMsg(`<p class="text-sm font-semibold">No readings yet</p><p class="text-xs mt-1" style="color:var(--text-mut);">Once workers log data it'll appear here.</p>`); return; }
                 renderWQ(data);
             }catch(e){
-                body.innerHTML = wqMsg(`<p class="text-sm font-semibold" style="color:var(--attention);">Couldn't load in-app</p><p class="text-xs mt-1 mb-3" style="color:var(--text-mut);">The browser may have blocked the data fetch. Open the full module instead.</p><button onclick="openWqFullTab()" class="px-4 py-2 rounded-xl text-sm font-semibold text-white" style="background:var(--accent);">Open full module ↗</button>`);
-            } finally { ic && ic.classList.remove('spin'); }
+                body.innerHTML=wqMsg(`<p class="text-sm font-semibold" style="color:var(--attention);">Couldn't load in-app</p><p class="text-xs mt-1 mb-3" style="color:var(--text-mut);">The browser may have blocked the fetch. Try the full module instead.</p><button onclick="openWqFullTab()" class="px-4 py-2 rounded-xl text-sm font-semibold text-white" style="background:var(--accent);">Open full module ↗</button>`);
+            } finally { ic&&ic.classList.remove('spin'); }
         }
 
         function groupSessions(rows){
@@ -312,71 +398,142 @@
             rows.forEach(r=>{ const k=`${r.date}|${r.time}|${r.shift}`; if(!map.has(k)) map.set(k,{date:r.date,time:r.time,shift:r.shift,sections:[]}); map.get(k).sections.push(r); });
             const s=[...map.values()];
             s.forEach(x=>{ x.do=avg(x.sections.map(r=>num(r.do))); x.temp=avg(x.sections.map(r=>num(r.temp))); x.salinity=avg(x.sections.map(r=>num(r.salinity))); x.ph=avg(x.sections.map(r=>num(r.ph))); });
-            return s; // index 0 = most recent
+            return s;
         }
-        function sparkline(vals,color){
-            const v=vals.filter(x=>x!=null); if(v.length<2) return '';
-            const w=80,h=26,min=Math.min(...v),max=Math.max(...v),rng=(max-min)||1;
-            const pts=v.map((x,i)=>`${(i/(v.length-1)*w).toFixed(1)},${(h-((x-min)/rng)*h).toFixed(1)}`).join(' ');
-            const last=pts.split(' ').pop().split(',');
-            return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="overflow:visible"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/><circle cx="${last[0]}" cy="${last[1]}" r="2.4" fill="${color}"/></svg>`;
-        }
-        function kpiTile(key,latest,prev,series,color){
+
+        function kpiTile(key, latest){
             const cfg=WQ_RANGES[key], val=latest!=null?rnd(latest,cfg.dp):'—';
-            const inRange = latest!=null && latest>=cfg.min && latest<=cfg.max;
-            const pillBg = inRange?'color-mix(in srgb,var(--ok) 14%,transparent)':'color-mix(in srgb,var(--attention) 16%,transparent)';
-            const pillCol= inRange?'var(--ok)':'var(--attention)';
-            const pillTxt= inRange?'OK':'review';
-            let trend='';
-            if(latest!=null && prev!=null){ const d=latest-prev; const up=d>0.001, dn=d<-0.001;
-                const arrow = up?'M4.5 10.5L8 7l3.5 3.5':dn?'M4.5 5.5L8 9l3.5-3.5':'M4 8h8';
-                trend=`<span class="trend"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="${arrow}"/></svg>${(d>=0?'+':'')+d.toFixed(cfg.dp)}</span>`;
-            }
-            return `<div class="kpi" style="--hue:${color}">
-                <div class="flex items-start justify-between"><div><div class="kpi-label">${cfg.label}</div><div class="kpi-ko ko">${cfg.ko}</div></div><span class="pill" style="background:${pillBg}; color:${pillCol};">${pillTxt}</span></div>
-                <div class="flex items-end justify-between mt-2">
-                    <div class="flex items-baseline gap-1"><span class="kpi-val" style="color:${inRange?'var(--text)':'var(--attention)'}">${val}</span><span class="kpi-unit">${cfg.unit}</span></div>
-                    <div style="color:${color}">${sparkline(series,color)}</div>
+            const inRange=latest!=null&&latest>=cfg.min&&latest<=cfg.max;
+            const pillBg=inRange?'color-mix(in srgb,var(--ok) 14%,transparent)':'color-mix(in srgb,var(--attention) 16%,transparent)';
+            const pillCol=inRange?'var(--ok)':'var(--attention)';
+            const pillTxt=inRange?'OK':'Review';
+            return `<button class="kpi" onclick="openKpiChart('${key}')" style="--kpi-hue:${cfg.color};">
+                <div class="flex items-start justify-between">
+                    <div><div class="kpi-label">${cfg.label}</div><div class="kpi-ko ko">${cfg.ko}</div></div>
+                    <span class="pill" style="background:${pillBg};color:${pillCol};">${pillTxt}</span>
                 </div>
-                <div class="mt-1.5">${trend||'<span class="trend">—</span>'}</div>
-            </div>`;
+                <div class="flex items-baseline gap-1 kpi-val" style="color:${inRange?'var(--text)':'var(--attention)'};">
+                    ${val}<span class="kpi-unit">${cfg.unit}</span>
+                </div>
+                <div class="kpi-hint"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.5l6-6 4 4 8-8"/></svg>Tap to view trend</div>
+            </button>`;
         }
 
         function renderWQ(rows){
-            const sessions = groupSessions(rows);
-            const latest = sessions[0], prev = sessions[1] || null;
-            const chrono = sessions.slice(0,14).reverse();
-            const ser = (k)=>chrono.map(s=>s[k]);
-            const color = '#3B82F6';
-            const updated = latest ? `${latest.date} · ${fmtTimeCell(latest.time)} · ${latest.shift}` : '—';
+            wqSessions=groupSessions(rows); // store globally for chart taps
+            const latest=wqSessions[0];
+            const logTime=fmtLogTime(latest.time);
+            const loggedAt=`${latest.date}${logTime?' at '+logTime:''} · ${latest.shift} shift`;
 
-            const kpis = `<div class="grid grid-cols-2 gap-2.5">
-                ${kpiTile('do', latest.do, prev&&prev.do, ser('do'), color)}
-                ${kpiTile('temp', latest.temp, prev&&prev.temp, ser('temp'), '#F59E0B')}
-                ${kpiTile('salinity', latest.salinity, prev&&prev.salinity, ser('salinity'), '#14B8A6')}
-                ${kpiTile('ph', latest.ph, prev&&prev.ph, ser('ph'), '#8B5CF6')}
+            const kpis=`<div class="grid grid-cols-2 gap-3">
+                ${kpiTile('do',latest.do)}
+                ${kpiTile('temp',latest.temp)}
+                ${kpiTile('salinity',latest.salinity)}
+                ${kpiTile('ph',latest.ph)}
             </div>`;
 
             const order={Front:0,Middle:1,Back:2};
             const secRows=[...latest.sections].sort((a,b)=>(order[a.section]??9)-(order[b.section]??9)).map(r=>`
                 <tr><td>${r.section}</td><td>${rnd(num(r.do),2)}</td><td>${rnd(num(r.temp),1)}</td><td>${rnd(num(r.salinity),0)}</td><td>${rnd(num(r.ph),1)}</td></tr>`).join('');
-            const bySection = `<div class="card" style="padding:14px;"><div class="eyebrow mb-2">Latest reading · by section</div>
+            const bySection=`<div class="card" style="padding:14px;"><div class="eyebrow mb-2">Latest logging · by section</div>
                 <table class="data-table"><thead><tr><th>Section</th><th>DO</th><th>Temp</th><th>Sal</th><th>pH</th></tr></thead><tbody>${secRows}</tbody></table></div>`;
 
-            const hist=sessions.slice(0,10).map(s=>`
-                <tr><td>${s.date}<span style="color:var(--text-dim)"> ${s.shift}</span></td><td>${rnd(s.do,2)}</td><td>${rnd(s.temp,1)}</td><td>${rnd(s.salinity,0)}</td><td>${rnd(s.ph,1)}</td></tr>`).join('');
-            const history = `<div class="card" style="padding:14px;"><div class="eyebrow mb-2">Recent sessions · site average</div>
-                <table class="data-table"><thead><tr><th>Date</th><th>DO</th><th>Temp</th><th>Sal</th><th>pH</th></tr></thead><tbody>${hist}</tbody></table></div>`;
+            const hist=wqSessions.slice(0,10).map(s=>{
+                const t=fmtLogTime(s.time);
+                return `<tr><td>${s.date}${t?' <span style="color:var(--text-dim)">'+t+'</span>':''}<br><span style="color:var(--text-dim);font-size:10px;">${s.shift}</span></td><td>${rnd(s.do,2)}</td><td>${rnd(s.temp,1)}</td><td>${rnd(s.salinity,0)}</td><td>${rnd(s.ph,1)}</td></tr>`;
+            }).join('');
+            const history=`<div class="card" style="padding:14px;"><div class="eyebrow mb-2">Recent loggings · site average</div>
+                <table class="data-table"><thead><tr><th>Date · Time</th><th>DO</th><th>Temp</th><th>Sal</th><th>pH</th></tr></thead><tbody>${hist}</tbody></table></div>`;
 
-            document.getElementById('wq-body').innerHTML = `
-                <div class="flex items-center gap-2 mb-3 px-1"><span class="dot ok"></span><span class="text-xs font-semibold" style="color:var(--text-mut);">Last reading ${updated}</span></div>
+            document.getElementById('wq-body').innerHTML=`
+                <div class="flex items-center gap-2 mb-1 px-1"><span class="dot ok"></span><span class="text-xs font-semibold" style="color:var(--text-mut);">Last logging: ${loggedAt}</span></div>
+                <p class="text-xs px-1 mb-3" style="color:var(--text-dim);">Tap any tile to see the trend chart.</p>
                 ${kpis}
                 <div class="mt-3 space-y-3">${bySection}${history}</div>
-                <p class="text-[11px] mt-3 px-1" style="color:var(--text-dim);">Tiles compare the latest session to the one before it. "Review" tags use the reference ranges set in the code — confirm those against your real targets.</p>`;
+                <p class="text-xs mt-3 px-1" style="color:var(--text-dim);">"Review" flags use reference ranges set in the code — adjust to your real targets.</p>`;
+        }
+
+        /* ── Tap-to-expand chart ─────────────────────────────── */
+        function openKpiChart(key){
+            if(!wqSessions.length) return;
+            rumbleDevice(30);
+            const cfg=WQ_RANGES[key];
+            const chrono=[...wqSessions].reverse().slice(-20); // oldest→newest, up to 20 sessions
+            const vals=chrono.map(s=>s[key]);
+            const labels=chrono.map(s=>{
+                const parts=s.date.split('/'); // M/D/YYYY
+                return parts.length===3?`${parts[0]}/${parts[1]}`:s.date.substring(5);
+            });
+
+            document.getElementById('chart-title').textContent=`${cfg.label} · ${cfg.ko}`;
+            document.getElementById('chart-subtitle').textContent=`Last ${chrono.length} sessions · site average`;
+
+            const wrap=document.getElementById('chart-canvas-wrap');
+            wrap.innerHTML=buildChartSVG(vals,labels,cfg);
+
+            document.getElementById('chart-overlay').classList.add('open');
+        }
+        function closeChart(e){
+            if(e&&e.target!==document.getElementById('chart-overlay')) return;
+            document.getElementById('chart-overlay').classList.remove('open');
+        }
+        function closeChartBtn(){ document.getElementById('chart-overlay').classList.remove('open'); }
+
+        function buildChartSVG(vals,labels,cfg){
+            const W=340, H=180, PL=36, PR=12, PT=10, PB=44;
+            const plotW=W-PL-PR, plotH=H-PT-PB;
+            const clean=vals.map(v=>v!=null?v:null);
+            const defined=clean.filter(v=>v!=null);
+            if(!defined.length) return '<p style="color:var(--text-mut);text-align:center;padding:32px 0;">No data yet</p>';
+            const mn=Math.min(...defined), mx=Math.max(...defined);
+            const pad=(mx-mn)*0.12||0.5;
+            const lo=mn-pad, hi=mx+pad, rng=hi-lo;
+            const n=clean.length;
+            const xp=i=>(PL + (i/(n-1||1))*plotW);
+            const yp=v=>(PT + (1-(v-lo)/rng)*plotH);
+
+            // gridlines & y-labels (4 lines)
+            let grids='', yLabels='';
+            for(let g=0;g<=3;g++){
+                const gv=lo+(rng/3)*g, gy=yp(gv);
+                grids+=`<line x1="${PL}" y1="${gy.toFixed(1)}" x2="${W-PR}" y2="${gy.toFixed(1)}" stroke="var(--border)" stroke-width="1"/>`;
+                yLabels+=`<text x="${PL-4}" y="${(gy+4).toFixed(1)}" text-anchor="end" font-size="9" fill="var(--text-dim)" font-family="Space Grotesk,sans-serif">${gv.toFixed(cfg.dp)}</text>`;
+            }
+
+            // range band (reference)
+            const yHi=Math.min(yp(cfg.min),PT), yLo=Math.max(yp(cfg.max),PT+plotH);
+            const bandTop=Math.min(yp(cfg.max),yp(cfg.min));
+            const bandH=Math.abs(yp(cfg.min)-yp(cfg.max));
+            const band=`<rect x="${PL}" y="${bandTop.toFixed(1)}" width="${plotW}" height="${bandH.toFixed(1)}" fill="${cfg.color}" opacity=".07"/>`;
+
+            // path
+            let pathD='', dotCirles='';
+            clean.forEach((v,i)=>{
+                if(v==null) return;
+                const x=xp(i).toFixed(1), y=yp(v).toFixed(1);
+                pathD+=pathD?`L${x},${y}`:`M${x},${y}`;
+                const inRange=v>=cfg.min&&v<=cfg.max;
+                dotCirles+=`<circle cx="${x}" cy="${y}" r="3.5" fill="${inRange?cfg.color:'var(--attention)'}" stroke="var(--surface)" stroke-width="1.5"/>`;
+            });
+
+            // x-axis labels (every N to avoid overlap)
+            const step=Math.ceil(n/6);
+            let xLabels='';
+            clean.forEach((_,i)=>{
+                if(i%step!==0&&i!==n-1) return;
+                xLabels+=`<text x="${xp(i).toFixed(1)}" y="${H-6}" text-anchor="middle" font-size="9" fill="var(--text-dim)" font-family="Inter,sans-serif">${labels[i]||''}</text>`;
+            });
+
+            return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="overflow:visible;display:block;">
+                ${grids}${band}
+                <polyline points="${clean.map((v,i)=>v!=null?`${xp(i).toFixed(1)},${yp(v).toFixed(1)}`:null).filter(Boolean).join(' ')}" fill="none" stroke="${cfg.color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                ${dotCirles}${yLabels}${xLabels}
+                <text x="${PL}" y="${H-32}" font-size="8.5" fill="${cfg.color}" font-family="Inter,sans-serif" opacity=".8">— Target range</text>
+            </svg>`;
         }
 
         /* ── GAS URL settings ────────────────────────────────── */
-        const GAS_URL_KEYS = { 'Abalone-Spawning-and-Purchasing-Log':'mgr_spawning_gas_url','Abalone-Processing-Log':'mgr_processing_gas_url','hatchery-hr':'mgr_hr_gas_url','daily-water-quality':'mgr_wq_gas_url' };
+        const GAS_URL_KEYS={'Abalone-Spawning-and-Purchasing-Log':'mgr_spawning_gas_url','Abalone-Processing-Log':'mgr_processing_gas_url','hatchery-hr':'mgr_hr_gas_url','daily-water-quality':'mgr_wq_gas_url'};
         function getModuleGasUrl(appKey){ const k=GAS_URL_KEYS[appKey]; return k?store.get(k):null; }
         function toggleGasSettings(){ const d=document.getElementById('gas-settings-drawer'),s=document.getElementById('gas-settings-status'); d.classList.toggle('hidden'); s.textContent=d.classList.contains('hidden')?'Configure ▾':'Close ▴'; }
         function saveGasUrls(){ const map={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url'}; for(const[id,k]of Object.entries(map)){const v=document.getElementById(id).value.trim(); if(v)store.set(k,v);} const c=document.getElementById('gas-save-confirm'); c.classList.remove('hidden'); setTimeout(()=>c.classList.add('hidden'),2500); }
@@ -394,11 +551,10 @@
         function switchTab(target){ rumbleDevice(35);
             const ops=document.getElementById('dashboard-view'),auth=document.getElementById('manager-auth-view'),mgr=document.getElementById('manager-dashboard-view');
             const oBtn=document.getElementById('nav-ops-btn'),mBtn=document.getElementById('nav-mgr-btn');
-            if(target==='ops'){ ops.classList.remove('hidden'); auth.classList.add('hidden'); mgr.classList.add('hidden'); oBtn.classList.add('active'); mBtn.classList.remove('active'); }
-            else { ops.classList.add('hidden'); oBtn.classList.remove('active'); mBtn.classList.add('active'); if(isManagerAuthenticated){mgr.classList.remove('hidden');auth.classList.add('hidden');}else{auth.classList.remove('hidden');mgr.classList.add('hidden');} }
+            if(target==='ops'){ops.classList.remove('hidden');auth.classList.add('hidden');mgr.classList.add('hidden');oBtn.classList.add('active');mBtn.classList.remove('active');}
+            else{ops.classList.add('hidden');oBtn.classList.remove('active');mBtn.classList.add('active');if(isManagerAuthenticated){mgr.classList.remove('hidden');auth.classList.add('hidden');}else{auth.classList.remove('hidden');mgr.classList.add('hidden');}}
         }
         function populateMonthSelector(){ const sel=document.getElementById('mgr-month-select'),now=new Date(); sel.innerHTML=''; for(let i=-1;i<=12;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);const val=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,lbl=d.toLocaleDateString('en-US',{month:'long',year:'numeric'});const o=document.createElement('option');o.value=val;o.textContent=lbl;if(i===0)o.selected=true;sel.appendChild(o);} }
-
         function openManagerReport(appKey,tabContext){ rumbleDevice(45); document.getElementById('manager-menu-grid').classList.add('hidden'); document.getElementById('manager-report-frame').classList.remove('hidden'); document.getElementById('fetch-fail-banner').classList.add('hidden'); buildAndLoadURL(appKey,tabContext); }
         function buildAndLoadURL(appKey,tabContext){ const month=document.getElementById('mgr-month-select').value,iframe=document.getElementById('mgr-iframe-engine'); iframe.dataset.appKey=appKey; iframe.dataset.tabContext=tabContext; let url=`https://jamesaaa0203.github.io/${appKey}?targetTab=${tabContext}&pin=${MASTER_PIN}&month=${month}`; const g=getModuleGasUrl(appKey); if(g)url+=`&gasUrl=${encodeURIComponent(g)}`; currentReportURL=url; iframe.src=url; }
         function executeMonthFilterChange(){ rumbleDevice(30); const iframe=document.getElementById('mgr-iframe-engine'); const a=iframe.dataset.appKey,t=iframe.dataset.tabContext; if(!a)return; document.getElementById('fetch-fail-banner').classList.add('hidden'); buildAndLoadURL(a,t); }
