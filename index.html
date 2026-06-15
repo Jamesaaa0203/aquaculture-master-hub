@@ -486,8 +486,16 @@
             const defined=clean.filter(v=>v!=null);
             if(!defined.length) return '<p style="color:var(--text-mut);text-align:center;padding:32px 0;">No data yet</p>';
             const mn=Math.min(...defined), mx=Math.max(...defined);
-            const pad=(mx-mn)*0.12||0.5;
-            const lo=mn-pad, hi=mx+pad, rng=hi-lo;
+            // Use reference range as the base so charts with flat/stable readings
+            // (e.g. salinity always 35) don't over-zoom and produce duplicate labels.
+            // Only use cfg.max as a ceiling when it's a real operational limit (< 50);
+            // ignore huge sentinel values like 99 used for DO upper limit.
+            const cfgLo = cfg.max < 50 ? cfg.min : null;
+            const cfgHi = cfg.max < 50 ? cfg.max : null;
+            const baseLo = cfgLo!=null ? Math.min(cfgLo, mn) : mn;
+            const baseHi = cfgHi!=null ? Math.max(cfgHi, mx) : mx;
+            const span = (baseHi - baseLo) || 1;
+            const lo = baseLo - span*0.05, hi = baseHi + span*0.05, rng = hi - lo;
             const n=clean.length;
             const xp=i=>(PL + (i/(n-1||1))*plotW);
             const yp=v=>(PT + (1-(v-lo)/rng)*plotH);
