@@ -17,7 +17,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Noto+Sans+KR:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        /* ── Design tokens — flip on body.dark ─────────────────── */
         :root {
             --bg:#EAEFF5; --bg-soft:#F4F7FB; --surface:#FFFFFF; --surface-2:#F6F9FC;
             --border:#DCE4EE; --border-2:#C8D4E2; --text:#0B1B33; --text-mut:#5B6B82; --text-dim:#8896A8;
@@ -31,72 +30,63 @@
             --accent:#2DD4BF; --accent-2:#5EEAD4; --ok:#2DD4BF; --attention:#F59E0B; --alert:#FB7185; --idle:#475569;
             --shadow:0 1px 2px rgba(0,0,0,.4), 0 18px 40px -20px rgba(0,0,0,.7);
         }
-        /* High-contrast (outdoor) mode */
         body.hc { --text:#04101F; --text-mut:#243349; --text-dim:#3A4D66; --border:#94A6BC; --border-2:#6E8298; --accent:#0A6B61; }
         body.hc.dark { --text:#FFFFFF; --text-mut:#D4E0F0; --text-dim:#9DB0CC; --border:#3E567E; --border-2:#54709C; --accent:#5EEAD4; }
 
         * { -webkit-tap-highlight-color:transparent; }
         body { background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sans-serif; transition:background-color .4s ease,color .4s ease; }
         h1,h2,h3,h4,.num { font-family:'Space Grotesk','Inter',sans-serif; }
-        .ko,.bm { font-weight:600; }
-        .ko { font-family:'Noto Sans KR','Inter',sans-serif; }
+        .ko { font-family:'Noto Sans KR','Inter',sans-serif; font-weight:600; }
         .eyebrow { font-size:11px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--text-dim); }
-
         .card { background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); transition:background-color .4s ease,border-color .4s ease; }
         .wordmark { font-weight:700; letter-spacing:-.02em; font-size:19px; line-height:1; }
         .wordmark .sub { color:var(--accent); }
         .chip { display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border-radius:999px; background:var(--surface-2); border:1px solid var(--border); font-size:11px; font-weight:600; color:var(--text-mut); }
-        .icon-btn { width:36px; height:36px; border-radius:999px; display:flex; align-items:center; justify-content:center; background:var(--surface-2); border:1px solid var(--border); color:var(--text-mut); transition:color .2s ease, background-color .2s ease; }
+        .icon-btn { width:36px; height:36px; border-radius:999px; display:flex; align-items:center; justify-content:center; background:var(--surface-2); border:1px solid var(--border); color:var(--text-mut); transition:color .2s,background-color .2s; }
         .icon-btn.on { color:var(--accent); border-color:color-mix(in srgb,var(--accent) 40%,transparent); background:color-mix(in srgb,var(--accent) 12%,transparent); }
-
-        /* Signature: reef-line status ribbon */
-        .ribbon { position:relative; overflow:hidden; padding:14px; }
-        .ribbon::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--nacre); opacity:.9; }
-        .attn { display:flex; align-items:center; gap:9px; width:100%; padding:10px 12px; border-radius:12px; text-align:left; background:var(--surface-2); border:1px solid var(--border); margin-bottom:10px; }
-        .attn-ic { width:26px; height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex:none; }
-        .attn-txt { font-size:13px; font-weight:600; color:var(--text); line-height:1.25; }
-        .attn-sub { font-size:11px; font-weight:500; color:var(--text-mut); }
-        .ribbon-meta { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
-        .sync { display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:600; color:var(--text-dim); }
-        .node { position:relative; display:flex; flex-direction:column; gap:6px; padding:11px 9px 10px; border-radius:12px; background:var(--surface-2); border:1px solid var(--border); text-align:left; cursor:pointer; transition:transform .12s ease; }
-        .node:active { transform:scale(.96); }
-        .node-top { display:flex; align-items:center; justify-content:space-between; }
-        .node-ic { width:18px; height:18px; }
-        .node-name { font-size:11.5px; font-weight:600; color:var(--text); letter-spacing:-.01em; }
-        .node-meta { font-size:10px; font-weight:500; color:var(--text-dim); line-height:1.2; }
         .dot { width:8px; height:8px; border-radius:999px; flex:none; }
-        .dot.ok        { background:var(--ok);        box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 22%,transparent); }
-        .dot.attention { background:var(--attention); box-shadow:0 0 0 3px color-mix(in srgb,var(--attention) 22%,transparent); }
-        .dot.alert     { background:var(--alert);     box-shadow:0 0 0 3px color-mix(in srgb,var(--alert) 22%,transparent); }
-        .dot.idle      { background:var(--idle); }
-        .dot.live { animation:breathe 2.4s ease-in-out infinite; }
+        .dot.ok { background:var(--ok); box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 22%,transparent); animation:breathe 2.4s ease-in-out infinite; }
         @keyframes breathe { 0%,100%{opacity:1;} 50%{opacity:.45;} }
 
-        /* Module rows */
-        .module { position:relative; display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px; padding-left:18px; background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); transition:transform .12s ease; overflow:hidden; }
+        /* Module buttons (worker) */
+        .module { position:relative; display:flex; align-items:center; justify-content:space-between; gap:14px; padding:18px; padding-left:18px; background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); transition:transform .12s ease; overflow:hidden; width:100%; text-align:left; }
         .module::before { content:''; position:absolute; left:0; top:14px; bottom:14px; width:3px; border-radius:0 3px 3px 0; background:var(--hue,var(--accent)); opacity:.85; }
         .module:active { transform:scale(.985); }
-        .module-ic { width:46px; height:46px; flex:none; border-radius:13px; display:flex; align-items:center; justify-content:center; background:color-mix(in srgb,var(--hue,var(--accent)) 12%,transparent); color:var(--hue,var(--accent)); border:1px solid color-mix(in srgb,var(--hue,var(--accent)) 26%,transparent); }
-        .module-ic svg { width:23px; height:23px; }
+        .module-ic { width:50px; height:50px; flex:none; border-radius:14px; display:flex; align-items:center; justify-content:center; background:color-mix(in srgb,var(--hue,var(--accent)) 12%,transparent); color:var(--hue,var(--accent)); border:1px solid color-mix(in srgb,var(--hue,var(--accent)) 26%,transparent); }
+        .module-ic svg { width:25px; height:25px; }
         .module-bm { font-size:11px; font-weight:600; letter-spacing:.02em; color:var(--hue,var(--accent)); }
-        .module-title { font-size:16px; font-weight:600; letter-spacing:-.01em; color:var(--text); margin-top:1px; }
-        .module-desc { font-size:12px; font-weight:400; color:var(--text-mut); margin-top:2px; }
-        .module-stat { font-size:10px; font-weight:600; letter-spacing:.04em; }
+        .module-title { font-size:17px; font-weight:600; letter-spacing:-.01em; color:var(--text); margin-top:1px; }
+        .module-desc { font-size:12px; color:var(--text-mut); margin-top:2px; }
 
-        .keypad-btn { background:var(--surface); border:1px solid var(--border-2); border-radius:16px; box-shadow:var(--shadow); font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:22px; color:var(--text); padding:16px 0; transition:transform .1s ease,background-color .15s ease; }
+        .keypad-btn { background:var(--surface); border:1px solid var(--border-2); border-radius:16px; box-shadow:var(--shadow); font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:22px; color:var(--text); padding:16px 0; transition:transform .1s,background-color .15s; }
         .keypad-btn:active { transform:scale(.93); background:var(--surface-2); }
 
         .mgr-row { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px; text-align:left; background:var(--surface); border:1px solid var(--border); border-radius:18px; box-shadow:var(--shadow); transition:transform .12s ease; }
         .mgr-row:active { transform:scale(.985); }
 
+        /* KPI tiles (manager WQ dashboard) */
+        .kpi { background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); padding:13px 14px; }
+        .kpi-label { font-size:11px; font-weight:600; color:var(--text-mut); }
+        .kpi-ko { font-size:10px; color:var(--text-dim); }
+        .kpi-val { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:26px; line-height:1; letter-spacing:-.02em; }
+        .kpi-unit { font-size:12px; font-weight:600; color:var(--text-dim); }
+        .pill { font-size:10px; font-weight:700; letter-spacing:.03em; padding:2px 7px; border-radius:999px; }
+        .trend { font-size:11px; font-weight:600; display:inline-flex; align-items:center; gap:2px; color:var(--text-dim); }
+
+        .data-table { width:100%; border-collapse:collapse; font-size:12px; }
+        .data-table th { font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--text-dim); text-align:right; padding:7px 8px; border-bottom:1px solid var(--border); }
+        .data-table th:first-child, .data-table td:first-child { text-align:left; }
+        .data-table td { padding:8px; border-bottom:1px solid var(--border); color:var(--text); font-weight:500; text-align:right; font-family:'Space Grotesk',sans-serif; }
+        .data-table tr:last-child td { border-bottom:0; }
+
         .navbar { background:color-mix(in srgb,var(--surface) 88%,transparent); backdrop-filter:saturate(1.4) blur(14px); -webkit-backdrop-filter:saturate(1.4) blur(14px); border-top:1px solid var(--border); padding-bottom:calc(.6rem + env(safe-area-inset-bottom)); }
-        .nav-btn { color:var(--text-dim); transition:color .2s ease; }
+        .nav-btn { color:var(--text-dim); transition:color .2s; }
         .nav-btn.active { color:var(--accent); }
         .nav-btn .nb-ic { width:22px; height:22px; }
         .nav-label { font-size:10px; font-weight:600; letter-spacing:.03em; }
 
         .iframe-shell { height:calc(100dvh - 156px); min-height:560px; }
-        .gas-input { width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:9px 12px; font-size:13px; color:var(--text); outline:none; transition:border-color .2s ease; }
+        .gas-input { width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:9px 12px; font-size:13px; color:var(--text); outline:none; transition:border-color .2s; }
         .gas-input:focus { border-color:var(--accent); }
         .gas-input::placeholder { color:var(--text-dim); }
         .pin-on { background:var(--accent) !important; }
@@ -108,8 +98,7 @@
 <body id="app-body" class="flex flex-col min-h-screen antialiased">
 
     <!-- ── HEADER ─────────────────────────────────────────────── -->
-    <header class="sticky top-0 z-40 px-4 py-3 flex justify-between items-center"
-            style="background:color-mix(in srgb,var(--surface) 90%,transparent); backdrop-filter:saturate(1.4) blur(14px); -webkit-backdrop-filter:saturate(1.4) blur(14px); border-bottom:1px solid var(--border); padding-top:calc(.75rem + env(safe-area-inset-top));">
+    <header class="sticky top-0 z-40 px-4 py-3 flex justify-between items-center" style="background:color-mix(in srgb,var(--surface) 90%,transparent); backdrop-filter:saturate(1.4) blur(14px); -webkit-backdrop-filter:saturate(1.4) blur(14px); border-bottom:1px solid var(--border); padding-top:calc(.75rem + env(safe-area-inset-top));">
         <div class="flex items-center gap-2.5">
             <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
                 <defs><linearGradient id="shell" x1="4" y1="6" x2="28" y2="26" gradientUnits="userSpaceOnUse"><stop stop-color="#2DD4BF"/><stop offset=".5" stop-color="#818CF8"/><stop offset="1" stop-color="#FCD34D"/></linearGradient></defs>
@@ -117,40 +106,23 @@
                 <path d="M16 9c-3.6 0-6.5 2.7-6.5 6 0 3.4 3 6 6.8 6 2.9 0 5.2-1.8 5.2-4.2" stroke="url(#shell)" stroke-width="2.1" stroke-linecap="round" opacity=".7"/>
                 <circle cx="22" cy="11" r="1.4" fill="#FCD34D"/>
             </svg>
-            <div>
-                <div class="wordmark">Bon Aqua <span class="sub">Ops</span></div>
-                <div id="theme-indicator" class="eyebrow" style="margin-top:2px;">Daylight Mode</div>
-            </div>
+            <div><div class="wordmark">Bon Aqua <span class="sub">Ops</span></div><div id="theme-indicator" class="eyebrow" style="margin-top:2px;">Daylight Mode</div></div>
         </div>
         <div class="flex items-center gap-2">
             <button id="hc-btn" onclick="toggleContrast()" class="icon-btn" title="High-contrast outdoor mode" aria-label="Toggle high-contrast mode">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg>
             </button>
-            <div class="chip"><span class="dot ok live"></span><span class="num" id="live-clock" style="font-weight:600; color:var(--text);">00:00</span></div>
+            <div class="chip"><span class="dot ok"></span><span class="num" id="live-clock" style="font-weight:600; color:var(--text);">00:00</span></div>
         </div>
     </header>
 
-    <!-- ── OPS HOME ───────────────────────────────────────────── -->
-    <main id="dashboard-view" class="flex-1 p-4 space-y-5 pb-28 max-w-md mx-auto w-full">
-        <section class="card ribbon">
-            <button id="attention-line" class="attn" onclick="onAttentionTap()"></button>
-            <div class="ribbon-meta">
-                <span class="eyebrow">Farm Status</span>
-                <button class="sync" onclick="refreshStatus()" id="sync-btn">
-                    <svg id="sync-ic" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356M3.985 19.644V14.65h4.992m-4.969-3.65a8.25 8.25 0 0113.803-3.7L21 8.25m-18 7.5l3.181 3.182a8.25 8.25 0 0013.803-3.7"/></svg>
-                    <span id="sync-label">Syncing…</span>
-                </button>
-            </div>
-            <div class="grid grid-cols-4 gap-2" id="status-ribbon"></div>
-        </section>
-
-        <section class="space-y-3">
-            <div class="flex items-center justify-between px-1">
-                <span class="eyebrow">Worker Entry · Modul Kerja</span>
-                <span class="eyebrow" style="color:var(--text-mut);">Tap · Tekan</span>
-            </div>
-            <div id="module-list" class="space-y-3"></div>
-        </section>
+    <!-- ── OPS HOME (workers) ─────────────────────────────────── -->
+    <main id="dashboard-view" class="flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full">
+        <div class="flex items-center justify-between px-1 pt-1">
+            <span class="eyebrow">Worker Entry · Modul Kerja</span>
+            <span class="eyebrow" style="color:var(--text-mut);">Tap · Tekan</span>
+        </div>
+        <div id="module-list" class="space-y-3"></div>
     </main>
 
     <!-- ── MANAGER AUTH ───────────────────────────────────────── -->
@@ -167,73 +139,66 @@
                 <span class="w-3.5 h-3.5 rounded-full" style="border:2px solid var(--border-2);"></span>
             </div>
             <div class="grid grid-cols-3 gap-3 pt-2">
-                <button onclick="pressKey('1')" class="keypad-btn">1</button>
-                <button onclick="pressKey('2')" class="keypad-btn">2</button>
-                <button onclick="pressKey('3')" class="keypad-btn">3</button>
-                <button onclick="pressKey('4')" class="keypad-btn">4</button>
-                <button onclick="pressKey('5')" class="keypad-btn">5</button>
-                <button onclick="pressKey('6')" class="keypad-btn">6</button>
-                <button onclick="pressKey('7')" class="keypad-btn">7</button>
-                <button onclick="pressKey('8')" class="keypad-btn">8</button>
-                <button onclick="pressKey('9')" class="keypad-btn">9</button>
+                <button onclick="pressKey('1')" class="keypad-btn">1</button><button onclick="pressKey('2')" class="keypad-btn">2</button><button onclick="pressKey('3')" class="keypad-btn">3</button>
+                <button onclick="pressKey('4')" class="keypad-btn">4</button><button onclick="pressKey('5')" class="keypad-btn">5</button><button onclick="pressKey('6')" class="keypad-btn">6</button>
+                <button onclick="pressKey('7')" class="keypad-btn">7</button><button onclick="pressKey('8')" class="keypad-btn">8</button><button onclick="pressKey('9')" class="keypad-btn">9</button>
                 <button onclick="clearPin()" class="keypad-btn" style="font-family:'Inter'; font-size:13px; font-weight:600; color:var(--alert);">Clear</button>
-                <button onclick="pressKey('0')" class="keypad-btn">0</button>
-                <div></div>
+                <button onclick="pressKey('0')" class="keypad-btn">0</button><div></div>
             </div>
         </div>
     </main>
 
     <!-- ── MANAGER DASHBOARD ──────────────────────────────────── -->
     <main id="manager-dashboard-view" class="hidden flex-1 flex flex-col min-h-0 w-full">
+        <!-- Menu -->
         <div id="manager-menu-grid" class="flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full overflow-y-auto">
             <div class="flex justify-between items-start px-1">
                 <div><span class="eyebrow ko">최고 경영자 콘솔</span><h3 class="text-2xl font-semibold tracking-tight" style="margin-top:2px;">Executive Terminal</h3></div>
-                <button onclick="lockManagerView()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold" style="background:color-mix(in srgb,var(--alert) 12%,transparent); color:var(--alert); border:1px solid color-mix(in srgb,var(--alert) 26%,transparent);">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"></path></svg>Lock
-                </button>
+                <button onclick="lockManagerView()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold" style="background:color-mix(in srgb,var(--alert) 12%,transparent); color:var(--alert); border:1px solid color-mix(in srgb,var(--alert) 26%,transparent);"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"></path></svg>Lock</button>
             </div>
-
             <div class="card" style="padding:14px;">
                 <button onclick="toggleGasSettings()" class="w-full flex items-center justify-between">
-                    <div class="flex items-center gap-2.5">
-                        <span class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:color-mix(in srgb,var(--attention) 14%,transparent); color:var(--attention);"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"></path></svg></span>
-                        <span class="text-sm font-semibold">Module GAS connections</span>
-                    </div>
+                    <div class="flex items-center gap-2.5"><span class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:color-mix(in srgb,var(--attention) 14%,transparent); color:var(--attention);"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"></path></svg></span><span class="text-sm font-semibold">Module GAS connections</span></div>
                     <span id="gas-settings-status" class="text-xs font-semibold" style="color:var(--text-dim);">Configure ▾</span>
                 </button>
                 <div id="gas-settings-drawer" class="hidden mt-3 space-y-3 pt-3" style="border-top:1px solid var(--border);">
-                    <p class="text-xs" style="color:var(--text-mut);">Paste each module's GAS <span class="num">/exec</span> URL. Powers the live status ribbon and in-frame data.</p>
+                    <p class="text-xs" style="color:var(--text-mut);">Paste each module's GAS <span class="num">/exec</span> URL. Powers the live dashboards and in-frame data.</p>
                     <div><label class="eyebrow block mb-1.5">Water Quality</label><input type="password" id="gas-wq-url" placeholder="/exec URL for Water Quality" onchange="saveGasUrls()" class="gas-input"></div>
                     <div><label class="eyebrow block mb-1.5">Spawning &amp; Purchasing</label><input type="password" id="gas-spawning-url" placeholder="/exec URL for Spawning & Purchasing" onchange="saveGasUrls()" class="gas-input"></div>
                     <div><label class="eyebrow block mb-1.5">Processing Log</label><input type="password" id="gas-processing-url" placeholder="/exec URL for Processing Log" onchange="saveGasUrls()" class="gas-input"></div>
                     <div><label class="eyebrow block mb-1.5">Hatchery HR Suite</label><input type="password" id="gas-hr-url" placeholder="/exec URL for Hatchery HR" onchange="saveGasUrls()" class="gas-input"></div>
                     <button onclick="saveGasUrls()" class="w-full py-2.5 rounded-xl text-sm font-semibold text-white" style="background:var(--accent);">Save all URLs</button>
-                    <p id="gas-save-confirm" class="hidden text-xs font-semibold text-center" style="color:var(--ok);">✓ Saved — refreshing status…</p>
+                    <p id="gas-save-confirm" class="hidden text-xs font-semibold text-center" style="color:var(--ok);">✓ Saved</p>
                 </div>
             </div>
-
             <div class="px-1 pt-1"><span class="eyebrow">Log Views</span></div>
             <div id="mgr-list" class="grid grid-cols-1 gap-3"></div>
         </div>
 
+        <!-- Water Quality native dashboard -->
+        <div id="wq-data-view" class="hidden flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full overflow-y-auto">
+            <div class="flex items-center justify-between gap-2">
+                <button onclick="closeWaterQuality()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:var(--accent);"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"></path></svg><span class="ko">뒤로</span><span>Menu</span></button>
+                <div class="flex items-center gap-2">
+                    <button onclick="loadWaterQuality()" class="icon-btn" title="Refresh"><svg id="wq-refresh-ic" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356M3.985 19.644V14.65h4.992m-4.969-3.65a8.25 8.25 0 0113.803-3.7L21 8.25m-18 7.5l3.181 3.182a8.25 8.25 0 0013.803-3.7"/></svg></button>
+                    <button onclick="openWqFullTab()" class="icon-btn" title="Open full module"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg></button>
+                </div>
+            </div>
+            <div><span class="eyebrow" style="color:#3B82F6;">수질 관리 · Water Quality</span><h3 class="text-2xl font-semibold tracking-tight" style="margin-top:1px;">Live Readings</h3></div>
+            <div id="wq-body"></div>
+        </div>
+
+        <!-- Generic iframe frame (other modules) -->
         <div id="manager-report-frame" class="hidden flex-1 flex flex-col min-h-0 w-full">
             <div class="p-3 shrink-0" style="background:var(--surface); border-bottom:1px solid var(--border);">
                 <div class="flex justify-between items-center px-1 gap-2">
                     <button onclick="closeManagerReport()" class="flex items-center gap-1.5 text-sm font-semibold py-1 shrink-0" style="color:var(--accent);"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"></path></svg><span class="ko">뒤로</span><span>Menu</span></button>
-                    <div class="flex items-center gap-2">
-                        <label for="mgr-month-select" class="eyebrow ko hidden sm:block">조회 월</label>
-                        <select id="mgr-month-select" onchange="executeMonthFilterChange()" class="text-xs font-semibold py-2 px-2.5 rounded-lg num" style="background:var(--surface-2); color:var(--text); border:1px solid var(--border); outline:none;"></select>
-                    </div>
-                    <button onclick="openCurrentInNewTab()" title="Open in new tab for full data access" class="flex items-center gap-1 shrink-0 px-2.5 py-2 text-xs font-semibold rounded-lg" style="background:color-mix(in srgb,var(--attention) 12%,transparent); color:var(--attention); border:1px solid color-mix(in srgb,var(--attention) 26%,transparent);"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"></path></svg><span>Full tab</span></button>
+                    <div class="flex items-center gap-2"><label for="mgr-month-select" class="eyebrow ko hidden sm:block">조회 월</label><select id="mgr-month-select" onchange="executeMonthFilterChange()" class="text-xs font-semibold py-2 px-2.5 rounded-lg num" style="background:var(--surface-2); color:var(--text); border:1px solid var(--border); outline:none;"></select></div>
+                    <button onclick="openCurrentInNewTab()" title="Open in new tab" class="flex items-center gap-1 shrink-0 px-2.5 py-2 text-xs font-semibold rounded-lg" style="background:color-mix(in srgb,var(--attention) 12%,transparent); color:var(--attention); border:1px solid color-mix(in srgb,var(--attention) 26%,transparent);"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"></path></svg><span>Full tab</span></button>
                 </div>
-                <div id="fetch-fail-banner" class="hidden mt-2 mx-1 flex items-start gap-2 rounded-xl px-3 py-2.5" style="background:color-mix(in srgb,var(--attention) 12%,transparent); border:1px solid color-mix(in srgb,var(--attention) 30%,transparent);">
-                    <svg class="w-4 h-4 shrink-0 mt-0.5" style="color:var(--attention);" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"></path></svg>
-                    <div><p class="text-xs font-semibold" style="color:var(--attention);">Data load restricted in frame</p><p class="text-xs mt-0.5" style="color:var(--text-mut);">The browser blocked the sheet fetch inside this frame. Tap <strong>Full tab ↗</strong> to open with full data access.</p></div>
-                </div>
+                <div id="fetch-fail-banner" class="hidden mt-2 mx-1 flex items-start gap-2 rounded-xl px-3 py-2.5" style="background:color-mix(in srgb,var(--attention) 12%,transparent); border:1px solid color-mix(in srgb,var(--attention) 30%,transparent);"><svg class="w-4 h-4 shrink-0 mt-0.5" style="color:var(--attention);" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"></path></svg><div><p class="text-xs font-semibold" style="color:var(--attention);">Data load restricted in frame</p><p class="text-xs mt-0.5" style="color:var(--text-mut);">Tap <strong>Full tab ↗</strong> to open with full data access.</p></div></div>
             </div>
-            <div class="w-full p-1.5 relative iframe-shell" style="background:var(--bg-soft);">
-                <iframe id="mgr-iframe-engine" src="about:blank" class="w-full h-full rounded-2xl" style="border:1px solid var(--border); background:var(--surface);" onload="onIframeLoad()"></iframe>
-            </div>
+            <div class="w-full p-1.5 relative iframe-shell" style="background:var(--bg-soft);"><iframe id="mgr-iframe-engine" src="about:blank" class="w-full h-full rounded-2xl" style="border:1px solid var(--border); background:var(--surface);" onload="onIframeLoad()"></iframe></div>
         </div>
     </main>
 
@@ -245,17 +210,20 @@
 
     <script>
         const MASTER_PIN = "3653";
+        let inputPin = "", isManagerAuthenticated = false, currentReportURL = "";
 
         /* ════════════════════════════════════════════════════════
-           DEMO MODE
-           true  = show sample farm status so the ribbon looks alive.
-           false = fetch real status from each module's GAS endpoint.
-           Set to false once you've linked GAS URLs (Manager ▸ Module
-           GAS connections) and added the ?action=summary snippet.
+           WATER QUALITY REFERENCE RANGES — please confirm/adjust!
+           A reading outside these shows an amber "review" tag.
+           Defaults are deliberately wide so your normal readings
+           don't false-alarm. Tighten them to your real targets.
            ════════════════════════════════════════════════════════ */
-        const DEMO = true;
-
-        let inputPin = "", isManagerAuthenticated = false, currentReportURL = "", lastSync = null;
+        const WQ_RANGES = {
+            do:       { min:5.0,  max:99,  unit:'mg/L', dp:2, label:'Dissolved O₂', ko:'용존산소' },
+            temp:     { min:24,   max:32,  unit:'°C',   dp:1, label:'Temperature',  ko:'수온' },
+            salinity: { min:30,   max:37,  unit:'ppt',  dp:0, label:'Salinity',     ko:'염분' },
+            ph:       { min:7.7,  max:8.7, unit:'',     dp:1, label:'pH',           ko:'산도' }
+        };
 
         const store = {
             get(k){ try{return localStorage.getItem(k);}catch(e){return null;} },
@@ -264,278 +232,194 @@
             sset(k,v){ try{sessionStorage.setItem(k,v);}catch(e){} },
             srem(k){ try{sessionStorage.removeItem(k);}catch(e){} }
         };
-
+        const lineIcon=(d)=>`<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="${d}"/></svg>`;
+        const flameIcon='<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 00.495-7.467 5.99 5.99 0 00-1.925 3.546 5.974 5.974 0 01-2.133-1A3.75 3.75 0 0012 18z"/></svg>';
         const ICONS = {
             water:"M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5l6.74-6.76z",
             spawn:"M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.656 48.656 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3",
             hr:"M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
         };
-        const flameIcon = '<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 00.495-7.467 5.99 5.99 0 00-1.925 3.546 5.974 5.974 0 01-2.133-1A3.75 3.75 0 0012 18z"/></svg>';
-        const lineIcon = (d)=>`<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="${d}"/></svg>`;
 
-        const NODES = [
-            { key:'water', name:'Water', hue:'#3B82F6', appKey:'daily-water-quality', href:'https://jamesaaa0203.github.io/daily-water-quality/',
-              title:'Water Quality', bm:'Kualiti Air', desc:'DO, temperature & salinity logs', icon:lineIcon(ICONS.water) },
-            { key:'spawn', name:'Spawn', hue:'#8B5CF6', appKey:'Abalone-Spawning-and-Purchasing-Log', href:'https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/',
-              title:'Spawning Trials', bm:'Ujian Pemijahan', desc:'Induction & conditioning', icon:lineIcon(ICONS.spawn) },
-            { key:'proc', name:'Process', hue:'#0D9488', appKey:'Abalone-Processing-Log', href:'https://jamesaaa0203.github.io/Abalone-Processing-Log/',
-              title:'Processing Log', bm:'Log Pemprosesan', desc:'Cooking sessions & yield', icon:flameIcon },
-            { key:'hr', name:'HR', hue:'#6366F1', appKey:'hatchery-hr', href:'https://jamesaaa0203.github.io/hatchery-hr/',
-              title:'Hatchery HR Suite', bm:'Sumber Manusia', desc:'OT, leave & balances', icon:lineIcon(ICONS.hr) }
+        /* Worker module buttons */
+        const MODULES = [
+            { hue:'#3B82F6', href:'https://jamesaaa0203.github.io/daily-water-quality/', title:'Water Quality', bm:'Kualiti Air', desc:'DO, temperature & salinity logs', icon:lineIcon(ICONS.water) },
+            { hue:'#8B5CF6', href:'https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/', title:'Spawning Trials', bm:'Ujian Pemijahan', desc:'Induction & conditioning', icon:lineIcon(ICONS.spawn) },
+            { hue:'#0D9488', href:'https://jamesaaa0203.github.io/Abalone-Processing-Log/', title:'Processing Log', bm:'Log Pemprosesan', desc:'Cooking sessions & yield', icon:flameIcon },
+            { hue:'#6366F1', href:'https://jamesaaa0203.github.io/hatchery-hr/', title:'Hatchery HR Suite', bm:'Sumber Manusia', desc:'OT, leave & balances', icon:lineIcon(ICONS.hr) }
         ];
-
-        const nodeStatus = {
-            water:{ state:'idle', label:'—' }, spawn:{ state:'idle', label:'—' },
-            proc:{ state:'idle', label:'—' }, hr:{ state:'idle', label:'—' }
-        };
-
-        const STATE_RANK = { alert:3, attention:2, ok:1, idle:0 };
-        const nodeByKey = (k)=>NODES.find(n=>n.key===k);
-
-        function renderRibbon() {
-            document.getElementById('status-ribbon').innerHTML = NODES.map(n=>{
-                const s = nodeStatus[n.key];
-                const live = s.state==='ok' ? 'live' : '';
-                return `<button class="node" onclick="openModule('${n.href}')" style="--hue:${n.hue}">
-                    <div class="node-top"><span class="node-ic" style="color:${n.hue}">${n.icon}</span><span class="dot ${s.state} ${live}"></span></div>
-                    <div><div class="node-name">${n.name}</div><div class="node-meta">${s.label}</div></div>
-                </button>`;
-            }).join('');
+        function renderModules(){
+            document.getElementById('module-list').innerHTML = MODULES.map(m=>`
+                <button class="module" onclick="openModule('${m.href}')" style="--hue:${m.hue}">
+                    <div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">${m.icon}</span>
+                    <div class="min-w-0"><div class="module-bm">${m.bm}</div><div class="module-title">${m.title}</div><div class="module-desc">${m.desc}</div></div></div>
+                    <svg class="w-5 h-5" style="color:var(--text-dim);" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
+                </button>`).join('');
         }
-
-        function renderModules() {
-            document.getElementById('module-list').innerHTML = NODES.map(n=>{
-                const s = nodeStatus[n.key];
-                const c = s.state==='ok'?'var(--ok)':s.state==='attention'?'var(--attention)':s.state==='alert'?'var(--alert)':'var(--idle)';
-                const statTxt = s.state==='idle'?'Open':s.label;
-                return `<button class="module" onclick="openModule('${n.href}')" style="--hue:${n.hue}">
-                    <div class="flex items-center gap-3.5 min-w-0">
-                        <span class="module-ic">${n.icon}</span>
-                        <div class="min-w-0"><div class="module-bm">${n.bm}</div><div class="module-title">${n.title}</div><div class="module-desc">${n.desc}</div></div>
-                    </div>
-                    <div class="flex flex-col items-end gap-1.5 shrink-0"><span class="module-stat" style="color:${c};">${statTxt}</span><svg class="w-4 h-4" style="color:var(--text-dim);" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg></div>
-                </button>`;
-            }).join('');
-        }
-
-        function renderAttention() {
-            const el = document.getElementById('attention-line');
-            const flagged = NODES.map(n=>({n,s:nodeStatus[n.key]})).filter(x=>x.s.state==='alert'||x.s.state==='attention')
-                .sort((a,b)=>STATE_RANK[b.s.state]-STATE_RANK[a.s.state]);
-            let ic, bg, col, txt, sub;
-            if (flagged.length) {
-                const top = flagged[0], isAlert = top.s.state==='alert';
-                col = isAlert?'var(--alert)':'var(--attention)';
-                bg = `color-mix(in srgb, ${col} 14%, transparent)`;
-                ic = `<svg style="width:15px;height:15px;color:${col}" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>`;
-                const word = isAlert ? (flagged.length>1?`${flagged.length} alerts`:'1 alert') : (flagged.length>1?`${flagged.length} need attention`:'1 needs attention');
-                txt = word; sub = `${top.n.title} · ${top.s.label}`;
-                el.dataset.target = top.n.href;
-            } else {
-                const anyOk = NODES.some(n=>nodeStatus[n.key].state==='ok');
-                col='var(--ok)'; bg=`color-mix(in srgb, var(--ok) 14%, transparent)`;
-                ic = `<svg style="width:15px;height:15px;color:${col}" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`;
-                txt = anyOk ? 'All systems normal' : 'Awaiting first readings';
-                sub = anyOk ? 'Everything reporting healthy' : 'Link modules to see live status';
-                el.dataset.target = '';
-            }
-            el.querySelector('.attn-ic')?.remove();
-            el.innerHTML = `<span class="attn-ic" style="background:${bg}">${ic}</span><span><span class="attn-txt" style="color:${col}">${txt}</span><br><span class="attn-sub">${sub}</span></span>`;
-        }
-
-        function onAttentionTap(){ const t = document.getElementById('attention-line').dataset.target; if (t) openModule(t); else refreshStatus(); }
         function openModule(href){ rumbleDevice(35); window.location.href = href; }
 
-        window.setNodeStatus = function(key, state, label){
-            if (!nodeStatus[key]) return;
-            nodeStatus[key] = { state, label: label || nodeStatus[key].label };
-            renderRibbon(); renderModules(); renderAttention();
-        };
-
-        /* ── Live status fetch (real mode) ───────────────────── */
-        const GAS_URL_KEYS = {
-            'Abalone-Spawning-and-Purchasing-Log':'mgr_spawning_gas_url',
-            'Abalone-Processing-Log':'mgr_processing_gas_url',
-            'hatchery-hr':'mgr_hr_gas_url',
-            'daily-water-quality':'mgr_wq_gas_url'
-        };
-        function getModuleGasUrl(appKey){ const k = GAS_URL_KEYS[appKey]; return k ? store.get(k) : null; }
-
-        async function fetchSummary(node){
-            const url = getModuleGasUrl(node.appKey);
-            if (!url) { setNodeStatus(node.key,'idle','Not linked'); return false; }
-            try {
-                const ctrl = new AbortController();
-                const t = setTimeout(()=>ctrl.abort(), 7000);
-                const res = await fetch(url + (url.includes('?')?'&':'?') + 'action=summary', { signal:ctrl.signal, redirect:'follow' });
-                clearTimeout(t);
-                const data = await res.json();
-                const state = ['ok','attention','alert'].includes(data.state) ? data.state : 'idle';
-                setNodeStatus(node.key, state, data.label || '—');
-                return true;
-            } catch(e) {
-                setNodeStatus(node.key,'idle', navigator.onLine ? 'Unavailable' : 'Offline');
-                return false;
-            }
-        }
-
-        function setSyncUI(stateText, spinning){
-            document.getElementById('sync-label').textContent = stateText;
-            document.getElementById('sync-ic').classList.toggle('spin', !!spinning);
-        }
-
-        async function refreshStatus(){
-            rumbleDevice(25);
-            if (DEMO) { seedDemo(); setSyncUI('Demo data', false); return; }
-            if (!navigator.onLine) { setSyncUI('Offline', false); NODES.forEach(n=>setNodeStatus(n.key,'idle','Offline')); return; }
-            setSyncUI('Syncing…', true);
-            const results = await Promise.all(NODES.map(fetchSummary));
-            if (results.some(Boolean)) { lastSync = new Date(); setSyncUI('Synced '+fmtTime(lastSync), false); }
-            else setSyncUI('No links yet', false);
-        }
-
-        function fmtTime(d){ return d.toTimeString().substring(0,5); }
-
-        function seedDemo(){
-            setNodeStatus('water','ok','12m ago');
-            setNodeStatus('spawn','attention','Check pH');
-            setNodeStatus('proc','ok','Logged today');
-            setNodeStatus('hr','idle','No entries');
-        }
-
-        /* ── Manager log-view rows ───────────────────────────── */
+        /* Manager log-view rows */
         const MGR_VIEWS = [
-            { appKey:'daily-water-quality', tab:'manager', hue:'#3B82F6', ko:'수질 관리 데이터', title:'Water Quality Data', icon:lineIcon("M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14") },
+            { action:'wq', hue:'#3B82F6', ko:'수질 관리 데이터', title:'Water Quality Data', sub:'Live dashboard', icon:lineIcon("M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14") },
             { appKey:'Abalone-Spawning-and-Purchasing-Log', tab:'spawning', hue:'#8B5CF6', ko:'산란 시험 관리', title:'Spawning Trials', icon:lineIcon("M11.25 11.25l.041-.02a.75.75 0 11.518 1.352l-.145-.043L11.25 11.25zm0 0a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5zM12 18.75l3-3m0 0l-3-3m3 3H9") },
             { appKey:'Abalone-Spawning-and-Purchasing-Log', tab:'purchasing', hue:'#D97706', ko:'전복 매입 로그', title:'Abalone Purchasing', icon:lineIcon("M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h16.5M4.5 9h15M5.25 14.25h13.5") },
             { appKey:'Abalone-Processing-Log', tab:'manager', hue:'#0D9488', ko:'가공 처리 로그', title:'Processing Log', icon:flameIcon },
             { appKey:'hatchery-hr', tab:'mgr-tab', hue:'#6366F1', ko:'인사 및 근태 관리', title:'Workforce & HR', icon:lineIcon(ICONS.hr) }
         ];
         function renderMgrList(){
-            document.getElementById('mgr-list').innerHTML = MGR_VIEWS.map(v=>`
-                <button onclick="openManagerReport('${v.appKey}','${v.tab}')" class="mgr-row" style="--hue:${v.hue}">
+            document.getElementById('mgr-list').innerHTML = MGR_VIEWS.map((v)=>{
+                const onclick = v.action==='wq' ? 'openWaterQuality()' : `openManagerReport('${v.appKey}','${v.tab}')`;
+                const sub = v.sub ? `<div class="text-xs" style="color:var(--text-mut); margin-top:1px;">${v.sub}</div>` : '';
+                return `<button onclick="${onclick}" class="mgr-row" style="--hue:${v.hue}">
                     <div class="flex items-center gap-3.5"><span class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:color-mix(in srgb,${v.hue} 12%,transparent); color:${v.hue}; border:1px solid color-mix(in srgb,${v.hue} 24%,transparent);"><span style="width:22px;height:22px;display:inline-flex">${v.icon}</span></span>
-                    <div><div class="eyebrow ko" style="color:${v.hue};">${v.ko}</div><div class="text-base font-semibold tracking-tight" style="margin-top:1px;">${v.title}</div></div></div>
+                    <div><div class="eyebrow ko" style="color:${v.hue};">${v.ko}</div><div class="text-base font-semibold tracking-tight" style="margin-top:1px;">${v.title}</div>${sub}</div></div>
                     <svg class="w-5 h-5" style="color:var(--text-dim);" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
-                </button>`).join('');
+                </button>`;
+            }).join('');
         }
 
-        function toggleGasSettings(){
-            const drawer = document.getElementById('gas-settings-drawer'), status = document.getElementById('gas-settings-status');
-            drawer.classList.toggle('hidden');
-            status.textContent = drawer.classList.contains('hidden') ? 'Configure ▾' : 'Close ▴';
+        /* ── Water Quality dashboard ─────────────────────────── */
+        const num = (v)=>{ const n=parseFloat(v); return isFinite(n)?n:null; };
+        const avg = (a)=>{ const v=a.filter(x=>x!=null); return v.length? v.reduce((p,c)=>p+c,0)/v.length : null; };
+        const rnd = (v,dp)=> v==null? '—' : v.toFixed(dp);
+        function fmtTimeCell(t){ if(typeof t==='string' && t.includes('T')){ const d=new Date(t); if(!isNaN(d)) return d.toTimeString().substring(0,5); } return t!=null?String(t):''; }
+
+        function openWaterQuality(){ rumbleDevice(45); document.getElementById('manager-menu-grid').classList.add('hidden'); document.getElementById('wq-data-view').classList.remove('hidden'); loadWaterQuality(); }
+        function closeWaterQuality(){ rumbleDevice(40); document.getElementById('wq-data-view').classList.add('hidden'); document.getElementById('manager-menu-grid').classList.remove('hidden'); }
+        function openWqFullTab(){ const url=getModuleGasUrl('daily-water-quality'); const page=`https://jamesaaa0203.github.io/daily-water-quality/?targetTab=manager&pin=${MASTER_PIN}`+(url?`&gasUrl=${encodeURIComponent(url)}`:''); window.open(page,'_blank','noopener,noreferrer'); }
+
+        function wqMsg(html){ return `<div class="card" style="padding:22px; text-align:center;">${html}</div>`; }
+        async function loadWaterQuality(){
+            const body = document.getElementById('wq-body');
+            const ic = document.getElementById('wq-refresh-ic'); ic && ic.classList.add('spin');
+            const url = getModuleGasUrl('daily-water-quality');
+            if(!url){ body.innerHTML = wqMsg(`<p class="text-sm font-semibold" style="color:var(--text);">Water Quality not linked yet</p><p class="text-xs mt-1" style="color:var(--text-mut);">Open <strong>Module GAS connections</strong> and paste the Water Quality /exec URL.</p>`); ic&&ic.classList.remove('spin'); return; }
+            body.innerHTML = wqMsg(`<p class="text-sm" style="color:var(--text-mut);">Loading readings…</p>`);
+            try{
+                const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),12000);
+                const res = await fetch(`${url}${url.includes('?')?'&':'?'}pin=${MASTER_PIN}`,{signal:ctrl.signal, redirect:'follow'});
+                clearTimeout(t);
+                const data = await res.json();
+                if(data && data.error){ body.innerHTML = wqMsg(`<p class="text-sm font-semibold" style="color:var(--attention);">Access denied by module</p><p class="text-xs mt-1" style="color:var(--text-mut);">The saved URL or PIN didn't match. Re-check the Water Quality /exec URL.</p>`); return; }
+                if(!Array.isArray(data) || !data.length){ body.innerHTML = wqMsg(`<p class="text-sm font-semibold">No readings yet</p><p class="text-xs mt-1" style="color:var(--text-mut);">Once workers log data it'll appear here.</p>`); return; }
+                renderWQ(data);
+            }catch(e){
+                body.innerHTML = wqMsg(`<p class="text-sm font-semibold" style="color:var(--attention);">Couldn't load in-app</p><p class="text-xs mt-1 mb-3" style="color:var(--text-mut);">The browser may have blocked the data fetch. Open the full module instead.</p><button onclick="openWqFullTab()" class="px-4 py-2 rounded-xl text-sm font-semibold text-white" style="background:var(--accent);">Open full module ↗</button>`);
+            } finally { ic && ic.classList.remove('spin'); }
         }
-        function saveGasUrls(){
-            const map = { 'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url' };
-            for (const [id,k] of Object.entries(map)){ const v = document.getElementById(id).value.trim(); if (v) store.set(k,v); }
-            const c = document.getElementById('gas-save-confirm'); c.classList.remove('hidden'); setTimeout(()=>c.classList.add('hidden'),3000);
-            if (!DEMO) refreshStatus();
+
+        function groupSessions(rows){
+            const map=new Map();
+            rows.forEach(r=>{ const k=`${r.date}|${r.time}|${r.shift}`; if(!map.has(k)) map.set(k,{date:r.date,time:r.time,shift:r.shift,sections:[]}); map.get(k).sections.push(r); });
+            const s=[...map.values()];
+            s.forEach(x=>{ x.do=avg(x.sections.map(r=>num(r.do))); x.temp=avg(x.sections.map(r=>num(r.temp))); x.salinity=avg(x.sections.map(r=>num(r.salinity))); x.ph=avg(x.sections.map(r=>num(r.ph))); });
+            return s; // index 0 = most recent
         }
-        function loadSavedGasUrls(){
-            const map = { 'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url' };
-            for (const [id,k] of Object.entries(map)){ const v = store.get(k); if (v) document.getElementById(id).value = v; }
+        function sparkline(vals,color){
+            const v=vals.filter(x=>x!=null); if(v.length<2) return '';
+            const w=80,h=26,min=Math.min(...v),max=Math.max(...v),rng=(max-min)||1;
+            const pts=v.map((x,i)=>`${(i/(v.length-1)*w).toFixed(1)},${(h-((x-min)/rng)*h).toFixed(1)}`).join(' ');
+            const last=pts.split(' ').pop().split(',');
+            return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="overflow:visible"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/><circle cx="${last[0]}" cy="${last[1]}" r="2.4" fill="${color}"/></svg>`;
         }
+        function kpiTile(key,latest,prev,series,color){
+            const cfg=WQ_RANGES[key], val=latest!=null?rnd(latest,cfg.dp):'—';
+            const inRange = latest!=null && latest>=cfg.min && latest<=cfg.max;
+            const pillBg = inRange?'color-mix(in srgb,var(--ok) 14%,transparent)':'color-mix(in srgb,var(--attention) 16%,transparent)';
+            const pillCol= inRange?'var(--ok)':'var(--attention)';
+            const pillTxt= inRange?'OK':'review';
+            let trend='';
+            if(latest!=null && prev!=null){ const d=latest-prev; const up=d>0.001, dn=d<-0.001;
+                const arrow = up?'M4.5 10.5L8 7l3.5 3.5':dn?'M4.5 5.5L8 9l3.5-3.5':'M4 8h8';
+                trend=`<span class="trend"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="${arrow}"/></svg>${(d>=0?'+':'')+d.toFixed(cfg.dp)}</span>`;
+            }
+            return `<div class="kpi" style="--hue:${color}">
+                <div class="flex items-start justify-between"><div><div class="kpi-label">${cfg.label}</div><div class="kpi-ko ko">${cfg.ko}</div></div><span class="pill" style="background:${pillBg}; color:${pillCol};">${pillTxt}</span></div>
+                <div class="flex items-end justify-between mt-2">
+                    <div class="flex items-baseline gap-1"><span class="kpi-val" style="color:${inRange?'var(--text)':'var(--attention)'}">${val}</span><span class="kpi-unit">${cfg.unit}</span></div>
+                    <div style="color:${color}">${sparkline(series,color)}</div>
+                </div>
+                <div class="mt-1.5">${trend||'<span class="trend">—</span>'}</div>
+            </div>`;
+        }
+
+        function renderWQ(rows){
+            const sessions = groupSessions(rows);
+            const latest = sessions[0], prev = sessions[1] || null;
+            const chrono = sessions.slice(0,14).reverse();
+            const ser = (k)=>chrono.map(s=>s[k]);
+            const color = '#3B82F6';
+            const updated = latest ? `${latest.date} · ${fmtTimeCell(latest.time)} · ${latest.shift}` : '—';
+
+            const kpis = `<div class="grid grid-cols-2 gap-2.5">
+                ${kpiTile('do', latest.do, prev&&prev.do, ser('do'), color)}
+                ${kpiTile('temp', latest.temp, prev&&prev.temp, ser('temp'), '#F59E0B')}
+                ${kpiTile('salinity', latest.salinity, prev&&prev.salinity, ser('salinity'), '#14B8A6')}
+                ${kpiTile('ph', latest.ph, prev&&prev.ph, ser('ph'), '#8B5CF6')}
+            </div>`;
+
+            const order={Front:0,Middle:1,Back:2};
+            const secRows=[...latest.sections].sort((a,b)=>(order[a.section]??9)-(order[b.section]??9)).map(r=>`
+                <tr><td>${r.section}</td><td>${rnd(num(r.do),2)}</td><td>${rnd(num(r.temp),1)}</td><td>${rnd(num(r.salinity),0)}</td><td>${rnd(num(r.ph),1)}</td></tr>`).join('');
+            const bySection = `<div class="card" style="padding:14px;"><div class="eyebrow mb-2">Latest reading · by section</div>
+                <table class="data-table"><thead><tr><th>Section</th><th>DO</th><th>Temp</th><th>Sal</th><th>pH</th></tr></thead><tbody>${secRows}</tbody></table></div>`;
+
+            const hist=sessions.slice(0,10).map(s=>`
+                <tr><td>${s.date}<span style="color:var(--text-dim)"> ${s.shift}</span></td><td>${rnd(s.do,2)}</td><td>${rnd(s.temp,1)}</td><td>${rnd(s.salinity,0)}</td><td>${rnd(s.ph,1)}</td></tr>`).join('');
+            const history = `<div class="card" style="padding:14px;"><div class="eyebrow mb-2">Recent sessions · site average</div>
+                <table class="data-table"><thead><tr><th>Date</th><th>DO</th><th>Temp</th><th>Sal</th><th>pH</th></tr></thead><tbody>${hist}</tbody></table></div>`;
+
+            document.getElementById('wq-body').innerHTML = `
+                <div class="flex items-center gap-2 mb-3 px-1"><span class="dot ok"></span><span class="text-xs font-semibold" style="color:var(--text-mut);">Last reading ${updated}</span></div>
+                ${kpis}
+                <div class="mt-3 space-y-3">${bySection}${history}</div>
+                <p class="text-[11px] mt-3 px-1" style="color:var(--text-dim);">Tiles compare the latest session to the one before it. "Review" tags use the reference ranges set in the code — confirm those against your real targets.</p>`;
+        }
+
+        /* ── GAS URL settings ────────────────────────────────── */
+        const GAS_URL_KEYS = { 'Abalone-Spawning-and-Purchasing-Log':'mgr_spawning_gas_url','Abalone-Processing-Log':'mgr_processing_gas_url','hatchery-hr':'mgr_hr_gas_url','daily-water-quality':'mgr_wq_gas_url' };
+        function getModuleGasUrl(appKey){ const k=GAS_URL_KEYS[appKey]; return k?store.get(k):null; }
+        function toggleGasSettings(){ const d=document.getElementById('gas-settings-drawer'),s=document.getElementById('gas-settings-status'); d.classList.toggle('hidden'); s.textContent=d.classList.contains('hidden')?'Configure ▾':'Close ▴'; }
+        function saveGasUrls(){ const map={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url'}; for(const[id,k]of Object.entries(map)){const v=document.getElementById(id).value.trim(); if(v)store.set(k,v);} const c=document.getElementById('gas-save-confirm'); c.classList.remove('hidden'); setTimeout(()=>c.classList.add('hidden'),2500); }
+        function loadSavedGasUrls(){ const map={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url'}; for(const[id,k]of Object.entries(map)){const v=store.get(k); if(v)document.getElementById(id).value=v;} }
 
         /* ── Theme + contrast ────────────────────────────────── */
-        function synchronizeSystemTheme(){
-            const h = new Date().getHours(), body = document.getElementById('app-body'), ind = document.getElementById('theme-indicator');
-            if (h>=6 && h<18){ body.classList.remove('dark'); ind.textContent="Daylight Mode"; }
-            else { body.classList.add('dark'); ind.textContent="Night Ops Mode"; }
-        }
-        function applyContrast(){
-            const on = store.get('hc')==='1';
-            document.getElementById('app-body').classList.toggle('hc', on);
-            document.getElementById('hc-btn').classList.toggle('on', on);
-        }
-        function toggleContrast(){ rumbleDevice(30); store.set('hc', store.get('hc')==='1'?'0':'1'); applyContrast(); }
-
-        setInterval(()=>{ document.getElementById('live-clock').textContent = fmtTime(new Date()); synchronizeSystemTheme(); }, 1000);
-        function rumbleDevice(d){ if ('vibrate' in navigator) navigator.vibrate(d); }
+        function fmtTime(d){ return d.toTimeString().substring(0,5); }
+        function synchronizeSystemTheme(){ const h=new Date().getHours(),b=document.getElementById('app-body'),i=document.getElementById('theme-indicator'); if(h>=6&&h<18){b.classList.remove('dark');i.textContent="Daylight Mode";}else{b.classList.add('dark');i.textContent="Night Ops Mode";} }
+        function applyContrast(){ const on=store.get('hc')==='1'; document.getElementById('app-body').classList.toggle('hc',on); document.getElementById('hc-btn').classList.toggle('on',on); }
+        function toggleContrast(){ rumbleDevice(30); store.set('hc',store.get('hc')==='1'?'0':'1'); applyContrast(); }
+        setInterval(()=>{ document.getElementById('live-clock').textContent=fmtTime(new Date()); synchronizeSystemTheme(); },1000);
+        function rumbleDevice(d){ if('vibrate'in navigator) navigator.vibrate(d); }
 
         /* ── Tabs ────────────────────────────────────────────── */
-        function switchTab(target){
-            rumbleDevice(35);
-            const ops=document.getElementById('dashboard-view'), auth=document.getElementById('manager-auth-view'), mgr=document.getElementById('manager-dashboard-view');
-            const oBtn=document.getElementById('nav-ops-btn'), mBtn=document.getElementById('nav-mgr-btn');
-            if (target==='ops'){ ops.classList.remove('hidden'); auth.classList.add('hidden'); mgr.classList.add('hidden'); oBtn.classList.add('active'); mBtn.classList.remove('active'); }
-            else { ops.classList.add('hidden'); oBtn.classList.remove('active'); mBtn.classList.add('active');
-                if (isManagerAuthenticated){ mgr.classList.remove('hidden'); auth.classList.add('hidden'); } else { auth.classList.remove('hidden'); mgr.classList.add('hidden'); } }
+        function switchTab(target){ rumbleDevice(35);
+            const ops=document.getElementById('dashboard-view'),auth=document.getElementById('manager-auth-view'),mgr=document.getElementById('manager-dashboard-view');
+            const oBtn=document.getElementById('nav-ops-btn'),mBtn=document.getElementById('nav-mgr-btn');
+            if(target==='ops'){ ops.classList.remove('hidden'); auth.classList.add('hidden'); mgr.classList.add('hidden'); oBtn.classList.add('active'); mBtn.classList.remove('active'); }
+            else { ops.classList.add('hidden'); oBtn.classList.remove('active'); mBtn.classList.add('active'); if(isManagerAuthenticated){mgr.classList.remove('hidden');auth.classList.add('hidden');}else{auth.classList.remove('hidden');mgr.classList.add('hidden');} }
         }
+        function populateMonthSelector(){ const sel=document.getElementById('mgr-month-select'),now=new Date(); sel.innerHTML=''; for(let i=-1;i<=12;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);const val=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,lbl=d.toLocaleDateString('en-US',{month:'long',year:'numeric'});const o=document.createElement('option');o.value=val;o.textContent=lbl;if(i===0)o.selected=true;sel.appendChild(o);} }
 
-        function populateMonthSelector(){
-            const sel=document.getElementById('mgr-month-select'), now=new Date(); sel.innerHTML='';
-            for (let i=-1;i<=12;i++){ const d=new Date(now.getFullYear(),now.getMonth()-i,1);
-                const val=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`, lbl=d.toLocaleDateString('en-US',{month:'long',year:'numeric'});
-                const opt=document.createElement('option'); opt.value=val; opt.textContent=lbl; if (i===0) opt.selected=true; sel.appendChild(opt); }
-        }
-        function openManagerReport(appKey,tabContext){
-            rumbleDevice(45);
-            document.getElementById('manager-menu-grid').classList.add('hidden');
-            document.getElementById('manager-report-frame').classList.remove('hidden');
-            document.getElementById('fetch-fail-banner').classList.add('hidden');
-            buildAndLoadURL(appKey,tabContext);
-        }
-        function buildAndLoadURL(appKey,tabContext){
-            const month=document.getElementById('mgr-month-select').value, iframe=document.getElementById('mgr-iframe-engine');
-            iframe.dataset.appKey=appKey; iframe.dataset.tabContext=tabContext;
-            let url=`https://jamesaaa0203.github.io/${appKey}?targetTab=${tabContext}&pin=${MASTER_PIN}&month=${month}`;
-            const gasUrl=getModuleGasUrl(appKey); if (gasUrl) url+=`&gasUrl=${encodeURIComponent(gasUrl)}`;
-            currentReportURL=url; iframe.src=url;
-        }
-        function executeMonthFilterChange(){
-            rumbleDevice(30); const iframe=document.getElementById('mgr-iframe-engine');
-            const appKey=iframe.dataset.appKey, tabContext=iframe.dataset.tabContext; if (!appKey) return;
-            document.getElementById('fetch-fail-banner').classList.add('hidden'); buildAndLoadURL(appKey,tabContext);
-        }
-        function closeManagerReport(){
-            rumbleDevice(40); const iframe=document.getElementById('mgr-iframe-engine');
-            iframe.src="about:blank"; iframe.dataset.appKey=""; iframe.dataset.tabContext=""; currentReportURL="";
-            document.getElementById('manager-report-frame').classList.add('hidden');
-            document.getElementById('manager-menu-grid').classList.remove('hidden');
-            document.getElementById('fetch-fail-banner').classList.add('hidden');
-        }
-        function openCurrentInNewTab(){ rumbleDevice(40); if (currentReportURL) window.open(currentReportURL,'_blank','noopener,noreferrer'); }
+        function openManagerReport(appKey,tabContext){ rumbleDevice(45); document.getElementById('manager-menu-grid').classList.add('hidden'); document.getElementById('manager-report-frame').classList.remove('hidden'); document.getElementById('fetch-fail-banner').classList.add('hidden'); buildAndLoadURL(appKey,tabContext); }
+        function buildAndLoadURL(appKey,tabContext){ const month=document.getElementById('mgr-month-select').value,iframe=document.getElementById('mgr-iframe-engine'); iframe.dataset.appKey=appKey; iframe.dataset.tabContext=tabContext; let url=`https://jamesaaa0203.github.io/${appKey}?targetTab=${tabContext}&pin=${MASTER_PIN}&month=${month}`; const g=getModuleGasUrl(appKey); if(g)url+=`&gasUrl=${encodeURIComponent(g)}`; currentReportURL=url; iframe.src=url; }
+        function executeMonthFilterChange(){ rumbleDevice(30); const iframe=document.getElementById('mgr-iframe-engine'); const a=iframe.dataset.appKey,t=iframe.dataset.tabContext; if(!a)return; document.getElementById('fetch-fail-banner').classList.add('hidden'); buildAndLoadURL(a,t); }
+        function closeManagerReport(){ rumbleDevice(40); const iframe=document.getElementById('mgr-iframe-engine'); iframe.src="about:blank"; iframe.dataset.appKey=""; iframe.dataset.tabContext=""; currentReportURL=""; document.getElementById('manager-report-frame').classList.add('hidden'); document.getElementById('manager-menu-grid').classList.remove('hidden'); document.getElementById('fetch-fail-banner').classList.add('hidden'); }
+        function openCurrentInNewTab(){ rumbleDevice(40); if(currentReportURL) window.open(currentReportURL,'_blank','noopener,noreferrer'); }
         function onIframeLoad(){}
-
-        window.addEventListener('message', function(event){
-            if (!event.data || typeof event.data!=='object') return;
-            if (event.data.type==='fetch_failed') document.getElementById('fetch-fail-banner').classList.remove('hidden');
-            if (event.data.type==='fetch_ok') document.getElementById('fetch-fail-banner').classList.add('hidden');
-            if (event.data.type==='node_status' && event.data.key) setNodeStatus(event.data.key, event.data.state, event.data.label);
-        });
+        window.addEventListener('message',function(ev){ if(!ev.data||typeof ev.data!=='object')return; if(ev.data.type==='fetch_failed')document.getElementById('fetch-fail-banner').classList.remove('hidden'); if(ev.data.type==='fetch_ok')document.getElementById('fetch-fail-banner').classList.add('hidden'); });
 
         /* ── PIN pad ─────────────────────────────────────────── */
-        function pressKey(num){ if (inputPin.length>=4) return; rumbleDevice(40); inputPin+=num; renderPinDots(); if (inputPin.length===4) setTimeout(verifyPin,150); }
+        function pressKey(n){ if(inputPin.length>=4)return; rumbleDevice(40); inputPin+=n; renderPinDots(); if(inputPin.length===4)setTimeout(verifyPin,150); }
         function clearPin(){ rumbleDevice(60); inputPin=""; renderPinDots(); }
-        function renderPinDots(){
-            const dots=document.getElementById('pin-dots').children;
-            for (let i=0;i<4;i++){ const on=i<inputPin.length; dots[i].className="w-3.5 h-3.5 rounded-full"+(on?" pin-on":""); dots[i].style.border = on?"2px solid var(--accent)":"2px solid var(--border-2)"; }
-        }
-        function verifyPin(){
-            if (inputPin===MASTER_PIN){ inputPin=""; renderPinDots(); completeManagerAuth(); }
-            else { rumbleDevice([300,100,300]); inputPin=""; renderPinDots();
-                const d=document.getElementById('pin-dots'); d.animate([{transform:'translateX(0)'},{transform:'translateX(-8px)'},{transform:'translateX(8px)'},{transform:'translateX(0)'}],{duration:360}); }
-        }
-        function lockManagerView(){ rumbleDevice(100); isManagerAuthenticated=false; store.srem('mgr_auth'); closeManagerReport(); switchTab('ops'); }
+        function renderPinDots(){ const dots=document.getElementById('pin-dots').children; for(let i=0;i<4;i++){const on=i<inputPin.length; dots[i].className="w-3.5 h-3.5 rounded-full"+(on?" pin-on":""); dots[i].style.border=on?"2px solid var(--accent)":"2px solid var(--border-2)";} }
+        function verifyPin(){ if(inputPin===MASTER_PIN){inputPin="";renderPinDots();completeManagerAuth();}else{rumbleDevice([300,100,300]);inputPin="";renderPinDots();const d=document.getElementById('pin-dots');d.animate([{transform:'translateX(0)'},{transform:'translateX(-8px)'},{transform:'translateX(8px)'},{transform:'translateX(0)'}],{duration:360});} }
+        function lockManagerView(){ rumbleDevice(100); isManagerAuthenticated=false; store.srem('mgr_auth'); closeManagerReport(); closeWaterQuality(); switchTab('ops'); }
         function completeManagerAuth(){ rumbleDevice([80,50,80]); isManagerAuthenticated=true; store.sset('mgr_auth','1'); loadSavedGasUrls(); switchTab('mgr'); }
 
         /* ── Init ────────────────────────────────────────────── */
-        if (store.sget('mgr_auth')==='1') isManagerAuthenticated=true;
-        applyContrast();
-        renderRibbon(); renderModules(); renderAttention(); renderMgrList();
-        loadSavedGasUrls();
-        synchronizeSystemTheme();
-        document.getElementById('live-clock').textContent = fmtTime(new Date());
-        populateMonthSelector();
-        refreshStatus();
-        window.addEventListener('online', refreshStatus);
-        window.addEventListener('offline', ()=>{ setSyncUI('Offline', false); });
-        if (!DEMO) setInterval(refreshStatus, 5*60*1000); // re-sync every 5 min
-
-        /* ── PWA service worker ──────────────────────────────── */
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', ()=>{ navigator.serviceWorker.register('./sw.js').catch(()=>{}); });
-        }
+        if(store.sget('mgr_auth')==='1') isManagerAuthenticated=true;
+        applyContrast(); renderModules(); renderMgrList(); loadSavedGasUrls();
+        synchronizeSystemTheme(); document.getElementById('live-clock').textContent=fmtTime(new Date()); populateMonthSelector();
+        if('serviceWorker'in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('./sw.js').catch(()=>{}); }); }
     </script>
 </body>
 </html>
