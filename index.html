@@ -149,6 +149,26 @@
     <!-- ── OPS HOME ───────────────────────────────────────────── -->
     <main id="dashboard-view" class="flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full">
         <div class="flex items-center justify-between px-1 pt-1"><span class="eyebrow">Worker Entry · Modul Kerja</span><span class="eyebrow" style="color:var(--text-mut);">Tap · Tekan</span></div>
+
+        <!-- iOS install guide — shown only on iOS Safari when not yet installed -->
+        <div id="ios-install-banner" class="hidden rounded-2xl p-4" style="background:color-mix(in srgb,var(--accent) 10%,transparent); border:1px solid color-mix(in srgb,var(--accent) 28%,transparent);">
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex items-start gap-3">
+                    <span style="font-size:22px;flex:none;line-height:1.2;">📲</span>
+                    <div>
+                        <div class="text-sm font-semibold" style="color:var(--text);">Install as an app</div>
+                        <div class="text-xs mt-1" style="color:var(--text-mut);line-height:1.5;">
+                            In Safari, tap the <strong style="color:var(--text);">Share</strong> button
+                            <svg style="display:inline;vertical-align:middle;margin:0 2px;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                            then tap <strong style="color:var(--text);">Add to Home Screen</strong>.
+                        </div>
+                        <div class="text-xs mt-1.5" style="color:var(--text-dim);">Works offline · Launches like a native app</div>
+                    </div>
+                </div>
+                <button onclick="dismissIOSBanner()" style="color:var(--text-dim);font-size:20px;line-height:1;padding:0 4px;flex:none;margin-top:-2px;">×</button>
+            </div>
+        </div>
+
         <div id="module-list" class="space-y-3"></div>
     </main>
 
@@ -324,7 +344,7 @@
         const ALL_VIEWS=['wq-data-view','spawn-data-view','purchase-data-view','manager-report-frame'];
         function showView(id){document.getElementById('manager-menu-grid').classList.add('hidden');ALL_VIEWS.forEach(v=>document.getElementById(v).classList.add('hidden'));document.getElementById(id).classList.remove('hidden');}
         function closeView(){rumbleDevice(40);ALL_VIEWS.forEach(v=>document.getElementById(v).classList.add('hidden'));document.getElementById('manager-menu-grid').classList.remove('hidden');}
-        function openFullTab(which){const m={wq:()=>{const u=getGasUrl('daily-water-quality');return`https://jamesaaa0203.github.io/daily-water-quality/?targetTab=manager&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');},spawn:()=>{const u=getGasUrl('Abalone-Spawning-and-Purchasing-Log');return`https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/?targetTab=spawning&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');},purchase:()=>{const u=getGasUrl('Abalone-Spawning-and-Purchasing-Log');return`https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/?targetTab=purchasing&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'')`;}};const fn=m[which];if(fn)window.open(fn(),'_blank','noopener,noreferrer');}
+        function openFullTab(which){const m={wq:()=>{const u=getGasUrl('daily-water-quality');return`https://jamesaaa0203.github.io/daily-water-quality/?targetTab=manager&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');},spawn:()=>{const u=getGasUrl('Abalone-Spawning-and-Purchasing-Log');return`https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/?targetTab=spawning&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');},purchase:()=>{const u=getGasUrl('Abalone-Spawning-and-Purchasing-Log');return`https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/?targetTab=purchasing&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');}};const fn=m[which];if(fn)window.open(fn(),'_blank','noopener,noreferrer');}
 
         /* ── GAS URL settings ────────────────────────────────── */
         const GAS_KEYS={'Abalone-Spawning-and-Purchasing-Log':'mgr_spawning_gas_url','Abalone-Processing-Log':'mgr_processing_gas_url','hatchery-hr':'mgr_hr_gas_url','daily-water-quality':'mgr_wq_gas_url'};
@@ -614,10 +634,26 @@
         function lockManagerView(){rumbleDevice(100);isManagerAuthenticated=false;store.srem('mgr_auth');closeManagerReport();switchTab('ops');}
         function completeManagerAuth(){rumbleDevice([80,50,80]);isManagerAuthenticated=true;store.sset('mgr_auth','1');loadSavedGasUrls();switchTab('mgr');}
 
+        /* ── iOS install banner ──────────────────────────────── */
+        function initIOSInstallBanner(){
+            // Only show on iOS Safari, only when not already installed as standalone
+            const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || !!window.navigator.standalone;
+            const dismissed = store.get('ios_install_dismissed') === '1';
+            if(isIOS && !isStandalone && !dismissed){
+                document.getElementById('ios-install-banner').classList.remove('hidden');
+            }
+        }
+        function dismissIOSBanner(){
+            document.getElementById('ios-install-banner').classList.add('hidden');
+            store.set('ios_install_dismissed','1');
+        }
+
         /* ── Init ────────────────────────────────────────────── */
         if(store.sget('mgr_auth')==='1')isManagerAuthenticated=true;
         applyContrast();renderModules();renderMgrList();loadSavedGasUrls();
         synchronizeSystemTheme();document.getElementById('live-clock').textContent=fmtTime(new Date());populateMonthSelector();
+        initIOSInstallBanner();
         if('serviceWorker'in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});}
     </script>
 </body>
