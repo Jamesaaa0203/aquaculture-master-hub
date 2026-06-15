@@ -45,8 +45,6 @@
         .dot { width:8px; height:8px; border-radius:999px; flex:none; }
         .dot.ok { background:var(--ok); box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 22%,transparent); animation:breathe 2.4s ease-in-out infinite; }
         @keyframes breathe { 0%,100%{opacity:1;} 50%{opacity:.45;} }
-
-        /* Worker module buttons */
         .module { position:relative; display:flex; align-items:center; justify-content:space-between; gap:14px; padding:18px; background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); transition:transform .12s; overflow:hidden; width:100%; text-align:left; }
         .module::before { content:''; position:absolute; left:0; top:14px; bottom:14px; width:3px; border-radius:0 3px 3px 0; background:var(--hue,var(--accent)); opacity:.85; }
         .module:active { transform:scale(.985); }
@@ -55,7 +53,6 @@
         .module-bm { font-size:11px; font-weight:600; color:var(--hue,var(--accent)); }
         .module-title { font-size:17px; font-weight:600; letter-spacing:-.01em; color:var(--text); margin-top:1px; }
         .module-desc { font-size:12px; color:var(--text-mut); margin-top:2px; }
-
         .keypad-btn { background:var(--surface); border:1px solid var(--border-2); border-radius:16px; box-shadow:var(--shadow); font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:22px; color:var(--text); padding:16px 0; transition:transform .1s,background .15s; }
         .keypad-btn:active { transform:scale(.93); background:var(--surface-2); }
         .mgr-row { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px; text-align:left; background:var(--surface); border:1px solid var(--border); border-radius:18px; box-shadow:var(--shadow); transition:transform .12s; }
@@ -71,7 +68,29 @@
         .kpi-unit { font-size:12px; font-weight:600; color:var(--text-dim); margin-left:2px; }
         .kpi-hint { font-size:10.5px; font-weight:500; color:var(--text-dim); margin-top:10px; display:flex; align-items:center; gap:4px; }
         .pill { font-size:10px; font-weight:700; letter-spacing:.04em; padding:3px 8px; border-radius:999px; }
-        .kpi-big { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:22px; line-height:1.1; letter-spacing:-.01em; }
+
+        /* Moon trial cards */
+        .moon-card { background:var(--surface); border:1px solid var(--border); border-radius:18px; box-shadow:var(--shadow); padding:18px; width:100%; text-align:left; transition:transform .12s; position:relative; overflow:hidden; }
+        .moon-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; border-radius:0 4px 4px 0; background:var(--mc,var(--accent)); }
+        .moon-card:active { transform:scale(.985); }
+        .moon-name { font-size:18px; font-weight:700; color:var(--text); letter-spacing:-.01em; }
+        .moon-meta { font-size:12px; color:var(--text-mut); margin-top:3px; }
+        .moon-eggs { font-family:'Space Grotesk',sans-serif; font-size:32px; font-weight:700; letter-spacing:-.02em; margin-top:10px; }
+        .moon-eggs-label { font-size:11px; font-weight:600; color:var(--text-dim); margin-top:2px; }
+
+        /* Detail panel */
+        .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+        .info-item { background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:10px 12px; }
+        .info-key { font-size:10px; font-weight:600; color:var(--text-dim); letter-spacing:.04em; text-transform:uppercase; }
+        .info-val { font-size:14px; font-weight:600; color:var(--text); margin-top:3px; font-family:'Space Grotesk',sans-serif; }
+        .trial-row { background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:12px 14px; }
+        .wq-col { background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:10px 12px; }
+        .wq-col-head { font-size:10px; font-weight:700; color:var(--accent); letter-spacing:.05em; text-transform:uppercase; margin-bottom:6px; }
+        .wq-row { display:flex; justify-content:space-between; font-size:11.5px; padding:2px 0; }
+        .wq-row span:first-child { color:var(--text-mut); font-weight:500; }
+        .wq-row span:last-child { color:var(--text); font-weight:600; font-family:'Space Grotesk',sans-serif; }
+        .grade-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
+        .grade-row:last-child { border-bottom:0; }
 
         /* Data tables */
         .data-table { width:100%; border-collapse:collapse; font-size:12px; }
@@ -79,36 +98,20 @@
         .data-table th:first-child, .data-table td:first-child { text-align:left; }
         .data-table td { padding:8px; border-bottom:1px solid var(--border); color:var(--text); font-weight:500; text-align:right; font-family:'Space Grotesk',sans-serif; }
         .data-table tr:last-child td { border-bottom:0; }
-        .data-table td.ok { color:var(--ok); } .data-table td.attn { color:var(--attention); } .data-table td.alrt { color:var(--alert); }
 
-        /* Info row (2-col key-value) */
-        .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-        .info-item { background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:10px 12px; }
-        .info-key { font-size:10px; font-weight:600; color:var(--text-dim); letter-spacing:.04em; text-transform:uppercase; }
-        .info-val { font-size:14px; font-weight:600; color:var(--text); margin-top:3px; font-family:'Space Grotesk',sans-serif; }
+        /* Overlays (chart + detail share the same sheet pattern) */
+        .overlay { position:fixed; inset:0; z-index:200; background:rgba(0,0,0,.55); backdrop-filter:blur(4px); display:flex; align-items:flex-end; opacity:0; pointer-events:none; transition:opacity .25s; }
+        .overlay.open { opacity:1; pointer-events:all; }
+        .sheet { width:100%; max-width:480px; margin:0 auto; background:var(--surface); border-radius:24px 24px 0 0; padding:0 0 calc(24px + env(safe-area-inset-bottom)); transform:translateY(100%); transition:transform .3s cubic-bezier(.32,0,.15,1); max-height:90dvh; display:flex; flex-direction:column; }
+        .overlay.open .sheet { transform:translateY(0); }
+        .sheet-handle { width:36px; height:4px; border-radius:2px; background:var(--border-2); margin:12px auto 0; flex:none; }
+        .sheet-head { padding:14px 20px 12px; flex:none; border-bottom:1px solid var(--border); }
+        .sheet-body { flex:1; overflow-y:auto; padding:16px; }
 
-        /* WQ mini grid inside spawning */
-        .wq-mini { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
-        .wq-col { background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:10px 12px; }
-        .wq-col-head { font-size:10px; font-weight:700; color:var(--accent); letter-spacing:.06em; text-transform:uppercase; margin-bottom:6px; }
-        .wq-row { display:flex; justify-content:space-between; font-size:11px; padding:2px 0; }
-        .wq-row span:first-child { color:var(--text-mut); font-weight:500; }
-        .wq-row span:last-child { color:var(--text); font-weight:600; font-family:'Space Grotesk',sans-serif; }
-
-        /* Chart overlay */
-        #chart-overlay { position:fixed; inset:0; z-index:200; background:rgba(0,0,0,.55); backdrop-filter:blur(4px); display:flex; align-items:flex-end; opacity:0; pointer-events:none; transition:opacity .25s; }
-        #chart-overlay.open { opacity:1; pointer-events:all; }
-        #chart-sheet { width:100%; max-width:480px; margin:0 auto; background:var(--surface); border-radius:24px 24px 0 0; padding:0 0 calc(24px + env(safe-area-inset-bottom)); transform:translateY(100%); transition:transform .3s cubic-bezier(.32,0,.15,1); max-height:88dvh; display:flex; flex-direction:column; }
-        #chart-overlay.open #chart-sheet { transform:translateY(0); }
-        .chart-handle { width:36px; height:4px; border-radius:2px; background:var(--border-2); margin:12px auto 16px; flex:none; }
-        #chart-canvas-wrap { flex:1; overflow:hidden; padding:0 16px 16px; min-height:0; }
-
-        /* GAS input */
+        /* GAS / nav / misc */
         .gas-input { width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:9px 12px; font-size:13px; color:var(--text); outline:none; transition:border-color .2s; }
         .gas-input:focus { border-color:var(--accent); }
         .gas-input::placeholder { color:var(--text-dim); }
-
-        /* Nav */
         .navbar { background:color-mix(in srgb,var(--surface) 88%,transparent); backdrop-filter:saturate(1.4) blur(14px); -webkit-backdrop-filter:saturate(1.4) blur(14px); border-top:1px solid var(--border); padding-bottom:calc(.6rem + env(safe-area-inset-bottom)); }
         .nav-btn { color:var(--text-dim); transition:color .2s; }
         .nav-btn.active { color:var(--accent); }
@@ -139,31 +142,26 @@
             <button id="hc-btn" onclick="toggleContrast()" class="icon-btn" title="High-contrast outdoor mode">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg>
             </button>
-            <div class="chip"><span class="dot ok"></span><span class="num" id="live-clock" style="font-weight:600; color:var(--text);">00:00</span></div>
+            <div class="chip"><span class="dot ok"></span><span class="num" id="live-clock" style="font-weight:600;color:var(--text);">00:00</span></div>
         </div>
     </header>
 
-    <!-- ── OPS HOME (workers) ─────────────────────────────────── -->
+    <!-- ── OPS HOME ───────────────────────────────────────────── -->
     <main id="dashboard-view" class="flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full">
-        <div class="flex items-center justify-between px-1 pt-1">
-            <span class="eyebrow">Worker Entry · Modul Kerja</span>
-            <span class="eyebrow" style="color:var(--text-mut);">Tap · Tekan</span>
-        </div>
+        <div class="flex items-center justify-between px-1 pt-1"><span class="eyebrow">Worker Entry · Modul Kerja</span><span class="eyebrow" style="color:var(--text-mut);">Tap · Tekan</span></div>
         <div id="module-list" class="space-y-3"></div>
     </main>
 
     <!-- ── MANAGER AUTH ───────────────────────────────────────── -->
     <main id="manager-auth-view" class="hidden flex-1 p-4 flex flex-col justify-center items-center max-w-md mx-auto w-full pb-28">
         <div class="w-full text-center space-y-5 max-w-xs">
-            <div class="mx-auto w-14 h-14 rounded-2xl flex items-center justify-center" style="background:color-mix(in srgb,var(--accent) 12%,transparent); border:1px solid color-mix(in srgb,var(--accent) 30%,transparent); color:var(--accent);">
+            <div class="mx-auto w-14 h-14 rounded-2xl flex items-center justify-center" style="background:color-mix(in srgb,var(--accent) 12%,transparent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);color:var(--accent);">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"></path></svg>
             </div>
-            <div><h2 class="text-lg font-semibold tracking-tight">Manager Terminal</h2><p class="text-sm" style="color:var(--text-mut); margin-top:2px;">Enter your operational PIN</p></div>
+            <div><h2 class="text-lg font-semibold tracking-tight">Manager Terminal</h2><p class="text-sm" style="color:var(--text-mut);margin-top:2px;">Enter your operational PIN</p></div>
             <div class="flex justify-center gap-3.5 py-2" id="pin-dots">
-                <span class="w-3.5 h-3.5 rounded-full" style="border:2px solid var(--border-2);"></span>
-                <span class="w-3.5 h-3.5 rounded-full" style="border:2px solid var(--border-2);"></span>
-                <span class="w-3.5 h-3.5 rounded-full" style="border:2px solid var(--border-2);"></span>
-                <span class="w-3.5 h-3.5 rounded-full" style="border:2px solid var(--border-2);"></span>
+                <span class="w-3.5 h-3.5 rounded-full" style="border:2px solid var(--border-2);"></span><span class="w-3.5 h-3.5 rounded-full" style="border:2px solid var(--border-2);"></span>
+                <span class="w-3.5 h-3.5 rounded-full" style="border:2px solid var(--border-2);"></span><span class="w-3.5 h-3.5 rounded-full" style="border:2px solid var(--border-2);"></span>
             </div>
             <div class="grid grid-cols-3 gap-3 pt-2">
                 <button onclick="pressKey('1')" class="keypad-btn">1</button><button onclick="pressKey('2')" class="keypad-btn">2</button><button onclick="pressKey('3')" class="keypad-btn">3</button>
@@ -186,21 +184,17 @@
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"></path></svg>Lock
                 </button>
             </div>
-            <!-- GAS Settings -->
             <div class="card" style="padding:14px;">
                 <button onclick="toggleGasSettings()" class="w-full flex items-center justify-between">
-                    <div class="flex items-center gap-2.5">
-                        <span class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:color-mix(in srgb,var(--attention) 14%,transparent);color:var(--attention);"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"></path></svg></span>
-                        <span class="text-sm font-semibold">Module GAS connections</span>
-                    </div>
+                    <div class="flex items-center gap-2.5"><span class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:color-mix(in srgb,var(--attention) 14%,transparent);color:var(--attention);"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"></path></svg></span><span class="text-sm font-semibold">Module GAS connections</span></div>
                     <span id="gas-settings-status" class="text-xs font-semibold" style="color:var(--text-dim);">Configure ▾</span>
                 </button>
                 <div id="gas-settings-drawer" class="hidden mt-3 space-y-3 pt-3" style="border-top:1px solid var(--border);">
-                    <p class="text-xs" style="color:var(--text-mut);">Paste each module's GAS <span class="num">/exec</span> URL. Powers the live dashboards.</p>
-                    <div><label class="eyebrow block mb-1.5">Water Quality</label><input type="password" id="gas-wq-url" placeholder="/exec URL for Water Quality" onchange="saveGasUrls()" class="gas-input"></div>
-                    <div><label class="eyebrow block mb-1.5">Spawning &amp; Purchasing</label><input type="password" id="gas-spawning-url" placeholder="/exec URL for Spawning & Purchasing" onchange="saveGasUrls()" class="gas-input"></div>
-                    <div><label class="eyebrow block mb-1.5">Processing Log</label><input type="password" id="gas-processing-url" placeholder="/exec URL for Processing Log" onchange="saveGasUrls()" class="gas-input"></div>
-                    <div><label class="eyebrow block mb-1.5">Hatchery HR Suite</label><input type="password" id="gas-hr-url" placeholder="/exec URL for Hatchery HR" onchange="saveGasUrls()" class="gas-input"></div>
+                    <p class="text-xs" style="color:var(--text-mut);">Paste each module's GAS <span class="num">/exec</span> URL.</p>
+                    <div><label class="eyebrow block mb-1.5">Water Quality</label><input type="password" id="gas-wq-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
+                    <div><label class="eyebrow block mb-1.5">Spawning &amp; Purchasing</label><input type="password" id="gas-spawning-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
+                    <div><label class="eyebrow block mb-1.5">Processing Log</label><input type="password" id="gas-processing-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
+                    <div><label class="eyebrow block mb-1.5">Hatchery HR Suite</label><input type="password" id="gas-hr-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
                     <button onclick="saveGasUrls()" class="w-full py-2.5 rounded-xl text-sm font-semibold text-white" style="background:var(--accent);">Save all URLs</button>
                     <p id="gas-save-confirm" class="hidden text-xs font-semibold text-center" style="color:var(--ok);">✓ Saved</p>
                 </div>
@@ -209,45 +203,45 @@
             <div id="mgr-list" class="grid grid-cols-1 gap-3"></div>
         </div>
 
-        <!-- ── WATER QUALITY VIEW ──────────────────────────────── -->
+        <!-- WATER QUALITY VIEW -->
         <div id="wq-data-view" class="hidden flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full overflow-y-auto">
             <div class="flex items-center justify-between gap-2">
-                <button onclick="closeView('wq')" class="flex items-center gap-1.5 text-sm font-semibold" style="color:var(--accent);"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"></path></svg><span class="ko">뒤로</span> Menu</button>
+                <button onclick="closeView()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:var(--accent);"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"></path></svg><span class="ko">뒤로</span> Menu</button>
                 <div class="flex gap-2"><button onclick="loadWaterQuality()" class="icon-btn"><svg id="wq-refresh-ic" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356M3.985 19.644V14.65h4.992m-4.969-3.65a8.25 8.25 0 0113.803-3.7L21 8.25m-18 7.5l3.181 3.182a8.25 8.25 0 0013.803-3.7"/></svg></button><button onclick="openFullTab('wq')" class="icon-btn"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg></button></div>
             </div>
             <div><span class="eyebrow" style="color:#3B82F6;">수질 관리 · Water Quality</span><h3 class="text-2xl font-semibold tracking-tight" style="margin-top:1px;">Live Readings</h3></div>
             <div id="wq-body"></div>
         </div>
 
-        <!-- ── SPAWNING VIEW ───────────────────────────────────── -->
+        <!-- SPAWNING VIEW -->
         <div id="spawn-data-view" class="hidden flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full overflow-y-auto">
             <div class="flex items-center justify-between gap-2">
-                <button onclick="closeView('spawn')" class="flex items-center gap-1.5 text-sm font-semibold" style="color:var(--accent);"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"></path></svg><span class="ko">뒤로</span> Menu</button>
+                <button onclick="closeView()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:var(--accent);"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"></path></svg><span class="ko">뒤로</span> Menu</button>
                 <div class="flex gap-2"><button onclick="loadSpawnPurchase()" class="icon-btn"><svg id="spawn-refresh-ic" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356M3.985 19.644V14.65h4.992m-4.969-3.65a8.25 8.25 0 0113.803-3.7L21 8.25m-18 7.5l3.181 3.182a8.25 8.25 0 0013.803-3.7"/></svg></button><button onclick="openFullTab('spawn')" class="icon-btn"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg></button></div>
             </div>
-            <div><span class="eyebrow" style="color:#8B5CF6;">산란 시험 관리 · Spawning Trials</span><h3 class="text-2xl font-semibold tracking-tight" style="margin-top:1px;">Trial Overview</h3></div>
+            <div><span class="eyebrow" style="color:#8B5CF6;">산란 시험 관리 · Spawning Trials</span><h3 class="text-2xl font-semibold tracking-tight" id="spawn-month-title" style="margin-top:1px;">This Month</h3></div>
             <div id="spawn-body"></div>
         </div>
 
-        <!-- ── PURCHASING VIEW ─────────────────────────────────── -->
+        <!-- PURCHASING VIEW -->
         <div id="purchase-data-view" class="hidden flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full overflow-y-auto">
             <div class="flex items-center justify-between gap-2">
-                <button onclick="closeView('purchase')" class="flex items-center gap-1.5 text-sm font-semibold" style="color:var(--accent);"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"></path></svg><span class="ko">뒤로</span> Menu</button>
+                <button onclick="closeView()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:var(--accent);"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"></path></svg><span class="ko">뒤로</span> Menu</button>
                 <div class="flex gap-2"><button onclick="loadSpawnPurchase()" class="icon-btn"><svg id="purchase-refresh-ic" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356M3.985 19.644V14.65h4.992m-4.969-3.65a8.25 8.25 0 0113.803-3.7L21 8.25m-18 7.5l3.181 3.182a8.25 8.25 0 0013.803-3.7"/></svg></button><button onclick="openFullTab('purchase')" class="icon-btn"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg></button></div>
             </div>
-            <div><span class="eyebrow" style="color:#D97706;">전복 매입 로그 · Purchasing</span><h3 class="text-2xl font-semibold tracking-tight" style="margin-top:1px;">Broodstock Batches</h3></div>
+            <div><span class="eyebrow" style="color:#D97706;">전복 매입 · Purchasing</span><h3 class="text-2xl font-semibold tracking-tight" id="purchase-month-title" style="margin-top:1px;">This Month</h3></div>
             <div id="purchase-body"></div>
         </div>
 
-        <!-- ── IFRAME (Processing / HR fallback) ──────────────── -->
+        <!-- IFRAME (Processing / HR) -->
         <div id="manager-report-frame" class="hidden flex-1 flex flex-col min-h-0 w-full">
             <div class="p-3 shrink-0" style="background:var(--surface);border-bottom:1px solid var(--border);">
                 <div class="flex justify-between items-center px-1 gap-2">
                     <button onclick="closeManagerReport()" class="flex items-center gap-1.5 text-sm font-semibold py-1 shrink-0" style="color:var(--accent);"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"></path></svg><span class="ko">뒤로</span> Menu</button>
-                    <div class="flex items-center gap-2"><select id="mgr-month-select" onchange="executeMonthFilterChange()" class="text-xs font-semibold py-2 px-2.5 rounded-lg num" style="background:var(--surface-2);color:var(--text);border:1px solid var(--border);outline:none;"></select></div>
+                    <select id="mgr-month-select" onchange="executeMonthFilterChange()" class="text-xs font-semibold py-2 px-2.5 rounded-lg num" style="background:var(--surface-2);color:var(--text);border:1px solid var(--border);outline:none;"></select>
                     <button onclick="openCurrentInNewTab()" class="flex items-center gap-1 shrink-0 px-2.5 py-2 text-xs font-semibold rounded-lg" style="background:color-mix(in srgb,var(--attention) 12%,transparent);color:var(--attention);border:1px solid color-mix(in srgb,var(--attention) 26%,transparent);"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"></path></svg> Full tab</button>
                 </div>
-                <div id="fetch-fail-banner" class="hidden mt-2 mx-1 flex items-start gap-2 rounded-xl px-3 py-2.5" style="background:color-mix(in srgb,var(--attention) 12%,transparent);border:1px solid color-mix(in srgb,var(--attention) 30%,transparent);"><svg class="w-4 h-4 shrink-0 mt-0.5" style="color:var(--attention);" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"></path></svg><div><p class="text-xs font-semibold" style="color:var(--attention);">Data load restricted in frame</p><p class="text-xs mt-0.5" style="color:var(--text-mut);">Tap <strong>Full tab ↗</strong> to open with full data access.</p></div></div>
+                <div id="fetch-fail-banner" class="hidden mt-2 mx-1 flex items-start gap-2 rounded-xl px-3 py-2.5" style="background:color-mix(in srgb,var(--attention) 12%,transparent);border:1px solid color-mix(in srgb,var(--attention) 30%,transparent);"><svg class="w-4 h-4 shrink-0 mt-0.5" style="color:var(--attention);" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"></path></svg><div><p class="text-xs font-semibold" style="color:var(--attention);">Data load restricted</p><p class="text-xs mt-0.5" style="color:var(--text-mut);">Tap <strong>Full tab ↗</strong></p></div></div>
             </div>
             <div class="w-full p-1.5 relative iframe-shell" style="background:var(--bg-soft);"><iframe id="mgr-iframe-engine" src="about:blank" class="w-full h-full rounded-2xl" style="border:1px solid var(--border);background:var(--surface);" onload="onIframeLoad()"></iframe></div>
         </div>
@@ -260,428 +254,371 @@
     </nav>
 
     <!-- ── CHART OVERLAY ──────────────────────────────────────── -->
-    <div id="chart-overlay" onclick="closeChart(event)">
-        <div id="chart-sheet">
-            <div class="chart-handle"></div>
-            <div style="padding:0 20px 12px;flex:none;"><div id="chart-title" class="text-lg font-semibold tracking-tight"></div><div id="chart-subtitle" class="text-xs mt-0.5" style="color:var(--text-mut);"></div></div>
-            <div id="chart-canvas-wrap"></div>
+    <div id="chart-overlay" class="overlay" onclick="closeOverlay('chart-overlay',event)">
+        <div class="sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-head"><div id="chart-title" class="text-lg font-semibold tracking-tight"></div><div id="chart-subtitle" class="text-xs mt-0.5" style="color:var(--text-mut);"></div></div>
+            <div id="chart-canvas-wrap" class="sheet-body"></div>
+        </div>
+    </div>
+
+    <!-- ── DETAIL OVERLAY (spawning moon / broodstock breakdown) -->
+    <div id="detail-overlay" class="overlay" onclick="closeOverlay('detail-overlay',event)">
+        <div class="sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-head" id="detail-head"></div>
+            <div class="sheet-body" id="detail-body"></div>
         </div>
     </div>
 
     <script>
         const MASTER_PIN = "3653";
-        let inputPin = "", isManagerAuthenticated = false, currentReportURL = "";
-        // Cached data for chart taps
-        let wqSessions = [], spawnLogs = [], purchaseLogs = [], activeChartCfg = null;
+        let inputPin="", isManagerAuthenticated=false, currentReportURL="";
+        let wqSessions=[], spawnLogs=[], purchaseLogs=[];
 
         /* ── Storage ─────────────────────────────────────────── */
-        const store = {
-            get(k){ try{return localStorage.getItem(k);}catch(e){return null;} },
-            set(k,v){ try{localStorage.setItem(k,v);}catch(e){} },
-            sget(k){ try{return sessionStorage.getItem(k);}catch(e){return null;} },
-            sset(k,v){ try{sessionStorage.setItem(k,v);}catch(e){} },
-            srem(k){ try{sessionStorage.removeItem(k);}catch(e){} }
-        };
+        const store={get(k){try{return localStorage.getItem(k);}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}},sget(k){try{return sessionStorage.getItem(k);}catch(e){return null;}},sset(k,v){try{sessionStorage.setItem(k,v);}catch(e){}},srem(k){try{sessionStorage.removeItem(k);}catch(e){}}};
 
-        /* ── Icons ───────────────────────────────────────────── */
-        const lineIcon=(d)=>`<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="${d}"/></svg>`;
+        /* ── Date helpers ────────────────────────────────────── */
+        const MONTHS_LONG=['January','February','March','April','May','June','July','August','September','October','November','December'];
+        const MONTHS_SHORT=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        function parseAnyDate(v){if(!v&&v!==0)return null;const s=String(v);const m1=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(m1)return new Date(+m1[3],+m1[1]-1,+m1[2]);const m2=s.match(/^(\d{4})-(\d{2})-(\d{2})/);if(m2)return new Date(+m2[1],+m2[2]-1,+m2[3]);const d=new Date(v);return isNaN(d)?null:d;}
+        function ordinal(n){const s=['th','st','nd','rd'],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0]);}
+        function fmtCleanDate(v){const d=parseAnyDate(v);if(!d)return String(v||'—');return `${ordinal(d.getDate())} ${MONTHS_SHORT[d.getMonth()]}`;}
+        function fmtPeriod(start,end){const s=parseAnyDate(start),e=parseAnyDate(end);if(!s)return '—';if(!e)return fmtCleanDate(start);if(s.getMonth()===e.getMonth()&&s.getFullYear()===e.getFullYear())return `${ordinal(s.getDate())} – ${ordinal(e.getDate())} ${MONTHS_LONG[s.getMonth()]}`;return `${fmtCleanDate(start)} – ${fmtCleanDate(end)}`;}
+        function isCurrentMonth(v){const d=parseAnyDate(v);if(!d)return false;const n=new Date();return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear();}
+        function currentMonthLabel(){const n=new Date();return `${MONTHS_LONG[n.getMonth()]} ${n.getFullYear()}`;}
+        function fmtLogTime(t){if(!t&&t!==0)return '';const s=String(t);if(s.includes(':')&&s.length<=8)return s.substring(0,5);if(s.includes('T')){const d=new Date(s);if(!isNaN(d))return d.toTimeString().substring(0,5);}const f=parseFloat(s);if(isFinite(f)&&f>0&&f<1){const m=Math.round(f*1440);return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;}return s.substring(0,5);}
+        function normalizeMoon(mc){if(!mc)return 'Other';const l=mc.toLowerCase();if(l.includes('full'))return 'Full Moon';if(l.includes('new'))return 'New Moon';return mc;}
+        const MOON_COLOR={'Full Moon':'#8B5CF6','New Moon':'#3B82F6'};
+        const MOON_EMOJI={'Full Moon':'🌕','New Moon':'🌑'};
+
+        /* ── Misc helpers ────────────────────────────────────── */
+        const num=v=>{const n=parseFloat(v);return isFinite(n)?n:null;};
+        const rnd=(v,dp)=>v==null?'—':v.toFixed(dp);
+        const lineIcon=d=>`<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="${d}"/></svg>`;
         const flameIcon='<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 00.495-7.467 5.99 5.99 0 00-1.925 3.546 5.974 5.974 0 01-2.133-1A3.75 3.75 0 0012 18z"/></svg>';
         const chevR='<svg class="w-5 h-5" style="color:var(--text-dim);" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>';
-        const ICONS = {
-            water:"M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5l6.74-6.76z",
-            spawn:"M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.656 48.656 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3",
-            hr:"M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.75 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
-        };
+        const msgCard=html=>`<div class="card" style="padding:22px;text-align:center;">${html}</div>`;
+        function statusColor(s){if(!s)return 'var(--text)';const l=s.toLowerCase();if(l.includes('success')||l.includes('good')||l.includes('ok'))return'var(--ok)';if(l.includes('fail')||l.includes('poor'))return'var(--alert)';return'var(--attention)';}
+        function qualityColor(s){if(!s)return'var(--text)';const l=s.toLowerCase();if(l.includes('good')||l.includes('excellent'))return'var(--ok)';if(l.includes('poor')||l.includes('bad'))return'var(--alert)';return'var(--attention)';}
+        function mortalityColor(v){if(!isFinite(v))return'var(--text)';if(v<=5)return'var(--ok)';if(v<=15)return'var(--attention)';return'var(--alert)';}
 
         /* ── Worker modules ──────────────────────────────────── */
-        const MODULES = [
-            { hue:'#3B82F6', href:'https://jamesaaa0203.github.io/daily-water-quality/', title:'Water Quality', bm:'Kualiti Air', desc:'DO, temperature & salinity logs', icon:lineIcon(ICONS.water) },
-            { hue:'#8B5CF6', href:'https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/', title:'Spawning Trials', bm:'Ujian Pemijahan', desc:'Induction & conditioning', icon:lineIcon(ICONS.spawn) },
-            { hue:'#0D9488', href:'https://jamesaaa0203.github.io/Abalone-Processing-Log/', title:'Processing Log', bm:'Log Pemprosesan', desc:'Cooking sessions & yield', icon:flameIcon },
-            { hue:'#6366F1', href:'https://jamesaaa0203.github.io/hatchery-hr/', title:'Hatchery HR Suite', bm:'Sumber Manusia', desc:'OT, leave & balances', icon:lineIcon(ICONS.hr) }
+        const MODULES=[{hue:'#3B82F6',href:'https://jamesaaa0203.github.io/daily-water-quality/',title:'Water Quality',bm:'Kualiti Air',desc:'DO, temperature & salinity logs',icon:lineIcon("M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5l6.74-6.76z")},{hue:'#8B5CF6',href:'https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/',title:'Spawning Trials',bm:'Ujian Pemijahan',desc:'Induction & conditioning',icon:lineIcon("M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.656 48.656 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3")},{hue:'#0D9488',href:'https://jamesaaa0203.github.io/Abalone-Processing-Log/',title:'Processing Log',bm:'Log Pemprosesan',desc:'Cooking sessions & yield',icon:flameIcon},{hue:'#6366F1',href:'https://jamesaaa0203.github.io/hatchery-hr/',title:'Hatchery HR Suite',bm:'Sumber Manusia',desc:'OT, leave & balances',icon:lineIcon("M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z")}];
+        function renderModules(){document.getElementById('module-list').innerHTML=MODULES.map(m=>`<button class="module" onclick="openModule('${m.href}')" style="--hue:${m.hue}"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">${m.icon}</span><div class="min-w-0"><div class="module-bm">${m.bm}</div><div class="module-title">${m.title}</div><div class="module-desc">${m.desc}</div></div></div>${chevR}</button>`).join('');}
+        function openModule(href){rumbleDevice(35);window.location.href=href;}
+
+        /* ── Manager menu rows ───────────────────────────────── */
+        const MGR_VIEWS=[
+            {action:'wq',hue:'#3B82F6',ko:'수질 관리 데이터',title:'Water Quality',sub:'Live dashboard',icon:lineIcon("M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14")},
+            {action:'spawn',hue:'#8B5CF6',ko:'산란 시험 관리',title:'Spawning Trials',sub:'Live dashboard',icon:lineIcon("M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.656 48.656 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3")},
+            {action:'purchase',hue:'#D97706',ko:'전복 매입 로그',title:'Abalone Purchasing',sub:'Live dashboard',icon:lineIcon("M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h16.5M4.5 9h15M5.25 14.25h13.5")},
+            {appKey:'Abalone-Processing-Log',tab:'manager',hue:'#0D9488',ko:'가공 처리 로그',title:'Processing Log',icon:flameIcon},
+            {appKey:'hatchery-hr',tab:'mgr-tab',hue:'#6366F1',ko:'인사 및 근태 관리',title:'Workforce & HR',icon:lineIcon("M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z")}
         ];
-        function renderModules(){
-            document.getElementById('module-list').innerHTML = MODULES.map(m=>`
-                <button class="module" onclick="openModule('${m.href}')" style="--hue:${m.hue}">
-                    <div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">${m.icon}</span>
-                    <div class="min-w-0"><div class="module-bm">${m.bm}</div><div class="module-title">${m.title}</div><div class="module-desc">${m.desc}</div></div></div>
-                    ${chevR}
-                </button>`).join('');
-        }
-        function openModule(href){ rumbleDevice(35); window.location.href=href; }
+        const ACTION_FNS={wq:()=>openWaterQuality(),spawn:()=>openSpawning(),purchase:()=>openPurchasing()};
+        function renderMgrList(){document.getElementById('mgr-list').innerHTML=MGR_VIEWS.map(v=>{const onclick=v.action?`(ACTION_FNS['${v.action}']||function(){})()`:` openManagerReport('${v.appKey}','${v.tab}')`;const sub=v.sub?`<div class="text-xs" style="color:var(--text-mut);margin-top:1px;">${v.sub}</div>`:'';return`<button onclick="${onclick}" class="mgr-row"><div class="flex items-center gap-3.5"><span class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:color-mix(in srgb,${v.hue} 12%,transparent);color:${v.hue};border:1px solid color-mix(in srgb,${v.hue} 24%,transparent);"><span style="width:22px;height:22px;display:inline-flex">${v.icon}</span></span><div><div class="eyebrow ko" style="color:${v.hue};">${v.ko}</div><div class="text-base font-semibold tracking-tight" style="margin-top:1px;">${v.title}</div>${sub}</div></div>${chevR}</button>`;}).join('');}
 
-        /* ── Manager rows ────────────────────────────────────── */
-        const MGR_VIEWS = [
-            { action:'wq',       hue:'#3B82F6', ko:'수질 관리 데이터', title:'Water Quality',      sub:'Live dashboard', icon:lineIcon("M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14") },
-            { action:'spawn',    hue:'#8B5CF6', ko:'산란 시험 관리',   title:'Spawning Trials',    sub:'Live dashboard', icon:lineIcon(ICONS.spawn) },
-            { action:'purchase', hue:'#D97706', ko:'전복 매입 로그',   title:'Abalone Purchasing', sub:'Live dashboard', icon:lineIcon("M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h16.5M4.5 9h15M5.25 14.25h13.5") },
-            { appKey:'Abalone-Processing-Log', tab:'manager', hue:'#0D9488', ko:'가공 처리 로그', title:'Processing Log', icon:flameIcon },
-            { appKey:'hatchery-hr', tab:'mgr-tab', hue:'#6366F1', ko:'인사 및 근태 관리', title:'Workforce & HR', icon:lineIcon(ICONS.hr) }
-        ];
-        const ACTION_MAP = { wq:openWaterQuality, spawn:openSpawning, purchase:openPurchasing };
-        function renderMgrList(){
-            document.getElementById('mgr-list').innerHTML = MGR_VIEWS.map(v=>{
-                const onclick = v.action ? `(ACTION_MAP['${v.action}']||function(){})()` : `openManagerReport('${v.appKey}','${v.tab}')`;
-                const sub = v.sub ? `<div class="text-xs" style="color:var(--text-mut);margin-top:1px;">${v.sub}</div>` : '';
-                return `<button onclick="${onclick}" class="mgr-row" style="--hue:${v.hue}">
-                    <div class="flex items-center gap-3.5"><span class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:color-mix(in srgb,${v.hue} 12%,transparent);color:${v.hue};border:1px solid color-mix(in srgb,${v.hue} 24%,transparent);"><span style="width:22px;height:22px;display:inline-flex">${v.icon}</span></span>
-                    <div><div class="eyebrow ko" style="color:${v.hue};">${v.ko}</div><div class="text-base font-semibold tracking-tight" style="margin-top:1px;">${v.title}</div>${sub}</div></div>
-                    ${chevR}
-                </button>`;
-            }).join('');
-        }
-
-        /* ── View management ─────────────────────────────────── */
-        const VIEWS = ['wq-data-view','spawn-data-view','purchase-data-view','manager-report-frame'];
-        function showView(id){
-            document.getElementById('manager-menu-grid').classList.add('hidden');
-            VIEWS.forEach(v=>document.getElementById(v).classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-        }
-        function closeView(key){
-            rumbleDevice(40);
-            VIEWS.forEach(v=>document.getElementById(v).classList.add('hidden'));
-            document.getElementById('manager-menu-grid').classList.remove('hidden');
-        }
-
-        /* ── Utility ─────────────────────────────────────────── */
-        const num=(v)=>{ const n=parseFloat(v); return isFinite(n)?n:null; };
-        const rnd=(v,dp)=>v==null?'—':v.toFixed(dp);
-        const fmtD=(v)=>{ if(!v) return '—'; const s=String(v); if(s.length>6) return s.substring(0,10); return s; };
-        const msgCard=(html)=>`<div class="card" style="padding:22px;text-align:center;">${html}</div>`;
-
-        function statusColor(s){ if(!s) return 'var(--text)'; const l=s.toLowerCase(); if(l.includes('success')||l.includes('good')||l.includes('ok')) return 'var(--ok)'; if(l.includes('fail')||l.includes('poor')) return 'var(--alert)'; return 'var(--attention)'; }
-        function qualityColor(s){ if(!s) return 'var(--text)'; const l=s.toLowerCase(); if(l.includes('good')||l.includes('excellent')) return 'var(--ok)'; if(l.includes('poor')||l.includes('bad')) return 'var(--alert)'; return 'var(--attention)'; }
-        function mortalityColor(pct){ const v=parseFloat(pct); if(!isFinite(v)) return 'var(--text)'; if(v<=5) return 'var(--ok)'; if(v<=15) return 'var(--attention)'; return 'var(--alert)'; }
-
-        function infoItem(key, val, col){ return `<div class="info-item"><div class="info-key">${key}</div><div class="info-val" style="color:${col||'var(--text)'};">${val||'—'}</div></div>`; }
+        /* ── View manager ────────────────────────────────────── */
+        const ALL_VIEWS=['wq-data-view','spawn-data-view','purchase-data-view','manager-report-frame'];
+        function showView(id){document.getElementById('manager-menu-grid').classList.add('hidden');ALL_VIEWS.forEach(v=>document.getElementById(v).classList.add('hidden'));document.getElementById(id).classList.remove('hidden');}
+        function closeView(){rumbleDevice(40);ALL_VIEWS.forEach(v=>document.getElementById(v).classList.add('hidden'));document.getElementById('manager-menu-grid').classList.remove('hidden');}
+        function openFullTab(which){const m={wq:()=>{const u=getGasUrl('daily-water-quality');return`https://jamesaaa0203.github.io/daily-water-quality/?targetTab=manager&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');},spawn:()=>{const u=getGasUrl('Abalone-Spawning-and-Purchasing-Log');return`https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/?targetTab=spawning&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');},purchase:()=>{const u=getGasUrl('Abalone-Spawning-and-Purchasing-Log');return`https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/?targetTab=purchasing&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'')`;}};const fn=m[which];if(fn)window.open(fn(),'_blank','noopener,noreferrer');}
 
         /* ── GAS URL settings ────────────────────────────────── */
-        const GAS_URL_KEYS = { 'Abalone-Spawning-and-Purchasing-Log':'mgr_spawning_gas_url','Abalone-Processing-Log':'mgr_processing_gas_url','hatchery-hr':'mgr_hr_gas_url','daily-water-quality':'mgr_wq_gas_url' };
-        function getModuleGasUrl(key){ const k=GAS_URL_KEYS[key]; return k?store.get(k):null; }
-        function toggleGasSettings(){ const d=document.getElementById('gas-settings-drawer'),s=document.getElementById('gas-settings-status'); d.classList.toggle('hidden'); s.textContent=d.classList.contains('hidden')?'Configure ▾':'Close ▴'; }
-        function saveGasUrls(){ const map={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url'}; for(const[id,k]of Object.entries(map)){const v=document.getElementById(id).value.trim(); if(v)store.set(k,v);} const c=document.getElementById('gas-save-confirm'); c.classList.remove('hidden'); setTimeout(()=>c.classList.add('hidden'),2500); }
-        function loadSavedGasUrls(){ const map={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url'}; for(const[id,k]of Object.entries(map)){const v=store.get(k); if(v)document.getElementById(id).value=v;} }
+        const GAS_KEYS={'Abalone-Spawning-and-Purchasing-Log':'mgr_spawning_gas_url','Abalone-Processing-Log':'mgr_processing_gas_url','hatchery-hr':'mgr_hr_gas_url','daily-water-quality':'mgr_wq_gas_url'};
+        function getGasUrl(k){const key=GAS_KEYS[k];return key?store.get(key):null;}
+        function toggleGasSettings(){const d=document.getElementById('gas-settings-drawer'),s=document.getElementById('gas-settings-status');d.classList.toggle('hidden');s.textContent=d.classList.contains('hidden')?'Configure ▾':'Close ▴';}
+        function saveGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url'};for(const[id,k]of Object.entries(m)){const v=document.getElementById(id).value.trim();if(v)store.set(k,v);}const c=document.getElementById('gas-save-confirm');c.classList.remove('hidden');setTimeout(()=>c.classList.add('hidden'),2500);}
+        function loadSavedGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url'};for(const[id,k]of Object.entries(m)){const v=store.get(k);if(v)document.getElementById(id).value=v;}}
 
-        function openFullTab(which){
-            const map = {
-                wq:  ()=>{ const u=getModuleGasUrl('daily-water-quality'); return `https://jamesaaa0203.github.io/daily-water-quality/?targetTab=manager&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:''); },
-                spawn: ()=>{ const u=getModuleGasUrl('Abalone-Spawning-and-Purchasing-Log'); return `https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/?targetTab=spawning&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:''); },
-                purchase: ()=>{ const u=getModuleGasUrl('Abalone-Spawning-and-Purchasing-Log'); return `https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/?targetTab=purchasing&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:''); }
-            };
-            const fn=map[which]; if(fn) window.open(fn(),'_blank','noopener,noreferrer');
-        }
+        /* ── Overlay helpers ─────────────────────────────────── */
+        function closeOverlay(id,e){if(e&&e.target!==document.getElementById(id))return;document.getElementById(id).classList.remove('open');}
+        function openChartOverlay(title,subtitle,svgHtml){document.getElementById('chart-title').textContent=title;document.getElementById('chart-subtitle').textContent=subtitle;document.getElementById('chart-canvas-wrap').innerHTML=svgHtml;document.getElementById('chart-overlay').classList.add('open');}
+        function openDetailOverlay(headHtml,bodyHtml){document.getElementById('detail-head').innerHTML=headHtml;document.getElementById('detail-body').innerHTML=bodyHtml;document.getElementById('detail-overlay').classList.add('open');}
 
         /* ═══════════════════════════════════════════════════════
-           WATER QUALITY DASHBOARD
+           WATER QUALITY
            ═══════════════════════════════════════════════════════ */
-        const WQ_RANGES = {
-            do:       { min:5.0, max:99,  unit:'mg/L', dp:2, label:'Dissolved O₂', ko:'용존산소', color:'#3B82F6' },
-            temp:     { min:24,  max:32,  unit:'°C',   dp:1, label:'Temperature',  ko:'수온',    color:'#F59E0B' },
-            salinity: { min:30,  max:37,  unit:'ppt',  dp:0, label:'Salinity',     ko:'염분',    color:'#14B8A6' },
-            ph:       { min:7.7, max:8.7, unit:'',     dp:1, label:'pH',           ko:'산도',    color:'#8B5CF6' }
-        };
-        function openWaterQuality(){ rumbleDevice(45); showView('wq-data-view'); loadWaterQuality(); }
+        const WQ_RANGES={do:{min:5.0,max:99,unit:'mg/L',dp:2,label:'Dissolved O₂',ko:'용존산소',color:'#3B82F6'},temp:{min:24,max:32,unit:'°C',dp:1,label:'Temperature',ko:'수온',color:'#F59E0B'},salinity:{min:30,max:37,unit:'ppt',dp:0,label:'Salinity',ko:'염분',color:'#14B8A6'},ph:{min:7.7,max:8.7,unit:'',dp:1,label:'pH',ko:'산도',color:'#8B5CF6'}};
+        function openWaterQuality(){rumbleDevice(45);showView('wq-data-view');loadWaterQuality();}
         async function loadWaterQuality(){
-            const body=document.getElementById('wq-body'), ic=document.getElementById('wq-refresh-ic');
-            ic&&ic.classList.add('spin');
-            const url=getModuleGasUrl('daily-water-quality');
-            if(!url){ body.innerHTML=msgCard(`<p class="text-sm font-semibold">Water Quality not linked</p><p class="text-xs mt-1" style="color:var(--text-mut);">Add the /exec URL in Module GAS connections.</p>`); ic&&ic.classList.remove('spin'); return; }
+            const body=document.getElementById('wq-body'),ic=document.getElementById('wq-refresh-ic');ic&&ic.classList.add('spin');
+            const url=getGasUrl('daily-water-quality');
+            if(!url){body.innerHTML=msgCard(`<p class="text-sm font-semibold">Water Quality not linked</p><p class="text-xs mt-1" style="color:var(--text-mut);">Add the /exec URL in Module GAS connections.</p>`);ic&&ic.classList.remove('spin');return;}
             body.innerHTML=msgCard(`<p class="text-sm" style="color:var(--text-mut);">Loading…</p>`);
-            try{
-                const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),12000);
-                const res=await fetch(`${url}${url.includes('?')?'&':'?'}pin=${MASTER_PIN}`,{signal:ctrl.signal,redirect:'follow'});
-                clearTimeout(t);
-                const data=await res.json();
-                if(data&&data.error){ body.innerHTML=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Access denied — check URL / PIN.</p>`); return; }
-                if(!Array.isArray(data)||!data.length){ body.innerHTML=msgCard(`<p class="text-sm">No readings yet.</p>`); return; }
-                renderWQ(data);
-            }catch(e){
-                body.innerHTML=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Couldn't fetch data</p><p class="text-xs mt-1 mb-3" style="color:var(--text-mut);">Browser may have blocked the request.</p><button onclick="openFullTab('wq')" class="px-4 py-2 rounded-xl text-sm font-semibold text-white" style="background:var(--accent);">Open full module ↗</button>`);
-            } finally{ ic&&ic.classList.remove('spin'); }
+            try{const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),12000);const res=await fetch(`${url}${url.includes('?')?'&':'?'}pin=${MASTER_PIN}`,{signal:ctrl.signal,redirect:'follow'});clearTimeout(t);const data=await res.json();if(data&&data.error){body.innerHTML=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Access denied — check URL / PIN.</p>`);return;}if(!Array.isArray(data)||!data.length){body.innerHTML=msgCard(`<p class="text-sm">No readings yet.</p>`);return;}renderWQ(data);}
+            catch(e){body.innerHTML=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Couldn't fetch data</p><p class="text-xs mt-1 mb-3" style="color:var(--text-mut);">Browser may have blocked the request.</p><button onclick="openFullTab('wq')" class="px-4 py-2 rounded-xl text-sm font-semibold text-white" style="background:var(--accent);">Open full module ↗</button>`);}
+            finally{ic&&ic.classList.remove('spin');}
         }
-        function fmtLogTime(t){ if(!t&&t!==0) return ''; const s=String(t); if(s.includes(':')&&s.length<=8) return s.substring(0,5); if(s.includes('T')){ const d=new Date(s); if(!isNaN(d)) return d.toTimeString().substring(0,5); } const f=parseFloat(s); if(isFinite(f)&&f>0&&f<1){ const m=Math.round(f*1440); return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`; } return s.substring(0,5); }
-        function groupSessions(rows){ const map=new Map(); rows.forEach(r=>{ const k=`${r.date}|${r.time}|${r.shift}`; if(!map.has(k)) map.set(k,{date:r.date,time:r.time,shift:r.shift,sections:[]}); map.get(k).sections.push(r); }); const s=[...map.values()]; s.forEach(x=>{ x.do=avg(x.sections.map(r=>num(r.do))); x.temp=avg(x.sections.map(r=>num(r.temp))); x.salinity=avg(x.sections.map(r=>num(r.salinity))); x.ph=avg(x.sections.map(r=>num(r.ph))); }); return s; }
-        function avg(a){ const v=a.filter(x=>x!=null); return v.length?v.reduce((p,c)=>p+c,0)/v.length:null; }
-        function wqKpiTile(key,latest){
-            const cfg=WQ_RANGES[key], val=latest!=null?rnd(latest,cfg.dp):'—';
-            const ok=latest!=null&&latest>=cfg.min&&latest<=cfg.max;
-            const pg=ok?'color-mix(in srgb,var(--ok) 14%,transparent)':'color-mix(in srgb,var(--attention) 16%,transparent)';
-            const pc=ok?'var(--ok)':'var(--attention)';
-            return `<button class="kpi" onclick="openWQChart('${key}')" style="--kpi-hue:${cfg.color};">
-                <div class="flex items-start justify-between"><div><div class="kpi-label">${cfg.label}</div><div class="kpi-ko ko">${cfg.ko}</div></div><span class="pill" style="background:${pg};color:${pc};">${ok?'OK':'Review'}</span></div>
-                <div class="flex items-baseline gap-1 kpi-val" style="color:${ok?'var(--text)':'var(--attention)'};">${val}<span class="kpi-unit">${cfg.unit}</span></div>
-                <div class="kpi-hint"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.5l6-6 4 4 8-8"/></svg>Tap to view trend</div>
-            </button>`;
-        }
+        function groupSessions(rows){const map=new Map();rows.forEach(r=>{const k=`${r.date}|${r.time}|${r.shift}`;if(!map.has(k))map.set(k,{date:r.date,time:r.time,shift:r.shift,sections:[]});map.get(k).sections.push(r);});const s=[...map.values()];s.forEach(x=>{const a=arr=>arr.filter(v=>v!=null);const avg=arr=>{const v=a(arr);return v.length?v.reduce((p,c)=>p+c,0)/v.length:null;};x.do=avg(x.sections.map(r=>num(r.do)));x.temp=avg(x.sections.map(r=>num(r.temp)));x.salinity=avg(x.sections.map(r=>num(r.salinity)));x.ph=avg(x.sections.map(r=>num(r.ph)));});return s;}
+        function wqKpiTile(key,latest){const cfg=WQ_RANGES[key],val=latest!=null?rnd(latest,cfg.dp):'—';const ok=latest!=null&&latest>=cfg.min&&latest<=cfg.max;const pg=ok?'color-mix(in srgb,var(--ok) 14%,transparent)':'color-mix(in srgb,var(--attention) 16%,transparent)';const pc=ok?'var(--ok)':'var(--attention)';return`<button class="kpi" onclick="openWQChart('${key}')" style="--kpi-hue:${cfg.color};"><div class="flex items-start justify-between"><div><div class="kpi-label">${cfg.label}</div><div class="kpi-ko ko">${cfg.ko}</div></div><span class="pill" style="background:${pg};color:${pc};">${ok?'OK':'Review'}</span></div><div class="flex items-baseline gap-1 kpi-val" style="color:${ok?'var(--text)':'var(--attention)'};">${val}<span class="kpi-unit">${cfg.unit}</span></div><div class="kpi-hint"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.5l6-6 4 4 8-8"/></svg>Tap to view trend</div></button>`;}
         function renderWQ(rows){
-            wqSessions=groupSessions(rows);
-            const latest=wqSessions[0], logTime=fmtLogTime(latest.time);
+            wqSessions=groupSessions(rows);const latest=wqSessions[0],logTime=fmtLogTime(latest.time);
             const order={Front:0,Middle:1,Back:2};
             const secRows=[...latest.sections].sort((a,b)=>(order[a.section]??9)-(order[b.section]??9)).map(r=>`<tr><td>${r.section}</td><td>${rnd(num(r.do),2)}</td><td>${rnd(num(r.temp),1)}</td><td>${rnd(num(r.salinity),0)}</td><td>${rnd(num(r.ph),1)}</td></tr>`).join('');
-            const hist=wqSessions.slice(0,10).map(s=>{ const t=fmtLogTime(s.time); return `<tr><td>${fmtD(s.date)}${t?'<br><span style="color:var(--text-dim);font-size:10px;">'+t+' '+s.shift+'</span>':''}</td><td>${rnd(s.do,2)}</td><td>${rnd(s.temp,1)}</td><td>${rnd(s.salinity,0)}</td><td>${rnd(s.ph,1)}</td></tr>`; }).join('');
-            document.getElementById('wq-body').innerHTML=`
-                <div class="flex items-center gap-2 mb-1 px-1"><span class="dot ok"></span><span class="text-xs font-semibold" style="color:var(--text-mut);">Last logging: ${fmtD(latest.date)}${logTime?' at '+logTime:''} · ${latest.shift} shift</span></div>
-                <p class="text-xs px-1 mb-3" style="color:var(--text-dim);">Tap any tile to view trend chart.</p>
-                <div class="grid grid-cols-2 gap-3">${wqKpiTile('do',latest.do)}${wqKpiTile('temp',latest.temp)}${wqKpiTile('salinity',latest.salinity)}${wqKpiTile('ph',latest.ph)}</div>
-                <div class="mt-3 space-y-3">
-                    <div class="card" style="padding:14px;"><div class="eyebrow mb-2">Latest logging · by section</div><table class="data-table"><thead><tr><th>Section</th><th>DO</th><th>Temp</th><th>Sal</th><th>pH</th></tr></thead><tbody>${secRows}</tbody></table></div>
-                    <div class="card" style="padding:14px;"><div class="eyebrow mb-2">Recent loggings · site average</div><table class="data-table"><thead><tr><th>Date · Time</th><th>DO</th><th>Temp</th><th>Sal</th><th>pH</th></tr></thead><tbody>${hist}</tbody></table></div>
-                </div>
-                <p class="text-xs mt-3 px-1" style="color:var(--text-dim);">"Review" flags use reference ranges in the code — adjust WQ_RANGES to your real targets.</p>`;
+            const hist=wqSessions.slice(0,10).map(s=>{const t=fmtLogTime(s.time);return`<tr><td>${fmtCleanDate(s.date)}${t?'<br><span style="color:var(--text-dim);font-size:10px;">'+t+' '+s.shift+'</span>':''}</td><td>${rnd(s.do,2)}</td><td>${rnd(s.temp,1)}</td><td>${rnd(s.salinity,0)}</td><td>${rnd(s.ph,1)}</td></tr>`;}).join('');
+            document.getElementById('wq-body').innerHTML=`<div class="flex items-center gap-2 mb-1 px-1"><span class="dot ok"></span><span class="text-xs font-semibold" style="color:var(--text-mut);">Last logging: ${fmtCleanDate(latest.date)}${logTime?' at '+logTime:''} · ${latest.shift} shift</span></div><p class="text-xs px-1 mb-3" style="color:var(--text-dim);">Tap any tile to view trend chart.</p><div class="grid grid-cols-2 gap-3">${wqKpiTile('do',latest.do)}${wqKpiTile('temp',latest.temp)}${wqKpiTile('salinity',latest.salinity)}${wqKpiTile('ph',latest.ph)}</div><div class="mt-3 space-y-3"><div class="card" style="padding:14px;"><div class="eyebrow mb-2">Latest logging · by section</div><table class="data-table"><thead><tr><th>Section</th><th>DO</th><th>Temp</th><th>Sal</th><th>pH</th></tr></thead><tbody>${secRows}</tbody></table></div><div class="card" style="padding:14px;"><div class="eyebrow mb-2">Recent loggings · site average</div><table class="data-table"><thead><tr><th>Date · Time</th><th>DO</th><th>Temp</th><th>Sal</th><th>pH</th></tr></thead><tbody>${hist}</tbody></table></div></div><p class="text-xs mt-3 px-1" style="color:var(--text-dim);">"Review" flags use reference ranges in the code — adjust WQ_RANGES to your real targets.</p>`;
         }
-        function openWQChart(key){ const cfg=WQ_RANGES[key]; const chrono=[...wqSessions].reverse().slice(-20); openChart(cfg.label+' · '+cfg.ko, `Last ${chrono.length} sessions · site average`, chrono.map(s=>s[key]), chrono.map(s=>{ const parts=String(s.date).split('/'); return parts.length===3?`${parts[0]}/${parts[1]}`:String(s.date).substring(5); }), {color:cfg.color,dp:cfg.dp,min:cfg.max<50?cfg.min:null,max:cfg.max<50?cfg.max:null}); }
+        function openWQChart(key){const cfg=WQ_RANGES[key];const chrono=[...wqSessions].reverse().slice(-20);openChartOverlay(cfg.label+' · '+cfg.ko,`Last ${chrono.length} sessions · site average`,buildChartSVG(chrono.map(s=>s[key]),chrono.map(s=>{const p=String(s.date).split('/');return p.length===3?`${p[0]}/${p[1]}`:String(s.date).substring(5);}),{color:cfg.color,dp:cfg.dp,min:cfg.max<50?cfg.min:null,max:cfg.max<50?cfg.max:null}));}
 
         /* ═══════════════════════════════════════════════════════
            SPAWNING & PURCHASING SHARED FETCH
            ═══════════════════════════════════════════════════════ */
-        let spawnPurchaseCache = null;
         async function loadSpawnPurchase(){
-            const icS=document.getElementById('spawn-refresh-ic'), icP=document.getElementById('purchase-refresh-ic');
-            [icS,icP].forEach(ic=>ic&&ic.classList.add('spin'));
-            const url=getModuleGasUrl('Abalone-Spawning-and-Purchasing-Log');
-            const spawnBody=document.getElementById('spawn-body'), purchBody=document.getElementById('purchase-body');
-            if(!url){
-                const m=msgCard(`<p class="text-sm font-semibold">Spawning & Purchasing not linked</p><p class="text-xs mt-1" style="color:var(--text-mut);">Add the /exec URL in Module GAS connections.</p>`);
-                spawnBody.innerHTML=m; purchBody.innerHTML=m;
-                [icS,icP].forEach(ic=>ic&&ic.classList.remove('spin')); return;
-            }
-            [spawnBody,purchBody].forEach(b=>b.innerHTML=msgCard(`<p class="text-sm" style="color:var(--text-mut);">Loading…</p>`));
+            const ics=['spawn-refresh-ic','purchase-refresh-ic'].map(id=>document.getElementById(id));
+            ics.forEach(ic=>ic&&ic.classList.add('spin'));
+            const url=getGasUrl('Abalone-Spawning-and-Purchasing-Log');
+            const errMsg=msgCard(`<p class="text-sm font-semibold">Spawning & Purchasing not linked</p><p class="text-xs mt-1" style="color:var(--text-mut);">Add the /exec URL in Module GAS connections.</p>`);
+            if(!url){['spawn-body','purchase-body'].forEach(id=>document.getElementById(id).innerHTML=errMsg);ics.forEach(ic=>ic&&ic.classList.remove('spin'));return;}
+            ['spawn-body','purchase-body'].forEach(id=>document.getElementById(id).innerHTML=msgCard(`<p class="text-sm" style="color:var(--text-mut);">Loading…</p>`));
             try{
-                const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),12000);
+                const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),12000);
                 const res=await fetch(`${url}${url.includes('?')?'&':'?'}action=getLogs&pin=${MASTER_PIN}`,{signal:ctrl.signal,redirect:'follow'});
-                clearTimeout(t);
-                const data=await res.json();
-                if(!data||data.status==='error'){ const m=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Access denied — check URL / PIN.</p>`); spawnBody.innerHTML=m; purchBody.innerHTML=m; return; }
-                spawnLogs = (data.spawning||[]).slice(0,50);
-                purchaseLogs = (data.purchasing||[]).slice(0,50);
-                renderSpawning(spawnLogs);
-                renderPurchasing(purchaseLogs);
-                spawnPurchaseCache = data;
-            }catch(e){
-                const m=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Couldn't fetch data</p><p class="text-xs mt-1 mb-3" style="color:var(--text-mut);">Browser may have blocked the request.</p><button onclick="openFullTab('spawn')" class="px-4 py-2 rounded-xl text-sm font-semibold text-white" style="background:var(--accent);">Open full module ↗</button>`);
-                spawnBody.innerHTML=m; purchBody.innerHTML=m;
-            } finally{ [icS,icP].forEach(ic=>ic&&ic.classList.remove('spin')); }
+                clearTimeout(t);const data=await res.json();
+                if(!data||data.status==='error'){const m=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Access denied — check URL / PIN.</p>`);['spawn-body','purchase-body'].forEach(id=>document.getElementById(id).innerHTML=m);return;}
+                spawnLogs=data.spawning||[];purchaseLogs=data.purchasing||[];
+                renderSpawning(spawnLogs);renderPurchasing(purchaseLogs);
+            }catch(e){const m=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Couldn't fetch data</p><p class="text-xs mt-1 mb-3" style="color:var(--text-mut);">Browser may have blocked the request.</p><button onclick="openFullTab('spawn')" class="px-4 py-2 rounded-xl text-sm font-semibold text-white" style="background:var(--accent);">Open full module ↗</button>`);['spawn-body','purchase-body'].forEach(id=>document.getElementById(id).innerHTML=m);}
+            finally{ics.forEach(ic=>ic&&ic.classList.remove('spin'));}
         }
 
-        /* ── Spawning dashboard ──────────────────────────────── */
-        function openSpawning(){ rumbleDevice(45); showView('spawn-data-view'); if(!spawnLogs.length) loadSpawnPurchase(); else renderSpawning(spawnLogs); }
+        /* ═══════════════════════════════════════════════════════
+           SPAWNING DASHBOARD
+           ═══════════════════════════════════════════════════════ */
+        function openSpawning(){rumbleDevice(45);showView('spawn-data-view');if(!spawnLogs.length)loadSpawnPurchase();else renderSpawning(spawnLogs);}
         function renderSpawning(logs){
             const body=document.getElementById('spawn-body');
-            if(!logs||!logs.length){ body.innerHTML=msgCard(`<p class="text-sm font-semibold">No spawning records yet.</p>`); return; }
-            const r=logs[0]; // most recent (already reversed in GAS)
-            const totalFemPcs = [r.f1Pcs,r.f2Pcs,r.f3Pcs,r.f4Pcs].map(v=>parseInt(v)||0).reduce((a,b)=>a+b,0);
-            const statusCol=statusColor(r.statusOutcome);
-            const qualCol=qualityColor(r.eggQuality);
-            const eggNum=parseInt(r.totalEggs)||0;
-
-            // Egg count KPI (tappable for chart)
-            const eggTile=`<button class="kpi" onclick="openSpawnChart('eggs')" style="--kpi-hue:#8B5CF6; grid-column:span 2;">
-                <div class="flex items-start justify-between"><div><div class="kpi-label">Total Eggs</div><div class="kpi-ko ko">총 산란 수</div></div><span class="pill" style="background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok);">${r.statusOutcome||'—'}</span></div>
-                <div class="flex items-baseline gap-1 kpi-val" style="color:${statusCol};">${eggNum>0?eggNum.toLocaleString():'—'}</div>
-                <div class="kpi-hint"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.5l6-6 4 4 8-8"/></svg>Tap to view egg count trend</div>
-            </button>`;
-
-            // Info grid
-            const info=`<div class="info-grid">
-                ${infoItem('Date',fmtD(r.date))}
-                ${infoItem('Moon Cycle · 월령',r.moonCycle)}
-                ${infoItem('Period',`${r.periodStart||'—'} – ${r.periodEnd||'—'}`)}
-                ${infoItem('In Charge · 담당자',r.inCharge)}
-                ${infoItem('Egg Quality · 난질',r.eggQuality,''+qualCol)}
-                ${infoItem('Total Spawners · 산란어',r.totalSpawners)}
-                ${infoItem('Females Used · 암컷',`${totalFemPcs} pcs`)}
-                ${infoItem('Males Used · 수컷',`${parseInt(r.malePcs)||0} pcs`)}
-            </div>`;
-
-            // WQ during trial
-            const wqMini=`<div class="card" style="padding:14px;"><div class="eyebrow mb-2">Water quality during trial</div>
-                <div class="wq-mini">
-                    <div class="wq-col"><div class="wq-col-head">WQ1 · ${r.wq1Time||'—'}</div>
-                        <div class="wq-row"><span>Temp</span><span>${r.wq1AvgTemp||'—'} °C</span></div>
-                        <div class="wq-row"><span>DO</span><span>${r.wq1AvgDo||'—'} mg/L</span></div>
-                        <div class="wq-row"><span>pH</span><span>${r.wq1AvgPh||'—'}</span></div>
-                        <div class="wq-row"><span>Sal</span><span>${r.wq1AvgSal||'—'} ppt</span></div>
-                    </div>
-                    <div class="wq-col"><div class="wq-col-head">WQ2 · ${r.wq2Time||'—'}</div>
-                        <div class="wq-row"><span>Temp</span><span>${r.wq2AvgTemp||'—'} °C</span></div>
-                        <div class="wq-row"><span>DO</span><span>${r.wq2AvgDo||'—'} mg/L</span></div>
-                        <div class="wq-row"><span>pH</span><span>${r.wq2AvgPh||'—'}</span></div>
-                        <div class="wq-row"><span>Sal</span><span>${r.wq2AvgSal||'—'} ppt</span></div>
-                    </div>
-                </div></div>`;
-
-            // Recent trials table
-            const histRows=logs.slice(0,10).map(s=>{
-                const sc=statusColor(s.statusOutcome), qc=qualityColor(s.eggQuality);
-                const eggs=parseInt(s.totalEggs)||0;
-                return `<tr><td>${fmtD(s.date)}<br><span style="color:var(--text-dim);font-size:10px;">${s.moonCycle||''}</span></td>
-                    <td class="${s.statusOutcome&&s.statusOutcome.toLowerCase().includes('success')?'ok':'attn'}">${s.statusOutcome||'—'}</td>
-                    <td>${eggs>0?eggs.toLocaleString():'—'}</td>
-                    <td style="color:${qc}">${s.eggQuality||'—'}</td>
-                    <td>${s.totalSpawners||'—'}</td></tr>`;
+            document.getElementById('spawn-month-title').textContent=currentMonthLabel();
+            // Filter to current month
+            const monthLogs=logs.filter(r=>isCurrentMonth(r.date));
+            if(!monthLogs.length){
+                // Try showing most recent month if nothing this month
+                const noDataHtml=msgCard(`<p class="text-sm font-semibold">No trials recorded this month yet.</p><p class="text-xs mt-1" style="color:var(--text-mut);">Use Full tab to see historical records.</p>`);
+                body.innerHTML=noDataHtml;return;
+            }
+            // Group by moon cycle
+            const moonGroups={};
+            monthLogs.forEach(r=>{const m=normalizeMoon(r.moonCycle);if(!moonGroups[m])moonGroups[m]=[];moonGroups[m].push(r);});
+            // Moon cards
+            const priorityOrder=['Full Moon','New Moon'];
+            const orderedKeys=[...priorityOrder.filter(k=>moonGroups[k]),...Object.keys(moonGroups).filter(k=>!priorityOrder.includes(k))];
+            const moonCards=orderedKeys.map(moonKey=>{
+                const trials=moonGroups[moonKey];
+                const totalEggs=trials.reduce((s,r)=>s+(parseInt(r.totalEggs)||0),0);
+                const allDates=trials.flatMap(r=>[parseAnyDate(r.periodStart),parseAnyDate(r.periodEnd),parseAnyDate(r.date)]).filter(Boolean);
+                const minD=allDates.length?new Date(Math.min(...allDates.map(d=>d.getTime()))):null;
+                const maxD=allDates.length?new Date(Math.max(...allDates.map(d=>d.getTime()))):null;
+                const dateRange=minD&&maxD?fmtPeriod(minD,maxD):'—';
+                const statuses=trials.map(r=>r.statusOutcome||'').filter(Boolean);
+                const hasSuccess=statuses.some(s=>s.toLowerCase().includes('success'));
+                const allFailed=statuses.length&&statuses.every(s=>s.toLowerCase().includes('fail'));
+                const pillBg=hasSuccess?'color-mix(in srgb,var(--ok) 14%,transparent)':allFailed?'color-mix(in srgb,var(--alert) 14%,transparent)':'color-mix(in srgb,var(--attention) 14%,transparent)';
+                const pillCol=hasSuccess?'var(--ok)':allFailed?'var(--alert)':'var(--attention)';
+                const pillTxt=hasSuccess?'Success':allFailed?'Failed':'In Progress';
+                const mc=MOON_COLOR[moonKey]||'#8B5CF6';
+                const emoji=MOON_EMOJI[moonKey]||'🌙';
+                return`<button class="moon-card" onclick="openMoonDetail('${moonKey}')" style="--mc:${mc};">
+                    <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span style="font-size:20px;">${emoji}</span><span class="moon-name">${moonKey}</span></div><span class="pill" style="background:${pillBg};color:${pillCol};">${pillTxt}</span></div>
+                    <div class="moon-meta">${dateRange} · ${trials.length} trial${trials.length>1?'s':''}</div>
+                    <div class="moon-eggs" style="color:${mc};">${totalEggs>0?totalEggs.toLocaleString():'—'}</div>
+                    <div class="moon-eggs-label">Total eggs · Tap for full breakdown ›</div>
+                </button>`;
             }).join('');
-            const hist=`<div class="card" style="padding:14px;"><div class="eyebrow mb-2">Recent trials</div>
-                <table class="data-table"><thead><tr><th>Date · Moon</th><th>Status</th><th>Eggs</th><th>Quality</th><th>Spawners</th></tr></thead><tbody>${histRows}</tbody></table></div>`;
-
-            body.innerHTML=`<div class="grid grid-cols-2 gap-3 mb-3">${eggTile}</div>${info}<div class="mt-3 space-y-3">${wqMini}${hist}</div>`;
+            // Latest trial WQ
+            const latest=monthLogs[0];
+            const wq1Label=`WQ 1 – ${fmtCleanDate(latest.date)}${latest.wq1Time?' – '+fmtLogTime(latest.wq1Time):''}`;
+            const wq2Label=`WQ 2 – ${fmtCleanDate(latest.date)}${latest.wq2Time?' – '+fmtLogTime(latest.wq2Time):''}`;
+            const wqBlock=`<div class="card" style="padding:14px;"><div class="eyebrow mb-3">Latest trial water quality</div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="wq-col"><div class="wq-col-head">${wq1Label}</div><div class="wq-row"><span>Temp</span><span>${latest.wq1AvgTemp||'—'} °C</span></div><div class="wq-row"><span>DO</span><span>${latest.wq1AvgDo||'—'} mg/L</span></div><div class="wq-row"><span>pH</span><span>${latest.wq1AvgPh||'—'}</span></div><div class="wq-row"><span>Sal</span><span>${latest.wq1AvgSal||'—'} ppt</span></div></div>
+                    <div class="wq-col"><div class="wq-col-head">${wq2Label}</div><div class="wq-row"><span>Temp</span><span>${latest.wq2AvgTemp||'—'} °C</span></div><div class="wq-row"><span>DO</span><span>${latest.wq2AvgDo||'—'} mg/L</span></div><div class="wq-row"><span>pH</span><span>${latest.wq2AvgPh||'—'}</span></div><div class="wq-row"><span>Sal</span><span>${latest.wq2AvgSal||'—'} ppt</span></div></div>
+                </div></div>`;
+            // Recent trials table (current month)
+            const trialRows=monthLogs.slice(0,10).map(r=>{const eggs=parseInt(r.totalEggs)||0;return`<tr><td>${fmtCleanDate(r.date)}<br><span style="color:var(--text-dim);font-size:10px;">${normalizeMoon(r.moonCycle)}</span></td><td style="color:${statusColor(r.statusOutcome)};">${r.statusOutcome||'—'}</td><td>${eggs>0?eggs.toLocaleString():'—'}</td><td style="color:${qualityColor(r.eggQuality)};">${r.eggQuality||'—'}</td></tr>`;}).join('');
+            const trialTable=`<div class="card" style="padding:14px;"><div class="eyebrow mb-2">All trials this month</div><table class="data-table"><thead><tr><th>Date · Moon</th><th>Status</th><th>Eggs</th><th>Quality</th></tr></thead><tbody>${trialRows}</tbody></table></div>`;
+            body.innerHTML=`<div class="space-y-3">${moonCards}</div><div class="mt-4 space-y-3">${wqBlock}${trialTable}</div><p class="text-xs mt-3 px-1" style="color:var(--text-dim);">Showing ${currentMonthLabel()} only — tap Full tab for full history.</p>`;
         }
-        function openSpawnChart(type){
-            const vals=spawnLogs.slice(0,20).reverse().map(r=>parseInt(r.totalEggs)||null);
-            const labels=spawnLogs.slice(0,20).reverse().map(r=>{ const parts=String(r.date||'').split('/'); return parts.length===3?`${parts[0]}/${parts[1]}`:String(r.date||'').substring(5); });
-            openChart('Total Eggs · 총 산란 수',`Last ${vals.length} trials`,vals,labels,{color:'#8B5CF6',dp:0});
+
+        // Moon trial detail panel
+        function openMoonDetail(moonKey){
+            rumbleDevice(30);
+            const monthLogs=spawnLogs.filter(r=>isCurrentMonth(r.date));
+            const trials=monthLogs.filter(r=>normalizeMoon(r.moonCycle)===moonKey);
+            if(!trials.length)return;
+            const totalEggs=trials.reduce((s,r)=>s+(parseInt(r.totalEggs)||0),0);
+            const allDates=trials.flatMap(r=>[parseAnyDate(r.periodStart),parseAnyDate(r.periodEnd),parseAnyDate(r.date)]).filter(Boolean);
+            const minD=allDates.length?new Date(Math.min(...allDates.map(d=>d.getTime()))):null;
+            const maxD=allDates.length?new Date(Math.max(...allDates.map(d=>d.getTime()))):null;
+            const dateRange=minD&&maxD?fmtPeriod(minD,maxD):'—';
+            const mc=MOON_COLOR[moonKey]||'#8B5CF6';
+            const emoji=MOON_EMOJI[moonKey]||'🌙';
+            const headHtml=`<div class="flex items-center gap-2"><span style="font-size:22px;">${emoji}</span><div><div class="text-xl font-semibold tracking-tight">${moonKey}</div><div class="text-sm" style="color:var(--text-mut);">${dateRange} · ${currentMonthLabel()}</div></div></div>
+                <div class="flex items-baseline gap-2 mt-3"><span class="num" style="font-size:36px;font-weight:700;color:${mc};">${totalEggs>0?totalEggs.toLocaleString():'—'}</span><span style="font-size:13px;color:var(--text-dim);">total eggs</span></div>`;
+            // Individual trial cards
+            const trialCards=trials.map((r,i)=>{
+                const eggs=parseInt(r.totalEggs)||0;
+                const period=fmtPeriod(r.periodStart,r.periodEnd)||fmtCleanDate(r.date);
+                const sc=statusColor(r.statusOutcome),qc=qualityColor(r.eggQuality);
+                const femPcs=[r.f1Pcs,r.f2Pcs,r.f3Pcs,r.f4Pcs].map(v=>parseInt(v)||0).reduce((a,b)=>a+b,0);
+                const malePcs=parseInt(r.malePcs)||0;
+                return`<div class="trial-row">
+                    <div class="flex items-start justify-between"><div><div class="text-sm font-semibold" style="color:var(--text);">${period}</div><div class="text-xs mt-0.5" style="color:var(--text-mut);">In charge: ${r.inCharge||'—'}</div></div><span class="pill" style="background:color-mix(in srgb,${sc} 14%,transparent);color:${sc};">${r.statusOutcome||'—'}</span></div>
+                    <div class="flex items-baseline gap-2 mt-2"><span class="num" style="font-size:24px;font-weight:700;color:${sc};">${eggs>0?eggs.toLocaleString():'—'}</span><span style="font-size:11px;color:var(--text-dim);">eggs · ${r.eggQuality||'?'} quality</span></div>
+                    <button onclick="openSpawnerDetail(${spawnLogs.indexOf(r)})" class="mt-2 flex items-center gap-1.5 text-xs font-semibold py-1.5 px-3 rounded-lg" style="background:color-mix(in srgb,${mc} 12%,transparent);color:${mc};border:1px solid color-mix(in srgb,${mc} 26%,transparent);">Spawners: ${femPcs+malePcs} total (${femPcs}F + ${malePcs}M) — tap for maturity breakdown ›</button>
+                </div>`;
+            }).join('');
+            const bodyHtml=`<div class="eyebrow mb-3">Trial breakdown — ${trials.length} trial${trials.length>1?'s':''}</div><div class="space-y-3">${trialCards}</div>`;
+            openDetailOverlay(headHtml,bodyHtml);
         }
 
-        /* ── Purchasing dashboard ────────────────────────────── */
-        function openPurchasing(){ rumbleDevice(45); showView('purchase-data-view'); if(!purchaseLogs.length) loadSpawnPurchase(); else renderPurchasing(purchaseLogs); }
+        // Spawner maturity detail
+        function openSpawnerDetail(logIdx){
+            rumbleDevice(25);
+            const r=spawnLogs[logIdx];if(!r)return;
+            const period=fmtPeriod(r.periodStart,r.periodEnd)||fmtCleanDate(r.date);
+            const mc=MOON_COLOR[normalizeMoon(r.moonCycle)]||'#8B5CF6';
+            const headHtml=`<button onclick="openMoonDetail('${normalizeMoon(r.moonCycle)}')" class="flex items-center gap-1.5 text-sm font-semibold mb-2" style="color:var(--accent);">‹ Back to ${normalizeMoon(r.moonCycle)}</button><div class="text-xl font-semibold tracking-tight">Spawner Breakdown</div><div class="text-sm" style="color:var(--text-mut);">${period}</div>`;
+            const females=[[r.f1Mat,r.f1Pcs],[r.f2Mat,r.f2Pcs],[r.f3Mat,r.f3Pcs],[r.f4Mat,r.f4Pcs]].filter(([mat,pcs])=>mat||parseInt(pcs));
+            const totalFem=females.reduce((s,[,p])=>s+(parseInt(p)||0),0);
+            const malePcs=parseInt(r.malePcs)||0;
+            const total=totalFem+malePcs;
+            const femRows=females.map(([mat,pcs],i)=>{const p=parseInt(pcs)||0;const pct=total?Math.round(p/total*100):0;return`<div class="grade-row"><div><div class="text-sm font-semibold">Female ${i+1} · ${mat||'—'}</div><div class="text-xs" style="color:var(--text-dim);">${pct}% of total broodstock</div></div><div class="num font-semibold text-sm" style="color:${mc};">${p} pcs</div></div>`;}).join('');
+            const malePct=total?Math.round(malePcs/total*100):0;
+            const maleRow=`<div class="grade-row"><div><div class="text-sm font-semibold">Male · ${r.maleMat||'—'}</div><div class="text-xs" style="color:var(--text-dim);">${malePct}% of total broodstock</div></div><div class="num font-semibold text-sm">${malePcs} pcs</div></div>`;
+            const bodyHtml=`<div class="card" style="padding:14px;"><div class="eyebrow mb-2">Female broodstock</div>${femRows}</div><div class="card mt-3" style="padding:14px;"><div class="eyebrow mb-2">Male broodstock</div>${maleRow}</div><div class="card mt-3" style="padding:12px 14px;"><div class="flex justify-between items-center"><span class="text-sm font-semibold">Total spawners</span><span class="num text-lg font-bold" style="color:${mc};">${total}</span></div></div>`;
+            openDetailOverlay(headHtml,bodyHtml);
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           PURCHASING DASHBOARD
+           ═══════════════════════════════════════════════════════ */
+        function openPurchasing(){rumbleDevice(45);showView('purchase-data-view');if(!purchaseLogs.length)loadSpawnPurchase();else renderPurchasing(purchaseLogs);}
         function renderPurchasing(logs){
             const body=document.getElementById('purchase-body');
-            if(!logs||!logs.length){ body.innerHTML=msgCard(`<p class="text-sm font-semibold">No purchasing records yet.</p>`); return; }
-            const r=logs[0];
-            const mort=parseFloat(r.mortality)||parseFloat(r['mortality%'])||null;
+            document.getElementById('purchase-month-title').textContent=currentMonthLabel();
+            const monthLogs=logs.filter(r=>isCurrentMonth(r.date));
+            if(!monthLogs.length){body.innerHTML=msgCard(`<p class="text-sm font-semibold">No batches this month yet.</p><p class="text-xs mt-1" style="color:var(--text-mut);">Use Full tab to see historical records.</p>`);return;}
+            const latest=monthLogs[0];
+            const mort=num(latest.mortality||latest['mortality%']);
             const mortCol=mortalityColor(mort);
-            const totalKg=parseFloat(r.totalBatchWeightKg||r.totalBatchWeight)||null;
-            const femPcs=parseInt(r.totalFemalesPcs)||null;
-
-            // KPI tiles
+            const totalKg=num(latest.totalBatchWeightKg||latest.totalBatchWeight);
+            const femPcs=parseInt(latest.totalFemalesPcs)||0;
+            const malePcs=parseInt(latest.totalMalesPcs)||0;
+            const totalBroodstock=femPcs+malePcs;
             const tiles=`<div class="grid grid-cols-2 gap-3">
+                <button class="kpi" onclick="openBroodstockDetail(0)" style="--kpi-hue:#D97706;grid-column:span 2;">
+                    <div class="flex items-start justify-between"><div><div class="kpi-label">Total Broodstock</div><div class="kpi-ko ko">총 어미 입고</div></div></div>
+                    <div class="flex items-baseline gap-1 kpi-val">${totalBroodstock>0?totalBroodstock.toLocaleString():'—'}<span class="kpi-unit">pcs</span></div>
+                    <div class="kpi-hint" style="margin-top:8px;"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 1v14M1 8h14"/></svg>Tap for male / female breakdown</div>
+                </button>
+                <button class="kpi" onclick="openPurchaseChart()" style="--kpi-hue:${mortCol};">
+                    <div class="kpi-label">Mortality</div><div class="kpi-ko ko">폐사율</div>
+                    <div class="flex items-baseline gap-1 kpi-val" style="color:${mortCol};">${mort!=null?mort.toFixed(1):'—'}<span class="kpi-unit">%</span></div>
+                    <div class="kpi-hint"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.5l6-6 4 4 8-8"/></svg>Tap for trend</div>
+                </button>
                 <div class="kpi" style="--kpi-hue:#D97706;">
                     <div class="kpi-label">Batch Weight</div><div class="kpi-ko ko">총 입고량</div>
                     <div class="flex items-baseline gap-1 kpi-val">${totalKg!=null?totalKg.toFixed(1):'—'}<span class="kpi-unit">kg</span></div>
                 </div>
-                <button class="kpi" onclick="openPurchaseChart('mortality')" style="--kpi-hue:${mortCol.includes('ok')?'#0D9488':mortCol.includes('attention')?'#D97706':'#E11D48'};">
-                    <div class="flex items-start justify-between"><div><div class="kpi-label">Mortality</div><div class="kpi-ko ko">폐사율</div></div></div>
-                    <div class="flex items-baseline gap-1 kpi-val" style="color:${mortCol};">${mort!=null?mort.toFixed(1):'—'}<span class="kpi-unit">%</span></div>
-                    <div class="kpi-hint"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.5l6-6 4 4 8-8"/></svg>Tap to view trend</div>
-                </button>
-                <div class="kpi" style="--kpi-hue:#D97706;">
-                    <div class="kpi-label">Quality</div><div class="kpi-ko ko">품질 등급</div>
-                    <div class="kpi-big mt-2.5" style="color:${qualityColor(r.overallQuality)};">${r.overallQuality||'—'}</div>
-                </div>
-                <div class="kpi" style="--kpi-hue:#D97706;">
-                    <div class="kpi-label">Females (pcs)</div><div class="kpi-ko ko">암컷 수량</div>
-                    <div class="flex items-baseline gap-1 kpi-val">${femPcs!=null?femPcs.toLocaleString():'—'}</div>
+                <div class="kpi" style="--kpi-hue:${qualityColor(latest.overallQuality)};">
+                    <div class="kpi-label">Quality</div><div class="kpi-ko ko">품질</div>
+                    <div class="kpi-val" style="font-size:22px;color:${qualityColor(latest.overallQuality)};">${latest.overallQuality||'—'}</div>
                 </div>
             </div>`;
-
-            // Latest batch info
-            const info=`<div class="info-grid">
-                ${infoItem('Date · 입고일',fmtD(r.date))}
-                ${infoItem('Supplier Category',r.supplierCategory||r.supplierCat)}
-                ${infoItem('Moon Phase · 월령',r.moonPhase||r.moon)}
-                ${infoItem('Dead Weight · 폐사량',`${parseFloat(r.deadWeightKg||r.deadKg)||0} kg`)}
-            </div>`;
-
-            // Female size breakdown
-            const sizes=['50','60','70','80','90'];
-            const sizeRows=sizes.map(s=>{
-                const pcs=parseInt(r[`female${s}Pcs`])||0, kg=parseFloat(r[`female${s}Kg`])||0;
-                if(!pcs&&!kg) return '';
-                return `<tr><td>${s}%</td><td>${pcs}</td><td>${kg.toFixed(1)}</td></tr>`;
-            }).filter(Boolean).join('');
-            const sizeTable=sizeRows?`<div class="card" style="padding:14px;"><div class="eyebrow mb-2">Female size breakdown · 암컷 규격별</div>
-                <table class="data-table"><thead><tr><th>Grade</th><th>Pcs</th><th>kg</th></tr></thead><tbody>${sizeRows}</tbody></table></div>`:'';
-
-            // Recent batches
-            const histRows=logs.slice(0,10).map(l=>{
-                const m=parseFloat(l.mortality||l['mortality%'])||null;
-                return `<tr><td>${fmtD(l.date)}</td><td>${parseFloat(l.totalBatchWeightKg||l.totalBatchWeight)||0} kg</td><td style="color:${mortalityColor(m)};">${m!=null?m.toFixed(1)+'%':'—'}</td><td style="color:${qualityColor(l.overallQuality)};">${l.overallQuality||'—'}</td></tr>`;
-            }).join('');
-            const hist=`<div class="card" style="padding:14px;"><div class="eyebrow mb-2">Recent batches</div>
-                <table class="data-table"><thead><tr><th>Date</th><th>Batch</th><th>Mortality</th><th>Quality</th></tr></thead><tbody>${histRows}</tbody></table></div>`;
-
-            body.innerHTML=`${tiles}${info?`<div class="mt-3">${info}</div>`:''}<div class="mt-3 space-y-3">${sizeTable}${hist}</div>`;
+            // Recent batches — current month only
+            const batchRows=monthLogs.map(l=>{const m=num(l.mortality||l['mortality%']);const bkg=num(l.totalBatchWeightKg||l.totalBatchWeight);return`<tr><td>${fmtCleanDate(l.date)}<br><span style="color:var(--text-dim);font-size:10px;">${l.supplierCategory||l.supplierCat||'—'}</span></td><td>${bkg!=null?bkg.toFixed(1):'—'} kg</td><td style="color:${mortalityColor(m)};">${m!=null?m.toFixed(1)+'%':'—'}</td><td style="color:${qualityColor(l.overallQuality)};">${l.overallQuality||'—'}</td></tr>`;}).join('');
+            const batchTable=`<div class="card" style="padding:14px;"><div class="eyebrow mb-2">Batches this month</div><table class="data-table"><thead><tr><th>Date · Supplier</th><th>Weight</th><th>Mortality</th><th>Quality</th></tr></thead><tbody>${batchRows}</tbody></table></div>`;
+            body.innerHTML=`${tiles}<div class="mt-3 space-y-3">${batchTable}</div><p class="text-xs mt-3 px-1" style="color:var(--text-dim);">Showing ${currentMonthLabel()} only — tap Full tab for full history.</p>`;
         }
-        function openPurchaseChart(type){
-            const vals=purchaseLogs.slice(0,20).reverse().map(r=>parseFloat(r.mortality||r['mortality%'])||null);
-            const labels=purchaseLogs.slice(0,20).reverse().map(r=>{ const parts=String(r.date||'').split('/'); return parts.length===3?`${parts[0]}/${parts[1]}`:String(r.date||'').substring(5); });
-            openChart('Mortality Rate · 폐사율',`Last ${vals.length} batches`,vals,labels,{color:'#D97706',dp:1,unit:'%'});
+
+        // Broodstock breakdown detail
+        function openBroodstockDetail(monthIdx){
+            rumbleDevice(25);
+            const monthLogs=purchaseLogs.filter(r=>isCurrentMonth(r.date));
+            const r=monthLogs[monthIdx];if(!r)return;
+            const femPcs=parseInt(r.totalFemalesPcs)||0,malePcs=parseInt(r.totalMalesPcs)||0;
+            const femKg=parseFloat(r.totalFemalesKg)||0,maleKg=parseFloat(r.totalMalesKg)||0;
+            const total=femPcs+malePcs;
+            const femPct=total?Math.round(femPcs/total*100):0,malePct=total?Math.round(malePcs/total*100):0;
+            const headHtml=`<div class="text-xl font-semibold tracking-tight">Broodstock Breakdown</div><div class="text-sm" style="color:var(--text-mut);">${fmtCleanDate(r.date)} · ${r.supplierCategory||r.supplierCat||'—'}</div><div class="flex items-baseline gap-2 mt-2"><span class="num" style="font-size:30px;font-weight:700;color:#D97706;">${total>0?total.toLocaleString():'—'}</span><span style="font-size:12px;color:var(--text-dim);">total broodstock</span></div>`;
+            const sizes=['50','60','70','80','90'];
+            const femBreakdown=sizes.map(s=>{const pcs=parseInt(r[`female${s}Pcs`])||0;const kg=parseFloat(r[`female${s}Kg`])||0;if(!pcs&&!kg)return'';const pct=femPcs?Math.round(pcs/femPcs*100):0;return`<div class="grade-row"><div><div class="text-sm font-semibold">Grade ${s}%</div><div class="text-xs" style="color:var(--text-dim);">${pcs} pcs · ${kg.toFixed(1)} kg · ${pct}% of females</div></div><div class="num text-sm font-semibold" style="color:#8B5CF6;">${pcs>0?pcs:''}</div></div>`;}).filter(Boolean).join('');
+            const bodyHtml=`<div class="card" style="padding:14px;">
+                <div class="grade-row" style="border-color:var(--accent)"><div><div class="text-sm font-semibold" style="color:var(--accent);">Female total</div><div class="text-xs" style="color:var(--text-dim);">${femPct}% of total broodstock · ${femKg.toFixed(1)} kg</div></div><div class="num text-lg font-bold" style="color:var(--accent);">${femPcs} pcs</div></div>
+                ${femBreakdown}
+            </div>
+            <div class="card mt-3" style="padding:14px;">
+                <div class="grade-row" style="border-bottom:0"><div><div class="text-sm font-semibold">Male total</div><div class="text-xs" style="color:var(--text-dim);">${malePct}% of total broodstock · ${maleKg.toFixed(1)} kg</div></div><div class="num text-lg font-bold">${malePcs} pcs</div></div>
+            </div>`;
+            openDetailOverlay(headHtml,bodyHtml);
+        }
+
+        function openPurchaseChart(){
+            const monthLogs=[...purchaseLogs].filter(r=>isCurrentMonth(r.date)).reverse();
+            const all=[...purchaseLogs].slice(0,20).reverse();
+            const vals=all.map(r=>num(r.mortality||r['mortality%']));
+            const labels=all.map(r=>fmtCleanDate(r.date));
+            openChartOverlay('Mortality Rate · 폐사율',`Last ${all.length} batches`,buildChartSVG(vals,labels,{color:'#D97706',dp:1,unit:'%'}));
         }
 
         /* ═══════════════════════════════════════════════════════
-           CHART ENGINE (shared by WQ, Spawning, Purchasing)
+           CHART ENGINE
            ═══════════════════════════════════════════════════════ */
-        function openChart(title, subtitle, vals, labels, cfg){
-            rumbleDevice(30);
-            document.getElementById('chart-title').textContent=title;
-            document.getElementById('chart-subtitle').textContent=subtitle;
-            document.getElementById('chart-canvas-wrap').innerHTML=buildChartSVG(vals,labels,cfg);
-            document.getElementById('chart-overlay').classList.add('open');
-        }
-        function closeChart(e){ if(e&&e.target!==document.getElementById('chart-overlay')) return; document.getElementById('chart-overlay').classList.remove('open'); }
-
         function buildChartSVG(vals,labels,cfg){
             const defined=vals.filter(v=>v!=null);
-            if(!defined.length) return '<p style="color:var(--text-mut);text-align:center;padding:32px 0;">No data yet</p>';
-            const W=340,H=180,PL=40,PR=12,PT=10,PB=48, plotW=W-PL-PR, plotH=H-PT-PB;
-            const n=vals.length;
-            const mn=Math.min(...defined), mx=Math.max(...defined);
-            // Use reference range as base when sensible (< 50 means it's a real operational ceiling)
+            if(!defined.length)return'<p style="color:var(--text-mut);text-align:center;padding:32px 0;">No data yet</p>';
+            const W=340,H=180,PL=40,PR=12,PT=10,PB=48,plotW=W-PL-PR,plotH=H-PT-PB;
+            const n=vals.length,mn=Math.min(...defined),mx=Math.max(...defined);
             const cfgLo=cfg.min!=null&&(cfg.max==null||cfg.max<50)?cfg.min:null;
             const cfgHi=cfg.max!=null&&cfg.max<50?cfg.max:null;
-            const baseLo=cfgLo!=null?Math.min(cfgLo,mn):mn;
-            const baseHi=cfgHi!=null?Math.max(cfgHi,mx):mx;
-            const span=(baseHi-baseLo)||1;
-            const lo=baseLo-span*.05, hi=baseHi+span*.05, rng=hi-lo;
-            const dp=cfg.dp??1, color=cfg.color||'var(--accent)';
-            const xp=i=>PL+(i/(n-1||1))*plotW;
-            const yp=v=>PT+(1-(v-lo)/rng)*plotH;
-            // Gridlines
-            let grids='', yLabels='';
-            for(let g=0;g<=3;g++){
-                const gv=lo+(rng/3)*g, gy=yp(gv);
-                grids+=`<line x1="${PL}" y1="${gy.toFixed(1)}" x2="${W-PR}" y2="${gy.toFixed(1)}" stroke="var(--border)" stroke-width="1"/>`;
-                yLabels+=`<text x="${PL-4}" y="${(gy+4).toFixed(1)}" text-anchor="end" font-size="9" fill="var(--text-dim)" font-family="Space Grotesk,sans-serif">${gv.toFixed(dp)}${cfg.unit?cfg.unit:''}</text>`;
-            }
-            // Reference band
-            let band='';
-            if(cfgLo!=null&&cfgHi!=null){ const bT=Math.min(yp(cfgHi),yp(cfgLo)),bH=Math.abs(yp(cfgLo)-yp(cfgHi)); band=`<rect x="${PL}" y="${bT.toFixed(1)}" width="${plotW}" height="${bH.toFixed(1)}" fill="${color}" opacity=".07"/>`; }
-            // Line
-            const pts=vals.map((v,i)=>v!=null?`${xp(i).toFixed(1)},${yp(v).toFixed(1)}`:null).filter(Boolean);
-            const dots=vals.map((v,i)=>{ if(v==null) return ''; const inR=cfgLo==null||(v>=cfgLo&&v<=cfgHi); return `<circle cx="${xp(i).toFixed(1)}" cy="${yp(v).toFixed(1)}" r="3.5" fill="${inR?color:'var(--attention)'}" stroke="var(--surface)" stroke-width="1.5"/>`; }).join('');
-            // X labels
+            const baseLo=cfgLo!=null?Math.min(cfgLo,mn):mn,baseHi=cfgHi!=null?Math.max(cfgHi,mx):mx;
+            const span=(baseHi-baseLo)||1,lo=baseLo-span*.05,hi=baseHi+span*.05,rng=hi-lo;
+            const dp=cfg.dp??1,color=cfg.color||'var(--accent)';
+            const xp=i=>PL+(i/(n-1||1))*plotW,yp=v=>PT+(1-(v-lo)/rng)*plotH;
+            let grids='',yLabels='';
+            for(let g=0;g<=3;g++){const gv=lo+(rng/3)*g,gy=yp(gv);grids+=`<line x1="${PL}" y1="${gy.toFixed(1)}" x2="${W-PR}" y2="${gy.toFixed(1)}" stroke="var(--border)" stroke-width="1"/>`;yLabels+=`<text x="${PL-4}" y="${(gy+4).toFixed(1)}" text-anchor="end" font-size="9" fill="var(--text-dim)" font-family="Space Grotesk,sans-serif">${gv.toFixed(dp)}${cfg.unit||''}</text>`;}
+            let band='';if(cfgLo!=null&&cfgHi!=null){const bT=Math.min(yp(cfgHi),yp(cfgLo)),bH=Math.abs(yp(cfgLo)-yp(cfgHi));band=`<rect x="${PL}" y="${bT.toFixed(1)}" width="${plotW}" height="${bH.toFixed(1)}" fill="${color}" opacity=".07"/>`;}
+            const pts=vals.map((v,i)=>v!=null?`${xp(i).toFixed(1)},${yp(v).toFixed(1)}`:null).filter(Boolean).join(' ');
+            const dots=vals.map((v,i)=>{if(v==null)return'';const inR=cfgLo==null||(v>=cfgLo&&v<=cfgHi);return`<circle cx="${xp(i).toFixed(1)}" cy="${yp(v).toFixed(1)}" r="3.5" fill="${inR?color:'var(--attention)'}" stroke="var(--surface)" stroke-width="1.5"/>`;}).join('');
             const step=Math.ceil(n/6);
-            const xLabels=vals.map((_,i)=>{ if(i%step!==0&&i!==n-1) return ''; return `<text x="${xp(i).toFixed(1)}" y="${H-6}" text-anchor="middle" font-size="9" fill="var(--text-dim)" font-family="Inter,sans-serif">${labels[i]||''}</text>`; }).join('');
-            return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="overflow:visible;display:block;">${grids}${band}<polyline points="${pts.join(' ')}" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>${dots}${yLabels}${xLabels}${cfgLo!=null?`<text x="${PL}" y="${H-32}" font-size="8.5" fill="${color}" font-family="Inter,sans-serif" opacity=".8">— Target range</text>`:''}</svg>`;
+            const xLabels=vals.map((_,i)=>{if(i%step!==0&&i!==n-1)return'';return`<text x="${xp(i).toFixed(1)}" y="${H-6}" text-anchor="middle" font-size="9" fill="var(--text-dim)" font-family="Inter,sans-serif">${labels[i]||''}</text>`;}).join('');
+            return`<svg viewBox="0 0 ${W} ${H}" width="100%" style="overflow:visible;display:block;">${grids}${band}<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>${dots}${yLabels}${xLabels}${cfgLo!=null?`<text x="${PL}" y="${H-32}" font-size="8.5" fill="${color}" font-family="Inter,sans-serif" opacity=".8">— Target range</text>`:''}</svg>`;
         }
 
-        /* ── Theme + contrast ────────────────────────────────── */
-        function fmtTime(d){ return d.toTimeString().substring(0,5); }
-        function synchronizeSystemTheme(){ const h=new Date().getHours(),b=document.getElementById('app-body'),i=document.getElementById('theme-indicator'); if(h>=6&&h<18){b.classList.remove('dark');i.textContent="Daylight Mode";}else{b.classList.add('dark');i.textContent="Night Ops Mode";} }
-        function applyContrast(){ const on=store.get('hc')==='1'; document.getElementById('app-body').classList.toggle('hc',on); document.getElementById('hc-btn').classList.toggle('on',on); }
-        function toggleContrast(){ rumbleDevice(30); store.set('hc',store.get('hc')==='1'?'0':'1'); applyContrast(); }
-        setInterval(()=>{ document.getElementById('live-clock').textContent=fmtTime(new Date()); synchronizeSystemTheme(); },1000);
-        function rumbleDevice(d){ if('vibrate'in navigator) navigator.vibrate(d); }
+        /* ── Theme ───────────────────────────────────────────── */
+        function fmtTime(d){return d.toTimeString().substring(0,5);}
+        function synchronizeSystemTheme(){const h=new Date().getHours(),b=document.getElementById('app-body'),i=document.getElementById('theme-indicator');if(h>=6&&h<18){b.classList.remove('dark');i.textContent="Daylight Mode";}else{b.classList.add('dark');i.textContent="Night Ops Mode";}}
+        function applyContrast(){const on=store.get('hc')==='1';document.getElementById('app-body').classList.toggle('hc',on);document.getElementById('hc-btn').classList.toggle('on',on);}
+        function toggleContrast(){rumbleDevice(30);store.set('hc',store.get('hc')==='1'?'0':'1');applyContrast();}
+        setInterval(()=>{document.getElementById('live-clock').textContent=fmtTime(new Date());synchronizeSystemTheme();},1000);
+        function rumbleDevice(d){if('vibrate'in navigator)navigator.vibrate(d);}
 
         /* ── Tabs ────────────────────────────────────────────── */
-        function switchTab(target){ rumbleDevice(35);
-            const ops=document.getElementById('dashboard-view'),auth=document.getElementById('manager-auth-view'),mgr=document.getElementById('manager-dashboard-view');
-            const oBtn=document.getElementById('nav-ops-btn'),mBtn=document.getElementById('nav-mgr-btn');
-            if(target==='ops'){ops.classList.remove('hidden');auth.classList.add('hidden');mgr.classList.add('hidden');oBtn.classList.add('active');mBtn.classList.remove('active');}
-            else{ops.classList.add('hidden');oBtn.classList.remove('active');mBtn.classList.add('active');if(isManagerAuthenticated){mgr.classList.remove('hidden');auth.classList.add('hidden');}else{auth.classList.remove('hidden');mgr.classList.add('hidden');}}
-        }
-        function populateMonthSelector(){ const sel=document.getElementById('mgr-month-select'),now=new Date(); sel.innerHTML=''; for(let i=-1;i<=12;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);const val=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,lbl=d.toLocaleDateString('en-US',{month:'long',year:'numeric'});const o=document.createElement('option');o.value=val;o.textContent=lbl;if(i===0)o.selected=true;sel.appendChild(o);} }
-        function openManagerReport(appKey,tabContext){ rumbleDevice(45); showView('manager-report-frame'); document.getElementById('fetch-fail-banner').classList.add('hidden'); buildAndLoadURL(appKey,tabContext); }
-        function buildAndLoadURL(appKey,tabContext){ const month=document.getElementById('mgr-month-select').value,iframe=document.getElementById('mgr-iframe-engine'); iframe.dataset.appKey=appKey; iframe.dataset.tabContext=tabContext; let url=`https://jamesaaa0203.github.io/${appKey}?targetTab=${tabContext}&pin=${MASTER_PIN}&month=${month}`; const g=getModuleGasUrl(appKey); if(g)url+=`&gasUrl=${encodeURIComponent(g)}`; currentReportURL=url; iframe.src=url; }
-        function executeMonthFilterChange(){ rumbleDevice(30); const iframe=document.getElementById('mgr-iframe-engine'); const a=iframe.dataset.appKey,t=iframe.dataset.tabContext; if(!a)return; document.getElementById('fetch-fail-banner').classList.add('hidden'); buildAndLoadURL(a,t); }
-        function closeManagerReport(){ rumbleDevice(40); const iframe=document.getElementById('mgr-iframe-engine'); iframe.src="about:blank"; iframe.dataset.appKey=""; iframe.dataset.tabContext=""; currentReportURL=""; closeView('frame'); }
-        function openCurrentInNewTab(){ rumbleDevice(40); if(currentReportURL) window.open(currentReportURL,'_blank','noopener,noreferrer'); }
+        function switchTab(target){rumbleDevice(35);const ops=document.getElementById('dashboard-view'),auth=document.getElementById('manager-auth-view'),mgr=document.getElementById('manager-dashboard-view'),oBtn=document.getElementById('nav-ops-btn'),mBtn=document.getElementById('nav-mgr-btn');if(target==='ops'){ops.classList.remove('hidden');auth.classList.add('hidden');mgr.classList.add('hidden');oBtn.classList.add('active');mBtn.classList.remove('active');}else{ops.classList.add('hidden');oBtn.classList.remove('active');mBtn.classList.add('active');if(isManagerAuthenticated){mgr.classList.remove('hidden');auth.classList.add('hidden');}else{auth.classList.remove('hidden');mgr.classList.add('hidden');}}}
+        function populateMonthSelector(){const sel=document.getElementById('mgr-month-select'),now=new Date();sel.innerHTML='';for(let i=-1;i<=12;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);const val=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,lbl=d.toLocaleDateString('en-US',{month:'long',year:'numeric'});const o=document.createElement('option');o.value=val;o.textContent=lbl;if(i===0)o.selected=true;sel.appendChild(o);}}
+        function openManagerReport(appKey,tabContext){rumbleDevice(45);showView('manager-report-frame');document.getElementById('fetch-fail-banner').classList.add('hidden');buildAndLoadURL(appKey,tabContext);}
+        function buildAndLoadURL(appKey,tabContext){const month=document.getElementById('mgr-month-select').value,iframe=document.getElementById('mgr-iframe-engine');iframe.dataset.appKey=appKey;iframe.dataset.tabContext=tabContext;let url=`https://jamesaaa0203.github.io/${appKey}?targetTab=${tabContext}&pin=${MASTER_PIN}&month=${month}`;const g=getGasUrl(appKey);if(g)url+=`&gasUrl=${encodeURIComponent(g)}`;currentReportURL=url;iframe.src=url;}
+        function executeMonthFilterChange(){rumbleDevice(30);const iframe=document.getElementById('mgr-iframe-engine');const a=iframe.dataset.appKey,t=iframe.dataset.tabContext;if(!a)return;document.getElementById('fetch-fail-banner').classList.add('hidden');buildAndLoadURL(a,t);}
+        function closeManagerReport(){rumbleDevice(40);const iframe=document.getElementById('mgr-iframe-engine');iframe.src="about:blank";iframe.dataset.appKey="";iframe.dataset.tabContext="";currentReportURL="";closeView();}
+        function openCurrentInNewTab(){rumbleDevice(40);if(currentReportURL)window.open(currentReportURL,'_blank','noopener,noreferrer');}
         function onIframeLoad(){}
-        window.addEventListener('message',function(ev){ if(!ev.data||typeof ev.data!=='object')return; if(ev.data.type==='fetch_failed')document.getElementById('fetch-fail-banner').classList.remove('hidden'); if(ev.data.type==='fetch_ok')document.getElementById('fetch-fail-banner').classList.add('hidden'); });
+        window.addEventListener('message',function(ev){if(!ev.data||typeof ev.data!=='object')return;if(ev.data.type==='fetch_failed')document.getElementById('fetch-fail-banner').classList.remove('hidden');if(ev.data.type==='fetch_ok')document.getElementById('fetch-fail-banner').classList.add('hidden');});
 
-        /* ── PIN pad ─────────────────────────────────────────── */
-        function pressKey(n){ if(inputPin.length>=4)return; rumbleDevice(40); inputPin+=n; renderPinDots(); if(inputPin.length===4)setTimeout(verifyPin,150); }
-        function clearPin(){ rumbleDevice(60); inputPin=""; renderPinDots(); }
-        function renderPinDots(){ const dots=document.getElementById('pin-dots').children; for(let i=0;i<4;i++){const on=i<inputPin.length; dots[i].className="w-3.5 h-3.5 rounded-full"+(on?" pin-on":""); dots[i].style.border=on?"2px solid var(--accent)":"2px solid var(--border-2)";} }
-        function verifyPin(){ if(inputPin===MASTER_PIN){inputPin="";renderPinDots();completeManagerAuth();}else{rumbleDevice([300,100,300]);inputPin="";renderPinDots();const d=document.getElementById('pin-dots');d.animate([{transform:'translateX(0)'},{transform:'translateX(-8px)'},{transform:'translateX(8px)'},{transform:'translateX(0)'}],{duration:360});} }
-        function lockManagerView(){ rumbleDevice(100); isManagerAuthenticated=false; store.srem('mgr_auth'); closeManagerReport(); switchTab('ops'); }
-        function completeManagerAuth(){ rumbleDevice([80,50,80]); isManagerAuthenticated=true; store.sset('mgr_auth','1'); loadSavedGasUrls(); switchTab('mgr'); }
+        /* ── PIN ─────────────────────────────────────────────── */
+        function pressKey(n){if(inputPin.length>=4)return;rumbleDevice(40);inputPin+=n;renderPinDots();if(inputPin.length===4)setTimeout(verifyPin,150);}
+        function clearPin(){rumbleDevice(60);inputPin="";renderPinDots();}
+        function renderPinDots(){const dots=document.getElementById('pin-dots').children;for(let i=0;i<4;i++){const on=i<inputPin.length;dots[i].className="w-3.5 h-3.5 rounded-full"+(on?" pin-on":"");dots[i].style.border=on?"2px solid var(--accent)":"2px solid var(--border-2)";}}
+        function verifyPin(){if(inputPin===MASTER_PIN){inputPin="";renderPinDots();completeManagerAuth();}else{rumbleDevice([300,100,300]);inputPin="";renderPinDots();const d=document.getElementById('pin-dots');d.animate([{transform:'translateX(0)'},{transform:'translateX(-8px)'},{transform:'translateX(8px)'},{transform:'translateX(0)'}],{duration:360});}}
+        function lockManagerView(){rumbleDevice(100);isManagerAuthenticated=false;store.srem('mgr_auth');closeManagerReport();switchTab('ops');}
+        function completeManagerAuth(){rumbleDevice([80,50,80]);isManagerAuthenticated=true;store.sset('mgr_auth','1');loadSavedGasUrls();switchTab('mgr');}
 
         /* ── Init ────────────────────────────────────────────── */
-        if(store.sget('mgr_auth')==='1') isManagerAuthenticated=true;
-        applyContrast(); renderModules(); renderMgrList(); loadSavedGasUrls();
-        synchronizeSystemTheme(); document.getElementById('live-clock').textContent=fmtTime(new Date()); populateMonthSelector();
-        if('serviceWorker'in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('./sw.js').catch(()=>{}); }); }
+        if(store.sget('mgr_auth')==='1')isManagerAuthenticated=true;
+        applyContrast();renderModules();renderMgrList();loadSavedGasUrls();
+        synchronizeSystemTheme();document.getElementById('live-clock').textContent=fmtTime(new Date());populateMonthSelector();
+        if('serviceWorker'in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});}
     </script>
 </body>
 </html>
