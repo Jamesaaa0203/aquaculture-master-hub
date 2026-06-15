@@ -471,7 +471,7 @@
         // Moon trial detail panel
         function openMoonDetail(moonKey){
             rumbleDevice(30);
-            const monthLogs=spawnLogs.filter(r=>isCurrentMonth(r.date));
+            const monthLogs=spawnLogs.filter(r=>isMonthMatch(r.date,spawnMonth));
             const trials=monthLogs.filter(r=>normalizeMoon(r.moonCycle)===moonKey);
             if(!trials.length)return;
             const totalEggs=trials.reduce((s,r)=>s+(parseInt(r.totalEggs)||0),0);
@@ -541,11 +541,10 @@
                     <div class="flex items-baseline gap-1 kpi-val">${totalBroodstock>0?totalBroodstock.toLocaleString():'—'}<span class="kpi-unit">pcs</span></div>
                     <div class="kpi-hint" style="margin-top:8px;"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 1v14M1 8h14"/></svg>Tap for male / female breakdown</div>
                 </button>
-                <button class="kpi" onclick="openPurchaseChart()" style="--kpi-hue:${mortCol};">
+                <div class="kpi"style="--kpi-hue:${mortCol};">
                     <div class="kpi-label">Mortality</div><div class="kpi-ko ko">폐사율</div>
                     <div class="flex items-baseline gap-1 kpi-val" style="color:${mortCol};">${mort!=null?mort.toFixed(1):'—'}<span class="kpi-unit">%</span></div>
-                    <div class="kpi-hint"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.5l6-6 4 4 8-8"/></svg>Tap for trend</div>
-                </button>
+                </div>
                 <div class="kpi" style="--kpi-hue:#D97706;">
                     <div class="kpi-label">Batch Weight</div><div class="kpi-ko ko">총 입고량</div>
                     <div class="flex items-baseline gap-1 kpi-val">${totalKg!=null?totalKg.toFixed(1):'—'}<span class="kpi-unit">kg</span></div>
@@ -564,7 +563,7 @@
         // Broodstock breakdown detail
         function openBroodstockDetail(monthIdx){
             rumbleDevice(25);
-            const monthLogs=purchaseLogs.filter(r=>isCurrentMonth(r.date));
+            const monthLogs=purchaseLogs.filter(r=>isMonthMatch(r.date,purchaseMonth));
             const r=monthLogs[monthIdx];if(!r)return;
             const femPcs=parseInt(r.totalFemalesPcs)||0,malePcs=parseInt(r.totalMalesPcs)||0;
             const femKg=parseFloat(r.totalFemalesKg)||0,maleKg=parseFloat(r.totalMalesKg)||0;
@@ -583,13 +582,7 @@
             openDetailOverlay(headHtml,bodyHtml);
         }
 
-        function openPurchaseChart(){
-            const monthLogs=[...purchaseLogs].filter(r=>isCurrentMonth(r.date)).reverse();
-            const all=[...purchaseLogs].slice(0,20).reverse();
-            const vals=all.map(r=>num(r.mortality||r['mortality%']));
-            const labels=all.map(r=>fmtCleanDate(r.date));
-            openChartOverlay('Mortality Rate · 폐사율',`Last ${all.length} batches`,buildChartSVG(vals,labels,{color:'#D97706',dp:1,unit:'%'}));
-        }
+        
 
         /* ═══════════════════════════════════════════════════════
            CHART ENGINE
