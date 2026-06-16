@@ -559,7 +559,7 @@
             const monthLogs=logs.filter(r=>isMonthMatch(r.date,purchaseMonth));
             if(!monthLogs.length){body.innerHTML=msgCard(`<p class="text-sm font-semibold">No batches in ${monthLabel(purchaseMonth)}.</p><p class="text-xs mt-1" style="color:var(--text-mut);">Select a different month using the dropdown above.</p>`);return;}
             const latest=monthLogs[0];
-            const mort=num(latest.mortality||latest['mortality%']);
+            const mortRaw=num(latest.mortality??latest['mortality%']);const mort=mortRaw!=null?(mortRaw>0&&mortRaw<1?mortRaw*100:mortRaw):null;
             const mortCol=mortalityColor(mort);
             const totalKg=num(latest.totalBatchWeightKg||latest.totalBatchWeight);
             const femPcs=parseInt(latest.totalFemalesPcs)||0;
@@ -585,7 +585,7 @@
                 </div>
             </div>`;
             // Recent batches — current month only
-            const batchRows=monthLogs.map(l=>{const m=num(l.mortality||l['mortality%']);const bkg=num(l.totalBatchWeightKg||l.totalBatchWeight);return`<tr><td>${fmtCleanDate(l.date)}<br><span style="color:var(--text-dim);font-size:10px;">${l.supplierCategory||l.supplierCat||'—'}</span></td><td>${bkg!=null?bkg.toFixed(1):'—'} kg</td><td style="color:${mortalityColor(m)};">${m!=null?m.toFixed(1)+'%':'—'}</td><td style="color:${qualityColor(l.overallQuality)};">${l.overallQuality||'—'}</td></tr>`;}).join('');
+            const batchRows=monthLogs.map(l=>{const mRaw=num(l.mortality??l['mortality%']);const m=mRaw!=null?(mRaw>0&&mRaw<1?mRaw*100:mRaw):null;const bkg=num(l.totalBatchWeightKg||l.totalBatchWeight);return`<tr><td>${fmtCleanDate(l.date)}<br><span style="color:var(--text-dim);font-size:10px;">${l.supplierCategory||l.supplierCat||'—'}</span></td><td>${bkg!=null?bkg.toFixed(1):'—'} kg</td><td style="color:${mortalityColor(m)};">${m!=null?m.toFixed(1)+'%':'—'}</td><td style="color:${qualityColor(l.overallQuality)};">${l.overallQuality||'—'}</td></tr>`;}).join('');
             const batchTable=`<div class="card" style="padding:14px;"><div class="eyebrow mb-2">Batches this month</div><table class="data-table"><thead><tr><th>Date · Supplier</th><th>Weight</th><th>Mortality</th><th>Quality</th></tr></thead><tbody>${batchRows}</tbody></table></div>`;
             body.innerHTML=`${tiles}<div class="mt-3 space-y-3">${batchTable}</div><p class="text-xs mt-3 px-1" style="color:var(--text-dim);">Showing ${monthLabel(purchaseMonth)} — use dropdown to change month.</p>`;
         }
