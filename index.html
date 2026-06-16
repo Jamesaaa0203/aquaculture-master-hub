@@ -775,7 +775,7 @@
            HR SUITE — Native Dashboard
            GAS returns: { success, balances[], ot[], leave[] }
            ═══════════════════════════════════════════════════════ */
-        function openHRView(){rumbleDevice(45);showView('hr-data-view');if(!hrData.balances.length)fetchHRData();else renderHR();}
+        openHRView(){rumbleDevice(45);loadPendingLeaveApps();showView('hr-data-view');if(!hrData.balances.length)fetchHRData();else renderHR();}
         async function fetchHRData(){
             const ic=document.getElementById('hr-refresh-ic');ic&&ic.classList.add('spin');
             const url=getGasUrl('hatchery-hr');
@@ -841,7 +841,8 @@
             }).join('');
             const otRows=[...monthOT].reverse().map(r=>{const dp=(r.date||'').split('-');const dDisp=dp.length===3?`${dp[2]}/${dp[1]}`:r.date;const cls=r.compRule==='Extra Holiday'?'attention':'ok';return`<tr><td>${dDisp}<br><span style="color:var(--text-dim);font-size:10px;">${r.name||'—'}</span></td><td>${(parseFloat(r.hours)||0).toFixed(1)}</td><td>${r.dayType||'—'}</td><td><span class="pill" style="background:color-mix(in srgb,var(--${cls}) 14%,transparent);color:var(--${cls});font-size:9px;">${r.compRule||'—'}</span></td></tr>`;}).join('');
             const leaveRows=[...monthLeave].reverse().map(r=>{const dp=(r.startDate||'').split('-');const dDisp=dp.length===3?`${dp[2]}/${dp[1]}`:r.startDate;const cls=r.type==='Annual Leave'?'ok':r.type==='Extra Holiday Used'?'attention':'alert';return`<tr><td>${r.name||'—'}<br><span style="color:var(--text-dim);font-size:10px;">${dDisp}</span></td><td><span class="pill" style="background:color-mix(in srgb,var(--${cls}) 14%,transparent);color:var(--${cls});font-size:9px;">${r.type||'—'}</span></td><td>${(parseFloat(r.days)||0).toFixed(1)}</td></tr>`;}).join('');
-            document.getElementById('hr-body').innerHTML=`${kpis}
+            document.getElementById('hr-body').innerHTML=`${renderPendingApps()}
+    ${renderUpcomingLeaves(hrData.leave)}${kpis}
                 <p class="eyebrow px-1 mt-1">Worker Balances · <span class="ko">잔여 휴가</span></p>
                 <div class="space-y-2">${workerCards||msgCard('<p class="text-sm" style="color:var(--text-mut);">No balance data — run initBalances() in the HR GAS first.</p>')}</div>
                 <p class="eyebrow px-1 mt-2">This Month · <span class="ko">이번달 현황</span></p>
@@ -1856,6 +1857,82 @@ function renderStockData(items) {
                 }, 1600);
             });
         })();
+    let _pendingLeaveApps = [];
+
+async function loadPendingLeaveApps(){
+    const url = getGasUrl('hatchery-hr');
+    if(!url) return;
+    try {
+        const res  = await fetch(`${url}?action=getLeaveApplications`, {redirect:'follow'});
+        const json = await res.json();
+        if(json.success) _pendingLeaveApps = json.applications || [];
+        if(hrData.balances.length) renderHR();
+    } catch(e) { /* silent */ }
+}
+
+async function processLeaveApp(id, action){
+    rumbleDevice(50);
+    const url = getGasUrl('hatchery-hr');
+    if(!url){ alert('HR GAS not connected.'); return; }
+    try {
+        await fetch(url, {method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({action:'processLeave',applicationId:id,decision:action})});
+        rumbleDevice([40,30,70]);
+        _pendingLeaveApps = _pendingLeaveApps.filter(a=>a.id!==id);
+        await fetchHRData();
+    } catch(e){ alert('Error: '+e.message); }
+}
+
+function renderPendingApps(){
+    if(!_pendingLeaveApps.length) return '';
+    const LC={'Annual Leave':'#10B981','Medical Leave':'#3B82F6','Emergency Leave':'#EF4444','Unpaid Leave':'#94A3B8'};
+    const cards=_pendingLeaveApps.map(app=>{
+        const col=LC[app.type]||'var(--accent)';
+        return `<div style="padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div style="width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,${col} 12%,transparent);color:${col};font-size:14px;font-weight:800;flex:none;">${app.name.substring(0,2).toUpperCase()}</div>
+                    <div><div style="font-size:14px;font-weight:600;">${app.name}</div>
+                    <div style="font-size:11px;color:var(--text-dim);margin-top:1px;">${app.appliedOn||'New'}</div></div>
+                </div>
+                <span style="padding:4px 9px;border-radius:999px;font-size:10px;font-weight:700;background:color-mix(in srgb,${col} 12%,transparent);color:${col};">${app.type}</span>
+            </div>
+            <div style="padding:10px 12px;background:var(--surface-2);border-radius:10px;margin-bottom:10px;">
+                <div style="font-size:13px;font-weight:600;">From ${app.startDate||'—'} · ${app.days} day${app.days!=1?'s':''}</div>
+                <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">${app.reason||'No reason given'}</div>
+            </div>
+            <div style="display:flex;gap:8px;">
+                <button onclick="processLeaveApp('${app.id}','approve')" style="flex:1;padding:10px;background:color-mix(in srgb,#10B981 12%,transparent);color:#10B981;border:1.5px solid color-mix(in srgb,#10B981 30%,transparent);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">✓ Approve</button>
+                <button onclick="processLeaveApp('${app.id}','deny')" style="flex:1;padding:10px;background:color-mix(in srgb,var(--alert) 10%,transparent);color:var(--alert);border:1.5px solid color-mix(in srgb,var(--alert) 24%,transparent);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">✗ Deny</button>
+            </div>
+        </div>`;
+    }).join('');
+    return `<div style="padding:10px 14px;background:color-mix(in srgb,var(--attention) 10%,transparent);border:1px solid color-mix(in srgb,var(--attention) 28%,transparent);border-radius:12px;display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+        <span style="font-size:18px;">📬</span>
+        <div><div style="font-size:13px;font-weight:700;color:var(--attention);">${_pendingLeaveApps.length} Leave Application${_pendingLeaveApps.length>1?'s':''} Pending</div>
+        <div style="font-size:11px;color:var(--text-mut);margin-top:1px;">Review and approve or deny below</div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">${cards}</div>`;
+}
+
+function renderUpcomingLeaves(allLeave){
+    const today=new Date();today.setHours(0,0,0,0);
+    const limit=new Date(today);limit.setDate(today.getDate()+14);
+    const upcoming=allLeave.filter(r=>{const d=r.startDate?new Date(r.startDate):null;return d&&!isNaN(d)&&d>=today&&d<=limit;}).sort((a,b)=>new Date(a.startDate)-new Date(b.startDate));
+    if(!upcoming.length) return '';
+    const LC={'Annual Leave':'#10B981','Medical Leave':'#3B82F6','Emergency Leave':'#EF4444','Unpaid Leave':'#94A3B8'};
+    const rows=upcoming.map(r=>{
+        const d=new Date(r.startDate);const diff=Math.ceil((d-today)/86400000);
+        const tag=diff===0?'Today':diff===1?'Tomorrow':`In ${diff} days`;
+        const col=LC[r.type]||'var(--accent)';
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);">
+            <div><div style="font-size:13px;font-weight:500;">${r.name}</div>
+            <div style="font-size:10px;color:var(--text-dim);margin-top:1px;">${r.startDate} · ${r.days}d · <span style="color:${col};">${r.type}</span></div></div>
+            <span style="padding:3px 9px;border-radius:999px;font-size:10px;font-weight:700;background:color-mix(in srgb,${col} 12%,transparent);color:${col};">${tag}</span>
+        </div>`;
+    }).join('');
+    return `<div class="card" style="padding:14px;"><div class="eyebrow mb-2">Upcoming Leaves · <span class="ko">예정된 휴가</span></div>${rows}</div>`;
+}
     </script>
     <main id="seacage-worker-view" class="hidden flex-1 flex flex-col min-h-0 w-full">
   <div class="flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full overflow-y-auto">
