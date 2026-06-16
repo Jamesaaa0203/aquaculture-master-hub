@@ -157,6 +157,7 @@
             <div><div class="wordmark">Bon Aqua <span class="sub">Ops</span></div><div id="theme-indicator" class="eyebrow" style="margin-top:2px;">Daylight Mode</div></div>
         </div>
         <div class="flex items-center gap-2">
+            <button id="install-btn" onclick="showInstallPrompt()" class="icon-btn hidden" title="Add to Home Screen"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg></button>
             <button id="hc-btn" onclick="toggleContrast()" class="icon-btn" title="High-contrast outdoor mode">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg>
             </button>
@@ -781,13 +782,23 @@
         function changePurchaseMonth(val){ rumbleDevice(25); purchaseMonth=val; renderPurchasing(purchaseLogs); }
 
         /* ── iOS install banner ──────────────────────────────── */
+        let _dip=null;
+        window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();_dip=e;document.getElementById('install-btn').classList.remove('hidden');});
+        window.addEventListener('appinstalled',function(){document.getElementById('install-btn').classList.add('hidden');_dip=null;});
+        function showInstallPrompt(){
+            rumbleDevice(35);
+            const isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
+            if(isStandalone)return;
+            if(_dip){_dip.prompt();_dip.userChoice.then(()=>{_dip=null;document.getElementById('install-btn').classList.add('hidden');});}
+            else{store.set('ios_install_dismissed','0');document.getElementById('ios-install-banner').classList.remove('hidden');document.getElementById('ios-install-banner').scrollIntoView({behavior:'smooth'});}
+        }
         function initIOSInstallBanner(){
-            // Only show on iOS Safari, only when not already installed as standalone
-            const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || !!window.navigator.standalone;
-            const dismissed = store.get('ios_install_dismissed') === '1';
-            if(isIOS && !isStandalone && !dismissed){
-                document.getElementById('ios-install-banner').classList.remove('hidden');
+            const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+            const isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
+            if(isStandalone)return;
+            if(isIOS){
+                document.getElementById('install-btn').classList.remove('hidden');
+                if(store.get('ios_install_dismissed')!=='1')document.getElementById('ios-install-banner').classList.remove('hidden');
             }
         }
         function dismissIOSBanner(){
