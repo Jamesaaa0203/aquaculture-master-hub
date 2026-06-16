@@ -287,7 +287,22 @@
             <div><span class="eyebrow" style="color:#6366F1;">인사 및 근태 관리 · HR Suite</span><div class="flex items-center justify-between mt-1"><h3 class="text-2xl font-semibold tracking-tight" id="hr-month-title">This Month</h3><select id="hr-month-select" onchange="changeHRMonth(this.value)" class="text-xs font-semibold py-1.5 px-2.5 rounded-lg num" style="background:var(--surface-2);color:var(--text);border:1px solid var(--border);outline:none;max-width:148px;"></select></div></div>
             <div id="hr-body"></div>
         </div>
-
+<div id="seacage-data-view" class="hidden flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full overflow-y-auto">
+  <div class="flex items-center justify-between gap-2">
+    <button onclick="closeView()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:var(--accent);">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"/></svg>
+      <span class="ko">뒤로</span> Menu
+    </button>
+    <button onclick="refreshSCManagerView()" class="icon-btn">
+      <svg id="sc-mgr-refresh-ic" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356M3.985 19.644V14.65h4.992m-4.969-3.65a8.25 8.25 0 0113.803-3.7L21 8.25m-18 7.5l3.181 3.182a8.25 8.25 0 0013.803-3.7"/></svg>
+    </button>
+  </div>
+  <div>
+    <span class="eyebrow" style="color:#0EA5E9;">가두리 운영 현황 · Sea Cage</span>
+    <h3 class="text-2xl font-semibold tracking-tight" style="margin-top:1px;">Live Dashboard</h3>
+  </div>
+  <div id="seacage-body"></div>
+</div>
         <!-- IFRAME (HR only now — Processing is native above) -->
         <div id="manager-report-frame" class="hidden flex-1 flex flex-col min-h-0 w-full">
             <div class="p-3 shrink-0" style="background:var(--surface);border-bottom:1px solid var(--border);">
@@ -920,6 +935,492 @@
         applyContrast();renderModules();renderMgrList();loadSavedGasUrls();
         synchronizeSystemTheme();document.getElementById('live-clock').textContent=fmtTime(new Date());populateMonthSelector();
         initIOSInstallBanner();
+        /* ── Constants & state ─────────────────────────────────────────────── */
+const SC_COLS = {
+  left:   [9,10,11,12,13,14,15,16],
+  middle: [1,2,3,4,17,18,19,20],
+  right:  [5,6,7,8,21,22,23,24]
+};
+const SC_EPOCH = new Date("2026-06-08T00:00:00");
+let scData = {setup:[],transfers:[],mortality:[],growth:[],maintenance:[]};
+let scActiveWorkerTab = 'layout';
+let scTfDate = new Date().toISOString().split('T')[0], scTfUnit='', scTfPetak='1', scTfSize='0.5 - 0.8', scTfQty='';
+let scMortType='harian', scMortUnit='', scMortPetak='1', scMortQty='', scMortBatch='';
+let scGrUnit='', scGrPetak='1', scSamples=[];
+ 
+/* ── Metric helpers ────────────────────────────────────────────────── */
+function scCalcMetrics(unitId, petak) {
+  const cfg = scData.setup?.find(s => +s.unitId === +unitId && String(s.petak) === String(petak));
+  let init = cfg ? +(cfg.initialQty||0) : 0, tIn=0, dead=0;
+  scData.transfers?.filter(t => +t.unitId === +unitId && String(t.petak) === String(petak))
+    .forEach(t => { tIn += +(t.qty||0); dead += +(t.postDead||0); });
+  scData.mortality?.filter(m => +m.unitId === +unitId && String(m.petak) === String(petak))
+    .forEach(m => { dead += +(m.qty||0); });
+  const total = init + tIn, live = Math.max(0, total - dead);
+  return { totalEntered:total, dead, currentLive:live,
+           survivalRate: total > 0 ? ((live/total)*100).toFixed(1) : '100.0' };
+}
+ 
+function scGetGlobal() {
+  let tIn=0, tDead=0;
+  scData.setup?.forEach(s => tIn += +(s.initialQty||0));
+  scData.transfers?.forEach(t => { tIn += +(t.qty||0); tDead += +(t.postDead||0); });
+  scData.mortality?.forEach(m => tDead += +(m.qty||0));
+  const live = Math.max(0, tIn - tDead);
+  return { totalInput:tIn, totalDead:tDead, live,
+           survival: tIn > 0 ? ((live/tIn)*100).toFixed(1) : '100.0' };
+}
+ 
+function scGetAvgGrowth(uId, petak) {
+  const logs = scData.growth?.filter(g => +g.unitId === +uId && String(g.petak) === String(petak));
+  if (!logs?.length) return '—';
+  return (logs.reduce((s,l) => s + parseFloat(l.length||0), 0) / logs.length).toFixed(1) + ' cm';
+}
+ 
+function scElapsedDays() {
+  return Math.floor((new Date() - SC_EPOCH) / 86400000);
+}
+ 
+/* ── GAS fetch & post ──────────────────────────────────────────────── */
+async function fetchSCData(showSpin) {
+  const url = getGasUrl('sea-cage');
+  const ic = document.getElementById('sc-refresh-ic');
+  if (showSpin && ic) ic.classList.add('spin');
+  if (!url) { if (ic) ic.classList.remove('spin'); return; }
+  try {
+    const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), 12000);
+    const res = await fetch(url, {signal:ctrl.signal, redirect:'follow'});
+    clearTimeout(t);
+    const data = await res.json();
+    scData = {
+      setup:       data.setup       || [],
+      transfers:   data.transfers   || [],
+      mortality:   data.mortality   || [],
+      growth:      data.growth      || [],
+      maintenance: data.maintenance || []
+    };
+    // Refresh whichever worker tab is active
+    if (scActiveWorkerTab === 'layout')   renderSCLayout();
+    if (scActiveWorkerTab === 'transfer') renderSCTransferForm();
+    if (scActiveWorkerTab === 'mortality')renderSCMortalityForm();
+    if (scActiveWorkerTab === 'growth')   renderSCGrowthForm();
+  } catch(e) { console.warn('SC fetch error', e); }
+  finally { if (ic) ic.classList.remove('spin'); }
+}
+ 
+async function scPost(payload) {
+  const url = getGasUrl('sea-cage');
+  if (!url) { alert('Sea Cage GAS URL not configured.\nManager: set it in Module GAS Connections.'); return; }
+  try {
+    await fetch(url, { method:'POST', body:JSON.stringify(payload) });
+    rumbleDevice([80,50,80]);
+    alert('Berjaya disimpan! ✓');
+    await fetchSCData(false);
+  } catch(e) { alert('Ralat cloud. Cuba semula.'); }
+}
+ 
+/* ── Worker view navigation ────────────────────────────────────────── */
+function openSeaCageWorkerView() {
+  rumbleDevice(45);
+  document.getElementById('dashboard-view').classList.add('hidden');
+  document.getElementById('seacage-worker-view').classList.remove('hidden');
+  fetchSCData(false);
+  showSCWorkerTab('layout');
+}
+ 
+function closeSeaCageWorkerView() {
+  rumbleDevice(40);
+  document.getElementById('seacage-worker-view').classList.add('hidden');
+  document.getElementById('dashboard-view').classList.remove('hidden');
+}
+ 
+function showSCWorkerTab(tab) {
+  scActiveWorkerTab = tab;
+  ['layout','transfer','mortality','growth'].forEach(t => {
+    const btn = document.getElementById('sc-tab-'+t);
+    const cnt = document.getElementById('sc-content-'+t);
+    if (btn) {
+      btn.style.background = t===tab ? 'var(--accent)' : '';
+      btn.style.color = t===tab ? 'white' : 'var(--text-mut)';
+    }
+    if (cnt) cnt.classList.toggle('hidden', t !== tab);
+  });
+  if (tab === 'layout')   renderSCLayout();
+  if (tab === 'transfer') renderSCTransferForm();
+  if (tab === 'mortality')renderSCMortalityForm();
+  if (tab === 'growth')   renderSCGrowthForm();
+}
+ 
+/* ── Unit detail overlay (shared worker + manager) ─────────────────── */
+function openSCUnitDetail(uId) {
+  rumbleDevice(30);
+  const maint  = scData.maintenance?.find(m => +m.unitId === +uId);
+  const status = (uId >= 13 && uId <= 24 && !maint) ? 'Construction' : (maint?.status || 'Active');
+  const issue  = maint?.issue || (uId >= 13 && uId <= 24 && !maint ? 'Tapak Belum Siap' : '');
+  const p1 = scCalcMetrics(uId, '1');
+  const p2 = scCalcMetrics(uId, '2');
+  const statusBadge = status !== 'Active'
+    ? `<div style="display:inline-block;padding:4px 10px;border-radius:999px;background:color-mix(in srgb,var(--attention) 14%,transparent);color:var(--attention);font-size:11px;font-weight:700;margin-bottom:12px;">⚠️ ${status} — ${issue||'—'}</div>` : '';
+  const petakBlock = (p, n) => `<div class="info-item">
+    <div class="info-key" style="color:#0EA5E9;">Petak ${n}</div>
+    <div class="info-val">${p.currentLive} <span style="font-size:13px;color:var(--text-dim);">live</span></div>
+    <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">In: ${p.totalEntered} · Dead: ${p.dead}</div>
+    <div style="font-size:11px;color:var(--text-dim);">Survival: ${p.survivalRate}%</div>
+    <div style="font-size:11px;color:var(--text-dim);">Avg: ${scGetAvgGrowth(uId, n)}</div>
+  </div>`;
+  openDetailOverlay(
+    `<div class="text-xl font-semibold tracking-tight">Unit ${uId}</div>
+     <div class="text-sm" style="color:var(--text-mut);">Sea Cage · <span class="ko">가두리 현황</span></div>`,
+    `${statusBadge}
+     <div class="info-grid">${petakBlock(p1,'1')}${petakBlock(p2,'2')}</div>
+     <div class="card mt-3" style="padding:12px 14px;">
+       <div class="flex justify-between items-center">
+         <span class="text-sm font-semibold">Combined Live · <span class="ko">합계</span></span>
+         <span class="num" style="font-size:20px;font-weight:700;color:#0EA5E9;">${p1.currentLive+p2.currentLive}</span>
+       </div>
+     </div>`
+  );
+}
+ 
+/* ── TAB 1: Layout map ──────────────────────────────────────────────── */
+function renderSCLayout() {
+  const c = document.getElementById('sc-content-layout');
+  if (!c) return;
+ 
+  const unitCard = (uId) => {
+    const maint  = scData.maintenance?.find(m => +m.unitId === +uId);
+    const status = (uId >= 13 && uId <= 24 && !maint) ? 'Construction' : (maint?.status || 'Active');
+    const p1 = scCalcMetrics(uId, '1');
+    const p2 = scCalcMetrics(uId, '2');
+    const live = p1.currentLive + p2.currentLive;
+ 
+    const cfg = {
+      Active:       { col:'#0EA5E9', bg:'color-mix(in srgb,#0EA5E9 7%,transparent)',  lbl:'LIVE',     inner:`<div style="font-size:17px;font-weight:900;color:#0EA5E9;line-height:1;font-family:'Space Grotesk',sans-serif;">${live}</div>` },
+      Construction: { col:'var(--attention)', bg:'color-mix(in srgb,var(--attention) 8%,transparent)', lbl:'CONSTR', inner:`<div style="font-size:13px;">🏗️</div>` },
+      Maintenance:  { col:'var(--alert)',     bg:'color-mix(in srgb,var(--alert) 8%,transparent)',     lbl:'REPAIR', inner:`<div style="font-size:13px;">🛠️</div>` },
+      Empty:        { col:'var(--idle)',      bg:'color-mix(in srgb,var(--idle) 8%,transparent)',      lbl:'EMPTY',  inner:`<div style="font-size:13px;">🕳️</div>` }
+    }[status] || { col:'var(--idle)', bg:'transparent', lbl:'?', inner:'' };
+ 
+    const onclick = status === 'Construction'
+      ? `alert('Unit ${uId} masih dalam pembinaan.')`
+      : `openSCUnitDetail(${uId})`;
+ 
+    return `<button onclick="${onclick}"
+      style="position:relative;background:${cfg.bg};border:1.5px solid color-mix(in srgb,${cfg.col} 24%,transparent);border-radius:14px;height:86px;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;cursor:pointer;transition:transform .1s;"
+      ontouchstart="this.style.transform='scale(.93)'" ontouchend="this.style.transform=''">
+      <div style="position:absolute;top:5px;left:7px;font-size:9px;font-weight:800;opacity:.35;font-family:'Space Grotesk',sans-serif;">U${uId}</div>
+      ${cfg.inner}
+      <div style="font-size:7px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;opacity:.35;margin-top:2px;">${cfg.lbl}</div>
+    </button>`;
+  };
+ 
+  const col = (ids, lbl) => `
+    <div style="display:flex;flex-direction:column;gap:7px;">
+      <div style="font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-align:center;color:var(--text-dim);opacity:.4;">${lbl}</div>
+      ${ids.map(unitCard).join('')}
+    </div>`;
+ 
+  c.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 72px;gap:7px;align-items:start;">
+      ${col(SC_COLS.left,'Left')}
+      ${col(SC_COLS.middle,'Mid')}
+      ${col(SC_COLS.right,'Right')}
+      <div style="padding-top:22px;">
+        <div style="border:2px solid color-mix(in srgb,var(--attention) 38%,transparent);background:color-mix(in srgb,var(--attention) 6%,transparent);border-radius:14px;padding:10px 4px;text-align:center;font-size:7.5px;font-weight:900;color:var(--attention);text-transform:uppercase;letter-spacing:.04em;line-height:1.5;">🏠<br>Security<br>House</div>
+      </div>
+    </div>
+    <p style="font-size:11px;color:var(--text-dim);padding:0 2px;margin-top:4px;">Tap any unit for Petak 1 & 2 breakdown.</p>`;
+}
+ 
+/* ── TAB 2: Transfer form ───────────────────────────────────────────── */
+function renderSCTransferForm() {
+  const c = document.getElementById('sc-content-transfer');
+  if (!c) return;
+  const petak = (p) => `<button onclick="scTfPetak='${p}';renderSCTransferForm()"
+    style="flex:1;padding:9px;border-radius:10px;font-weight:700;font-size:13px;border:1px solid var(--border-2);
+    background:${scTfPetak===p?'var(--accent)':'var(--surface)'};color:${scTfPetak===p?'white':'var(--text)'};">P${p}</button>`;
+  const size = (sz) => `<button onclick="scTfSize='${sz}';renderSCTransferForm()"
+    style="flex:1;padding:8px;border-radius:10px;font-weight:700;font-size:11px;border:1px solid var(--border-2);
+    background:${scTfSize===sz?'var(--accent)':'var(--surface)'};color:${scTfSize===sz?'white':'var(--text)'};">${sz}</button>`;
+  c.innerHTML = `
+    <div class="card" style="padding:22px;">
+      <div class="eyebrow" style="color:#0EA5E9;margin-bottom:16px;">Pindah Benih Baru</div>
+      <label class="eyebrow">Tarikh</label>
+      <input type="date" id="sc-tf-date" value="${scTfDate}" oninput="scTfDate=this.value" class="gas-input" style="margin:6px 0 14px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+        <div>
+          <label class="eyebrow">Unit (1–24)</label>
+          <input type="number" inputmode="numeric" id="sc-tf-unit" placeholder="Ex: 3" value="${scTfUnit}" oninput="scTfUnit=this.value" class="gas-input" style="margin-top:6px;">
+        </div>
+        <div>
+          <label class="eyebrow">Petak</label>
+          <div style="display:flex;gap:6px;margin-top:6px;">${petak('1')}${petak('2')}</div>
+        </div>
+      </div>
+      <label class="eyebrow">Julat Saiz Benih</label>
+      <div style="display:flex;gap:6px;margin:6px 0 14px;">${size('0.5 - 0.8')}${size('0.9 ke atas')}</div>
+      <label class="eyebrow">Kuantiti (pcs)</label>
+      <input type="number" inputmode="numeric" id="sc-tf-qty" placeholder="Contoh: 3000" value="${scTfQty}" oninput="scTfQty=this.value" class="gas-input" style="margin:6px 0 18px;">
+      <button onclick="submitSCTransfer()" style="width:100%;padding:14px;background:var(--accent);color:white;font-weight:700;border-radius:12px;font-size:13px;">Hantar Rekod Pemindahan</button>
+    </div>`;
+}
+ 
+async function submitSCTransfer() {
+  const unit = parseInt(document.getElementById('sc-tf-unit')?.value || scTfUnit);
+  const qty  = parseInt(document.getElementById('sc-tf-qty')?.value  || scTfQty);
+  const date = document.getElementById('sc-tf-date')?.value || scTfDate;
+  if (!unit || unit < 1 || unit > 24 || !qty) { alert('Sila isi Unit (1–24) dan Kuantiti.'); return; }
+  rumbleDevice(45);
+  await scPost({ action:'pemindahan', batchId:'B-'+Date.now(), date, unitId:unit, petak:scTfPetak, size:scTfSize, qty });
+  scTfUnit=''; scTfQty='';
+  renderSCTransferForm();
+}
+ 
+/* ── TAB 3: Mortality form ──────────────────────────────────────────── */
+function renderSCMortalityForm() {
+  const c = document.getElementById('sc-content-mortality');
+  if (!c) return;
+  const tab = (v,l) => `<button onclick="scMortType='${v}';renderSCMortalityForm()"
+    style="flex:1;padding:8px;border-radius:9px;font-size:10px;font-weight:700;
+    background:${scMortType===v?'var(--alert)':'transparent'};color:${scMortType===v?'white':'var(--text-mut)'};">${l}</button>`;
+  const petak = (p) => `<button onclick="scMortPetak='${p}';renderSCMortalityForm()"
+    style="flex:1;padding:9px;border-radius:10px;font-weight:700;font-size:13px;border:1px solid var(--border-2);
+    background:${scMortPetak===p?'var(--alert)':'var(--surface)'};color:${scMortPetak===p?'white':'var(--text)'};">Petak ${p}</button>`;
+  const batches = scData.transfers?.slice(0,30).map(t =>
+    `<option value="${t.batchId||t.id||''}">Unit ${t.unitId} (P${t.petak}) — ${t.qty} pcs [${t.date}]</option>`
+  ).join('') || '';
+ 
+  c.innerHTML = `
+    <div class="card" style="padding:22px;">
+      <div class="eyebrow" style="color:var(--alert);margin-bottom:12px;">Rekod Kematian</div>
+      <div style="display:flex;gap:4px;margin-bottom:16px;padding:4px;background:var(--surface-2);border-radius:12px;border:1px solid var(--border);">
+        ${tab('harian','Harian')}${tab('pasca','Pasca-Transfer')}
+      </div>
+      ${scMortType === 'harian' ? `
+        <input type="number" inputmode="numeric" id="sc-md-unit" placeholder="Unit (1–24)" value="${scMortUnit}" oninput="scMortUnit=this.value" class="gas-input" style="margin-bottom:10px;">
+        <div style="display:flex;gap:6px;margin-bottom:10px;">${petak('1')}${petak('2')}</div>
+        <input type="number" inputmode="numeric" id="sc-md-qty" placeholder="Kuantiti Mati Ditemui" value="${scMortQty}" oninput="scMortQty=this.value" class="gas-input" style="margin-bottom:18px;">
+        <button onclick="submitSCMortality()" style="width:100%;padding:14px;background:var(--alert);color:white;font-weight:700;border-radius:12px;font-size:13px;">Simpan Kematian Harian</button>
+      ` : `
+        <label class="eyebrow">Pilih Batch Asal</label>
+        <select id="sc-md-batch" onchange="scMortBatch=this.value" class="gas-input" style="margin:6px 0 10px;background:var(--surface-2);">
+          <option value="">-- Sila Pilih Batch --</option>${batches}
+        </select>
+        <input type="number" inputmode="numeric" id="sc-md-qty-p" placeholder="Jumlah Mati Pasca-Transfer" value="${scMortQty}" oninput="scMortQty=this.value" class="gas-input" style="margin-bottom:18px;">
+        <button onclick="submitSCPostMortality()" style="width:100%;padding:14px;background:var(--alert);color:white;font-weight:700;border-radius:12px;font-size:13px;">Kemaskini Pasca-Transfer</button>
+      `}
+    </div>`;
+}
+ 
+async function submitSCMortality() {
+  const unit = parseInt(document.getElementById('sc-md-unit')?.value || scMortUnit);
+  const qty  = parseInt(document.getElementById('sc-md-qty')?.value  || scMortQty);
+  if (!unit || !qty) { alert('Sila isi Unit dan Kuantiti.'); return; }
+  rumbleDevice(45);
+  await scPost({ action:'kematian', date:new Date().toISOString().split('T')[0], unitId:unit, petak:scMortPetak, qty });
+  scMortUnit=''; scMortQty='';
+  renderSCMortalityForm();
+}
+ 
+async function submitSCPostMortality() {
+  const batch = document.getElementById('sc-md-batch')?.value || scMortBatch;
+  const qty   = parseInt(document.getElementById('sc-md-qty-p')?.value || scMortQty);
+  if (!batch) { alert('Sila pilih batch.'); return; }
+  if (!qty)   { alert('Sila isi kuantiti.'); return; }
+  rumbleDevice(45);
+  await scPost({ action:'update_post_dead', batchId:batch, qty });
+  scMortBatch=''; scMortQty='';
+  renderSCMortalityForm();
+}
+ 
+/* ── TAB 4: Growth form ─────────────────────────────────────────────── */
+function renderSCGrowthForm() {
+  const c = document.getElementById('sc-content-growth');
+  if (!c) return;
+  const avg = scSamples.length
+    ? (scSamples.reduce((a,b)=>a+b,0)/scSamples.length).toFixed(2) : '0.00';
+  const locked = scSamples.length > 0;
+  const petak = (p) => `<button ${locked?'disabled':''} onclick="scGrPetak='${p}';renderSCGrowthForm()"
+    style="flex:1;padding:9px;border-radius:10px;font-weight:700;font-size:13px;border:1px solid var(--border-2);
+    background:${scGrPetak===p?'#10B981':'var(--surface)'};color:${scGrPetak===p?'white':'var(--text)'};${locked?'opacity:.4':''};">P${p}</button>`;
+ 
+  c.innerHTML = `
+    <div class="card" style="padding:22px;">
+      <div class="flex items-start justify-between" style="margin-bottom:12px;">
+        <div>
+          <div class="eyebrow" style="color:#10B981;">Pengukuran Pertumbuhan</div>
+          <p style="font-size:11px;color:var(--text-dim);margin-top:2px;">Ukur dalam sentimeter (cm)</p>
+        </div>
+        <span style="padding:4px 10px;border-radius:999px;background:color-mix(in srgb,#10B981 12%,transparent);color:#10B981;font-size:11px;font-weight:700;">${scSamples.length} sampel</span>
+      </div>
+ 
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:14px;">
+        <div>
+          <label class="eyebrow">Unit</label>
+          <input type="number" inputmode="numeric" ${locked?'disabled':''} id="sc-gr-unit" placeholder="1–24" value="${scGrUnit}" oninput="scGrUnit=this.value" class="gas-input" style="margin-top:6px;${locked?'opacity:.4':''}">
+        </div>
+        <div>
+          <label class="eyebrow">Petak</label>
+          <div style="display:flex;gap:6px;margin-top:6px;">${petak('1')}${petak('2')}</div>
+        </div>
+      </div>
+ 
+      ${scSamples.length ? `
+        <div style="padding:10px 12px;background:var(--surface-2);border:1px dashed var(--border-2);border-radius:12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="font-size:13px;">Purata: <b style="color:#0EA5E9;font-size:16px;font-family:'Space Grotesk',sans-serif;">${avg} cm</b></div>
+          <button onclick="scSamples=[];renderSCGrowthForm()" style="font-size:10px;background:color-mix(in srgb,var(--alert) 10%,transparent);color:var(--alert);padding:4px 8px;border-radius:8px;font-weight:700;">Padam</button>
+        </div>` : ''}
+ 
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:10px;">
+        <div style="flex:1;">
+          <label class="eyebrow">Saiz Sampel Berikut (cm)</label>
+          <input type="number" step="0.01" inputmode="decimal" id="sc-gr-sample" placeholder="Contoh: 4.5" class="gas-input" style="margin-top:6px;">
+        </div>
+        <button onclick="scAddSample()" style="padding:9px 14px;background:var(--surface-2);border:1px solid var(--border-2);border-radius:10px;font-weight:700;font-size:12px;color:var(--text);white-space:nowrap;">+ Tambah</button>
+      </div>
+ 
+      ${scSamples.length ? `
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;padding:10px;background:var(--surface-2);border-radius:12px;border:1px solid var(--border);max-height:72px;overflow-y:auto;">
+          ${scSamples.map((s,i)=>`<span style="font-size:10px;padding:3px 7px;border-radius:9px;background:color-mix(in srgb,#0EA5E9 12%,transparent);color:#0EA5E9;font-weight:700;">#${i+1}: ${s}cm</span>`).join('')}
+        </div>` : ''}
+ 
+      <button onclick="submitSCGrowth()" ${!scSamples.length||!scGrUnit?'disabled':''}
+        style="width:100%;padding:14px;font-weight:700;border-radius:12px;font-size:13px;
+        background:${scSamples.length&&scGrUnit?'#10B981':'var(--surface-2)'};
+        color:${scSamples.length&&scGrUnit?'white':'var(--text-dim)'};">
+        🚀 Hantar ${scSamples.length} Sampel ke Cloud
+      </button>
+    </div>`;
+}
+ 
+function scAddSample() {
+  const v = parseFloat(document.getElementById('sc-gr-sample')?.value);
+  if (!v || v <= 0) return;
+  scSamples = [...scSamples, v];
+  document.getElementById('sc-gr-sample').value = '';
+  renderSCGrowthForm();
+}
+ 
+async function submitSCGrowth() {
+  const unit = parseInt(document.getElementById('sc-gr-unit')?.value || scGrUnit);
+  if (!unit || scSamples.length < 1) return;
+  rumbleDevice(45);
+  await scPost({ action:'growth_batch_log', unitId:unit, petak:scGrPetak, samples:scSamples });
+  scSamples=[]; scGrUnit='';
+  renderSCGrowthForm();
+}
+ 
+/* ── Manager dashboard ──────────────────────────────────────────────── */
+async function openSeaCageManagerView() {
+  rumbleDevice(45);
+  showView('seacage-data-view');
+  const url = getGasUrl('sea-cage');
+  if (!url) {
+    document.getElementById('seacage-body').innerHTML = msgCard(
+      `<p class="text-sm font-semibold">Sea Cage not linked</p>
+       <p class="text-xs mt-1" style="color:var(--text-mut);">Add the /exec URL in Module GAS Connections.</p>`);
+    return;
+  }
+  document.getElementById('seacage-body').innerHTML = msgCard(`<p class="text-sm" style="color:var(--text-mut);">Loading…</p>`);
+  await fetchSCData(false);
+  renderSCManagerDashboard();
+}
+ 
+async function refreshSCManagerView() {
+  const ic = document.getElementById('sc-mgr-refresh-ic');
+  if (ic) ic.classList.add('spin');
+  await fetchSCData(false);
+  renderSCManagerDashboard();
+  if (ic) ic.classList.remove('spin');
+}
+ 
+function renderSCManagerDashboard() {
+  const g    = scGetGlobal();
+  const days = scElapsedDays();
+  const wk   = Math.floor(days/7) + 1;
+  const survCol = parseFloat(g.survival) >= 90 ? 'var(--ok)' : parseFloat(g.survival) >= 75 ? 'var(--attention)' : 'var(--alert)';
+ 
+  /* Compact layout grid */
+  const compactUnit = (uId) => {
+    const maint  = scData.maintenance?.find(m => +m.unitId === +uId);
+    const status = (uId >= 13 && uId <= 24 && !maint) ? 'Construction' : (maint?.status || 'Active');
+    const p1 = scCalcMetrics(uId, '1');
+    const p2 = scCalcMetrics(uId, '2');
+    const live = p1.currentLive + p2.currentLive;
+    const col = status==='Active'?'#0EA5E9':status==='Construction'?'var(--attention)':status==='Maintenance'?'var(--alert)':'var(--idle)';
+    const inner = status==='Active' ? `${live}` : status==='Construction' ? '🏗' : status==='Maintenance' ? '🛠' : '○';
+    return `<div onclick="openSCUnitDetail(${uId})"
+      style="border:1.5px solid color-mix(in srgb,${col} 28%,transparent);border-radius:10px;height:50px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;
+      background:color-mix(in srgb,${col} 6%,transparent);">
+      <div style="font-size:7px;font-weight:800;opacity:.35;font-family:'Space Grotesk',sans-serif;">U${uId}</div>
+      <div style="font-size:${status==='Active'?'14':'12'}px;font-weight:900;color:${col};font-family:'Space Grotesk',sans-serif;line-height:1;">${inner}</div>
+    </div>`;
+  };
+ 
+  const gridCol = (ids) => `<div style="display:flex;flex-direction:column;gap:4px;">${ids.map(compactUnit).join('')}</div>`;
+ 
+  /* Recent transfers table */
+  const recent = [...(scData.transfers||[])].reverse().slice(0,12);
+  const batchRows = recent.length ? recent.map(t => {
+    const loss = t.qty > 0 ? (((t.postDead||0)/t.qty)*100).toFixed(1) : '0.0';
+    const lc = parseFloat(loss)>=5?'alert':parseFloat(loss)>=2?'attention':'ok';
+    return `<tr>
+      <td>U${t.unitId}·P${t.petak}<br><span style="color:var(--text-dim);font-size:9px;">${t.date||'—'}</span></td>
+      <td>${t.qty||0}</td>
+      <td style="color:var(--${lc});">${t.postDead||0}</td>
+      <td><span class="pill" style="background:color-mix(in srgb,var(--${lc}) 14%,transparent);color:var(--${lc});">${loss}%</span></td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:14px 0;">No transfers yet.</td></tr>`;
+ 
+  document.getElementById('seacage-body').innerHTML = `
+    <div class="grid grid-cols-3 gap-3">
+      <div class="kpi" style="--kpi-hue:#0EA5E9;">
+        <div class="kpi-label">Total In</div><div class="kpi-ko ko">총 입식</div>
+        <div class="kpi-val">${g.totalInput.toLocaleString()}</div>
+      </div>
+      <div class="kpi" style="--kpi-hue:var(--alert);">
+        <div class="kpi-label">Dead</div><div class="kpi-ko ko">폐사</div>
+        <div class="kpi-val" style="color:var(--alert);">${g.totalDead.toLocaleString()}</div>
+      </div>
+      <div class="kpi" style="--kpi-hue:${survCol};">
+        <div class="kpi-label">Survival</div><div class="kpi-ko ko">생존율</div>
+        <div class="kpi-val" style="color:${survCol};">${g.survival}%</div>
+      </div>
+    </div>
+ 
+    <div class="card" style="padding:14px;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div class="eyebrow" style="color:#0EA5E9;">Ops Status · 운영 현황</div>
+        <div style="font-size:12px;color:var(--text-mut);margin-top:2px;">Start: 8 Jun 2026</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="num" style="font-size:24px;font-weight:700;color:#0EA5E9;">${days}d</div>
+        <div style="font-size:10px;color:var(--text-dim);">Week ${wk}</div>
+      </div>
+    </div>
+ 
+    <div>
+      <div class="eyebrow" style="margin-bottom:8px;">Cage Layout · <span class="ko">배치도</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 56px;gap:5px;">
+        ${gridCol(SC_COLS.left)}${gridCol(SC_COLS.middle)}${gridCol(SC_COLS.right)}
+        <div style="padding-top:20px;"><div style="border:1.5px solid color-mix(in srgb,var(--attention) 35%,transparent);border-radius:10px;padding:8px 3px;text-align:center;font-size:7px;font-weight:900;color:var(--attention);text-transform:uppercase;line-height:1.5;">🏠<br>Guard</div></div>
+      </div>
+      <p style="font-size:10px;color:var(--text-dim);margin-top:5px;">Tap any unit for Petak detail.</p>
+    </div>
+ 
+    <div>
+      <div class="eyebrow" style="margin-bottom:8px;">Recent Transfers · <span class="ko">최근 입식</span></div>
+      <div class="card" style="padding:14px;">
+        <table class="data-table">
+          <thead><tr><th>Unit · Date</th><th>Qty</th><th>Dead</th><th>Loss</th></tr></thead>
+          <tbody>${batchRows}</tbody>
+        </table>
+      </div>
+    </div>
+    <p style="font-size:10px;color:var(--text-dim);">Workers log data via Sea Cage Ops on the Ops Home tab.</p>`;
+}
+ 
         if('serviceWorker'in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});}
 
         /* ── Splash screen ───────────────────────────────────── */
@@ -934,5 +1435,32 @@
             });
         })();
     </script>
+    <main id="seacage-worker-view" class="hidden flex-1 flex flex-col min-h-0 w-full">
+  <div class="flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full overflow-y-auto">
+    <div class="flex items-center justify-between">
+      <button onclick="closeSeaCageWorkerView()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:var(--accent);">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"/></svg>
+        <span class="ko">뒤로</span> Ops Home
+      </button>
+      <button onclick="fetchSCData(true)" class="icon-btn">
+        <svg id="sc-refresh-ic" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356M3.985 19.644V14.65h4.992m-4.969-3.65a8.25 8.25 0 0113.803-3.7L21 8.25m-18 7.5l3.181 3.182a8.25 8.25 0 0013.803-3.7"/></svg>
+      </button>
+    </div>
+    <div>
+      <span class="eyebrow" style="color:#0EA5E9;">가두리 작업 · Sea Cage Ops</span>
+      <h3 class="text-2xl font-semibold tracking-tight" style="margin-top:1px;">Sangkar Laut</h3>
+    </div>
+    <div style="display:flex;padding:4px;background:var(--surface-2);border:1px solid var(--border);border-radius:14px;gap:4px;overflow-x:auto;">
+      <button onclick="showSCWorkerTab('layout')" id="sc-tab-layout" style="flex:1;min-width:60px;padding:8px 2px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.04em;background:var(--accent);color:white;transition:all .2s;">Layout</button>
+      <button onclick="showSCWorkerTab('transfer')" id="sc-tab-transfer" style="flex:1;min-width:60px;padding:8px 2px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.04em;color:var(--text-mut);transition:all .2s;">Transfer</button>
+      <button onclick="showSCWorkerTab('mortality')" id="sc-tab-mortality" style="flex:1;min-width:60px;padding:8px 2px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.04em;color:var(--text-mut);transition:all .2s;">Kematian</button>
+      <button onclick="showSCWorkerTab('growth')" id="sc-tab-growth" style="flex:1;min-width:60px;padding:8px 2px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.04em;color:var(--text-mut);transition:all .2s;">Tumbuh</button>
+    </div>
+    <div id="sc-content-layout"></div>
+    <div id="sc-content-transfer" class="hidden"></div>
+    <div id="sc-content-mortality" class="hidden"></div>
+    <div id="sc-content-growth" class="hidden"></div>
+  </div>
+</main>
 </body>
 </html>
