@@ -228,7 +228,7 @@
                     <div><label class="eyebrow block mb-1.5">Water Quality</label><input type="password" id="gas-wq-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
                     <div><label class="eyebrow block mb-1.5">Spawning &amp; Purchasing</label><input type="password" id="gas-spawning-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
                     <div><label class="eyebrow block mb-1.5">Processing Log</label><input type="password" id="gas-processing-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
-                    <div><label class="eyebrow block mb-1.5">Sea Cage Ops</label><input type="password" id="gas-sc-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div><div><label class="eyebrow block mb-1.5">Hatchery HR Suite</label><input type="password" id="gas-hr-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
+                    <div><label class="eyebrow block mb-1.5">Sea Cage Ops</label><input type="password" id="gas-sc-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div><div><label class="eyebrow block mb-1.5">Hatchery HR Suite</label><div><label class="eyebrow block mb-1.5">Farm Stock Check</label><input type="password" id="gas-stockcheck-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div><input type="password" id="gas-hr-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
                     <button onclick="saveGasUrls()" class="w-full py-2.5 rounded-xl text-sm font-semibold text-white" style="background:var(--accent);">Save all URLs</button>
                     <p id="gas-save-confirm" class="hidden text-xs font-semibold text-center" style="color:var(--ok);">✓ Saved</p>
                 </div>
@@ -382,7 +382,12 @@
         function mortalityColor(v){if(!isFinite(v))return'var(--text)';if(v<=5)return'var(--ok)';if(v<=15)return'var(--attention)';return'var(--alert)';}
 
         /* ── Worker modules ──────────────────────────────────── */
-        const MODULES=[{hue:'#3B82F6',href:'https://jamesaaa0203.github.io/daily-water-quality/',title:'Water Quality',bm:'Kualiti Air',desc:'DO, temperature & salinity logs',icon:lineIcon("M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5l6.74-6.76z")},{hue:'#8B5CF6',href:'https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/',title:'Spawning Trials',bm:'Ujian Pemijahan',desc:'Induction & conditioning',icon:lineIcon("M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.656 48.656 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3")},{hue:'#0D9488',href:'https://jamesaaa0203.github.io/Abalone-Processing-Log/',title:'Processing Log',bm:'Log Pemprosesan',desc:'Cooking sessions & yield',icon:flameIcon},{hue:'#0EA5E9',action:'openSeaCageWorkerView',title:'Sea Cage Ops',bm:'Operasi Sangkar Laut',desc:'Transfer, kematian & ukur pertumbuhan',icon:lineIcon("M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z")},{hue:'#6366F1',href:'https://jamesaaa0203.github.io/hatchery-hr/',title:'Hatchery HR Suite',bm:'Sumber Manusia',desc:'OT, leave & balances',icon:lineIcon("M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z")}];
+        const MODULES=[{hue:'#3B82F6',href:'https://jamesaaa0203.github.io/daily-water-quality/',title:'Water Quality',bm:'Kualiti Air',desc:'DO, temperature & salinity logs',icon:lineIcon("M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5l6.74-6.76z")},{hue:'#8B5CF6',href:'https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/',title:'Spawning Trials',bm:'Ujian Pemijahan',desc:'Induction & conditioning',icon:lineIcon("M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.656 48.656 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3")},{hue:'#0D9488',href:'https://jamesaaa0203.github.io/Abalone-Processing-Log/',title:'Processing Log',bm:'Log Pemprosesan',desc:'Cooking sessions & yield',icon:flameIcon},{hue:'#0EA5E9',action:'openSeaCageWorkerView',title:'Sea Cage Ops',bm:'Operasi Sangkar Laut',desc:'Transfer, kematian & ukur pertumbuhan',icon:lineIcon("M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z")},{hue:'#6366F1',href:'https://jamesaaa0203.github.io/hatchery-hr/',title:'Hatchery HR Suite',bm:'Sumber Manusia',desc:'OT, leave & balances',icon:lineIcon("M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z")},{hue:'#F97316',
+  href:'https://jamesaaa0203.github.io/Stock-Checking-/',
+  title:'Farm Stock Check',
+  bm:'Semakan Stok Ladang',
+  desc:'Consumables, supplies & reorder alerts',
+  icon:lineIcon("M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01")}];
         function renderModules(){document.getElementById('module-list').innerHTML=MODULES.map(m=>`<button class="module" onclick="${m.action?m.action+'()':'openModule(\''+m.href+'\')'}" style="--hue:${m.hue}"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">${m.icon}</span><div class="min-w-0"><div class="module-bm">${m.bm}</div><div class="module-title">${m.title}</div><div class="module-desc">${m.desc}</div></div></div>${chevR}</button>`).join('');}
         function openModule(href){rumbleDevice(35);window.location.href=href;}
 
@@ -393,22 +398,27 @@
             {action:'purchase',hue:'#D97706',ko:'전복 매입 로그',title:'Abalone Purchasing',sub:'Live dashboard',icon:lineIcon("M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h16.5M4.5 9h15M5.25 14.25h13.5")},
             {action:'processing',hue:'#0D9488',ko:'가공 처리 로그',title:'Processing Log',sub:'Live dashboard',icon:flameIcon},
             {action:'seacage',hue:'#0EA5E9',ko:'가두리 운영 현황',title:'Sea Cage Ops',sub:'Live dashboard',icon:lineIcon("M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z")},{action:'hr',hue:'#6366F1',ko:'인사 및 근태 관리',title:'Workforce & HR',sub:'Live dashboard',icon:lineIcon("M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z")}
-        ];
-        const ACTION_FNS={wq:()=>openWaterQuality(),spawn:()=>openSpawning(),purchase:()=>openPurchasing(),processing:()=>openProcessingView(),hr:()=>openHRView(),seacage:()=>openSeaCageManagerView()};
+        ,{action:'stockcheck',
+  hue:'#F97316',
+  ko:'재고 관리 현황',
+  title:'Farm Stock Check',
+  sub:'Critical items & reorder list',
+  icon:lineIcon("M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01")}];
+        const ACTION_FNS={stockcheck:()=>openStockCheckView(),wq:()=>openWaterQuality(),spawn:()=>openSpawning(),purchase:()=>openPurchasing(),processing:()=>openProcessingView(),hr:()=>openHRView(),seacage:()=>openSeaCageManagerView()};
         function renderMgrList(){document.getElementById('mgr-list').innerHTML=MGR_VIEWS.map(v=>{const onclick=v.action?`(ACTION_FNS['${v.action}']||function(){})()`:` openManagerReport('${v.appKey}','${v.tab}')`;const sub=v.sub?`<div class="text-xs" style="color:var(--text-mut);margin-top:1px;">${v.sub}</div>`:'';return`<button onclick="${onclick}" class="mgr-row"><div class="flex items-center gap-3.5"><span class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:color-mix(in srgb,${v.hue} 12%,transparent);color:${v.hue};border:1px solid color-mix(in srgb,${v.hue} 24%,transparent);"><span style="width:22px;height:22px;display:inline-flex">${v.icon}</span></span><div><div class="eyebrow ko" style="color:${v.hue};">${v.ko}</div><div class="text-base font-semibold tracking-tight" style="margin-top:1px;">${v.title}</div>${sub}</div></div>${chevR}</button>`;}).join('');}
 
         /* ── View manager ────────────────────────────────────── */
-        const ALL_VIEWS=['wq-data-view','spawn-data-view','purchase-data-view','proc-data-view','hr-data-view','seacage-data-view','manager-report-frame'];
+        const ALL_VIEWS=['wq-data-view','spawn-data-view','purchase-data-view','proc-data-view','hr-data-view','seacage-data-view','stock-data-view','manager-report-frame'];
         function showView(id){document.getElementById('manager-menu-grid').classList.add('hidden');ALL_VIEWS.forEach(v=>document.getElementById(v).classList.add('hidden'));document.getElementById(id).classList.remove('hidden');}
         function closeView(){rumbleDevice(40);ALL_VIEWS.forEach(v=>document.getElementById(v).classList.add('hidden'));document.getElementById('manager-menu-grid').classList.remove('hidden');}
         function openFullTab(which){const m={wq:()=>{const u=getGasUrl('daily-water-quality');return`https://jamesaaa0203.github.io/daily-water-quality/?targetTab=manager&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');},spawn:()=>{const u=getGasUrl('Abalone-Spawning-and-Purchasing-Log');return`https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/?targetTab=spawning&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');},purchase:()=>{const u=getGasUrl('Abalone-Spawning-and-Purchasing-Log');return`https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/?targetTab=purchasing&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');}};const fn=m[which];if(fn)window.open(fn(),'_blank','noopener,noreferrer');}
 
         /* ── GAS URL settings ────────────────────────────────── */
-        const GAS_KEYS={'Abalone-Spawning-and-Purchasing-Log':'mgr_spawning_gas_url','Abalone-Processing-Log':'mgr_processing_gas_url','hatchery-hr':'mgr_hr_gas_url','daily-water-quality':'mgr_wq_gas_url','sea-cage':'mgr_seacage_gas_url'};
+        const GAS_KEYS={'Abalone-Spawning-and-Purchasing-Log':'mgr_spawning_gas_url','Abalone-Processing-Log':'mgr_processing_gas_url','hatchery-hr':'mgr_hr_gas_url','daily-water-quality':'mgr_wq_gas_url','sea-cage':'mgr_seacage_gas_url','farm-stock-check': 'mgr_stockcheck_gas_url',};
         function getGasUrl(k){const key=GAS_KEYS[k];return key?store.get(key):null;}
         function toggleGasSettings(){const d=document.getElementById('gas-settings-drawer'),s=document.getElementById('gas-settings-status');d.classList.toggle('hidden');s.textContent=d.classList.contains('hidden')?'Configure ▾':'Close ▴';}
-        function saveGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url','gas-sc-url':'mgr_seacage_gas_url'};for(const[id,k]of Object.entries(m)){const v=document.getElementById(id).value.trim();if(v)store.set(k,v);}const c=document.getElementById('gas-save-confirm');c.classList.remove('hidden');setTimeout(()=>c.classList.add('hidden'),2500);}
-        function loadSavedGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url','gas-sc-url':'mgr_seacage_gas_url'};for(const[id,k]of Object.entries(m)){const v=store.get(k);if(v)document.getElementById(id).value=v;}}
+        function saveGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url','gas-sc-url':'mgr_seacage_gas_url','gas-stockcheck-url':'mgr_stockcheck_gas_url'};for(const[id,k]of Object.entries(m)){const v=document.getElementById(id).value.trim();if(v)store.set(k,v);}const c=document.getElementById('gas-save-confirm');c.classList.remove('hidden');setTimeout(()=>c.classList.add('hidden'),2500);}
+        function loadSavedGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url','gas-sc-url':'mgr_seacage_gas_url','gas-stockcheck-url':'mgr_stockcheck_gas_url'};for(const[id,k]of Object.entries(m)){const v=store.get(k);if(v)document.getElementById(id).value=v;}}
 
         /* ── Overlay helpers ─────────────────────────────────── */
         function closeOverlay(id,e){if(e&&e.target!==document.getElementById(id))return;document.getElementById(id).classList.remove('open');}
@@ -1377,6 +1387,22 @@ function _scMgrRender(){
   if(scMgrSubTab==='batches')  renderSCMgrBatches();
   if(scMgrSubTab==='biomass')  renderSCMgrBiomass();
 }
+        <div id="stock-data-view" class="hidden flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full overflow-y-auto">
+    <div class="flex items-center justify-between gap-2">
+        <button onclick="closeView()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:var(--accent);">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"/></svg>
+            <span class="ko">뒤로</span> Menu
+        </button>
+        <button onclick="loadStockData()" class="icon-btn">
+            <svg id="stock-refresh-ic" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356M3.985 19.644V14.65h4.992m-4.969-3.65a8.25 8.25 0 0113.803-3.7L21 8.25m-18 7.5l3.181 3.182a8.25 8.25 0 0013.803-3.7"/></svg>
+        </button>
+    </div>
+    <div>
+        <span class="eyebrow" style="color:#F97316;">재고 관리 현황 · Farm Stock</span>
+        <h3 class="text-2xl font-semibold tracking-tight" style="margin-top:1px;">Stock Overview</h3>
+    </div>
+    <div id="stock-body"></div>
+</div>
  
 /* ── Manager: OVERVIEW ───────────────────────────────────────────── */
 function renderSCMgrOverview(){
@@ -1679,6 +1705,138 @@ function scBioAddWLPrompt(){
   const src=prompt('Source / date:', 'Field measurement')||'Field measurement';
   const wl=scLoadWLTable();wl.push({length:l,weight:w,source:src});
   wl.sort((a,b)=>a.length-b.length);scSaveWLTable(wl);renderSCMgrBiomass();
+}
+        /* ═══════════════════════════════════════════════════════
+   FARM STOCK CHECK — Native Manager Dashboard
+   GAS: ?action=getItems&pin=3653&callback=handleStockCheckData
+   ═══════════════════════════════════════════════════════ */
+const FARM_STOCK_URL = 'https://jamesaaa0203.github.io/farm-stock-check/';
+
+function openStockCheckView() {
+    rumbleDevice(45);
+    showView('stock-data-view');
+    loadStockData();
+}
+
+window.handleStockCheckData = function(res) {
+    const ic = document.getElementById('stock-refresh-ic');
+    if (ic) ic.classList.remove('spin');
+    if (res.status !== 'success') {
+        document.getElementById('stock-body').innerHTML = msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Access denied — check URL / PIN.</p>`);
+        return;
+    }
+    renderStockData(res.items || []);
+};
+
+async function loadStockData() {
+    const body = document.getElementById('stock-body');
+    const ic   = document.getElementById('stock-refresh-ic');
+    if (ic) ic.classList.add('spin');
+    const url = getGasUrl('farm-stock-check');
+    if (!url) {
+        body.innerHTML = msgCard(`<p class="text-sm font-semibold">Farm Stock not linked</p><p class="text-xs mt-1" style="color:var(--text-mut);">Add the /exec URL in Module GAS Connections.</p>`);
+        if (ic) ic.classList.remove('spin');
+        return;
+    }
+    body.innerHTML = msgCard(`<p class="text-sm" style="color:var(--text-mut);">Loading…</p>`);
+    const s   = document.createElement('script');
+    s.src     = `${url}?action=getItems&pin=${MASTER_PIN}&callback=handleStockCheckData`;
+    s.onerror = () => {
+        body.innerHTML = msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Couldn't fetch data</p><p class="text-xs mt-1 mb-3" style="color:var(--text-mut);">Check GAS URL or network.</p><button onclick="window.open('${FARM_STOCK_URL}','_blank','noopener,noreferrer')" class="px-4 py-2 rounded-xl text-sm font-semibold text-white" style="background:var(--accent);">Open full module ↗</button>`);
+        if (ic) ic.classList.remove('spin');
+    };
+    document.body.appendChild(s);
+}
+
+function renderStockData(items) {
+    if (!items.length) {
+        document.getElementById('stock-body').innerHTML = msgCard(`<p class="text-sm">No items configured yet.</p><p class="text-xs mt-1" style="color:var(--text-mut);">Open the Farm Stock module to add items.</p>`);
+        return;
+    }
+    let critical = 0, low = 0, reorderHtml = '', tableHtml = '';
+
+    items.forEach(item => {
+        const ratio      = item.min_required > 0 ? item.current_count / item.min_required : 1;
+        const isCritical = ratio <= 0.4;
+        const isLow      = ratio < 1 && !isCritical;
+        const needed     = item.min_required - item.current_count;
+        if (isCritical) critical++;
+        else if (isLow) low++;
+
+        const cntStyle = isCritical ? 'color:var(--alert);' : isLow ? 'color:var(--attention);' : '';
+        const statusTxt = isCritical
+            ? `<span style="font-size:11px;font-weight:600;color:var(--alert);">Critical</span>`
+            : isLow
+            ? `<span style="font-size:11px;font-weight:600;color:var(--attention);">Low</span>`
+            : `<span style="font-size:11px;color:var(--text-dim);">—</span>`;
+
+        tableHtml += `<tr>
+            <td><div style="font-size:12px;font-weight:500;">${item.name}</div>
+                <div style="font-size:10px;color:var(--text-dim);">${item.area} · ${item.category}</div></td>
+            <td style="font-size:12px;">${item.min_required}</td>
+            <td class="num" style="font-size:13px;font-weight:700;${cntStyle}">${item.current_count}</td>
+            <td>${statusTxt}</td></tr>`;
+
+        if (needed > 0) {
+            const urgency = isCritical ? 'var(--alert)' : 'var(--attention)';
+            reorderHtml += `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);">
+                    <div>
+                        <div style="font-size:13px;font-weight:500;">${item.name}</div>
+                        <div style="font-size:10px;color:var(--text-dim);">${item.area} · ${item.category}</div>
+                    </div>
+                    <div style="text-align:right;flex:none;">
+                        <div class="num" style="font-size:15px;font-weight:700;color:${urgency};">+${needed}</div>
+                        <div style="font-size:10px;color:var(--text-dim);">${item.unit||'units'} needed</div>
+                    </div>
+                </div>`;
+        }
+    });
+
+    document.getElementById('stock-body').innerHTML = `
+        <!-- Stats bar -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);">
+            <div style="text-align:center;padding:14px 8px;">
+                <span class="num" style="display:block;font-size:24px;font-weight:700;color:var(--alert);">${critical}</span>
+                <span style="display:block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--text-dim);margin-top:3px;">Critical</span>
+            </div>
+            <div style="text-align:center;padding:14px 8px;border-left:1px solid var(--border);">
+                <span class="num" style="display:block;font-size:24px;font-weight:700;color:var(--attention);">${low}</span>
+                <span style="display:block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--text-dim);margin-top:3px;">Low Stock</span>
+            </div>
+            <div style="text-align:center;padding:14px 8px;border-left:1px solid var(--border);">
+                <span class="num" style="display:block;font-size:24px;font-weight:700;">${items.length}</span>
+                <span style="display:block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--text-dim);margin-top:3px;">Total Items</span>
+            </div>
+        </div>
+
+        <!-- Reorder list -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);">
+            <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--text-mut);">Purchase Order List</span>
+                <span style="font-size:10px;color:var(--text-dim);">Auto-generated</span>
+            </div>
+            ${reorderHtml || '<p style="text-align:center;padding:20px;font-size:12px;font-weight:500;color:var(--ok);">✓ All items at minimum stock.</p>'}
+        </div>
+
+        <!-- Inventory table -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);">
+            <div style="padding:10px 14px;border-bottom:1px solid var(--border);">
+                <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--text-mut);">Full Inventory Ledger</span>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="data-table">
+                    <thead><tr><th>Item</th><th>Min</th><th>Count</th><th>Status</th></tr></thead>
+                    <tbody>${tableHtml}</tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Link out -->
+        <button onclick="window.open(FARM_STOCK_URL,'_blank','noopener,noreferrer')"
+            style="width:100%;padding:11px;background:color-mix(in srgb,#F97316 12%,transparent);color:#F97316;border:1px solid color-mix(in srgb,#F97316 28%,transparent);border-radius:10px;font-size:12px;font-weight:600;">
+            Open Full Module ↗
+        </button>`;
 }
   
         if('serviceWorker'in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});}
