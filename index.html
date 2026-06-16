@@ -282,6 +282,16 @@
             <div><span class="eyebrow" style="color:#0D9488;">가공 처리 로그 · Processing Log</span><div class="flex items-center justify-between mt-1"><h3 class="text-2xl font-semibold tracking-tight" id="proc-month-title">This Month</h3><select id="proc-month-select" onchange="changeProcMonth(this.value)" class="text-xs font-semibold py-1.5 px-2.5 rounded-lg num" style="background:var(--surface-2);color:var(--text);border:1px solid var(--border);outline:none;max-width:148px;"></select></div></div>
             <div id="proc-body"></div>
         </div>
+        
+        <!-- HR SUITE VIEW -->
+        <div id="hr-data-view" class="hidden flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full overflow-y-auto">
+            <div class="flex items-center justify-between gap-2">
+                <button onclick="closeView()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:var(--accent);"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"></path></svg><span class="ko">뒤로</span> Menu</button>
+                <button onclick="fetchHRData()" class="icon-btn"><svg id="hr-refresh-ic" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356M3.985 19.644V14.65h4.992m-4.969-3.65a8.25 8.25 0 0113.803-3.7L21 8.25m-18 7.5l3.181 3.182a8.25 8.25 0 0013.803-3.7"/></svg></button>
+            </div>
+            <div><span class="eyebrow" style="color:#6366F1;">인사 및 근태 관리 · HR Suite</span><div class="flex items-center justify-between mt-1"><h3 class="text-2xl font-semibold tracking-tight" id="hr-month-title">This Month</h3><select id="hr-month-select" onchange="changeHRMonth(this.value)" class="text-xs font-semibold py-1.5 px-2.5 rounded-lg num" style="background:var(--surface-2);color:var(--text);border:1px solid var(--border);outline:none;max-width:148px;"></select></div></div>
+            <div id="hr-body"></div>
+        </div>
 
         <!-- IFRAME (HR only now — Processing is native above) -->
         <div id="manager-report-frame" class="hidden flex-1 flex flex-col min-h-0 w-full">
@@ -325,8 +335,9 @@
         const MASTER_PIN = "3653";
         let inputPin="", isManagerAuthenticated=false, currentReportURL="";
         let wqSessions=[], spawnLogs=[], purchaseLogs=[], procLogs=[], _procFiltered=[];
+        let hrData={balances:[],ot:[],leave:[]};
         function currentMonthStr(){ const n=new Date(); return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`; }
-        let spawnMonth=currentMonthStr(), purchaseMonth=currentMonthStr(), procMonth=currentMonthStr();
+        let spawnMonth=currentMonthStr(), purchaseMonth=currentMonthStr(), procMonth=currentMonthStr(), hrMonth=currentMonthStr();
 
         /* ── Storage ─────────────────────────────────────────── */
         const store={get(k){try{return localStorage.getItem(k);}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}},sget(k){try{return sessionStorage.getItem(k);}catch(e){return null;}},sset(k,v){try{sessionStorage.setItem(k,v);}catch(e){}},srem(k){try{sessionStorage.removeItem(k);}catch(e){}}};
@@ -371,13 +382,13 @@
             {action:'spawn',hue:'#8B5CF6',ko:'산란 시험 관리',title:'Spawning Trials',sub:'Live dashboard',icon:lineIcon("M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.656 48.656 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3")},
             {action:'purchase',hue:'#D97706',ko:'전복 매입 로그',title:'Abalone Purchasing',sub:'Live dashboard',icon:lineIcon("M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h16.5M4.5 9h15M5.25 14.25h13.5")},
             {action:'processing',hue:'#0D9488',ko:'가공 처리 로그',title:'Processing Log',sub:'Live dashboard',icon:flameIcon},
-            {appKey:'hatchery-hr',tab:'mgr-tab',hue:'#6366F1',ko:'인사 및 근태 관리',title:'Workforce & HR',icon:lineIcon("M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z")}
+            {action:'hr',hue:'#6366F1',ko:'인사 및 근태 관리',title:'Workforce & HR',sub:'Live dashboard',icon:lineIcon("M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z")}
         ];
-        const ACTION_FNS={wq:()=>openWaterQuality(),spawn:()=>openSpawning(),purchase:()=>openPurchasing(),processing:()=>openProcessingView()};
+        const ACTION_FNS={wq:()=>openWaterQuality(),spawn:()=>openSpawning(),purchase:()=>openPurchasing(),processing:()=>openProcessingView(),hr:()=>openHRView()};
         function renderMgrList(){document.getElementById('mgr-list').innerHTML=MGR_VIEWS.map(v=>{const onclick=v.action?`(ACTION_FNS['${v.action}']||function(){})()`:` openManagerReport('${v.appKey}','${v.tab}')`;const sub=v.sub?`<div class="text-xs" style="color:var(--text-mut);margin-top:1px;">${v.sub}</div>`:'';return`<button onclick="${onclick}" class="mgr-row"><div class="flex items-center gap-3.5"><span class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:color-mix(in srgb,${v.hue} 12%,transparent);color:${v.hue};border:1px solid color-mix(in srgb,${v.hue} 24%,transparent);"><span style="width:22px;height:22px;display:inline-flex">${v.icon}</span></span><div><div class="eyebrow ko" style="color:${v.hue};">${v.ko}</div><div class="text-base font-semibold tracking-tight" style="margin-top:1px;">${v.title}</div>${sub}</div></div>${chevR}</button>`;}).join('');}
 
         /* ── View manager ────────────────────────────────────── */
-        const ALL_VIEWS=['wq-data-view','spawn-data-view','purchase-data-view','proc-data-view','manager-report-frame'];
+        const ALL_VIEWS=['wq-data-view','spawn-data-view','purchase-data-view','proc-data-view','hr-data-view','manager-report-frame'];
         function showView(id){document.getElementById('manager-menu-grid').classList.add('hidden');ALL_VIEWS.forEach(v=>document.getElementById(v).classList.add('hidden'));document.getElementById(id).classList.remove('hidden');}
         function closeView(){rumbleDevice(40);ALL_VIEWS.forEach(v=>document.getElementById(v).classList.add('hidden'));document.getElementById('manager-menu-grid').classList.remove('hidden');}
         function openFullTab(which){const m={wq:()=>{const u=getGasUrl('daily-water-quality');return`https://jamesaaa0203.github.io/daily-water-quality/?targetTab=manager&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');},spawn:()=>{const u=getGasUrl('Abalone-Spawning-and-Purchasing-Log');return`https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/?targetTab=spawning&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');},purchase:()=>{const u=getGasUrl('Abalone-Spawning-and-Purchasing-Log');return`https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/?targetTab=purchasing&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');}};const fn=m[which];if(fn)window.open(fn(),'_blank','noopener,noreferrer');}
@@ -725,7 +736,110 @@
                 `<div class="card" style="padding:14px;">${rows||'<p style="color:var(--text-dim);text-align:center;padding:16px;">No data</p>'}</div>`
             );
         }
-
+/* ═══════════════════════════════════════════════════════
+           HR SUITE — Native Dashboard
+           GAS returns: { success, balances[], ot[], leave[] }
+           ═══════════════════════════════════════════════════════ */
+        function openHRView(){rumbleDevice(45);showView('hr-data-view');if(!hrData.balances.length)fetchHRData();else renderHR();}
+        async function fetchHRData(){
+            const ic=document.getElementById('hr-refresh-ic');ic&&ic.classList.add('spin');
+            const url=getGasUrl('hatchery-hr');
+            if(!url){document.getElementById('hr-body').innerHTML=msgCard(`<p class="text-sm font-semibold">HR Suite not linked</p><p class="text-xs mt-1" style="color:var(--text-mut);">Add the /exec URL in Module GAS connections.</p>`);ic&&ic.classList.remove('spin');return;}
+            document.getElementById('hr-body').innerHTML=msgCard(`<p class="text-sm" style="color:var(--text-mut);">Loading…</p>`);
+            try{
+                const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),12000);
+                const res=await fetch(url,{signal:ctrl.signal,redirect:'follow'});
+                clearTimeout(t);const json=await res.json();
+                if(!json.success)throw new Error(json.error||'GAS error');
+                hrData={balances:json.balances||[],ot:json.ot||[],leave:json.leave||[]};
+                _populateHRMonthSel();renderHR();
+            }catch(err){document.getElementById('hr-body').innerHTML=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Couldn't load HR data</p><p class="text-xs mt-1" style="color:var(--text-mut);">${err.message}</p>`);}
+            finally{ic&&ic.classList.remove('spin');}
+        }
+        function _populateHRMonthSel(){
+            const allDates=[...hrData.ot.map(r=>r.date),...hrData.leave.map(r=>r.startDate)].filter(Boolean);
+            const months=[...new Set(allDates.map(d=>{const p=parseAnyDate(d);return p?`${p.getFullYear()}-${String(p.getMonth()+1).padStart(2,'0')}`:null;}).filter(Boolean))].sort().reverse();
+            const sel=document.getElementById('hr-month-select');
+            if(!months.length){sel.innerHTML=`<option value="${hrMonth}">${monthLabel(hrMonth)}</option>`;return;}
+            if(!months.includes(hrMonth))months.unshift(hrMonth);
+            sel.innerHTML=months.map(m=>`<option value="${m}"${m===hrMonth?' selected':''}>${monthLabel(m)}</option>`).join('');
+            sel.value=hrMonth;
+        }
+        function changeHRMonth(val){rumbleDevice(25);hrMonth=val;renderHR();}
+        function renderHR(){
+            document.getElementById('hr-month-title').textContent=monthLabel(hrMonth);
+            _populateHRMonthSel();
+            const monthOT=hrData.ot.filter(r=>isMonthMatch(r.date,hrMonth));
+            const monthLeave=hrData.leave.filter(r=>isMonthMatch(r.startDate,hrMonth));
+            const totalHours=monthOT.reduce((s,r)=>s+(parseFloat(r.hours)||0),0);
+            const totalLeaveDays=monthLeave.reduce((s,r)=>s+(parseFloat(r.days)||0),0);
+            const otWorkers=new Set(monthOT.map(r=>r.name)).size;
+            const leaveWorkers=new Set(monthLeave.map(r=>r.name)).size;
+            const kpis=`<div class="grid grid-cols-2 gap-3">
+                <div class="kpi" style="--kpi-hue:#6366F1;"><div class="kpi-label">OT Hours</div><div class="kpi-ko ko">총 초과근무</div><div class="flex items-baseline gap-1 kpi-val">${totalHours.toFixed(1)}<span class="kpi-unit">hrs</span></div><div class="kpi-hint">${otWorkers} worker${otWorkers!==1?'s':''} this month</div></div>
+                <div class="kpi" style="--kpi-hue:#6366F1;"><div class="kpi-label">Leave Days</div><div class="kpi-ko ko">총 휴가일수</div><div class="flex items-baseline gap-1 kpi-val">${totalLeaveDays.toFixed(1)}<span class="kpi-unit">days</span></div><div class="kpi-hint">${leaveWorkers} worker${leaveWorkers!==1?'s':''} this month</div></div>
+            </div>`;
+            const workerCards=hrData.balances.map(b=>{
+                const wOT=monthOT.filter(r=>r.name===b.name);
+                const wHours=wOT.reduce((s,r)=>s+(parseFloat(r.hours)||0),0);
+                const wLeave=monthLeave.filter(r=>r.name===b.name);
+                const wDays=wLeave.reduce((s,r)=>s+(parseFloat(r.days)||0),0);
+                const annualLeft=parseFloat(b.annualLeaveLeft)||0;
+                const extra=parseFloat(b.extraHolidayEarned)||0;
+                const leaveColor=annualLeft>7?'var(--ok)':annualLeft>3?'var(--attention)':'var(--alert)';
+                const initials=b.name.substring(0,2).toUpperCase();
+                return`<button class="mgr-row" onclick="openHRWorkerDetail('${b.name.replace(/'/g,"\\'")}')">
+                    <div class="flex items-center gap-3 min-w-0 flex-1">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-none text-xs font-bold" style="background:color-mix(in srgb,#6366F1 12%,transparent);color:#6366F1;border:1px solid color-mix(in srgb,#6366F1 24%,transparent);font-family:'Space Grotesk',sans-serif;">${initials}</div>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-sm font-semibold">${b.name}</div>
+                            <div class="flex items-center flex-wrap gap-x-2 mt-1">
+                                <span class="text-xs font-semibold" style="color:${leaveColor};">${annualLeft}d AL left</span>
+                                ${extra>0?`<span class="text-xs font-semibold" style="color:var(--attention);">+${extra}d extra</span>`:''}
+                                ${wHours>0?`<span class="text-xs font-semibold" style="color:#6366F1;">${wHours.toFixed(1)}h OT</span>`:''}
+                                ${wDays>0?`<span class="text-xs font-semibold" style="color:var(--text-dim);">${wDays.toFixed(1)}d leave</span>`:''}
+                            </div>
+                        </div>
+                    </div>
+                    ${chevR}
+                </button>`;
+            }).join('');
+            const otRows=[...monthOT].reverse().map(r=>{const dp=(r.date||'').split('-');const dDisp=dp.length===3?`${dp[2]}/${dp[1]}`:r.date;const cls=r.compRule==='Extra Holiday'?'attention':'ok';return`<tr><td>${dDisp}<br><span style="color:var(--text-dim);font-size:10px;">${r.name||'—'}</span></td><td>${(parseFloat(r.hours)||0).toFixed(1)}</td><td>${r.dayType||'—'}</td><td><span class="pill" style="background:color-mix(in srgb,var(--${cls}) 14%,transparent);color:var(--${cls});font-size:9px;">${r.compRule||'—'}</span></td></tr>`;}).join('');
+            const leaveRows=[...monthLeave].reverse().map(r=>{const dp=(r.startDate||'').split('-');const dDisp=dp.length===3?`${dp[2]}/${dp[1]}`:r.startDate;const cls=r.type==='Annual Leave'?'ok':r.type==='Extra Holiday Used'?'attention':'alert';return`<tr><td>${r.name||'—'}<br><span style="color:var(--text-dim);font-size:10px;">${dDisp}</span></td><td><span class="pill" style="background:color-mix(in srgb,var(--${cls}) 14%,transparent);color:var(--${cls});font-size:9px;">${r.type||'—'}</span></td><td>${(parseFloat(r.days)||0).toFixed(1)}</td></tr>`;}).join('');
+            document.getElementById('hr-body').innerHTML=`${kpis}
+                <p class="eyebrow px-1 mt-1">Worker Balances · <span class="ko">잔여 휴가</span></p>
+                <div class="space-y-2">${workerCards||msgCard('<p class="text-sm" style="color:var(--text-mut);">No balance data — run initBalances() in the HR GAS first.</p>')}</div>
+                <p class="eyebrow px-1 mt-2">This Month · <span class="ko">이번달 현황</span></p>
+                ${otRows?`<div class="card" style="padding:14px;"><div class="eyebrow mb-2">OT Records · <span class="ko">초과근무 기록</span></div><table class="data-table"><thead><tr><th>Date · Worker</th><th>Hours</th><th>Day</th><th>Comp</th></tr></thead><tbody>${otRows}</tbody></table></div>`:msgCard('<p class="text-sm" style="color:var(--text-mut);">No OT records this month</p>')}
+                ${leaveRows?`<div class="card" style="padding:14px;"><div class="eyebrow mb-2">Leave Records · <span class="ko">휴가 기록</span></div><table class="data-table"><thead><tr><th>Worker · Date</th><th>Type</th><th>Days</th></tr></thead><tbody>${leaveRows}</tbody></table></div>`:msgCard('<p class="text-sm" style="color:var(--text-mut);">No leave records this month</p>')}
+                <p class="text-xs px-1 mt-1" style="color:var(--text-dim);">Tap any worker for their full OT & leave history. Showing ${monthLabel(hrMonth)}.</p>`;
+        }
+        function openHRWorkerDetail(name){
+            rumbleDevice(25);
+            const bal=hrData.balances.find(b=>b.name===name)||{};
+            const allOT=hrData.ot.filter(r=>r.name===name);
+            const allLeave=hrData.leave.filter(r=>r.name===name);
+            const annualLeft=parseFloat(bal.annualLeaveLeft)||0;
+            const extra=parseFloat(bal.extraHolidayEarned)||0;
+            const totalUsed=parseFloat(bal.medicalLeaveLeft)||0;
+            const totalOTHours=allOT.reduce((s,r)=>s+(parseFloat(r.hours)||0),0);
+            const initials=name.substring(0,2).toUpperCase();
+            const otRows=[...allOT].reverse().slice(0,15).map(r=>{const dp=(r.date||'').split('-');const d=dp.length===3?`${dp[2]}/${dp[1]}`:r.date;const cls=r.compRule==='Extra Holiday'?'attention':'ok';return`<div class="grade-row"><div><div class="text-sm font-semibold">${d} · ${r.dayType||'—'}</div><div class="text-xs ko" style="color:var(--text-dim);">${r.shiftType||''} · <span style="color:var(--${cls});">${r.compRule||'—'}</span></div></div><div class="num text-sm font-semibold" style="color:#6366F1;">${(parseFloat(r.hours)||0).toFixed(1)}h</div></div>`;}).join('')||'<p class="text-xs py-2 text-center" style="color:var(--text-dim);">No OT records</p>';
+            const leaveRows=[...allLeave].reverse().slice(0,15).map(r=>{const dp=(r.startDate||'').split('-');const d=dp.length===3?`${dp[2]}/${dp[1]}`:r.startDate;const cls=r.type==='Annual Leave'?'ok':r.type==='Extra Holiday Used'?'attention':'alert';return`<div class="grade-row"><div><div class="text-sm font-semibold">${d} · ${(parseFloat(r.days)||0).toFixed(1)}d</div><div class="text-xs" style="color:var(--text-dim);"><span class="pill" style="background:color-mix(in srgb,var(--${cls}) 14%,transparent);color:var(--${cls});font-size:9px;">${r.type||'—'}</span>${r.reason?' · '+r.reason:''}</div></div></div>`;}).join('')||'<p class="text-xs py-2 text-center" style="color:var(--text-dim);">No leave records</p>';
+            openDetailOverlay(
+                `<div class="flex items-center gap-3"><div class="w-12 h-12 rounded-xl flex items-center justify-center text-base font-bold flex-none" style="background:color-mix(in srgb,#6366F1 12%,transparent);color:#6366F1;border:1px solid color-mix(in srgb,#6366F1 24%,transparent);font-family:'Space Grotesk',sans-serif;">${initials}</div><div><div class="text-xl font-semibold tracking-tight">${name}</div><div class="text-sm ko" style="color:var(--text-mut);">근태 상세 · HR Detail</div></div></div>`,
+                `<div class="info-grid mb-4">
+                    <div class="info-item"><div class="info-key">AL Remaining</div><div class="info-val" style="color:${annualLeft>7?'var(--ok)':annualLeft>3?'var(--attention)':'var(--alert)'};">${annualLeft} / 14d</div></div>
+                    <div class="info-item"><div class="info-key">Extra Holidays</div><div class="info-val" style="color:var(--attention);">${extra}d</div></div>
+                    <div class="info-item"><div class="info-key">Total OT</div><div class="info-val" style="color:#6366F1;">${totalOTHours.toFixed(1)}h</div></div>
+                    <div class="info-item"><div class="info-key">Leave Used</div><div class="info-val">${totalUsed}d</div></div>
+                </div>
+                <div class="eyebrow mb-2">OT History · <span class="ko">초과근무 이력</span></div>
+                <div class="card mb-3" style="padding:14px;">${otRows}</div>
+                <div class="eyebrow mb-2">Leave History · <span class="ko">휴가 이력</span></div>
+                <div class="card" style="padding:14px;">${leaveRows}</div>`
+            );
+        }
         /* ═══════════════════════════════════════════════════════
            CHART ENGINE
            ═══════════════════════════════════════════════════════ */
@@ -778,7 +892,7 @@
         function completeManagerAuth(){rumbleDevice([80,50,80]);isManagerAuthenticated=true;store.sset('mgr_auth','1');loadSavedGasUrls();switchTab('mgr');}
 
         /* ── Month change handlers ───────────────────────────── */
-        function changeSpawnMonth(val){ rumbleDevice(25); spawnMonth=val; renderSpawning(spawnLogs); }
+        function changeSpawnMonth(val){ rumbleDevice(25); spawnMonth=val; renderSpawning(spawnLogs); }function changeHRMonth(val){ rumbleDevice(25); hrMonth=val; renderHR(); }
         function changePurchaseMonth(val){ rumbleDevice(25); purchaseMonth=val; renderPurchasing(purchaseLogs); }
 
         /* ── iOS install banner ──────────────────────────────── */
