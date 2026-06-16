@@ -334,7 +334,7 @@
     <script>
         const MASTER_PIN = "3653";
         let inputPin="", isManagerAuthenticated=false, currentReportURL="";
-        let wqSessions=[], spawnLogs=[], purchaseLogs=[], procLogs=[], _procFiltered=[];let hrData={balances:[],ot:[],leave:[]};
+        let wqSessions=[], spawnLogs=[], purchaseLogs=[], procLogs=[], _procFiltered=[];
         let hrData={balances:[],ot:[],leave:[]};
         function currentMonthStr(){ const n=new Date(); return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`; }
         let spawnMonth=currentMonthStr(), purchaseMonth=currentMonthStr(), procMonth=currentMonthStr(), hrMonth=currentMonthStr();
