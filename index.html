@@ -775,7 +775,7 @@
            HR SUITE — Native Dashboard
            GAS returns: { success, balances[], ot[], leave[] }
            ═══════════════════════════════════════════════════════ */
-        openHRView(){rumbleDevice(45);loadPendingLeaveApps();showView('hr-data-view');if(!hrData.balances.length)fetchHRData();else renderHR();}
+        function openHRView(){rumbleDevice(45);loadPendingLeaveApps();showView('hr-data-view');if(!hrData.balances.length)fetchHRData();else renderHR();}
         async function fetchHRData(){
             const ic=document.getElementById('hr-refresh-ic');ic&&ic.classList.add('spin');
             const url=getGasUrl('hatchery-hr');
