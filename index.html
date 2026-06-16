@@ -228,7 +228,7 @@
                     <div><label class="eyebrow block mb-1.5">Water Quality</label><input type="password" id="gas-wq-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
                     <div><label class="eyebrow block mb-1.5">Spawning &amp; Purchasing</label><input type="password" id="gas-spawning-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
                     <div><label class="eyebrow block mb-1.5">Processing Log</label><input type="password" id="gas-processing-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
-                    <div><label class="eyebrow block mb-1.5">Sea Cage Ops</label><input type="password" id="gas-sc-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div><div><label class="eyebrow block mb-1.5">Hatchery HR Suite</label><div><label class="eyebrow block mb-1.5">Farm Stock Check</label><input type="password" id="gas-stockcheck-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div><input type="password" id="gas-hr-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
+                    <div><label class="eyebrow block mb-1.5">Sea Cage Ops</label><input type="password" id="gas-sc-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div><div><label class="eyebrow block mb-1.5">Hatchery HR Suite</label><input type="password" id="gas-hr-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div> <div><label class="eyebrow block mb-1.5">Farm Stock Check</label><input type="password" id="gas-stockcheck-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
                     <button onclick="saveGasUrls()" class="w-full py-2.5 rounded-xl text-sm font-semibold text-white" style="background:var(--accent);">Save all URLs</button>
                     <p id="gas-save-confirm" class="hidden text-xs font-semibold text-center" style="color:var(--ok);">✓ Saved</p>
                 </div>
@@ -303,6 +303,20 @@
   </div>
   <div id="seacage-body"></div>
 </div>
+
+        <!-- STOCK CHECK VIEW -->
+        <div id="stock-data-view" class="hidden flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full overflow-y-auto">
+            <div class="flex items-center justify-between gap-2">
+                <button onclick="closeView()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:var(--accent);"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"/></svg><span class="ko">뒤로</span> Menu</button>
+                <button onclick="loadStockData()" class="icon-btn"><svg id="stock-refresh-ic" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356M3.985 19.644V14.65h4.992m-4.969-3.65a8.25 8.25 0 0113.803-3.7L21 8.25m-18 7.5l3.181 3.182a8.25 8.25 0 0013.803-3.7"/></svg></button>
+            </div>
+            <div>
+                <span class="eyebrow" style="color:#F97316;">재고 관리 현황 · Farm Stock</span>
+                <h3 class="text-2xl font-semibold tracking-tight" style="margin-top:1px;">Stock Overview</h3>
+            </div>
+            <div id="stock-body"></div>
+        </div>
+
         <!-- IFRAME (HR only now — Processing is native above) -->
         <div id="manager-report-frame" class="hidden flex-1 flex flex-col min-h-0 w-full">
             <div class="p-3 shrink-0" style="background:var(--surface);border-bottom:1px solid var(--border);">
@@ -1387,22 +1401,7 @@ function _scMgrRender(){
   if(scMgrSubTab==='batches')  renderSCMgrBatches();
   if(scMgrSubTab==='biomass')  renderSCMgrBiomass();
 }
-        <div id="stock-data-view" class="hidden flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full overflow-y-auto">
-    <div class="flex items-center justify-between gap-2">
-        <button onclick="closeView()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:var(--accent);">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"/></svg>
-            <span class="ko">뒤로</span> Menu
-        </button>
-        <button onclick="loadStockData()" class="icon-btn">
-            <svg id="stock-refresh-ic" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356M3.985 19.644V14.65h4.992m-4.969-3.65a8.25 8.25 0 0113.803-3.7L21 8.25m-18 7.5l3.181 3.182a8.25 8.25 0 0013.803-3.7"/></svg>
-        </button>
-    </div>
-    <div>
-        <span class="eyebrow" style="color:#F97316;">재고 관리 현황 · Farm Stock</span>
-        <h3 class="text-2xl font-semibold tracking-tight" style="margin-top:1px;">Stock Overview</h3>
-    </div>
-    <div id="stock-body"></div>
-</div>
+     
  
 /* ── Manager: OVERVIEW ───────────────────────────────────────────── */
 function renderSCMgrOverview(){
@@ -1710,7 +1709,7 @@ function scBioAddWLPrompt(){
    FARM STOCK CHECK — Native Manager Dashboard
    GAS: ?action=getItems&pin=3653&callback=handleStockCheckData
    ═══════════════════════════════════════════════════════ */
-const FARM_STOCK_URL = 'https://jamesaaa0203.github.io/farm-stock-check/';
+const FARM_STOCK_URL = 'https://jamesaaa0203.github.io/Stock-Checking-/';
 
 function openStockCheckView() {
     rumbleDevice(45);
