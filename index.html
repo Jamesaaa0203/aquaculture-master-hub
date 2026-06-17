@@ -817,7 +817,7 @@
             const workerCards=hrData.balances.map(b=>{
                 const wOT=monthOT.filter(r=>r.name===b.name);
                 const wHours=wOT.filter(r=>r.compRule!=='Extra Holiday').reduce((s,r)=>s+(parseFloat(r.hours)||0),0);
-const wExtraHols=wOT.filter(r=>r.compRule==='Extra Holiday').length; const wExtraHols=wOT.filter(r=>r.compRule==='Extra Holiday').length;
+const wExtraHols=wOT.filter(r=>r.compRule==='Extra Holiday').length;
                 const wLeave=monthLeave.filter(r=>r.name===b.name);
                 const wDays=wLeave.reduce((s,r)=>s+(parseFloat(r.days)||0),0);
                 const annualLeft=parseFloat(b.annualLeaveLeft)||0;
