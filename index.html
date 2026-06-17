@@ -832,7 +832,7 @@ const wExtraHols=wOT.filter(r=>r.compRule==='Extra Holiday').length;
                             <div class="flex items-center flex-wrap gap-x-2 mt-1">
                                 <span class="text-xs font-semibold" style="color:${leaveColor};">${annualLeft}d AL left</span>
                                 ${extra>0?`<span class="text-xs font-semibold" style="color:var(--attention);">+${extra}d extra</span>`:''}
-                               ${wHours>0?`<span class="text-xs font-semibold" style="color:#6366F1;">${wHours.toFixed(1)}h OT</span>`:''}${wExtraHols>0?`<span class="text-xs font-semibold" style="color:var(--attention);">+${wExtraHols}d XH</span>`:''}
+                               ${wHours>0?`<span class="text-xs font-semibold" style="color:#6366F1;">${wHours.toFixed(1)}h OT</span>`:''}
                                 ${wDays>0?`<span class="text-xs font-semibold" style="color:var(--text-dim);">${wDays.toFixed(1)}d leave</span>`:''}
                         </div>
                     </div>
