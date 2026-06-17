@@ -960,6 +960,34 @@ window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{
             store.set('ios_install_dismissed','1');
         }
 
+        /* ── First-time Setup Card ───────────────────────── */
+        const SETUP_DONE_KEY = 'bonaqua_setup_done';
+        const SETUP_URL_MAP = {
+            'setup-wq-url':         'mgr_wq_gas_url',
+            'setup-spawning-url':   'mgr_spawning_gas_url',
+            'setup-processing-url': 'mgr_processing_gas_url',
+            'setup-sc-url':         'mgr_seacage_gas_url',
+            'setup-hr-url':         'mgr_hr_gas_url',
+            'setup-stockcheck-url': 'mgr_stockcheck_gas_url'
+        };
+        function initSetupCard(){
+            if(store.get(SETUP_DONE_KEY)==='1') return;
+            for(const[inputId,storeKey] of Object.entries(SETUP_URL_MAP)){
+                const saved=store.get(storeKey), el=document.getElementById(inputId);
+                if(saved&&el) el.value=saved;
+            }
+            document.getElementById('setup-card').style.display='block';
+        }
+        function saveSetupUrls(){
+            for(const[inputId,storeKey] of Object.entries(SETUP_URL_MAP)){
+                const el=document.getElementById(inputId);
+                if(el&&el.value.trim()) store.set(storeKey,el.value.trim());
+            }
+            store.set(SETUP_DONE_KEY,'1');
+            document.getElementById('setup-card').style.display='none';
+            rumbleDevice(80);
+        }
+
         /* ── Init ────────────────────────────────────────────── */
         if(store.sget('mgr_auth')==='1')isManagerAuthenticated=true;
         applyTheme();applyContrast();renderModules();renderMgrList();loadSavedGasUrls();
@@ -1844,7 +1872,7 @@ function renderStockData(items) {
         </button>`;
 }
   
-        /* ── First-time Setup Card ───────────────────────── */         const SETUP_DONE_KEY = 'bonaqua_setup_done';         const SETUP_URL_MAP = {             'setup-wq-url':         'mgr_wq_gas_url',             'setup-spawning-url':   'mgr_spawning_gas_url',             'setup-processing-url': 'mgr_processing_gas_url',             'setup-sc-url':         'mgr_seacage_gas_url',             'setup-hr-url':         'mgr_hr_gas_url',             'setup-stockcheck-url': 'mgr_stockcheck_gas_url'         };         function initSetupCard(){             if(store.get(SETUP_DONE_KEY)==='1') return;             for(const[inputId,storeKey] of Object.entries(SETUP_URL_MAP)){                 const saved=store.get(storeKey), el=document.getElementById(inputId);                 if(saved&&el) el.value=saved;             }             document.getElementById('setup-card').style.display='block';         }         function saveSetupUrls(){             for(const[inputId,storeKey] of Object.entries(SETUP_URL_MAP)){                 const el=document.getElementById(inputId);                 if(el&&el.value.trim()) store.set(storeKey,el.value.trim());             }             store.set(SETUP_DONE_KEY,'1');             document.getElementById('setup-card').style.display='none';             rumbleDevice(80);         }          if('serviceWorker'in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});}
+        if('serviceWorker'in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});}
 
         /* ── Splash screen ───────────────────────────────────── */
         (function(){
