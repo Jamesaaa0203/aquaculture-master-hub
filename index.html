@@ -806,7 +806,7 @@
             _populateHRMonthSel();
             const monthOT=hrData.ot.filter(r=>isMonthMatch(r.date,hrMonth));
             const monthLeave=hrData.leave.filter(r=>isMonthMatch(r.startDate,hrMonth));
-            const cashOT=monthOT.filter(r=>r.compRule!=='Extra Holiday'); const totalHours=cashOT.reduce((s,r)=>s+(parseFloat(r.hours)||0),0); const totalExtraHolEarned=monthOT.filter(r=>r.compRule==='Extra Holiday').length;
+            const cashOT=monthOT.filter(r=>r.compRule!=='Extra Holiday'); const totalHours=monthOT.filter(r=>r.compRule!=='Extra Holiday').reduce((s,r)=>s+(parseFloat(r.hours)||0),0); const totalExtraHolEarned=monthOT.filter(r=>r.compRule==='Extra Holiday').length;
             const totalLeaveDays=monthLeave.reduce((s,r)=>s+(parseFloat(r.days)||0),0);
             const otWorkers=new Set(monthOT.map(r=>r.name)).size;
             const leaveWorkers=new Set(monthLeave.map(r=>r.name)).size;
@@ -816,7 +816,8 @@
             </div>`;
             const workerCards=hrData.balances.map(b=>{
                 const wOT=monthOT.filter(r=>r.name===b.name);
-                const wHours=wOT.filter(r=>r.compRule!=='Extra Holiday').reduce((s,r)=>s+(parseFloat(r.hours)||0),0); const wExtraHols=wOT.filter(r=>r.compRule==='Extra Holiday').length;
+                const wHours=wOT.filter(r=>r.compRule!=='Extra Holiday').reduce((s,r)=>s+(parseFloat(r.hours)||0),0);
+const wExtraHols=wOT.filter(r=>r.compRule==='Extra Holiday').length; const wExtraHols=wOT.filter(r=>r.compRule==='Extra Holiday').length;
                 const wLeave=monthLeave.filter(r=>r.name===b.name);
                 const wDays=wLeave.reduce((s,r)=>s+(parseFloat(r.days)||0),0);
                 const annualLeft=parseFloat(b.annualLeaveLeft)||0;
@@ -831,9 +832,8 @@
                             <div class="flex items-center flex-wrap gap-x-2 mt-1">
                                 <span class="text-xs font-semibold" style="color:${leaveColor};">${annualLeft}d AL left</span>
                                 ${extra>0?`<span class="text-xs font-semibold" style="color:var(--attention);">+${extra}d extra</span>`:''}
-                                ${wHours>0?`<span class="text-xs font-semibold" style="color:#6366F1;">${wHours.toFixed(1)}h OT</span>`:''}${wExtraHols>0?`<span class="text-xs font-semibold" style="color:var(--attention);">+${wExtraHols}d XH</span>`:''}
+                               ${wHours>0?`<span class="text-xs font-semibold" style="color:#6366F1;">${wHours.toFixed(1)}h OT</span>`:''}${wExtraHols>0?`<span class="text-xs font-semibold" style="color:var(--attention);">+${wExtraHols}d XH</span>`:''}
                                 ${wDays>0?`<span class="text-xs font-semibold" style="color:var(--text-dim);">${wDays.toFixed(1)}d leave</span>`:''}
-                            </div>
                         </div>
                     </div>
                     ${chevR}
