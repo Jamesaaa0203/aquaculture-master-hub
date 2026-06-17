@@ -184,7 +184,7 @@
             </div>
         </div>
 
-        <div id="module-list" class="space-y-3"></div>
+        <!-- ── FIRST-TIME SETUP CARD ─────────────────────── -->         <div id="setup-card" class="card" style="padding:20px;display:none;">             <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">                 <div style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex:none;background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);">                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>                 </div>                 <div>                     <div class="text-base font-semibold">First-Time Setup</div>                     <div class="text-xs" style="color:var(--text-mut);margin-top:1px;">Paste your module links below</div>                 </div>             </div>             <p class="text-xs mb-4" style="color:var(--text-dim);line-height:1.6;">Only fill in the modules you use. Leave others blank. This screen won't appear again on this device after you save.</p>             <div class="space-y-3">                 <div><label class="eyebrow block mb-1.5">Water Quality</label><input type="password" id="setup-wq-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Spawning &amp; Purchasing</label><input type="password" id="setup-spawning-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Processing Log</label><input type="password" id="setup-processing-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Sea Cage Ops</label><input type="password" id="setup-sc-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Hatchery HR Suite</label><input type="password" id="setup-hr-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Farm Stock Check</label><input type="password" id="setup-stockcheck-url" placeholder="/exec URL" class="gas-input"></div>             </div>             <button onclick="saveSetupUrls()" class="w-full py-3 rounded-xl text-sm font-semibold text-white mt-4" style="background:var(--accent);">Save &amp; Continue →</button>         </div>          <div id="module-list" class="space-y-3"></div>
     </main>
 
     <!-- ── MANAGER AUTH ───────────────────────────────────────── -->
@@ -964,7 +964,7 @@ window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{
         if(store.sget('mgr_auth')==='1')isManagerAuthenticated=true;
         applyTheme();applyContrast();renderModules();renderMgrList();loadSavedGasUrls();
         document.getElementById('live-clock').textContent=fmtTime(new Date());populateMonthSelector();
-        initIOSInstallBanner();
+        initIOSInstallBanner();         initSetupCard();
        /* ── Constants ───────────────────────────────────────────────────── */
 const SC_COLS = {
   left:   [9,10,11,12,13,14,15,16],
@@ -1844,7 +1844,7 @@ function renderStockData(items) {
         </button>`;
 }
   
-        if('serviceWorker'in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});}
+        /* ── First-time Setup Card ───────────────────────── */         const SETUP_DONE_KEY = 'bonaqua_setup_done';         const SETUP_URL_MAP = {             'setup-wq-url':         'mgr_wq_gas_url',             'setup-spawning-url':   'mgr_spawning_gas_url',             'setup-processing-url': 'mgr_processing_gas_url',             'setup-sc-url':         'mgr_seacage_gas_url',             'setup-hr-url':         'mgr_hr_gas_url',             'setup-stockcheck-url': 'mgr_stockcheck_gas_url'         };         function initSetupCard(){             if(store.get(SETUP_DONE_KEY)==='1') return;             for(const[inputId,storeKey] of Object.entries(SETUP_URL_MAP)){                 const saved=store.get(storeKey), el=document.getElementById(inputId);                 if(saved&&el) el.value=saved;             }             document.getElementById('setup-card').style.display='block';         }         function saveSetupUrls(){             for(const[inputId,storeKey] of Object.entries(SETUP_URL_MAP)){                 const el=document.getElementById(inputId);                 if(el&&el.value.trim()) store.set(storeKey,el.value.trim());             }             store.set(SETUP_DONE_KEY,'1');             document.getElementById('setup-card').style.display='none';             rumbleDevice(80);         }          if('serviceWorker'in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});}
 
         /* ── Splash screen ───────────────────────────────────── */
         (function(){
