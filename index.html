@@ -404,7 +404,7 @@
   desc:'Consumables, supplies & reorder alerts',
   icon:lineIcon("M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01")}];
         function renderModules(){document.getElementById('module-list').innerHTML=MODULES.map(m=>`<button class="module" onclick="${m.action?m.action+'()':'openModule(\''+m.href+'\')'}" style="--hue:${m.hue}"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">${m.icon}</span><div class="min-w-0"><div class="module-bm">${m.bm}</div><div class="module-title">${m.title}</div><div class="module-desc">${m.desc}</div></div></div>${chevR}</button>`).join('');}
-        function openModule(href){rumbleDevice(35);window.location.href=href;}
+        function openModule(href){             rumbleDevice(35);             const m=href.match(/github\.io\/([^\/\?#]+)/);             if(m){const k=m[1]==='Stock-Checking-'?'farm-stock-check':m[1];const g=getGasUrl(k);if(g)href+=(href.includes('?')?'&':'?')+'gasUrl='+encodeURIComponent(g);}             window.location.href=href;         }
 
         /* ── Manager menu rows ───────────────────────────────── */
         const MGR_VIEWS=[
