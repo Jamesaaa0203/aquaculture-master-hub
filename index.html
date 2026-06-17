@@ -806,17 +806,17 @@
             _populateHRMonthSel();
             const monthOT=hrData.ot.filter(r=>isMonthMatch(r.date,hrMonth));
             const monthLeave=hrData.leave.filter(r=>isMonthMatch(r.startDate,hrMonth));
-            const totalHours=monthOT.reduce((s,r)=>s+(parseFloat(r.hours)||0),0);
+            const cashOT=monthOT.filter(r=>r.compRule!=='Extra Holiday'); const totalHours=cashOT.reduce((s,r)=>s+(parseFloat(r.hours)||0),0); const totalExtraHolEarned=monthOT.filter(r=>r.compRule==='Extra Holiday').length;
             const totalLeaveDays=monthLeave.reduce((s,r)=>s+(parseFloat(r.days)||0),0);
             const otWorkers=new Set(monthOT.map(r=>r.name)).size;
             const leaveWorkers=new Set(monthLeave.map(r=>r.name)).size;
             const kpis=`<div class="grid grid-cols-2 gap-3">
-                <div class="kpi" style="--kpi-hue:#6366F1;"><div class="kpi-label">OT Hours</div><div class="kpi-ko ko">총 초과근무</div><div class="flex items-baseline gap-1 kpi-val">${totalHours.toFixed(1)}<span class="kpi-unit">hrs</span></div><div class="kpi-hint">${otWorkers} worker${otWorkers!==1?'s':''} this month</div></div>
+                <div class="kpi" style="--kpi-hue:#6366F1;"><div class="kpi-label">OT Hours</div><div class="kpi-ko ko">총 초과근무</div><div class="flex items-baseline gap-1 kpi-val">${totalHours.toFixed(1)}<span class="kpi-unit">hrs</span></div><div class="kpi-hint">${otWorkers} worker${otWorkers!==1?'s':''} · ${totalExtraHolEarned>0?totalExtraHolEarned+'d XH excluded':''}</div></div>
                 <div class="kpi" style="--kpi-hue:#6366F1;"><div class="kpi-label">Leave Days</div><div class="kpi-ko ko">총 휴가일수</div><div class="flex items-baseline gap-1 kpi-val">${totalLeaveDays.toFixed(1)}<span class="kpi-unit">days</span></div><div class="kpi-hint">${leaveWorkers} worker${leaveWorkers!==1?'s':''} this month</div></div>
             </div>`;
             const workerCards=hrData.balances.map(b=>{
                 const wOT=monthOT.filter(r=>r.name===b.name);
-                const wHours=wOT.reduce((s,r)=>s+(parseFloat(r.hours)||0),0);
+                const wHours=wOT.filter(r=>r.compRule!=='Extra Holiday').reduce((s,r)=>s+(parseFloat(r.hours)||0),0); const wExtraHols=wOT.filter(r=>r.compRule==='Extra Holiday').length;
                 const wLeave=monthLeave.filter(r=>r.name===b.name);
                 const wDays=wLeave.reduce((s,r)=>s+(parseFloat(r.days)||0),0);
                 const annualLeft=parseFloat(b.annualLeaveLeft)||0;
@@ -831,7 +831,7 @@
                             <div class="flex items-center flex-wrap gap-x-2 mt-1">
                                 <span class="text-xs font-semibold" style="color:${leaveColor};">${annualLeft}d AL left</span>
                                 ${extra>0?`<span class="text-xs font-semibold" style="color:var(--attention);">+${extra}d extra</span>`:''}
-                                ${wHours>0?`<span class="text-xs font-semibold" style="color:#6366F1;">${wHours.toFixed(1)}h OT</span>`:''}
+                                ${wHours>0?`<span class="text-xs font-semibold" style="color:#6366F1;">${wHours.toFixed(1)}h OT</span>`:''}${wExtraHols>0?`<span class="text-xs font-semibold" style="color:var(--attention);">+${wExtraHols}d XH</span>`:''}
                                 ${wDays>0?`<span class="text-xs font-semibold" style="color:var(--text-dim);">${wDays.toFixed(1)}d leave</span>`:''}
                             </div>
                         </div>
@@ -839,7 +839,7 @@
                     ${chevR}
                 </button>`;
             }).join('');
-            const otRows=[...monthOT].reverse().map(r=>{const dp=(r.date||'').split('-');const dDisp=dp.length===3?`${dp[2]}/${dp[1]}`:r.date;const cls=r.compRule==='Extra Holiday'?'attention':'ok';return`<tr><td>${dDisp}<br><span style="color:var(--text-dim);font-size:10px;">${r.name||'—'}</span></td><td>${(parseFloat(r.hours)||0).toFixed(1)}</td><td>${r.dayType||'—'}</td><td><span class="pill" style="background:color-mix(in srgb,var(--${cls}) 14%,transparent);color:var(--${cls});font-size:9px;">${r.compRule||'—'}</span></td></tr>`;}).join('');
+            const otRows=[...monthOT].reverse().map(r=>{const dp=(r.date||'').split('-');const dDisp=dp.length===3?`${dp[2]}/${dp[1]}`:r.date;const cls=r.compRule==='Extra Holiday'?'attention':'ok';const isXH=r.compRule==='Extra Holiday';return`<tr><td>${dDisp}<br><span style="color:var(--text-dim);font-size:10px;">${r.name||'—'}</span></td><td style="color:${isXH?'var(--attention)':''}">${isXH?'1d XH':(parseFloat(r.hours)||0).toFixed(1)}</td><td>${r.dayType||'—'}</td><td><span class="pill" style="background:color-mix(in srgb,var(--${cls}) 14%,transparent);color:var(--${cls});font-size:9px;">${r.compRule||'—'}</span></td></tr>`;}).join('');
             const leaveRows=[...monthLeave].reverse().map(r=>{const dp=(r.startDate||'').split('-');const dDisp=dp.length===3?`${dp[2]}/${dp[1]}`:r.startDate;const cls=r.type==='Annual Leave'?'ok':r.type==='Extra Holiday Used'?'attention':'alert';return`<tr><td>${r.name||'—'}<br><span style="color:var(--text-dim);font-size:10px;">${dDisp}</span></td><td><span class="pill" style="background:color-mix(in srgb,var(--${cls}) 14%,transparent);color:var(--${cls});font-size:9px;">${r.type||'—'}</span></td><td>${(parseFloat(r.days)||0).toFixed(1)}</td></tr>`;}).join('');
             document.getElementById('hr-body').innerHTML=`${renderPendingApps()}
     ${renderUpcomingLeaves(hrData.leave)}${kpis}
@@ -858,9 +858,9 @@
             const annualLeft=parseFloat(bal.annualLeaveLeft)||0;
             const extra=parseFloat(bal.extraHolidayEarned)||0;
             const totalUsed=parseFloat(bal.medicalLeaveLeft)||0;
-            const totalOTHours=allOT.reduce((s,r)=>s+(parseFloat(r.hours)||0),0);
+            const totalOTHours=allOT.filter(r=>r.compRule!=='Extra Holiday').reduce((s,r)=>s+(parseFloat(r.hours)||0),0); const workerXHEarned=allOT.filter(r=>r.compRule==='Extra Holiday').length;
             const initials=name.substring(0,2).toUpperCase();
-            const otRows=[...allOT].reverse().slice(0,15).map(r=>{const dp=(r.date||'').split('-');const d=dp.length===3?`${dp[2]}/${dp[1]}`:r.date;const cls=r.compRule==='Extra Holiday'?'attention':'ok';return`<div class="grade-row"><div><div class="text-sm font-semibold">${d} · ${r.dayType||'—'}</div><div class="text-xs ko" style="color:var(--text-dim);">${r.shiftType||''} · <span style="color:var(--${cls});">${r.compRule||'—'}</span></div></div><div class="num text-sm font-semibold" style="color:#6366F1;">${(parseFloat(r.hours)||0).toFixed(1)}h</div></div>`;}).join('')||'<p class="text-xs py-2 text-center" style="color:var(--text-dim);">No OT records</p>';
+            const otRows=[...allOT].reverse().slice(0,15).map(r=>{const dp=(r.date||'').split('-');const d=dp.length===3?`${dp[2]}/${dp[1]}`:r.date;const cls=r.compRule==='Extra Holiday'?'attention':'ok';const isXH=r.compRule==='Extra Holiday';return`<div class="grade-row"><div><div class="text-sm font-semibold">${d} · ${r.dayType||'—'}</div><div class="text-xs ko" style="color:var(--text-dim);">${r.shiftType||''} · <span style="color:var(--${cls});">${r.compRule||'—'}</span></div></div><div class="num text-sm font-semibold" style="color:${isXH?'var(--attention)':'#6366F1'};">${isXH?'1d XH':(parseFloat(r.hours)||0).toFixed(1)+'h'}</div></div>`;}).join('')||'<p class="text-xs py-2 text-center" style="color:var(--text-dim);">No OT records</p>';
             const leaveRows=[...allLeave].reverse().slice(0,15).map(r=>{const dp=(r.startDate||'').split('-');const d=dp.length===3?`${dp[2]}/${dp[1]}`:r.startDate;const cls=r.type==='Annual Leave'?'ok':r.type==='Extra Holiday Used'?'attention':'alert';return`<div class="grade-row"><div><div class="text-sm font-semibold">${d} · ${(parseFloat(r.days)||0).toFixed(1)}d</div><div class="text-xs" style="color:var(--text-dim);"><span class="pill" style="background:color-mix(in srgb,var(--${cls}) 14%,transparent);color:var(--${cls});font-size:9px;">${r.type||'—'}</span>${r.reason?' · '+r.reason:''}</div></div></div>`;}).join('')||'<p class="text-xs py-2 text-center" style="color:var(--text-dim);">No leave records</p>';
             openDetailOverlay(
                 `<div class="flex items-center gap-3"><div class="w-12 h-12 rounded-xl flex items-center justify-center text-base font-bold flex-none" style="background:color-mix(in srgb,#6366F1 12%,transparent);color:#6366F1;border:1px solid color-mix(in srgb,#6366F1 24%,transparent);font-family:'Space Grotesk',sans-serif;">${initials}</div><div><div class="text-xl font-semibold tracking-tight">${name}</div><div class="text-sm ko" style="color:var(--text-mut);">근태 상세 · HR Detail</div></div></div>`,
