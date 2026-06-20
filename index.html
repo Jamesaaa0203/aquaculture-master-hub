@@ -776,21 +776,33 @@
            GAS returns: { success, balances[], ot[], leave[] }
            ═══════════════════════════════════════════════════════ */
         function openHRView(){rumbleDevice(45);loadPendingLeaveApps();showView('hr-data-view');if(!hrData.balances.length)fetchHRData();else renderHR();}
-        async function fetchHRData(){
-            const ic=document.getElementById('hr-refresh-ic');ic&&ic.classList.add('spin');
-            const url=getGasUrl('hatchery-hr');
-            if(!url){document.getElementById('hr-body').innerHTML=msgCard(`<p class="text-sm font-semibold">HR Suite not linked</p><p class="text-xs mt-1" style="color:var(--text-mut);">Add the /exec URL in Module GAS connections.</p>`);ic&&ic.classList.remove('spin');return;}
-            document.getElementById('hr-body').innerHTML=msgCard(`<p class="text-sm" style="color:var(--text-mut);">Loading…</p>`);
-            try{
-                const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),12000);
-                const res=await fetch(url,{signal:ctrl.signal,redirect:'follow'});
-                clearTimeout(t);const json=await res.json();
-                if(!json.success)throw new Error(json.error||'GAS error');
-                hrData={balances:json.balances||[],ot:json.ot||[],leave:json.leave||[]};
-                _populateHRMonthSel();renderHR();
-            }catch(err){document.getElementById('hr-body').innerHTML=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Couldn't load HR data</p><p class="text-xs mt-1" style="color:var(--text-mut);">${err.message}</p>`);}
-            finally{ic&&ic.classList.remove('spin');}
-        }
+        function fetchHRData(){
+  const ic=document.getElementById('hr-refresh-ic');ic&&ic.classList.add('spin');
+  const url=getGasUrl('hatchery-hr');
+  if(!url){document.getElementById('hr-body').innerHTML=msgCard(`<p class="text-sm font-semibold">HR Suite not linked</p><p class="text-xs mt-1" style="color:var(--text-mut);">Add the /exec URL in Module GAS connections.</p>`);ic&&ic.classList.remove('spin');return Promise.resolve();}
+  document.getElementById('hr-body').innerHTML=msgCard(`<p class="text-sm" style="color:var(--text-mut);">Loading…</p>`);
+  return new Promise((resolve)=>{
+    window.handleHRData=function(json){
+      ic&&ic.classList.remove('spin');
+      if(!json||json.success===false){
+        document.getElementById('hr-body').innerHTML=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Couldn't load HR data</p><p class="text-xs mt-1" style="color:var(--text-mut);">${(json&&json.error)||'GAS error'}</p>`);
+        resolve();return;
+      }
+      hrData={balances:json.balances||[],ot:json.ot||[],leave:json.leave||[]};
+      _populateHRMonthSel();renderHR();
+      resolve();
+    };
+    const s=document.createElement('script');
+    s.src=`${url}${url.includes('?')?'&':'?'}callback=handleHRData&_=${Date.now()}`;
+    s.onerror=function(){
+      ic&&ic.classList.remove('spin');
+      document.getElementById('hr-body').innerHTML=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Couldn't load HR data</p><p class="text-xs mt-1" style="color:var(--text-mut);">Network or script error.</p>`);
+      resolve();
+    };
+    document.body.appendChild(s);
+    s.onload=function(){ s.remove(); };
+  });
+}
         function _populateHRMonthSel(){
             const allDates=[...hrData.ot.map(r=>r.date),...hrData.leave.map(r=>r.startDate)].filter(Boolean);
             const months=[...new Set(allDates.map(d=>{const p=parseAnyDate(d);return p?`${p.getFullYear()}-${String(p.getMonth()+1).padStart(2,'0')}`:null;}).filter(Boolean))].sort().reverse();
@@ -1116,22 +1128,27 @@ function scEstimateWeight(len,wlTable){
 }
  
 /* ── GAS fetch & post ────────────────────────────────────────────── */
-async function fetchSCData(showSpin){
-  const url=getGasUrl('sea-cage'),ic=document.getElementById('sc-refresh-ic');
+function fetchSCData(showSpin){
+  const url=getGasUrl('sea-cage'), ic=document.getElementById('sc-refresh-ic');
   if(showSpin&&ic)ic.classList.add('spin');
-  if(!url){if(ic)ic.classList.remove('spin');return;}
-  try{
-    const ctrl=new AbortController(),t=setTimeout(()=>ctrl.abort(),12000);
-    const res=await fetch(url,{signal:ctrl.signal,redirect:'follow'});
-    clearTimeout(t);const data=await res.json();
-    scData={setup:data.setup||[],transfers:data.transfers||[],mortality:data.mortality||[],
-            growth:data.growth||[],maintenance:data.maintenance||[],temperature:data.temperature||[]};
-    if(scActiveWorkerTab==='layout')  renderSCLayout();
-    if(scActiveWorkerTab==='transfer')renderSCTransferForm();
-    if(scActiveWorkerTab==='mortality')renderSCMortalityForm();
-    if(scActiveWorkerTab==='growth')  renderSCGrowthForm();
-  }catch(e){console.warn('SC fetch error',e);}
-  finally{if(ic)ic.classList.remove('spin');}
+  if(!url){ if(ic)ic.classList.remove('spin'); return Promise.resolve(); }
+  return new Promise((resolve)=>{
+    window.handleSeaCageData=function(data){
+      scData={setup:data.setup||[],transfers:data.transfers||[],mortality:data.mortality||[],
+              growth:data.growth||[],maintenance:data.maintenance||[],temperature:data.temperature||[]};
+      if(ic)ic.classList.remove('spin');
+      if(scActiveWorkerTab==='layout')  renderSCLayout();
+      if(scActiveWorkerTab==='transfer')renderSCTransferForm();
+      if(scActiveWorkerTab==='mortality')renderSCMortalityForm();
+      if(scActiveWorkerTab==='growth')  renderSCGrowthForm();
+      resolve();
+    };
+    const s=document.createElement('script');
+    s.src=`${url}${url.includes('?')?'&':'?'}callback=handleSeaCageData&_=${Date.now()}`;
+    s.onerror=()=>{ if(ic)ic.classList.remove('spin'); console.warn('Sea Cage JSONP load error'); resolve(); };
+    document.body.appendChild(s);
+    s.onload=function(){ s.remove(); };
+  });
 }
 async function scPost(payload){
   const url=getGasUrl('sea-cage');
@@ -1905,15 +1922,21 @@ function sendStockOrderMessage(){
         })();
     let _pendingLeaveApps = [];
 
-async function loadPendingLeaveApps(){
+function loadPendingLeaveApps(){
     const url = getGasUrl('hatchery-hr');
-    if(!url) return;
-    try {
-        const res  = await fetch(`${url}?action=getLeaveApplications`, {redirect:'follow'});
-        const json = await res.json();
-        if(json.success) _pendingLeaveApps = json.applications || [];
-        if(hrData.balances.length) renderHR();
-    } catch(e) { /* silent */ }
+    if(!url) return Promise.resolve();
+    return new Promise((resolve)=>{
+        window.handleLeaveAppsData=function(json){
+            if(json && json.success) _pendingLeaveApps = json.applications || [];
+            if(hrData.balances.length) renderHR();
+            resolve();
+        };
+        const s=document.createElement('script');
+        s.src=`${url}?action=getLeaveApplications&callback=handleLeaveAppsData&_=${Date.now()}`;
+        s.onerror=()=>{ resolve(); };
+        document.body.appendChild(s);
+        s.onload=function(){ s.remove(); };
+    });
 }
 
 async function processLeaveApp(id, action){
