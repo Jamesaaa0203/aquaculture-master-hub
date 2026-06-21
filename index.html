@@ -420,7 +420,7 @@
   sub:'Critical items & reorder list',
   icon:lineIcon("M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01")}];
         const ACTION_FNS={stockcheck:()=>openStockCheckView(),wq:()=>openWaterQuality(),spawn:()=>openSpawning(),purchase:()=>openPurchasing(),processing:()=>openProcessingView(),hr:()=>openHRView(),seacage:()=>openSeaCageManagerView()};
-        function renderMgrList(){document.getElementById('mgr-list').innerHTML=MGR_VIEWS.map(v=>{const onclick=v.action?`(ACTION_FNS['${v.action}']||function(){})()`:` openManagerReport('${v.appKey}','${v.tab}')`;const sub=v.sub?`<div class="text-xs" style="color:var(--text-mut);margin-top:1px;">${v.sub}</div>`:'';return`<button onclick="${onclick}" class="mgr-row"><div class="flex items-center gap-3.5"><span class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:color-mix(in srgb,${v.hue} 12%,transparent);color:${v.hue};border:1px solid color-mix(in srgb,${v.hue} 24%,transparent);"><span style="width:22px;height:22px;display:inline-flex">${v.icon}</span></span><div><div class="eyebrow ko" style="color:${v.hue};">${v.ko}</div><div class="text-base font-semibold tracking-tight" style="margin-top:1px;">${v.title}</div>${sub}</div></div>${chevR}</button>`;}).join('');}
+        function renderMgrList(){const el=document.getElementById('mgr-list');if(!el)return;const tempBadge=(typeof scGetCachedTempBadge==='function')?scGetCachedTempBadge():null;el.innerHTML=MGR_VIEWS.map(v=>{const onclick=v.action?`(ACTION_FNS['${v.action}']||function(){})()`:` openManagerReport('${v.appKey}','${v.tab}')`;const sub=v.sub?`<div class="text-xs" style="color:var(--text-mut);margin-top:1px;">${v.sub}</div>`:'';const tempRow=(v.action==='seacage'&&tempBadge)?`<div class="text-xs" style="color:var(--${tempBadge.freshness});margin-top:2px;font-weight:600;">🌡 ${tempBadge.temp.toFixed(1)}°C · ${tempBadge.agoText}</div>`:'';return`<button onclick="${onclick}" class="mgr-row"><div class="flex items-center gap-3.5"><span class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:color-mix(in srgb,${v.hue} 12%,transparent);color:${v.hue};border:1px solid color-mix(in srgb,${v.hue} 24%,transparent);"><span style="width:22px;height:22px;display:inline-flex">${v.icon}</span></span><div><div class="eyebrow ko" style="color:${v.hue};">${v.ko}</div><div class="text-base font-semibold tracking-tight" style="margin-top:1px;">${v.title}</div>${sub}${tempRow}</div></div>${chevR}</button>`;}).join('');}
 
         /* ── View manager ────────────────────────────────────── */
         const ALL_VIEWS=['wq-data-view','spawn-data-view','purchase-data-view','proc-data-view','hr-data-view','seacage-data-view','stock-data-view','manager-report-frame'];
@@ -1026,6 +1026,7 @@ let scData = {setup:[],transfers:[],mortality:[],growth:[],maintenance:[],temper
 let scActiveWorkerTab = 'layout';
 let scMgrSubTab        = 'overview';
 let scMgrWeek          = 0;
+let scMortRptOffset    = 0;
  
 let scTfDate = new Date().toISOString().split('T')[0],scTfUnit='',scTfPetak='1',scTfSize='0.5 - 0.8',scTfQty='';
 let scMortType='harian',scMortUnit='',scMortPetak='1',scMortQty='',scMortBatch='';
@@ -1080,6 +1081,81 @@ function scTransferWeek(t){
   const diff=Math.floor((new Date(t.date)-SC_EPOCH)/86400000);
   return Math.floor(diff/7)+1;
 }
+
+/* ── Weekly Mortality Report (independent Fri→Thu cycle) ──────────── */
+function scMortReportWeekBounds(offset){
+  const now=new Date();now.setHours(0,0,0,0);
+  const dow=now.getDay(); // 0=Sun..6=Sat, Fri=5
+  const daysSinceFriday=(dow-5+7)%7;
+  const mostRecentFriday=new Date(now.getTime()-daysSinceFriday*86400000);
+  const start=new Date(mostRecentFriday.getTime()-offset*7*86400000);
+  const end=new Date(start.getTime()+6*86400000);
+  end.setHours(23,59,59,999);
+  return{start,end};
+}
+function scFmtReportRange(start,end){
+  return`${start.getDate()} ${MONTHS_SHORT[start.getMonth()]} – ${end.getDate()} ${MONTHS_SHORT[end.getMonth()]}`;
+}
+function scMortReportData(offset){
+  const{start,end}=scMortReportWeekBounds(offset);
+  let dead=0;
+  (scData.mortality||[]).forEach(m=>{const d=parseAnyDate(m.date);if(d&&d>=start&&d<=end)dead+=(+(m.qty||0));});
+  (scData.transfers||[]).forEach(t=>{const d=parseAnyDate(t.date);if(d&&d>=start&&d<=end)dead+=(+(t.postDead||0));});
+  let cumulative=0;
+  (scData.setup||[]).forEach(s=>{cumulative+=(+(s.initialQty||0));});
+  (scData.transfers||[]).forEach(t=>{const d=parseAnyDate(t.date);if(d&&d<=end)cumulative+=(+(t.qty||0));});
+  const mortPct=cumulative>0?(dead/cumulative*100):0;
+  return{start,end,dead,cumulative,mortPct};
+}
+function openSCMortalityReport(){
+  rumbleDevice(30);
+  scMortRptOffset=0;
+  _renderSCMortalityReportOverlay();
+}
+function scMortRptNav(delta){
+  const newOffset=scMortRptOffset+delta;
+  if(newOffset<0)return;
+  rumbleDevice(25);
+  scMortRptOffset=newOffset;
+  _renderSCMortalityReportOverlay();
+}
+function _renderSCMortalityReportOverlay(){
+  const{start,end,dead,cumulative,mortPct}=scMortReportData(scMortRptOffset);
+  const rangeLabel=scFmtReportRange(start,end);
+  const isCurrent=scMortRptOffset===0;
+  const mortColor=mortPct<=1?'var(--ok)':mortPct<=3?'var(--attention)':'var(--alert)';
+  const prevBtn=`<button onclick="scMortRptNav(1)" style="width:36px;height:36px;border-radius:10px;border:1.5px solid var(--border-2);background:var(--surface-2);font-size:18px;color:var(--text-mut);flex:none;">‹</button>`;
+  const nextBtn=isCurrent
+    ?`<button style="width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);font-size:18px;color:var(--text-dim);opacity:.3;flex:none;" disabled>›</button>`
+    :`<button onclick="scMortRptNav(-1)" style="width:36px;height:36px;border-radius:10px;border:1.5px solid var(--border-2);background:var(--surface-2);font-size:18px;color:var(--text-mut);flex:none;">›</button>`;
+  const headHtml=`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+    ${prevBtn}
+    <div style="text-align:center;flex:1;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);">Weekly Mortality Report</div>
+      <div style="font-size:18px;font-weight:700;margin-top:2px;">${rangeLabel}</div>
+      ${isCurrent?'<div style="font-size:10px;color:var(--accent);font-weight:700;margin-top:2px;">⬤ Current Week</div>':''}
+    </div>
+    ${nextBtn}
+  </div>`;
+  const bodyHtml=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div class="card" style="padding:16px;text-align:center;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);">Total Dead</div>
+      <div class="num" style="font-size:30px;font-weight:900;color:var(--alert);margin-top:8px;">${dead.toLocaleString()}</div>
+    </div>
+    <div class="card" style="padding:16px;text-align:center;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);">Mortality %</div>
+      <div class="num" style="font-size:30px;font-weight:900;color:${mortColor};margin-top:8px;">${mortPct.toFixed(2)}%</div>
+    </div>
+  </div>
+  <div style="padding:12px 14px;background:var(--surface-2);border-radius:12px;border:1px solid var(--border);margin-top:12px;">
+    <div style="display:flex;justify-content:space-between;font-size:13px;">
+      <span style="color:var(--text-mut);">Cumulative stocked (as of week end)</span>
+      <span class="num" style="font-weight:700;">${cumulative.toLocaleString()}</span>
+    </div>
+  </div>
+  <p style="font-size:11px;color:var(--text-dim);margin-top:10px;">Friday – Thursday cycle · independent from Batches week numbering.</p>`;
+  openDetailOverlay(headHtml,bodyHtml);
+}
 function scStatusOf(uId){
   const m=scData.maintenance?.find(m=>+m.unitId===+uId);
   if(m)return{status:m.status,issue:m.issue||''};
@@ -1101,6 +1177,23 @@ function scLastTemp(){
   const r=sorted[0];
   const days=Math.floor((new Date()-new Date(r.date))/86400000);
   return{...r,daysAgo:days,freshness:days<=2?'ok':days<=5?'attention':'alert'};
+}
+
+/* ── Temp menu-badge cache (read by renderMgrList) ────────────────── */
+const SC_TEMP_CACHE_KEY='sc_temp_cache_v1';
+function scCacheLastTemp(){
+  const lt=scLastTemp();
+  if(lt&&lt.temp!=null) store.set(SC_TEMP_CACHE_KEY,JSON.stringify({date:lt.date,temp:lt.temp}));
+  renderMgrList();
+}
+function scGetCachedTempBadge(){
+  let raw;
+  try{raw=JSON.parse(store.get(SC_TEMP_CACHE_KEY)||'null');}catch(e){raw=null;}
+  if(!raw||raw.temp==null)return null;
+  const days=Math.max(0,Math.floor((new Date()-new Date(raw.date))/86400000));
+  const freshness=days<=2?'ok':days<=5?'attention':'alert';
+  const agoText=days===0?'today':days===1?'1d ago':`${days}d ago`;
+  return{temp:raw.temp,days,freshness,agoText};
 }
  
 /* ── Allometric helpers ───────────────────────────────────────────── */
@@ -1133,9 +1226,10 @@ function fetchSCData(showSpin){
   if(showSpin&&ic)ic.classList.add('spin');
   if(!url){ if(ic)ic.classList.remove('spin'); return Promise.resolve(); }
   return new Promise((resolve)=>{
-    window.handleSeaCageData=function(data){
+   window.handleSeaCageData=function(data){
       scData={setup:data.setup||[],transfers:data.transfers||[],mortality:data.mortality||[],
               growth:data.growth||[],maintenance:data.maintenance||[],temperature:data.temperature||[]};
+      scCacheLastTemp();
       if(ic)ic.classList.remove('spin');
       if(scActiveWorkerTab==='layout')  renderSCLayout();
       if(scActiveWorkerTab==='transfer')renderSCTransferForm();
@@ -1508,8 +1602,11 @@ function renderSCMgrOverview(){
     </div>
  
     <!-- This week strip -->
-    <div style="padding:16px 18px;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);">
-      <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;">This Week · Week ${wk}</div>
+    <div onclick="openSCMortalityReport()" style="padding:16px 18px;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);cursor:pointer;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);">This Week · Week ${wk}</div>
+        <span style="font-size:10px;color:var(--text-dim);">Mortality report ›</span>
+      </div>
       <div style="display:flex;gap:0;text-align:center;">
         <div style="flex:1;border-right:1px solid var(--border);">
           <div class="num" style="font-size:22px;font-weight:800;color:#0EA5E9;">${wIn.toLocaleString()}</div>
