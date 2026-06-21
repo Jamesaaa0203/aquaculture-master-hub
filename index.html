@@ -1165,9 +1165,15 @@ function scStatusOf(uId){
  
 /* ── Temperature helpers ─────────────────────────────────────────── */
 function scParseTemp(r){
-  const temp=parseFloat(r.avgTemp??r['Avg Temp']??r.temperature??r.Temperature??r.temp??r.Temp??null);
-  const date=r.date??r.Date??r.DATE??'';
+  let temp=parseFloat(r.avgTemp??r['Avg Temp']??r.temperature??r.Temperature??r.temp??r.Temp??null);
+  let date=r.date??r.Date??r.DATE??'';
   const doV=parseFloat(r.avgDO??r['Avg DO']??r.do??r.DO??null);
+  if(!isFinite(temp)){
+    for(const k in r){ if(k.toLowerCase().includes('temp')){ const v=parseFloat(r[k]); if(isFinite(v)){temp=v;break;} } }
+  }
+  if(!date){
+    for(const k in r){ if(k.toLowerCase().includes('date')){ date=r[k]; break; } }
+  }
   return{date,temp:isFinite(temp)?temp:null,do:isFinite(doV)?doV:null};
 }
 function scLastTemp(){
