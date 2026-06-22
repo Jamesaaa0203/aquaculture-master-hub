@@ -230,10 +230,10 @@
                 </button>
                 <div id="gas-settings-drawer" class="hidden mt-3 space-y-3 pt-3" style="border-top:1px solid var(--border);">
                     <p class="text-xs" style="color:var(--text-mut);">Paste each module's GAS <span class="num">/exec</span> URL.</p>
-                    <div><label class="eyebrow block mb-1.5">Water Quality</label><input type="password" id="gas-wq-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
-                    <div><label class="eyebrow block mb-1.5">Spawning &amp; Purchasing</label><input type="password" id="gas-spawning-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
-                    <div><label class="eyebrow block mb-1.5">Processing Log</label><input type="password" id="gas-processing-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
-                    <div><label class="eyebrow block mb-1.5">Sea Cage Ops</label><input type="password" id="gas-sc-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div><div><label class="eyebrow block mb-1.5">Hatchery HR Suite</label><input type="password" id="gas-hr-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div> <div><label class="eyebrow block mb-1.5">Farm Stock Check</label><input type="password" id="gas-stockcheck-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
+                    <div><label class="eyebrow block mb-1.5">Water Quality</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-wq-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
+                    <div><label class="eyebrow block mb-1.5">Spawning &amp; Purchasing</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-spawning-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
+                    <div><label class="eyebrow block mb-1.5">Processing Log</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-processing-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
+                    <div><label class="eyebrow block mb-1.5">Sea Cage Ops</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-sc-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div><div><label class="eyebrow block mb-1.5">Hatchery HR Suite</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-hr-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div> <div><label class="eyebrow block mb-1.5">Farm Stock Check</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-stockcheck-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
                     <button onclick="saveGasUrls()" class="w-full py-2.5 rounded-xl text-sm font-semibold text-white" style="background:var(--accent);">Save all URLs</button>
                     <p id="gas-save-confirm" class="hidden text-xs font-semibold text-center" style="color:var(--ok);">✓ Saved</p>
                 </div>
@@ -449,15 +449,24 @@
            ═══════════════════════════════════════════════════════ */
         const WQ_RANGES={do:{min:5.0,max:99,unit:'mg/L',dp:2,label:'Dissolved O₂',ko:'용존산소',color:'#3B82F6'},temp:{min:24,max:32,unit:'°C',dp:1,label:'Temperature',ko:'수온',color:'#F59E0B'},salinity:{min:30,max:37,unit:'ppt',dp:0,label:'Salinity',ko:'염분',color:'#14B8A6'},ph:{min:7.7,max:8.7,unit:'',dp:1,label:'pH',ko:'산도',color:'#8B5CF6'}};
         function openWaterQuality(){rumbleDevice(45);showView('wq-data-view');loadWaterQuality();}
-        async function loadWaterQuality(){
-            const body=document.getElementById('wq-body'),ic=document.getElementById('wq-refresh-ic');ic&&ic.classList.add('spin');
-            const url=getGasUrl('daily-water-quality');
-            if(!url){body.innerHTML=msgCard(`<p class="text-sm font-semibold">Water Quality not linked</p><p class="text-xs mt-1" style="color:var(--text-mut);">Add the /exec URL in Module GAS connections.</p>`);ic&&ic.classList.remove('spin');return;}
-            body.innerHTML=msgCard(`<p class="text-sm" style="color:var(--text-mut);">Loading…</p>`);
-            try{const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),12000);const res=await fetch(`${url}${url.includes('?')?'&':'?'}pin=${MASTER_PIN}`,{signal:ctrl.signal,redirect:'follow'});clearTimeout(t);const data=await res.json();if(data&&data.error){body.innerHTML=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Access denied — check URL / PIN.</p>`);return;}if(!Array.isArray(data)||!data.length){body.innerHTML=msgCard(`<p class="text-sm">No readings yet.</p>`);return;}renderWQ(data);}
-            catch(e){body.innerHTML=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Couldn't fetch data</p><p class="text-xs mt-1 mb-3" style="color:var(--text-mut);">Browser may have blocked the request.</p><button onclick="openFullTab('wq')" class="px-4 py-2 rounded-xl text-sm font-semibold text-white" style="background:var(--accent);">Open full module ↗</button>`);}
-            finally{ic&&ic.classList.remove('spin');}
-        }
+        function loadWaterQuality(){
+    const body=document.getElementById('wq-body'),ic=document.getElementById('wq-refresh-ic');
+    ic&&ic.classList.add('spin');
+    const url=getGasUrl('daily-water-quality');
+    if(!url){body.innerHTML=msgCard(`<p class="text-sm font-semibold">Water Quality not linked</p><p class="text-xs mt-1" style="color:var(--text-mut);">Add the /exec URL in Module GAS connections.</p>`);ic&&ic.classList.remove('spin');return;}
+    body.innerHTML=msgCard(`<p class="text-sm" style="color:var(--text-mut);">Loading…</p>`);
+    window.handleWQData=function(data){
+        ic&&ic.classList.remove('spin');
+        if(data&&data.error){body.innerHTML=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Access denied — check URL / PIN.</p>`);return;}
+        if(!Array.isArray(data)||!data.length){body.innerHTML=msgCard(`<p class="text-sm">No readings yet.</p>`);return;}
+        renderWQ(data);
+    };
+    const s=document.createElement('script');
+    s.src=`${url}${url.includes('?')?'&':'?'}pin=${MASTER_PIN}&callback=handleWQData&_=${Date.now()}`;
+    s.onerror=()=>{ic&&ic.classList.remove('spin');body.innerHTML=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Couldn't fetch data</p><p class="text-xs mt-1 mb-3" style="color:var(--text-mut);">Browser may have blocked the request.</p><button onclick="openFullTab('wq')" class="px-4 py-2 rounded-xl text-sm font-semibold text-white" style="background:var(--accent);">Open full module ↗</button>`);};
+    document.body.appendChild(s);
+    s.onload=function(){s.remove();};
+}
         function groupSessions(rows){const map=new Map();rows.forEach(r=>{const k=`${r.date}|${r.time}|${r.shift}`;if(!map.has(k))map.set(k,{date:r.date,time:r.time,shift:r.shift,sections:[]});map.get(k).sections.push(r);});const s=[...map.values()];s.forEach(x=>{const a=arr=>arr.filter(v=>v!=null);const avg=arr=>{const v=a(arr);return v.length?v.reduce((p,c)=>p+c,0)/v.length:null;};x.do=avg(x.sections.map(r=>num(r.do)));x.temp=avg(x.sections.map(r=>num(r.temp)));x.salinity=avg(x.sections.map(r=>num(r.salinity)));x.ph=avg(x.sections.map(r=>num(r.ph)));});return s;}
         function wqKpiTile(key,latest){const cfg=WQ_RANGES[key],val=latest!=null?rnd(latest,cfg.dp):'—';const ok=latest!=null&&latest>=cfg.min&&latest<=cfg.max;const pg=ok?'color-mix(in srgb,var(--ok) 14%,transparent)':'color-mix(in srgb,var(--attention) 16%,transparent)';const pc=ok?'var(--ok)':'var(--attention)';return`<button class="kpi" onclick="openWQChart('${key}')" style="--kpi-hue:${cfg.color};"><div class="flex items-start justify-between"><div><div class="kpi-label">${cfg.label}</div><div class="kpi-ko ko">${cfg.ko}</div></div><span class="pill" style="background:${pg};color:${pc};">${ok?'OK':'Review'}</span></div><div class="flex items-baseline gap-1 kpi-val" style="color:${ok?'var(--text)':'var(--attention)'};">${val}<span class="kpi-unit">${cfg.unit}</span></div><div class="kpi-hint"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.5l6-6 4 4 8-8"/></svg>Tap to view trend</div></button>`;}
         function renderWQ(rows){
@@ -489,37 +498,69 @@
             const d=Math.floor(diffH/24),h=Math.round(diffH%24);
             return{label:`Due in ${d}d${h>0?' '+h+'h':''}`,color:'var(--text-mut)',urgent:false};
         }
-        async function loadSpawnTasks(){
-            const url=getGasUrl('Abalone-Spawning-and-Purchasing-Log');
-            if(!url)return;
-            try{
-                const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),8000);
-                const res=await fetch(`${url}${url.includes('?')?'&':'?'}action=getUpcomingTasks`,{signal:ctrl.signal,redirect:'follow'});
-                clearTimeout(t);const data=await res.json();
-                if(data&&data.status==='success') spawnTasks=data.tasks||[];
-            }catch(e){ spawnTasks=[]; } // silent fail — tasks are non-critical
-        }
+        function fetchProcData(){
+    const ic=document.getElementById('proc-refresh-ic');ic&&ic.classList.add('spin');
+    const url=getGasUrl('Abalone-Processing-Log');
+    if(!url){document.getElementById('proc-body').innerHTML=msgCard(`<p class="text-sm font-semibold">Processing Log not linked</p><p class="text-xs mt-1" style="color:var(--text-mut);">Add the /exec URL in Module GAS connections.</p>`);ic&&ic.classList.remove('spin');return;}
+    document.getElementById('proc-body').innerHTML=msgCard(`<p class="text-sm" style="color:var(--text-mut);">Loading…</p>`);
+    window.handleProcData=function(json){
+        ic&&ic.classList.remove('spin');
+        if(!json||!json.success){document.getElementById('proc-body').innerHTML=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Couldn't load data</p><p class="text-xs mt-1" style="color:var(--text-mut);">${(json&&json.error)||'GAS error'}</p>`);return;}
+        procLogs=(json.data||[]).map(r=>({
+            date:r['Date'],batchNo:r['Batch No.'],
+            liveWeight:parseFloat(r['Live Weight (kg)'])||0,
+            yieldWeight:parseFloat(r['Yield Weight (kg)'])||0,
+            yieldPct:parseFloat(r['Yield %'])||0,
+            waterTime:r['Water 70°C Time']||'—',
+            coreTime:r['Core 70°C Time']||'—',
+            coreTemp:r['Core Temp (°C)']||'—',
+            status:r['Status']||'',
+            timestamp:r['Timestamp']||''
+        }));
+        populateMonthSelect('proc-month-select',procLogs,procMonth);
+        renderProc();
+    };
+    const s=document.createElement('script');
+    s.src=`${url}${url.includes('?')?'&':'?'}action=getLogs&pin=${MASTER_PIN}&callback=handleProcData&_=${Date.now()}`;
+    s.onerror=()=>{ic&&ic.classList.remove('spin');document.getElementById('proc-body').innerHTML=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Couldn't load data</p><p class="text-xs mt-1" style="color:var(--text-mut);">Network or script error.</p>`);};
+    document.body.appendChild(s);
+    s.onload=function(){s.remove();};
+}
 
         /* ═══════════════════════════════════════════════════════
            SPAWNING & PURCHASING SHARED FETCH
            ═══════════════════════════════════════════════════════ */
-        async function loadSpawnPurchase(){
-            const ics=['spawn-refresh-ic','purchase-refresh-ic'].map(id=>document.getElementById(id));
-            ics.forEach(ic=>ic&&ic.classList.add('spin'));
-            const url=getGasUrl('Abalone-Spawning-and-Purchasing-Log');
-            const errMsg=msgCard(`<p class="text-sm font-semibold">Spawning & Purchasing not linked</p><p class="text-xs mt-1" style="color:var(--text-mut);">Add the /exec URL in Module GAS connections.</p>`);
-            if(!url){['spawn-body','purchase-body'].forEach(id=>document.getElementById(id).innerHTML=errMsg);ics.forEach(ic=>ic&&ic.classList.remove('spin'));return;}
-            ['spawn-body','purchase-body'].forEach(id=>document.getElementById(id).innerHTML=msgCard(`<p class="text-sm" style="color:var(--text-mut);">Loading…</p>`));
-            try{
-                const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),12000);
-                const res=await fetch(`${url}${url.includes('?')?'&':'?'}action=getLogs&pin=${MASTER_PIN}`,{signal:ctrl.signal,redirect:'follow'});
-                clearTimeout(t);const data=await res.json();
-                if(!data||data.status==='error'){const m=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Access denied — check URL / PIN.</p>`);['spawn-body','purchase-body'].forEach(id=>document.getElementById(id).innerHTML=m);return;}
-                spawnLogs=data.spawning||[];purchaseLogs=data.purchasing||[];
-                renderSpawning(spawnLogs);renderPurchasing(purchaseLogs);
-            }catch(e){const m=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Couldn't fetch data</p><p class="text-xs mt-1 mb-3" style="color:var(--text-mut);">Browser may have blocked the request.</p><button onclick="openFullTab('spawn')" class="px-4 py-2 rounded-xl text-sm font-semibold text-white" style="background:var(--accent);">Open full module ↗</button>`);['spawn-body','purchase-body'].forEach(id=>document.getElementById(id).innerHTML=m);}
-            finally{ics.forEach(ic=>ic&&ic.classList.remove('spin'));}
-        }
+       function loadSpawnTasks(){
+    const url=getGasUrl('Abalone-Spawning-and-Purchasing-Log');
+    if(!url)return;
+    window.handleSpawnTasksData=function(data){
+        if(data&&data.status==='success') spawnTasks=data.tasks||[];
+    };
+    const s=document.createElement('script');
+    s.src=`${url}${url.includes('?')?'&':'?'}action=getUpcomingTasks&callback=handleSpawnTasksData&_=${Date.now()}`;
+    s.onerror=()=>{spawnTasks=[];};
+    document.body.appendChild(s);
+    s.onload=function(){s.remove();};
+}
+        function loadSpawnPurchase(){
+    const ics=['spawn-refresh-ic','purchase-refresh-ic'].map(id=>document.getElementById(id));
+    ics.forEach(ic=>ic&&ic.classList.add('spin'));
+    const url=getGasUrl('Abalone-Spawning-and-Purchasing-Log');
+    const errMsg=msgCard(`<p class="text-sm font-semibold">Spawning &amp; Purchasing not linked</p><p class="text-xs mt-1" style="color:var(--text-mut);">Add the /exec URL in Module GAS connections.</p>`);
+    if(!url){['spawn-body','purchase-body'].forEach(id=>document.getElementById(id).innerHTML=errMsg);ics.forEach(ic=>ic&&ic.classList.remove('spin'));return;}
+    ['spawn-body','purchase-body'].forEach(id=>document.getElementById(id).innerHTML=msgCard(`<p class="text-sm" style="color:var(--text-mut);">Loading…</p>`));
+    window.handleSpawnPurchaseData=function(data){
+        ics.forEach(ic=>ic&&ic.classList.remove('spin'));
+        if(!data||data.status==='error'){const m=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Access denied — check URL / PIN.</p>`);['spawn-body','purchase-body'].forEach(id=>document.getElementById(id).innerHTML=m);return;}
+        spawnLogs=data.spawning||[];purchaseLogs=data.purchasing||[];
+        renderSpawning(spawnLogs);renderPurchasing(purchaseLogs);
+    };
+    const s=document.createElement('script');
+    s.src=`${url}${url.includes('?')?'&':'?'}action=getLogs&pin=${MASTER_PIN}&callback=handleSpawnPurchaseData&_=${Date.now()}`;
+    s.onerror=()=>{ics.forEach(ic=>ic&&ic.classList.remove('spin'));const m=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Couldn't fetch data</p><p class="text-xs mt-1 mb-3" style="color:var(--text-mut);">Browser may have blocked the request.</p><button onclick="openFullTab('spawn')" class="px-4 py-2 rounded-xl text-sm font-semibold text-white" style="background:var(--accent);">Open full module ↗</button>`);['spawn-body','purchase-body'].forEach(id=>document.getElementById(id).innerHTML=m);};
+    document.body.appendChild(s);
+    s.onload=function(){s.remove();};
+}
 
         let _spawnSummaryCopyText='';
         function copySpawnSummary(btn){
@@ -558,7 +599,7 @@
             const url=getGasUrl('Abalone-Spawning-and-Purchasing-Log');
             if(!url){alert('Spawning GAS URL not configured.\nSet it in Module GAS Connections.');return;}
             try{
-                await fetch(url,{method:'POST',body:JSON.stringify({action:'updateManagerOutcome',trialId,outcome})});
+                await fetch(url,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'updateManagerOutcome',trialId,outcome})});
                 rumbleDevice([40,30,70]);
                 await loadSpawnPurchase();
                 const newIdx=spawnLogs.findIndex(x=>String(x.trialId)===String(trialId));
@@ -944,34 +985,6 @@
         const PROC_YIELD={ok:65,attention:55}; // ≥65% OK · ≥55% Review · <55% Low
 
         function openProcessingView(){rumbleDevice(45);showView('proc-data-view');if(!procLogs.length)fetchProcData();else renderProc();}
-
-        async function fetchProcData(){
-            const ic=document.getElementById('proc-refresh-ic');ic&&ic.classList.add('spin');
-            const url=getGasUrl('Abalone-Processing-Log');
-            if(!url){document.getElementById('proc-body').innerHTML=msgCard(`<p class="text-sm font-semibold">Processing Log not linked</p><p class="text-xs mt-1" style="color:var(--text-mut);">Add the /exec URL in Module GAS connections.</p>`);ic&&ic.classList.remove('spin');return;}
-            document.getElementById('proc-body').innerHTML=msgCard(`<p class="text-sm" style="color:var(--text-mut);">Loading…</p>`);
-            try{
-                const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),12000);
-                const res=await fetch(`${url}${url.includes('?')?'&':'?'}action=getLogs&pin=${MASTER_PIN}`,{signal:ctrl.signal,redirect:'follow'});
-                clearTimeout(t);const json=await res.json();
-                if(!json.success)throw new Error(json.error||'GAS error');
-                procLogs=(json.data||[]).map(r=>({
-                    date:r['Date'],batchNo:r['Batch No.'],
-                    liveWeight:parseFloat(r['Live Weight (kg)'])||0,
-                    yieldWeight:parseFloat(r['Yield Weight (kg)'])||0,
-                    yieldPct:parseFloat(r['Yield %'])||0,
-                    waterTime:r['Water 70°C Time']||'—',
-                    coreTime:r['Core 70°C Time']||'—',
-                    coreTemp:r['Core Temp (°C)']||'—',
-                    status:r['Status']||'',
-                    timestamp:r['Timestamp']||''
-                }));
-                populateMonthSelect('proc-month-select',procLogs,procMonth);
-                renderProc();
-            }catch(err){document.getElementById('proc-body').innerHTML=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Couldn't load data</p><p class="text-xs mt-1" style="color:var(--text-mut);">${err.message}</p>`);}
-            finally{ic&&ic.classList.remove('spin');}
-        }
-
         function changeProcMonth(val){rumbleDevice(25);procMonth=val;renderProc();}
 
         let _procSummaryCopyText='';
@@ -1053,8 +1066,9 @@
             </div>`;
 
             // ── Yield trend chart ─────────────────────────────────────
-            const chartVals=rows.map(r=>r.yieldPct);
-            const chartLabels=rows.map(r=>{const p=(r.date||'').split('-');return p.length===3?`${+p[2]}/${p[1]}`:r.date;});
+           const chronoRows=[...rows].sort((a,b)=>new Date(a.date)-new Date(b.date));
+const chartVals=chronoRows.map(r=>r.yieldPct);
+const chartLabels=chronoRows.map(r=>{const p=(r.date||'').split('-');return p.length===3?`${+p[2]}/${p[1]}`:r.date;});
             const yieldChart=`<div class="card" style="padding:14px;"><div class="eyebrow mb-2">Yield % Trend · <span class="ko">수율 추이</span></div>${buildChartSVG(chartVals,chartLabels,{color:'var(--ok)',dp:1})}</div>`;
 
             // ── Batch log (collapsed, tappable rows) ──────────────────
@@ -1276,8 +1290,8 @@ window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{
         function completeManagerAuth(){rumbleDevice([80,50,80]);isManagerAuthenticated=true;store.sset('mgr_auth','1');loadSavedGasUrls();switchTab('mgr');}
 
         /* ── Month change handlers ───────────────────────────── */
-        function changeSpawnMonth(val){ rumbleDevice(25); spawnMonth=val; renderSpawning(spawnLogs); }function changeHRMonth(val){ rumbleDevice(25); hrMonth=val; renderHR(); }
-        function changePurchaseMonth(val){ rumbleDevice(25); purchaseMonth=val; renderPurchasing(purchaseLogs); }
+        function changeSpawnMonth(val){ rumbleDevice(25); spawnMonth=val; renderSpawning(spawnLogs); }
+function changePurchaseMonth(val){ rumbleDevice(25); purchaseMonth=val; renderPurchasing(purchaseLogs); }
 
         /* ── iOS install banner ──────────────────────────────── */
         let _dip=null;
@@ -1586,7 +1600,7 @@ async function scPost(payload){
   const url=getGasUrl('sea-cage');
   if(!url){alert('Sea Cage GAS URL not configured.\nSet it in Module GAS Connections.');return;}
   try{
-    await fetch(url,{method:'POST',body:JSON.stringify(payload)});
+    await fetch(url,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)});
     rumbleDevice([80,50,80]);alert('Berjaya disimpan! ✓');
     await fetchSCData(false);
   }catch(e){alert('Ralat cloud. Cuba semula.');}
@@ -2225,12 +2239,13 @@ async function loadStockData() {
     }
     body.innerHTML = msgCard(`<p class="text-sm" style="color:var(--text-mut);">Loading…</p>`);
     const s   = document.createElement('script');
-    s.src     = `${url}?action=getItems&pin=${MASTER_PIN}&callback=handleStockCheckData`;
+    s.src     = `${url}?action=getItems&pin=${MASTER_PIN}&callback=handleStockCheckData&_=${Date.now()}`;
     s.onerror = () => {
         body.innerHTML = msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Couldn't fetch data</p><p class="text-xs mt-1 mb-3" style="color:var(--text-mut);">Check GAS URL or network.</p><button onclick="window.open('${FARM_STOCK_URL}','_blank','noopener,noreferrer')" class="px-4 py-2 rounded-xl text-sm font-semibold text-white" style="background:var(--accent);">Open full module ↗</button>`);
         if (ic) ic.classList.remove('spin');
     };
     document.body.appendChild(s);
+    s.onload = function(){ s.remove(); };
 }
 
 function renderStockData(items) {
