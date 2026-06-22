@@ -905,7 +905,7 @@
                 <div class="hidden mt-3"><table class="data-table"><thead><tr><th>Date · Supplier</th><th>Weight</th><th>Mortality</th><th>Quality</th></tr></thead><tbody>${batchRows}</tbody></table></div>
             </div>`;
 
-            body.innerHTML=`${summaryCard}${tiles}<div class="mt-3 space-y-3">${batchTable}</div><p class="text-xs mt-3 px-1" style="color:var(--text-dim);">Showing ${monthLabel(purchaseMonth)} — use dropdown to change month.</p>`;
+            body.innerHTML=`${summaryCard}<div class="mt-3 space-y-3">${batchTable}</div><p class="text-xs mt-3 px-1" style="color:var(--text-dim);">Showing ${monthLabel(purchaseMonth)} — use dropdown to change month.</p>`;
         }
 
         // Broodstock breakdown detail
