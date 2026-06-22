@@ -547,19 +547,22 @@
     ics.forEach(ic=>ic&&ic.classList.add('spin'));
     const url=getGasUrl('Abalone-Spawning-and-Purchasing-Log');
     const errMsg=msgCard(`<p class="text-sm font-semibold">Spawning &amp; Purchasing not linked</p><p class="text-xs mt-1" style="color:var(--text-mut);">Add the /exec URL in Module GAS connections.</p>`);
-    if(!url){['spawn-body','purchase-body'].forEach(id=>document.getElementById(id).innerHTML=errMsg);ics.forEach(ic=>ic&&ic.classList.remove('spin'));return;}
+    if(!url){['spawn-body','purchase-body'].forEach(id=>document.getElementById(id).innerHTML=errMsg);ics.forEach(ic=>ic&&ic.classList.remove('spin'));return Promise.resolve();}
     ['spawn-body','purchase-body'].forEach(id=>document.getElementById(id).innerHTML=msgCard(`<p class="text-sm" style="color:var(--text-mut);">Loading…</p>`));
-    window.handleSpawnPurchaseData=function(data){
-        ics.forEach(ic=>ic&&ic.classList.remove('spin'));
-        if(!data||data.status==='error'){const m=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Access denied — check URL / PIN.</p>`);['spawn-body','purchase-body'].forEach(id=>document.getElementById(id).innerHTML=m);return;}
-        spawnLogs=data.spawning||[];purchaseLogs=data.purchasing||[];
-        renderSpawning(spawnLogs);renderPurchasing(purchaseLogs);
-    };
-    const s=document.createElement('script');
-    s.src=`${url}${url.includes('?')?'&':'?'}action=getLogs&pin=${MASTER_PIN}&callback=handleSpawnPurchaseData&_=${Date.now()}`;
-    s.onerror=()=>{ics.forEach(ic=>ic&&ic.classList.remove('spin'));const m=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Couldn't fetch data</p><p class="text-xs mt-1 mb-3" style="color:var(--text-mut);">Browser may have blocked the request.</p><button onclick="openFullTab('spawn')" class="px-4 py-2 rounded-xl text-sm font-semibold text-white" style="background:var(--accent);">Open full module ↗</button>`);['spawn-body','purchase-body'].forEach(id=>document.getElementById(id).innerHTML=m);};
-    document.body.appendChild(s);
-    s.onload=function(){s.remove();};
+    return new Promise((resolve)=>{
+        window.handleSpawnPurchaseData=function(data){
+            ics.forEach(ic=>ic&&ic.classList.remove('spin'));
+            if(!data||data.status==='error'){const m=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Access denied — check URL / PIN.</p>`);['spawn-body','purchase-body'].forEach(id=>document.getElementById(id).innerHTML=m);resolve();return;}
+            spawnLogs=data.spawning||[];purchaseLogs=data.purchasing||[];
+            renderSpawning(spawnLogs);renderPurchasing(purchaseLogs);
+            resolve();
+        };
+        const s=document.createElement('script');
+        s.src=`${url}${url.includes('?')?'&':'?'}action=getLogs&pin=${MASTER_PIN}&callback=handleSpawnPurchaseData&_=${Date.now()}`;
+        s.onerror=()=>{ics.forEach(ic=>ic&&ic.classList.remove('spin'));const m=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Couldn't fetch data</p><p class="text-xs mt-1 mb-3" style="color:var(--text-mut);">Browser may have blocked the request.</p><button onclick="openFullTab('spawn')" class="px-4 py-2 rounded-xl text-sm font-semibold text-white" style="background:var(--accent);">Open full module ↗</button>`);['spawn-body','purchase-body'].forEach(id=>document.getElementById(id).innerHTML=m);resolve();};
+        document.body.appendChild(s);
+        s.onload=function(){s.remove();};
+    });
 }
 
         let _spawnSummaryCopyText='';
@@ -2227,7 +2230,7 @@ window.handleStockCheckData = function(res) {
     renderStockData(res.items || []);
 };
 
-async function loadStockData() {
+function loadStockData() {
     const body = document.getElementById('stock-body');
     const ic   = document.getElementById('stock-refresh-ic');
     if (ic) ic.classList.add('spin');
