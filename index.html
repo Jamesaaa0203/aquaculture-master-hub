@@ -899,10 +899,11 @@
             </div></div>`;
 
             // ── Batch table (collapsed) ────────────────────────────────
-            const batchRows=monthLogs.map(l=>{const mRaw=num(l.mortality??l['mortality%']);const m=mRaw!=null?(mRaw>0&&mRaw<1?mRaw*100:mRaw):null;const bkg=num(l.totalBatchWeightKg||l.totalBatchWeight);return`<tr><td>${fmtCleanDate(l.date)}<br><span style="color:var(--text-dim);font-size:10px;">${l.supplierCategory||l.supplierCat||'—'}</span></td><td>${bkg!=null?bkg.toFixed(1):'—'} kg</td><td style="color:${mortalityColor(m)};">${m!=null?m.toFixed(1)+'%':'—'}</td><td style="color:${qualityColor(l.overallQuality)};">${l.overallQuality||'—'}</td></tr>`;}).join('');
+            const batchRows=monthLogs.map((l,i)=>{const mRaw=num(l.mortality??l['mortality%']);const m=mRaw!=null?(mRaw>0&&mRaw<1?mRaw*100:mRaw):null;const bkg=num(l.totalBatchWeightKg||l.totalBatchWeight);const fp=parseInt(l.totalFemalesPcs)||0,mp=parseInt(l.totalMalesPcs)||0;return`<tr onclick="openBroodstockDetail(${i})" style="cursor:pointer;"><td>${fmtCleanDate(l.date)}<br><span style="color:var(--text-dim);font-size:10px;">${l.supplierCategory||l.supplierCat||'—'}</span></td><td>${bkg!=null?bkg.toFixed(1):'—'} kg</td><td style="color:${mortalityColor(m)};">${m!=null?m.toFixed(1)+'%':'—'}</td><td>${fp+mp>0?(fp+mp).toLocaleString():'—'}</td></tr>`;}).join('');
             const batchTable=`<div class="card" style="padding:14px;">
                 <button onclick="const b=this.nextElementSibling;b.classList.toggle('hidden');this.textContent=b.classList.contains('hidden')?'View all batches ▾':'Hide batches ▴';" style="width:100%;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);">View all batches ▾</button>
-                <div class="hidden mt-3"><table class="data-table"><thead><tr><th>Date · Supplier</th><th>Weight</th><th>Mortality</th><th>Quality</th></tr></thead><tbody>${batchRows}</tbody></table></div>
+                <div class="hidden mt-3"><table class="data-table"><thead><tr><th>Date · Supplier</th><th>Weight</th><th>Mortality</th><th>Broodstock</th></tr></thead><tbody>${batchRows}</tbody></table>
+                <p class="text-xs mt-2" style="color:var(--text-dim);">Tap any row for full broodstock grade breakdown.</p></div>
             </div>`;
 
             body.innerHTML=`${summaryCard}<div class="mt-3 space-y-3">${batchTable}</div><p class="text-xs mt-3 px-1" style="color:var(--text-dim);">Showing ${monthLabel(purchaseMonth)} — use dropdown to change month.</p>`;
