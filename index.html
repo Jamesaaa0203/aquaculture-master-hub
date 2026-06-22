@@ -971,6 +971,15 @@
 
         function changeProcMonth(val){rumbleDevice(25);procMonth=val;renderProc();}
 
+        let _procSummaryCopyText='';
+        function copyProcSummary(btn){
+            if(!navigator.clipboard){alert('Clipboard not available.');return;}
+            navigator.clipboard.writeText(_procSummaryCopyText).then(()=>{
+                const orig=btn.textContent;btn.textContent='✓ Copied';
+                setTimeout(()=>btn.textContent=orig,1600);
+            }).catch(()=>alert('Could not copy.'));
+        }
+
         function renderProc(){
             document.getElementById('proc-month-title').textContent=monthLabel(procMonth);
             populateMonthSelect('proc-month-select',procLogs,procMonth);
@@ -984,34 +993,81 @@
             const avgYield=count?rows.reduce((s,r)=>s+r.yieldPct,0)/count:0;
             const yState=avgYield>=PROC_YIELD.ok?{cls:'ok',label:'OK',color:'var(--ok)'}:avgYield>=PROC_YIELD.attention?{cls:'attention',label:'Review',color:'var(--attention)'}:{cls:'alert',label:'Low',color:'var(--alert)'};
 
-            const statusCounts={};rows.forEach(r=>{const s=(r.status||'Unknown').trim();statusCounts[s]=(statusCounts[s]||0)+1;});
-            const statusPills=Object.entries(statusCounts).map(([s,n])=>{const cls=/pass/i.test(s)?'ok':/fail/i.test(s)?'alert':'attention';return`<span class="pill" style="background:color-mix(in srgb,var(--${cls}) 14%,transparent);color:var(--${cls});">${s} ×${n}</span>`;}).join(' ');
+            // ── Previous month trend ──────────────────────────────────
+            const [cy,cm]=procMonth.split('-').map(Number);
+            const prevDate=new Date(cy,cm-2,1);
+            const prevMonth=`${prevDate.getFullYear()}-${String(prevDate.getMonth()+1).padStart(2,'0')}`;
+            const prevRows=procLogs.filter(r=>isMonthMatch(r.date,prevMonth));
+            const prevAvgYield=prevRows.length?prevRows.reduce((s,r)=>s+r.yieldPct,0)/prevRows.length:null;
+            const prevTotalYield=prevRows.reduce((s,r)=>s+r.yieldWeight,0);
+            const hasPrev=prevRows.length>0;
+            const yieldDiff=prevAvgYield!=null?avgYield-prevAvgYield:null;
+            const yieldTrendBadge=yieldDiff!=null?`<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;background:color-mix(in srgb,${yieldDiff>=0?'var(--ok)':'var(--alert)'} 12%,transparent);color:${yieldDiff>=0?'var(--ok)':'var(--alert)'};">${yieldDiff>=0?'↑':'↓'}${Math.abs(yieldDiff).toFixed(1)}% yield vs ${monthLabel(prevMonth).split(' ')[0]}</span>`:'';
+            const outputDiff=totalYield-prevTotalYield;
+            const outputTrendBadge=hasPrev?`<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;background:color-mix(in srgb,${outputDiff>=0?'var(--ok)':'var(--attention)'} 12%,transparent);color:${outputDiff>=0?'var(--ok)':'var(--attention)'};">${outputDiff>=0?'↑':'↓'}${Math.abs(outputDiff).toFixed(1)}kg output vs ${monthLabel(prevMonth).split(' ')[0]}</span>`:'';
 
+            // Pass/fail counts
+            const passCount=rows.filter(r=>/pass/i.test(r.status)).length;
+            const failCount=rows.filter(r=>/fail/i.test(r.status)).length;
+
+            // Copy text
+            _procSummaryCopyText=`Processing Summary — ${monthLabel(procMonth)}\nRuns: ${count}\nAvg yield: ${avgYield.toFixed(1)}% (${yState.label})\nTotal live weight: ${totalLive.toFixed(1)} kg\nTotal yield weight: ${totalYield.toFixed(1)} kg\nPass: ${passCount} · Fail: ${failCount}${hasPrev&&yieldDiff!=null?`\nvs ${monthLabel(prevMonth)}: yield ${yieldDiff>=0?'+':''}${yieldDiff.toFixed(1)}%, output ${outputDiff>=0?'+':''}${outputDiff.toFixed(1)} kg`:''}`;
+
+            // ── Summary card ──────────────────────────────────────────
+            const summaryCard=`<div class="card" style="padding:18px;border-left:4px solid #0D9488;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+                    <div>
+                        <div class="eyebrow" style="color:#0D9488;">Month Summary · <span class="ko">이번달 현황</span></div>
+                        <div style="font-size:24px;font-weight:700;letter-spacing:-.02em;margin-top:3px;font-family:'Space Grotesk',sans-serif;">${count} Run${count!==1?'s':''}</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
+                        <button onclick="copyProcSummary(this)" style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:8px;background:color-mix(in srgb,#0D9488 10%,transparent);color:#0D9488;border:1px solid color-mix(in srgb,#0D9488 24%,transparent);">Copy summary</button>
+                    </div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">
+                    <div style="padding:8px 10px;background:var(--surface-2);border-radius:10px;border:1px solid var(--border);grid-column:span 2;">
+                        <div style="font-size:10px;font-weight:600;color:var(--text-dim);">Avg yield %</div>
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:3px;">
+                            <div style="font-size:22px;font-weight:700;font-family:'Space Grotesk',sans-serif;color:${yState.color};">${avgYield.toFixed(1)}<span style="font-size:11px;color:var(--text-dim);margin-left:2px;">%</span>
+                            <span class="pill" style="background:color-mix(in srgb,${yState.color} 14%,transparent);color:${yState.color};margin-left:8px;">${yState.label}</span></div>
+                            ${yieldTrendBadge||''}
+                        </div>
+                    </div>
+                    <div style="padding:8px 10px;background:var(--surface-2);border-radius:10px;border:1px solid var(--border);">
+                        <div style="font-size:10px;font-weight:600;color:var(--text-dim);">Total live wt</div>
+                        <div style="font-size:18px;font-weight:700;font-family:'Space Grotesk',sans-serif;margin-top:3px;">${totalLive.toFixed(1)}<span style="font-size:11px;color:var(--text-dim);margin-left:2px;">kg</span></div>
+                    </div>
+                    <div style="padding:8px 10px;background:var(--surface-2);border-radius:10px;border:1px solid var(--border);">
+                        <div style="font-size:10px;font-weight:600;color:var(--text-dim);">Total yield wt</div>
+                        <div style="font-size:18px;font-weight:700;font-family:'Space Grotesk',sans-serif;margin-top:3px;">${totalYield.toFixed(1)}<span style="font-size:11px;color:var(--text-dim);margin-left:2px;">kg</span></div>
+                        ${outputTrendBadge?`<div style="margin-top:4px;">${outputTrendBadge}</div>`:''}
+                    </div>
+                    ${passCount+failCount>0?`<div style="padding:8px 10px;background:var(--surface-2);border-radius:10px;border:1px solid var(--border);grid-column:span 2;display:flex;gap:12px;">
+                        <span style="font-size:11px;font-weight:600;color:var(--ok);">✓ Pass: ${passCount}</span>
+                        <span style="font-size:11px;font-weight:600;color:var(--alert);">✗ Fail: ${failCount}</span>
+                    </div>`:''}
+                </div>
+            </div>`;
+
+            // ── Yield trend chart ─────────────────────────────────────
             const chartVals=rows.map(r=>r.yieldPct);
             const chartLabels=rows.map(r=>{const p=(r.date||'').split('-');return p.length===3?`${+p[2]}/${p[1]}`:r.date;});
+            const yieldChart=`<div class="card" style="padding:14px;"><div class="eyebrow mb-2">Yield % Trend · <span class="ko">수율 추이</span></div>${buildChartSVG(chartVals,chartLabels,{color:'var(--ok)',dp:1})}</div>`;
 
+            // ── Batch log (collapsed, tappable rows) ──────────────────
             const batchRows=_procFiltered.map((r,i)=>{
                 const yCls=r.yieldPct>=PROC_YIELD.ok?'ok':r.yieldPct>=PROC_YIELD.attention?'attention':'alert';
                 const sCol=/pass/i.test(r.status)?'var(--ok)':/fail/i.test(r.status)?'var(--alert)':'var(--attention)';
                 const dp=(r.date||'').split('-');const dDisp=dp.length===3?`${dp[2]}/${dp[1]}`:r.date;
                 return`<tr onclick="openProcDetail(${i})" style="cursor:pointer;"><td>${dDisp}</td><td>${r.batchNo||'—'}</td><td>${r.liveWeight.toFixed(1)}</td><td>${r.yieldWeight.toFixed(1)}</td><td><span class="pill" style="background:color-mix(in srgb,var(--${yCls}) 14%,transparent);color:var(--${yCls});">${r.yieldPct.toFixed(1)}%</span></td><td style="color:${sCol};">${r.status||'—'}</td></tr>`;
             }).join('');
+            const batchLog=`<div class="card" style="padding:14px;">
+                <button onclick="const b=this.nextElementSibling;b.classList.toggle('hidden');this.textContent=b.classList.contains('hidden')?'View batch log ▾':'Hide batch log ▴';" style="width:100%;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);">View batch log ▾</button>
+                <div class="hidden mt-3"><table class="data-table"><thead><tr><th>Date</th><th>Batch</th><th>Live kg</th><th>Yield kg</th><th>Yield %</th><th>Status</th></tr></thead><tbody>${batchRows}</tbody></table>
+                <p class="text-xs mt-2" style="color:var(--text-dim);">Tap any row for full batch detail.</p></div>
+            </div>`;
 
-            document.getElementById('proc-body').innerHTML=`
-                <div class="grid grid-cols-2 gap-3">
-                    <button class="kpi" onclick="openProcYieldBreakdown()" style="--kpi-hue:#0D9488;grid-column:span 2;">
-                        <div class="flex items-start justify-between"><div><div class="kpi-label">Avg Yield</div><div class="kpi-ko ko">평균 수율</div></div><span class="pill" style="background:color-mix(in srgb,${yState.color} 14%,transparent);color:${yState.color};">${yState.label}</span></div>
-                        <div class="flex items-baseline gap-1 kpi-val" style="color:${yState.color};">${avgYield.toFixed(1)}<span class="kpi-unit">%</span></div>
-                        <div class="kpi-hint"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.5l6-6 4 4 8-8"/></svg>Tap for batch breakdown</div>
-                    </button>
-                    <div class="kpi" style="--kpi-hue:#0D9488;"><div class="kpi-label">Runs</div><div class="kpi-ko ko">가공 횟수</div><div class="kpi-val">${count}</div></div>
-                    <div class="kpi" style="--kpi-hue:#0D9488;"><div class="kpi-label">Total Live Wt</div><div class="kpi-ko ko">총 생중량</div><div class="flex items-baseline gap-1 kpi-val">${totalLive.toFixed(1)}<span class="kpi-unit">kg</span></div></div>
-                    <div class="kpi" style="--kpi-hue:#0D9488;grid-column:span 2;"><div class="kpi-label">Total Yield Wt</div><div class="kpi-ko ko">총 가공중량</div><div class="flex items-baseline gap-1 kpi-val">${totalYield.toFixed(1)}<span class="kpi-unit">kg</span></div></div>
-                </div>
-                <div class="flex items-center gap-2 flex-wrap px-1">${statusPills}</div>
-                <div class="card" style="padding:14px;"><div class="eyebrow mb-2">Yield % Trend · <span class="ko">수율 추이</span></div>${buildChartSVG(chartVals,chartLabels,{color:'var(--ok)',dp:1})}</div>
-                <div class="card" style="padding:14px;"><div class="eyebrow mb-2">Batch Records · <span class="ko">가공 배치 목록</span></div><table class="data-table"><thead><tr><th>Date</th><th>Batch</th><th>Live kg</th><th>Yield kg</th><th>Yield %</th><th>Status</th></tr></thead><tbody>${batchRows}</tbody></table></div>
-                <p class="text-xs px-1" style="color:var(--text-dim);">Tap any row for full batch detail. Showing ${monthLabel(procMonth)}.</p>`;
+            document.getElementById('proc-body').innerHTML=`${summaryCard}${yieldChart}${batchLog}<p class="text-xs px-1" style="color:var(--text-dim);">Showing ${monthLabel(procMonth)}.</p>`;
         }
 
         function openProcDetail(i){
