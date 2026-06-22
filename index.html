@@ -486,6 +486,15 @@
             finally{ics.forEach(ic=>ic&&ic.classList.remove('spin'));}
         }
 
+        let _spawnSummaryCopyText='';
+        function copySpawnSummary(btn){
+            if(!navigator.clipboard){alert('Clipboard not available on this browser.');return;}
+            navigator.clipboard.writeText(_spawnSummaryCopyText).then(()=>{
+                const orig=btn.textContent;btn.textContent='✓ Copied';
+                setTimeout(()=>btn.textContent=orig,1600);
+            }).catch(()=>alert('Could not copy — try long-pressing and copying manually.'));
+        }
+
         /* ═══════════════════════════════════════════════════════
            MANAGER OUTCOME OVERRIDE
            A trial's "true" outcome = manager override if set,
@@ -604,13 +613,16 @@
              .map(s=>`<div style="flex:${outcomeCounts[s.key]};background:${s.color};height:100%;border-radius:3px;min-width:4px;" title="${s.key}: ${outcomeCounts[s.key]}"></div>`)
              .join('');
 
+            // Store copy text for the named copy function
+            _spawnSummaryCopyText=copyText;
+
             const summaryCard=`<div class="card" style="padding:18px;border-left:4px solid #8B5CF6;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
                     <div>
                         <div class="eyebrow" style="color:#8B5CF6;">Month Summary · <span class="ko">이번달 현황</span></div>
                         <div style="font-size:24px;font-weight:700;letter-spacing:-.02em;margin-top:3px;font-family:'Space Grotesk',sans-serif;">${totalTrials} Trial${totalTrials!==1?'s':''}</div>
                     </div>
-                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">${trendBadge}<button onclick="navigator.clipboard&&navigator.clipboard.writeText(${JSON.stringify(copyText)}).then(()=>{this.textContent='✓ Copied';setTimeout(()=>this.textContent='Copy summary',1600)})" style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:8px;background:color-mix(in srgb,#8B5CF6 10%,transparent);color:#8B5CF6;border:1px solid color-mix(in srgb,#8B5CF6 24%,transparent);">Copy summary</button></div>
+                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">${trendBadge}<button onclick="copySpawnSummary(this)" style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:8px;background:color-mix(in srgb,#8B5CF6 10%,transparent);color:#8B5CF6;border:1px solid color-mix(in srgb,#8B5CF6 24%,transparent);">Copy summary</button></div>
                 </div>
                 <div style="display:flex;height:6px;border-radius:3px;overflow:hidden;gap:2px;background:var(--surface-2);margin-bottom:12px;">${barSegs||`<div style="flex:1;background:var(--border);border-radius:3px;"></div>`}</div>
                 <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">
