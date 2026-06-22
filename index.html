@@ -571,19 +571,69 @@
                     <div class="moon-eggs-label">Total eggs · Tap for full breakdown ›</div>
                 </button>`;
             }).join('');
-            // Latest trial WQ
-            const latest=monthLogs[0];
-            const wq1Label=`WQ 1 – ${fmtCleanDate(latest.date)}${latest.wq1Time?' – '+fmtLogTime(latest.wq1Time):''}`;
-            const wq2Label=`WQ 2 – ${fmtCleanDate(latest.date)}${latest.wq2Time?' – '+fmtLogTime(latest.wq2Time):''}`;
-            const wqBlock=`<div class="card" style="padding:14px;"><div class="eyebrow mb-3">Latest trial water quality</div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div class="wq-col"><div class="wq-col-head">${wq1Label}</div><div class="wq-row"><span>Temp</span><span>${latest.wq1AvgTemp||'—'} °C</span></div><div class="wq-row"><span>DO</span><span>${latest.wq1AvgDo||'—'} mg/L</span></div><div class="wq-row"><span>pH</span><span>${latest.wq1AvgPh||'—'}</span></div><div class="wq-row"><span>Sal</span><span>${latest.wq1AvgSal||'—'} ppt</span></div></div>
-                    <div class="wq-col"><div class="wq-col-head">${wq2Label}</div><div class="wq-row"><span>Temp</span><span>${latest.wq2AvgTemp||'—'} °C</span></div><div class="wq-row"><span>DO</span><span>${latest.wq2AvgDo||'—'} mg/L</span></div><div class="wq-row"><span>pH</span><span>${latest.wq2AvgPh||'—'}</span></div><div class="wq-row"><span>Sal</span><span>${latest.wq2AvgSal||'—'} ppt</span></div></div>
-                </div></div>`;
-            // Recent trials table (current month)
-            const trialRows=monthLogs.slice(0,10).map(r=>{const eggs=parseInt(r.totalEggs)||0;return`<tr><td>${fmtCleanDate(r.date)}<br><span style="color:var(--text-dim);font-size:10px;">${normalizeMoon(r.moonCycle)}</span></td><td style="color:${statusColor(r.statusOutcome)};">${r.statusOutcome||'—'}</td><td>${eggs>0?eggs.toLocaleString():'—'}</td><td style="color:${qualityColor(r.eggQuality)};">${r.eggQuality||'—'}</td></tr>`;}).join('');
-            const trialTable=`<div class="card" style="padding:14px;"><div class="eyebrow mb-2">All trials this month</div><table class="data-table"><thead><tr><th>Date · Moon</th><th>Status</th><th>Eggs</th><th>Quality</th></tr></thead><tbody>${trialRows}</tbody></table></div>`;
-            body.innerHTML=`<div class="space-y-3">${moonCards}</div><div class="mt-4 space-y-3">${wqBlock}${trialTable}</div><p class="text-xs mt-3 px-1" style="color:var(--text-dim);">Showing ${monthLabel(spawnMonth)} — use dropdown to change month.</p>`;
+            // ── Monthly summary card ──────────────────────────────────
+            // Compute outcome buckets for this month using override-aware logic
+            const outcomeCounts={Successful:0,Failed:0,Inconclusive:0,Unconfirmed:0};
+            monthLogs.forEach(r=>{const o=trialEffectiveOutcome(r);outcomeCounts[o]=(outcomeCounts[o]||0)+1;});
+            const totalTrials=monthLogs.length;
+            const totalEggsMonth=monthLogs.reduce((s,r)=>s+(parseInt(r.totalEggs)||0),0);
+            const pct=n=>totalTrials?Math.round(n/totalTrials*100):0;
+
+            // Previous month for trend
+            const [cy,cm]=spawnMonth.split('-').map(Number);
+            const prevDate=new Date(cy,cm-2,1);
+            const prevMonth=`${prevDate.getFullYear()}-${String(prevDate.getMonth()+1).padStart(2,'0')}`;
+            const prevLogs=logs.filter(r=>isMonthMatch(r.date,prevMonth));
+            const prevTrials=prevLogs.length;
+            const prevEggs=prevLogs.reduce((s,r)=>s+(parseInt(r.totalEggs)||0),0);
+            const trialDiff=totalTrials-prevTrials;
+            const eggDiff=totalEggsMonth-prevEggs;
+            const hasPrev=prevTrials>0||prevEggs>0;
+            const trendBadge=hasPrev?`<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;background:color-mix(in srgb,${trialDiff>=0?'var(--ok)':'var(--alert)'} 12%,transparent);color:${trialDiff>=0?'var(--ok)':'var(--alert)'};">${trialDiff>=0?'↑':'↓'}${Math.abs(trialDiff)} trials vs ${monthLabel(prevMonth).split(' ')[0]}</span>`:'';
+
+            // Copy-to-clipboard summary text (Kevin report style)
+            const copyText=`Spawning Summary — ${monthLabel(spawnMonth)}\nTotal trials: ${totalTrials}\nSuccessful: ${outcomeCounts.Successful} (${pct(outcomeCounts.Successful)}%)\nFailed: ${outcomeCounts.Failed} (${pct(outcomeCounts.Failed)}%)\nInconclusive: ${outcomeCounts.Inconclusive} (${pct(outcomeCounts.Inconclusive)}%)${outcomeCounts.Unconfirmed>0?`\nUnconfirmed: ${outcomeCounts.Unconfirmed} (${pct(outcomeCounts.Unconfirmed)}%)`:''}\nTotal eggs: ${totalEggsMonth>0?totalEggsMonth.toLocaleString():'—'}${hasPrev?`\nvs ${monthLabel(prevMonth)}: ${trialDiff>=0?'+':''}${trialDiff} trials, ${eggDiff>=0?'+':''}${eggDiff>0?eggDiff.toLocaleString():eggDiff} eggs`:''}`;
+
+            // Outcome bar segments
+            const barSegs=[
+                {key:'Successful',color:'var(--ok)'},
+                {key:'Failed',color:'var(--alert)'},
+                {key:'Inconclusive',color:'var(--idle)'},
+                {key:'Unconfirmed',color:'var(--attention)'},
+            ].filter(s=>outcomeCounts[s.key]>0)
+             .map(s=>`<div style="flex:${outcomeCounts[s.key]};background:${s.color};height:100%;border-radius:3px;min-width:4px;" title="${s.key}: ${outcomeCounts[s.key]}"></div>`)
+             .join('');
+
+            const summaryCard=`<div class="card" style="padding:18px;border-left:4px solid #8B5CF6;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+                    <div>
+                        <div class="eyebrow" style="color:#8B5CF6;">Month Summary · <span class="ko">이번달 현황</span></div>
+                        <div style="font-size:24px;font-weight:700;letter-spacing:-.02em;margin-top:3px;font-family:'Space Grotesk',sans-serif;">${totalTrials} Trial${totalTrials!==1?'s':''}</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">${trendBadge}<button onclick="navigator.clipboard&&navigator.clipboard.writeText(${JSON.stringify(copyText)}).then(()=>{this.textContent='✓ Copied';setTimeout(()=>this.textContent='Copy summary',1600)})" style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:8px;background:color-mix(in srgb,#8B5CF6 10%,transparent);color:#8B5CF6;border:1px solid color-mix(in srgb,#8B5CF6 24%,transparent);">Copy summary</button></div>
+                </div>
+                <div style="display:flex;height:6px;border-radius:3px;overflow:hidden;gap:2px;background:var(--surface-2);margin-bottom:12px;">${barSegs||`<div style="flex:1;background:var(--border);border-radius:3px;"></div>`}</div>
+                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">
+                    ${[['Successful','var(--ok)'],['Failed','var(--alert)'],['Inconclusive','var(--idle)'],['Unconfirmed','var(--attention)']].filter(([k])=>outcomeCounts[k]>0||k==='Successful'||k==='Failed').map(([k,c])=>`<div style="padding:8px 10px;background:var(--surface-2);border-radius:10px;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;"><span style="font-size:11px;font-weight:600;color:${c};">${k}</span><span style="font-size:13px;font-weight:700;font-family:'Space Grotesk',sans-serif;color:${c};">${outcomeCounts[k]||0} <span style="font-size:10px;color:var(--text-dim);">(${pct(outcomeCounts[k]||0)}%)</span></span></div>`).join('')}
+                    ${totalEggsMonth>0?`<div style="padding:8px 10px;background:var(--surface-2);border-radius:10px;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;grid-column:span 2;"><span style="font-size:11px;font-weight:600;color:var(--text-mut);">Total eggs</span><span style="font-size:14px;font-weight:700;font-family:'Space Grotesk',sans-serif;">${totalEggsMonth.toLocaleString()}</span></div>`:''}
+                </div>
+            </div>`;
+
+            // ── Trial table (override-aware status) ───────────────────
+            const trialRows=monthLogs.slice(0,10).map(r=>{
+                const eggs=parseInt(r.totalEggs)||0;
+                const eff=trialEffectiveOutcome(r);
+                const ec=effectiveOutcomeColor(eff);
+                return`<tr><td>${fmtCleanDate(r.date)}<br><span style="color:var(--text-dim);font-size:10px;">${normalizeMoon(r.moonCycle)}</span></td><td style="color:${ec};">${eff}${isOverridden(r)?' ✏️':''}</td><td>${eggs>0?eggs.toLocaleString():'—'}</td><td style="color:${qualityColor(r.eggQuality)};">${r.eggQuality||'—'}</td></tr>`;
+            }).join('');
+
+            // ── "View raw log" collapsed table ────────────────────────
+            const trialTable=`<div class="card" style="padding:14px;">
+                <button onclick="const b=this.nextElementSibling;b.classList.toggle('hidden');this.textContent=b.classList.contains('hidden')?'View raw log ▾':'Hide raw log ▴';" style="width:100%;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);">View raw log ▾</button>
+                <div class="hidden mt-3"><table class="data-table"><thead><tr><th>Date · Moon</th><th>Status</th><th>Eggs</th><th>Quality</th></tr></thead><tbody>${trialRows}</tbody></table></div>
+            </div>`;
+
+            body.innerHTML=`${summaryCard}<div class="space-y-3 mt-1">${moonCards}</div><div class="mt-4 space-y-3">${trialTable}</div><p class="text-xs mt-3 px-1" style="color:var(--text-dim);">Showing ${monthLabel(spawnMonth)} — use dropdown to change month.</p>`;
         }
 
         // Moon trial detail panel
