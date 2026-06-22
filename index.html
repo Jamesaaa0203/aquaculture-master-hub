@@ -789,6 +789,15 @@
             openDetailOverlay(headHtml,bodyHtml);
         }
 
+        let _purchSummaryCopyText='';
+        function copyPurchSummary(btn){
+            if(!navigator.clipboard){alert('Clipboard not available.');return;}
+            navigator.clipboard.writeText(_purchSummaryCopyText).then(()=>{
+                const orig=btn.textContent;btn.textContent='✓ Copied';
+                setTimeout(()=>btn.textContent=orig,1600);
+            }).catch(()=>alert('Could not copy.'));
+        }
+
         /* ═══════════════════════════════════════════════════════
            PURCHASING DASHBOARD
            ═══════════════════════════════════════════════════════ */
@@ -799,36 +808,104 @@
             populateMonthSelect('purchase-month-select', logs, purchaseMonth);
             const monthLogs=logs.filter(r=>isMonthMatch(r.date,purchaseMonth));
             if(!monthLogs.length){body.innerHTML=msgCard(`<p class="text-sm font-semibold">No batches in ${monthLabel(purchaseMonth)}.</p><p class="text-xs mt-1" style="color:var(--text-mut);">Select a different month using the dropdown above.</p>`);return;}
+
+            // ── Month aggregates ──────────────────────────────────────
+            const totalBatches=monthLogs.length;
+            const totalBroodstockPcs=monthLogs.reduce((s,r)=>{
+                const f=parseInt(r.totalFemalesPcs)||0,m=parseInt(r.totalMalesPcs)||0;
+                return s+f+m;
+            },0);
+            const totalWeightKg=monthLogs.reduce((s,r)=>s+(num(r.totalBatchWeightKg||r.totalBatchWeight)||0),0);
+            const mortValues=monthLogs.map(r=>{const v=num(r.mortality??r['mortality%']);return v!=null?(v>0&&v<1?v*100:v):null;}).filter(v=>v!=null);
+            const avgMort=mortValues.length?mortValues.reduce((a,b)=>a+b,0)/mortValues.length:null;
+            const mortCol=avgMort!=null?mortalityColor(avgMort):'var(--text-dim)';
+
+            // ── Previous month trend ──────────────────────────────────
+            const [cy,cm]=purchaseMonth.split('-').map(Number);
+            const prevDate=new Date(cy,cm-2,1);
+            const prevMonth=`${prevDate.getFullYear()}-${String(prevDate.getMonth()+1).padStart(2,'0')}`;
+            const prevLogs=logs.filter(r=>isMonthMatch(r.date,prevMonth));
+            const prevMortVals=prevLogs.map(r=>{const v=num(r.mortality??r['mortality%']);return v!=null?(v>0&&v<1?v*100:v):null;}).filter(v=>v!=null);
+            const prevAvgMort=prevMortVals.length?prevMortVals.reduce((a,b)=>a+b,0)/prevMortVals.length:null;
+            const prevWeight=prevLogs.reduce((s,r)=>s+(num(r.totalBatchWeightKg||r.totalBatchWeight)||0),0);
+            const hasPrev=prevLogs.length>0;
+
+            // Mortality trend: DOWN is good (green), UP is bad (red)
+            const mortDiff=avgMort!=null&&prevAvgMort!=null?avgMort-prevAvgMort:null;
+            const mortTrendBadge=mortDiff!=null?`<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;background:color-mix(in srgb,${mortDiff<=0?'var(--ok)':'var(--alert)'} 12%,transparent);color:${mortDiff<=0?'var(--ok)':'var(--alert)'};">${mortDiff<=0?'↓':'↑'}${Math.abs(mortDiff).toFixed(1)}% mort vs ${monthLabel(prevMonth).split(' ')[0]}</span>`:'';
+            const weightDiff=totalWeightKg-prevWeight;
+            const weightTrendBadge=hasPrev?`<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;background:color-mix(in srgb,${weightDiff>=0?'var(--ok)':'var(--attention)'} 12%,transparent);color:${weightDiff>=0?'var(--ok)':'var(--attention)'};">${weightDiff>=0?'↑':'↓'}${Math.abs(weightDiff).toFixed(1)}kg vs ${monthLabel(prevMonth).split(' ')[0]}</span>`:'';
+
+            // Copy text
+            _purchSummaryCopyText=`Purchasing Summary — ${monthLabel(purchaseMonth)}\nBatches: ${totalBatches}\nTotal broodstock: ${totalBroodstockPcs.toLocaleString()} pcs\nTotal weight: ${totalWeightKg.toFixed(1)} kg\nAvg mortality: ${avgMort!=null?avgMort.toFixed(1)+'%':'—'}${hasPrev&&mortDiff!=null?`\nvs ${monthLabel(prevMonth)}: mortality ${mortDiff>0?'+':''}${mortDiff.toFixed(1)}%, weight ${weightDiff>=0?'+':''}${weightDiff.toFixed(1)} kg`:''}`;
+
+            const summaryCard=`<div class="card" style="padding:18px;border-left:4px solid #D97706;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+                    <div>
+                        <div class="eyebrow" style="color:#D97706;">Month Summary · <span class="ko">이번달 현황</span></div>
+                        <div style="font-size:24px;font-weight:700;letter-spacing:-.02em;margin-top:3px;font-family:'Space Grotesk',sans-serif;">${totalBatches} Batch${totalBatches!==1?'es':''}</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
+                        <button onclick="copyPurchSummary(this)" style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:8px;background:color-mix(in srgb,#D97706 10%,transparent);color:#D97706;border:1px solid color-mix(in srgb,#D97706 24%,transparent);">Copy summary</button>
+                    </div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">
+                    <div style="padding:8px 10px;background:var(--surface-2);border-radius:10px;border:1px solid var(--border);">
+                        <div style="font-size:10px;font-weight:600;color:var(--text-dim);">Total broodstock</div>
+                        <div style="font-size:18px;font-weight:700;font-family:'Space Grotesk',sans-serif;margin-top:3px;">${totalBroodstockPcs>0?totalBroodstockPcs.toLocaleString():'—'}<span style="font-size:11px;color:var(--text-dim);margin-left:2px;">pcs</span></div>
+                    </div>
+                    <div style="padding:8px 10px;background:var(--surface-2);border-radius:10px;border:1px solid var(--border);">
+                        <div style="font-size:10px;font-weight:600;color:var(--text-dim);">Total weight</div>
+                        <div style="font-size:18px;font-weight:700;font-family:'Space Grotesk',sans-serif;margin-top:3px;">${totalWeightKg.toFixed(1)}<span style="font-size:11px;color:var(--text-dim);margin-left:2px;">kg</span></div>
+                        ${weightTrendBadge?`<div style="margin-top:4px;">${weightTrendBadge}</div>`:''}
+                    </div>
+                    <div style="padding:8px 10px;background:var(--surface-2);border-radius:10px;border:1px solid var(--border);grid-column:span 2;">
+                        <div style="font-size:10px;font-weight:600;color:var(--text-dim);">Avg mortality</div>
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:3px;">
+                            <div style="font-size:20px;font-weight:700;font-family:'Space Grotesk',sans-serif;color:${mortCol};">${avgMort!=null?avgMort.toFixed(1)+'%':'—'}</div>
+                            ${mortTrendBadge||''}
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+
+            // ── Latest batch KPI tiles (tap for broodstock breakdown) ──
             const latest=monthLogs[0];
             const mortRaw=num(latest.mortality??latest['mortality%']);const mort=mortRaw!=null?(mortRaw>0&&mortRaw<1?mortRaw*100:mortRaw):null;
-            const mortCol=mortalityColor(mort);
+            const mortColLatest=mortalityColor(mort);
             const totalKg=num(latest.totalBatchWeightKg||latest.totalBatchWeight);
             const femPcs=parseInt(latest.totalFemalesPcs)||0;
             const malePcs=parseInt(latest.totalMalesPcs)||0;
-            const totalBroodstock=femPcs+malePcs;
-            const tiles=`<div class="grid grid-cols-2 gap-3">
+            const totalBroodstockLatest=femPcs+malePcs;
+            const tiles=`<div><div class="eyebrow px-1 mb-2">Latest batch · <span style="color:var(--text-dim);">${fmtCleanDate(latest.date)}</span></div>
+            <div class="grid grid-cols-2 gap-3">
                 <button class="kpi" onclick="openBroodstockDetail(0)" style="--kpi-hue:#D97706;grid-column:span 2;">
-                    <div class="flex items-start justify-between"><div><div class="kpi-label">Total Broodstock</div><div class="kpi-ko ko">총 어미 입고</div></div></div>
-                    <div class="flex items-baseline gap-1 kpi-val">${totalBroodstock>0?totalBroodstock.toLocaleString():'—'}<span class="kpi-unit">pcs</span></div>
-                    <div class="kpi-hint" style="margin-top:8px;"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 1v14M1 8h14"/></svg>Tap for male / female breakdown</div>
+                    <div class="flex items-start justify-between"><div><div class="kpi-label">Broodstock</div><div class="kpi-ko ko">총 어미 입고</div></div></div>
+                    <div class="flex items-baseline gap-1 kpi-val">${totalBroodstockLatest>0?totalBroodstockLatest.toLocaleString():'—'}<span class="kpi-unit">pcs</span></div>
+                    <div class="kpi-hint" style="margin-top:8px;"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 1v14M1 8h14"/></svg>Tap for grade breakdown</div>
                 </button>
-                <div class="kpi"style="--kpi-hue:${mortCol};">
+                <div class="kpi" style="--kpi-hue:${mortColLatest};">
                     <div class="kpi-label">Mortality</div><div class="kpi-ko ko">폐사율</div>
-                    <div class="flex items-baseline gap-1 kpi-val" style="color:${mortCol};">${mort!=null?mort.toFixed(1):'—'}<span class="kpi-unit">%</span></div>
+                    <div class="flex items-baseline gap-1 kpi-val" style="color:${mortColLatest};">${mort!=null?mort.toFixed(1):'—'}<span class="kpi-unit">%</span></div>
                 </div>
                 <div class="kpi" style="--kpi-hue:#D97706;">
-                    <div class="kpi-label">Batch Weight</div><div class="kpi-ko ko">총 입고량</div>
+                    <div class="kpi-label">Weight</div><div class="kpi-ko ko">입고량</div>
                     <div class="flex items-baseline gap-1 kpi-val">${totalKg!=null?totalKg.toFixed(1):'—'}<span class="kpi-unit">kg</span></div>
                 </div>
-                <div class="kpi" style="--kpi-hue:${qualityColor(latest.overallQuality)};">
+                <div class="kpi" style="--kpi-hue:${qualityColor(latest.overallQuality)};grid-column:span 2;">
                     <div class="kpi-label">Quality</div><div class="kpi-ko ko">품질</div>
                     <div class="kpi-val" style="font-size:22px;color:${qualityColor(latest.overallQuality)};">${latest.overallQuality||'—'}</div>
                 </div>
-            </div>`;
-            // Recent batches — current month only
+            </div></div>`;
+
+            // ── Batch table (collapsed) ────────────────────────────────
             const batchRows=monthLogs.map(l=>{const mRaw=num(l.mortality??l['mortality%']);const m=mRaw!=null?(mRaw>0&&mRaw<1?mRaw*100:mRaw):null;const bkg=num(l.totalBatchWeightKg||l.totalBatchWeight);return`<tr><td>${fmtCleanDate(l.date)}<br><span style="color:var(--text-dim);font-size:10px;">${l.supplierCategory||l.supplierCat||'—'}</span></td><td>${bkg!=null?bkg.toFixed(1):'—'} kg</td><td style="color:${mortalityColor(m)};">${m!=null?m.toFixed(1)+'%':'—'}</td><td style="color:${qualityColor(l.overallQuality)};">${l.overallQuality||'—'}</td></tr>`;}).join('');
-            const batchTable=`<div class="card" style="padding:14px;"><div class="eyebrow mb-2">Batches this month</div><table class="data-table"><thead><tr><th>Date · Supplier</th><th>Weight</th><th>Mortality</th><th>Quality</th></tr></thead><tbody>${batchRows}</tbody></table></div>`;
-            body.innerHTML=`${tiles}<div class="mt-3 space-y-3">${batchTable}</div><p class="text-xs mt-3 px-1" style="color:var(--text-dim);">Showing ${monthLabel(purchaseMonth)} — use dropdown to change month.</p>`;
+            const batchTable=`<div class="card" style="padding:14px;">
+                <button onclick="const b=this.nextElementSibling;b.classList.toggle('hidden');this.textContent=b.classList.contains('hidden')?'View all batches ▾':'Hide batches ▴';" style="width:100%;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);">View all batches ▾</button>
+                <div class="hidden mt-3"><table class="data-table"><thead><tr><th>Date · Supplier</th><th>Weight</th><th>Mortality</th><th>Quality</th></tr></thead><tbody>${batchRows}</tbody></table></div>
+            </div>`;
+
+            body.innerHTML=`${summaryCard}${tiles}<div class="mt-3 space-y-3">${batchTable}</div><p class="text-xs mt-3 px-1" style="color:var(--text-dim);">Showing ${monthLabel(purchaseMonth)} — use dropdown to change month.</p>`;
         }
 
         // Broodstock breakdown detail
