@@ -1,6 +1,6 @@
 /* Bon Aqua Ops — service worker
    Bump CACHE_VERSION whenever you deploy changes so phones pull the new shell. */
-const CACHE_VERSION = 'bonaqua-v1';
+const CACHE_VERSION = 'bonaqua-v2';
 const SHELL = [
   './',
   './index.html',
