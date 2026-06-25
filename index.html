@@ -362,15 +362,33 @@
 
     <script>
         const MASTER_PIN = "3653";
+                /* ── Storage ─────────────────────────────────────────── */
+        const store={get(k){try{return localStorage.getItem(k);}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}},sget(k){try{return sessionStorage.getItem(k);}catch(e){return null;}},sset(k,v){try{sessionStorage.setItem(k,v);}catch(e){}},srem(k){try{sessionStorage.removeItem(k);}catch(e){}}};
+
+// ── App version — bump this string on every deploy ──────────────
+const APP_VERSION = document.lastModified;
+(function enforceVersion(){
+    const stored = store.get('bonaqua_app_version');
+    if (stored === APP_VERSION) return;               // already current
+    // New deploy detected — nuke all SW caches then hard-reload once
+    store.set('bonaqua_app_version', APP_VERSION);
+    const doReload = !!stored;                        // skip reload on very first visit
+    if ('caches' in window) {
+        caches.keys().then(keys => {
+            Promise.all(keys.map(k => caches.delete(k))).then(() => {
+                if (doReload) window.location.reload(true);
+            });
+        });
+    } else if (doReload) {
+        window.location.reload(true);
+    }
+})();
         let inputPin="", isManagerAuthenticated=false, currentReportURL="";
         let wqSessions=[], spawnLogs=[], purchaseLogs=[], procLogs=[], _procFiltered=[]; let _lastStockItems=[];
         let hrData={balances:[],ot:[],leave:[]};
         function currentMonthStr(){ const n=new Date(); return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`; }
         let spawnMonth=currentMonthStr(), purchaseMonth=currentMonthStr(), procMonth=currentMonthStr(), hrMonth=currentMonthStr();
         let spawnTasks=[]; // lifecycle tasks from getUpcomingTasks GAS endpoint
-
-        /* ── Storage ─────────────────────────────────────────── */
-        const store={get(k){try{return localStorage.getItem(k);}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}},sget(k){try{return sessionStorage.getItem(k);}catch(e){return null;}},sset(k,v){try{sessionStorage.setItem(k,v);}catch(e){}},srem(k){try{sessionStorage.removeItem(k);}catch(e){}}};
 
         /* ── Date helpers ────────────────────────────────────── */
         const MONTHS_LONG=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1447,6 +1465,22 @@ function scMortReportWeekBounds(offset){
 function scFmtReportRange(start,end){
   return`${start.getDate()} ${MONTHS_SHORT[start.getMonth()]} – ${end.getDate()} ${MONTHS_SHORT[end.getMonth()]}`;
 }
+function scFmtBatchDateTime(dateVal) {
+    if (!dateVal) return '—';
+    const d = new Date(dateVal);
+    if (isNaN(d)) return String(dateVal).substring(0, 10);
+    // Shift to MYT (UTC+8)
+    const myt = new Date(d.getTime() + 8 * 3600000);
+    const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const day  = myt.getUTCDate();
+    const mon  = M[myt.getUTCMonth()];
+    const yr   = myt.getUTCFullYear();
+    const h    = myt.getUTCHours();
+    const m    = myt.getUTCMinutes();
+    const dateStr = `${day} ${mon} ${yr}`;
+    if (h === 0 && m === 0) return dateStr;          // date-only entries
+    return `${dateStr} · ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')} MYT`;
+}        
 function scMortReportData(offset){
   const{start,end}=scMortReportWeekBounds(offset);
   let dead=0;
@@ -1788,7 +1822,7 @@ function renderSCMortalityForm(){
   const c=document.getElementById('sc-content-mortality');if(!c)return;
   const tog=(v,l)=>`<button onclick="scMortType='${v}';renderSCMortalityForm()" style="flex:1;padding:9px;border-radius:10px;font-size:11px;font-weight:700;background:${scMortType===v?'var(--alert)':'transparent'};color:${scMortType===v?'white':'var(--text-mut)'};transition:all .2s;">${l}</button>`;
   const pet=p=>`<button onclick="scMortPetak='${p}';renderSCMortalityForm()" style="flex:1;padding:10px;border-radius:11px;font-weight:700;font-size:13px;border:1.5px solid ${scMortPetak===p?'var(--alert)':'var(--border-2)'};background:${scMortPetak===p?'var(--alert)':'var(--surface)'};color:${scMortPetak===p?'white':'var(--text)'};transition:all .2s;">Petak ${p}</button>`;
-  const batches=scData.transfers?.slice(0,30).map(t=>`<option value="${t.batchId||t.id||''}">Unit ${t.unitId} (P${t.petak}) — ${t.qty} pcs [${t.date}]</option>`).join('')||'';
+  const batches=scData.transfers?.slice(0,30).map(t=>`<option value="${t.batchId||t.id||''}">Unit ${t.unitId} (P${t.petak}) — ${t.qty} pcs [${scFmtBatchDateTime(t.date)}]</option>`).join('')||'';
   c.innerHTML=`<div class="card" style="padding:24px;">
     <div style="font-size:13px;font-weight:700;color:var(--alert);letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">💀 Rekod Kematian</div>
     <div style="display:flex;gap:5px;margin-bottom:20px;padding:5px;background:var(--surface-2);border-radius:13px;border:1px solid var(--border);">
@@ -2080,7 +2114,7 @@ function renderSCMgrBatches(){
     return`<div style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:16px;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
         <div><div style="font-size:15px;font-weight:700;">Unit ${t.unitId} — Petak ${t.petak}</div>
-        <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">${t.date||'—'} · ${t.size||'—'}</div></div>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">${scFmtBatchDateTime(t.date)} · ${t.size||'—'}</div></div>
         <span class="pill" style="background:color-mix(in srgb,var(--${lc}) 14%,transparent);color:var(--${lc});">${loss}% loss</span>
       </div>
       <div style="display:flex;gap:20px;padding-top:12px;border-top:1px solid var(--border);">
@@ -2364,7 +2398,27 @@ function sendStockOrderMessage(){
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
 }
   
-        if('serviceWorker'in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});}
+        if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then(reg => {
+            // Check for a new SW version on every page load
+            reg.update();
+            reg.addEventListener('updatefound', () => {
+                const newSW = reg.installing;
+                newSW.addEventListener('statechange', () => {
+                    // New SW installed and waiting — tell it to skip waiting immediately
+                    if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+                        newSW.postMessage({ type: 'SKIP_WAITING' });
+                    }
+                });
+            });
+        }).catch(() => {});
+        // When a new SW takes control, reload to pick up fresh HTML/JS
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            window.location.reload();
+        });
+    });
+}
 
         /* ── Splash screen ───────────────────────────────────── */
         (function(){
