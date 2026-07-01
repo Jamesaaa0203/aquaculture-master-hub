@@ -416,6 +416,43 @@ const APP_VERSION = document.lastModified;
         function statusColor(s){if(!s)return 'var(--text)';const l=s.toLowerCase();if(l.includes('success')||l.includes('good')||l.includes('ok'))return'var(--ok)';if(l.includes('fail')||l.includes('poor'))return'var(--alert)';return'var(--attention)';}
         function qualityColor(s){if(!s)return'var(--text)';const l=s.toLowerCase();if(l.includes('good')||l.includes('excellent'))return'var(--ok)';if(l.includes('poor')||l.includes('bad'))return'var(--alert)';return'var(--attention)';}
         function mortalityColor(v){if(!isFinite(v))return'var(--text)';if(v<=5)return'var(--ok)';if(v<=15)return'var(--attention)';return'var(--alert)';}
+        function otRateInfo(dayType){
+    const d=(dayType||'').toLowerCase();
+    if(d.includes('public'))  return {mult:'3x',  label:'public'};
+    if(d.includes('rest'))    return {mult:'2x',  label:'rest day'};
+    if(d.includes('normal'))  return {mult:'1.5x',label:'normal day'};
+    return {mult:'—', label:dayType||'—'};
+}
+let _otSummaryCopyText='';
+function copyOTSummary(btn){
+    if(!navigator.clipboard){alert('Clipboard not available on this browser.');return;}
+    navigator.clipboard.writeText(_otSummaryCopyText).then(()=>{
+        const orig=btn.textContent;btn.textContent='✓ Copied';
+        setTimeout(()=>btn.textContent=orig,1600);
+    }).catch(()=>alert('Could not copy — try long-pressing and copying manually.'));
+}
+function buildOTSummaryText(monthOT){
+    if(!monthOT.length) return 'No OT records this month.';
+    const byDate={};
+    [...monthOT].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(r=>{
+        (byDate[r.date]=byDate[r.date]||[]).push(r);
+    });
+    const dates=Object.keys(byDate).sort((a,b)=>new Date(a)-new Date(b));
+    return dates.map(dateKey=>{
+        const d=parseAnyDate(dateKey);
+        const dateLabel=d?`${MONTHS_LONG[d.getMonth()]} ${ordinal(d.getDate())}`:dateKey;
+        const lines=byDate[dateKey].map(r=>{
+            const isXH=r.compRule==='Extra Holiday';
+            const hrs=parseFloat(r.hours)||0;
+            const hrsLabel=isXH?'1 day (Extra Holiday)':`${hrs} ${hrs===1?'hour':'hours'}`;
+            const rate=otRateInfo(r.dayType);
+            const rateLabel=isXH?'':` - ${rate.mult} (${rate.label})`;
+            const reason=r.reason||r.otReason||'No reason logged';
+            return `${r.name||'—'} - ${hrsLabel}${rateLabel} - ${reason}`;
+        });
+        return `${dateLabel}\n${lines.join('\n')}`;
+    }).join('\n\n');
+}
 
         /* ── Worker modules ──────────────────────────────────── */
         const MODULES=[{hue:'#3B82F6',href:'https://jamesaaa0203.github.io/daily-water-quality/',title:'Water Quality',bm:'Kualiti Air',desc:'DO, temperature & salinity logs',icon:lineIcon("M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5l6.74-6.76z")},{hue:'#8B5CF6',href:'https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/',title:'Spawning Trials',bm:'Ujian Pemijahan',desc:'Induction & conditioning',icon:lineIcon("M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.656 48.656 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3")},{hue:'#0D9488',href:'https://jamesaaa0203.github.io/Abalone-Processing-Log/',title:'Processing Log',bm:'Log Pemprosesan',desc:'Cooking sessions & yield',icon:flameIcon},{hue:'#0EA5E9',action:'openSeaCageWorkerView',title:'Sea Cage Ops',bm:'Operasi Sangkar Laut',desc:'Transfer, kematian & ukur pertumbuhan',icon:lineIcon("M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z")},{hue:'#6366F1',href:'https://jamesaaa0203.github.io/hatchery-hr/?v=2',title:'Hatchery HR Suite',bm:'Sumber Manusia',desc:'OT, leave & balances',icon:lineIcon("M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z")},{hue:'#F97316',
@@ -1183,6 +1220,7 @@ const chartLabels=chronoRows.map(r=>{const p=(r.date||'').split('-');return p.le
             document.getElementById('hr-month-title').textContent=monthLabel(hrMonth);
             _populateHRMonthSel();
             const monthOT=hrData.ot.filter(r=>isMonthMatch(r.date,hrMonth));
+            _otSummaryCopyText=buildOTSummaryText(monthOT);
             const monthLeave=hrData.leave.filter(r=>isMonthMatch(r.startDate,hrMonth));
             const cashOT=monthOT.filter(r=>r.compRule!=='Extra Holiday'); const totalHours=monthOT.filter(r=>r.compRule!=='Extra Holiday').reduce((s,r)=>s+(parseFloat(r.hours)||0),0); const totalExtraHolEarned=monthOT.filter(r=>r.compRule==='Extra Holiday').length;
             const totalLeaveDays=monthLeave.reduce((s,r)=>s+(parseFloat(r.days)||0),0);
@@ -1225,7 +1263,7 @@ const wExtraHols=wOT.filter(r=>r.compRule==='Extra Holiday').length;
                 <p class="eyebrow px-1 mt-1">Worker Balances · <span class="ko">잔여 휴가</span></p>
                 <div class="space-y-2">${workerCards||msgCard('<p class="text-sm" style="color:var(--text-mut);">No balance data — run initBalances() in the HR GAS first.</p>')}</div>
                 <p class="eyebrow px-1 mt-2">This Month · <span class="ko">이번달 현황</span></p>
-                ${otRows?`<div class="card" style="padding:14px;"><div class="eyebrow mb-2">OT Records · <span class="ko">초과근무 기록</span></div><table class="data-table"><thead><tr><th>Date · Worker</th><th>Hours</th><th>Day</th><th>Comp</th></tr></thead><tbody>${otRows}</tbody></table></div>`:msgCard('<p class="text-sm" style="color:var(--text-mut);">No OT records this month</p>')}
+                ${otRows?`<div class="card" style="padding:14px;">     <div class="flex items-center justify-between mb-2">         <div class="eyebrow">OT Records · <span class="ko">초과근무 기록</span></div>         <button onclick="copyOTSummary(this)" style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:8px;background:color-mix(in srgb,#6366F1 10%,transparent);color:#6366F1;border:1px solid color-mix(in srgb,#6366F1 24%,transparent);">Copy summary</button>     </div>     <table class="data-table"><thead><tr><th>Date · Worker</th><th>Hours</th><th>Day</th><th>Comp</th></tr></thead><tbody>${otRows}</tbody></table> </div>`:msgCard('<p class="text-sm" style="color:var(--text-mut);">No OT records this month</p>')}
                 ${leaveRows?`<div class="card" style="padding:14px;"><div class="eyebrow mb-2">Leave Records · <span class="ko">휴가 기록</span></div><table class="data-table"><thead><tr><th>Worker · Date</th><th>Type</th><th>Days</th></tr></thead><tbody>${leaveRows}</tbody></table></div>`:msgCard('<p class="text-sm" style="color:var(--text-mut);">No leave records this month</p>')}
                 <p class="text-xs px-1 mt-1" style="color:var(--text-dim);">Tap any worker for their full OT & leave history. Showing ${monthLabel(hrMonth)}.</p>`;
         }
