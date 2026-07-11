@@ -186,7 +186,7 @@
             </div>
         </div>
 
-        <!-- ── FIRST-TIME SETUP CARD ─────────────────────── -->         <div id="setup-card" class="card" style="padding:20px;display:none;">             <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">                 <div style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex:none;background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);">                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>                 </div>                 <div>                     <div class="text-base font-semibold">First-Time Setup</div>                     <div class="text-xs" style="color:var(--text-mut);margin-top:1px;">Paste your module links below</div>                 </div>             </div>             <p class="text-xs mb-4" style="color:var(--text-dim);line-height:1.6;">Only fill in the modules you use. Leave others blank. This screen won't appear again on this device after you save.</p>             <div class="space-y-3">                 <div><label class="eyebrow block mb-1.5">Water Quality</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="setup-wq-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Spawning &amp; Purchasing</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"id="setup-spawning-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Processing Log</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="setup-processing-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Sea Cage Ops</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"id="setup-sc-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Hatchery HR Suite</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"id="setup-hr-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Farm Stock Check</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"id="setup-stockcheck-url" placeholder="/exec URL" class="gas-input"></div>             </div>             <button onclick="saveSetupUrls()" class="w-full py-3 rounded-xl text-sm font-semibold text-white mt-4" style="background:var(--accent);">Save &amp; Continue →</button>         </div>          <div id="module-list" class="space-y-3"></div>
+        <!-- ── FIRST-TIME SETUP CARD ─────────────────────── -->         <div id="setup-card" class="card" style="padding:20px;display:none;">             <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">                 <div style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex:none;background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);">                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>                 </div>                 <div>                     <div class="text-base font-semibold">First-Time Setup</div>                     <div class="text-xs" style="color:var(--text-mut);margin-top:1px;">Paste your module links below</div>                 </div>             </div>             <p class="text-xs mb-4" style="color:var(--text-dim);line-height:1.6;">Only fill in the modules you use. Leave others blank. This screen won't appear again on this device after you save.</p>             <div class="space-y-3">                 <div><label class="eyebrow block mb-1.5">Water Quality</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="setup-wq-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Spawning &amp; Purchasing</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"id="setup-spawning-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Processing Log</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="setup-processing-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Sea Cage Ops</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"id="setup-sc-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Hatchery HR Suite</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"id="setup-hr-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Farm Stock Check</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"id="setup-stockcheck-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Land Farm</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="setup-landfarm-url" placeholder="/exec URL" class="gas-input"></div>             </div>             <button onclick="saveSetupUrls()" class="w-full py-3 rounded-xl text-sm font-semibold text-white mt-4" style="background:var(--accent);">Save &amp; Continue →</button>         </div>          <div id="module-list" class="space-y-3"></div>
     </main>
 
     <!-- ── MANAGER AUTH ───────────────────────────────────────── -->
@@ -232,6 +232,7 @@
                     <div><label class="eyebrow block mb-1.5">Spawning &amp; Purchasing</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-spawning-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
                     <div><label class="eyebrow block mb-1.5">Processing Log</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-processing-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
                     <div><label class="eyebrow block mb-1.5">Sea Cage Ops</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-sc-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div><div><label class="eyebrow block mb-1.5">Hatchery HR Suite</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-hr-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div> <div><label class="eyebrow block mb-1.5">Farm Stock Check</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-stockcheck-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
+                    <div><label class="eyebrow block mb-1.5">Land Farm</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-landfarm-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
                     <button onclick="saveGasUrls()" class="w-full py-2.5 rounded-xl text-sm font-semibold text-white" style="background:var(--accent);">Save all URLs</button>
                     <p id="gas-save-confirm" class="hidden text-xs font-semibold text-center" style="color:var(--ok);">✓ Saved</p>
                 </div>
@@ -318,6 +319,19 @@
                 <h3 class="text-2xl font-semibold tracking-tight" style="margin-top:1px;">Stock Overview</h3>
             </div>
             <div id="stock-body"></div>
+        </div>
+
+        <!-- LAND FARM VIEW -->
+        <div id="landfarm-data-view" class="hidden flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full overflow-y-auto">
+            <div class="flex items-center justify-between gap-2">
+                <button onclick="closeView()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:var(--accent);"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"/></svg><span class="ko">뒤로</span> Menu</button>
+                <button onclick="refreshLFManagerView()" class="icon-btn"><svg id="landfarm-mgr-refresh-ic" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356M3.985 19.644V14.65h4.992m-4.969-3.65a8.25 8.25 0 0113.803-3.7L21 8.25m-18 7.5l3.181 3.182a8.25 8.25 0 0013.803-3.7"/></svg></button>
+            </div>
+            <div>
+                <span class="eyebrow" style="color:#10B981;">육상 양식장 · Land Farm</span>
+                <h3 class="text-2xl font-semibold tracking-tight" style="margin-top:1px;">Live Dashboard</h3>
+            </div>
+            <div id="landfarm-body"></div>
         </div>
 
         <!-- IFRAME (HR only now — Processing is native above) -->
@@ -455,7 +469,7 @@ function buildOTSummaryText(monthOT){
 }
 
         /* ── Worker modules ──────────────────────────────────── */
-        const MODULES=[{hue:'#3B82F6',href:'https://jamesaaa0203.github.io/daily-water-quality/',title:'Water Quality',bm:'Kualiti Air',desc:'DO, temperature & salinity logs',icon:lineIcon("M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5l6.74-6.76z")},{hue:'#8B5CF6',href:'https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/',title:'Spawning Trials',bm:'Ujian Pemijahan',desc:'Induction & conditioning',icon:lineIcon("M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.656 48.656 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3")},{hue:'#0D9488',href:'https://jamesaaa0203.github.io/Abalone-Processing-Log/',title:'Processing Log',bm:'Log Pemprosesan',desc:'Cooking sessions & yield',icon:flameIcon},{hue:'#0EA5E9',action:'openSeaCageWorkerView',title:'Sea Cage Ops',bm:'Operasi Sangkar Laut',desc:'Transfer, kematian & ukur pertumbuhan',icon:lineIcon("M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z")},{hue:'#6366F1',href:'https://jamesaaa0203.github.io/hatchery-hr/?v=2',title:'Hatchery HR Suite',bm:'Sumber Manusia',desc:'OT, leave & balances',icon:lineIcon("M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z")},{hue:'#F97316',
+        const MODULES=[{hue:'#10B981',action:'openLandFarmWorkerView',title:'Land Farm',bm:'Ladang Daratan',desc:'Kualiti air, pemijahan, pemprosesan & tangki',icon:lineIcon("M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082M9.75 3.104a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5")},{hue:'#0EA5E9',action:'openSeaCageWorkerView',title:'Sea Cage Ops',bm:'Operasi Sangkar Laut',desc:'Transfer, kematian & ukur pertumbuhan',icon:lineIcon("M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z")},{hue:'#6366F1',href:'https://jamesaaa0203.github.io/hatchery-hr/?v=2',title:'Hatchery HR Suite',bm:'Sumber Manusia',desc:'OT, leave & balances',icon:lineIcon("M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z")},{hue:'#F97316',
   href:'https://jamesaaa0203.github.io/Stock-Checking-/',
   title:'Farm Stock Check',
   bm:'Semakan Stok Ladang',
@@ -465,32 +479,26 @@ function buildOTSummaryText(monthOT){
         function openModule(href){             rumbleDevice(35);             const m=href.match(/github\.io\/([^\/\?#]+)/);             if(m){const k=m[1]==='Stock-Checking-'?'farm-stock-check':m[1];const g=getGasUrl(k);if(g)href+=(href.includes('?')?'&':'?')+'gasUrl='+encodeURIComponent(g);}             window.location.href=href;         }
 
         const MGR_VIEWS=[
-            {action:'wq',hue:'#3B82F6',ko:'수질 관리 데이터',title:'Water Quality',sub:'Live dashboard',icon:lineIcon("M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14")},
-            {action:'spawn',hue:'#8B5CF6',ko:'산란 시험 관리',title:'Spawning Trials',sub:'Live dashboard',icon:lineIcon("M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.656 48.656 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3")},
-            {action:'purchase',hue:'#D97706',ko:'전복 매입 로그',title:'Abalone Purchasing',sub:'Live dashboard',icon:lineIcon("M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h16.5M4.5 9h15M5.25 14.25h13.5")},
-            {action:'processing',hue:'#0D9488',ko:'가공 처리 로그',title:'Processing Log',sub:'Live dashboard',icon:flameIcon},
-            {action:'seacage',hue:'#0EA5E9',ko:'가두리 운영 현황',title:'Sea Cage Ops',sub:'Live dashboard',icon:lineIcon("M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z")},{action:'hr',hue:'#6366F1',ko:'인사 및 근태 관리',title:'Workforce & HR',sub:'Live dashboard',icon:lineIcon("M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z")}
-        ,{action:'stockcheck',
-  hue:'#F97316',
-  ko:'재고 관리 현황',
-  title:'Farm Stock Check',
-  sub:'Critical items & reorder list',
-  icon:lineIcon("M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01")}];
-        const ACTION_FNS={stockcheck:()=>openStockCheckView(),wq:()=>openWaterQuality(),spawn:()=>openSpawning(),purchase:()=>openPurchasing(),processing:()=>openProcessingView(),hr:()=>openHRView(),seacage:()=>openSeaCageManagerView()};
+            {action:'landfarm',hue:'#10B981',ko:'육상 양식장 현황',title:'Land Farm',sub:'Tanks, WQ, spawning, processing & purchasing',icon:lineIcon("M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082M9.75 3.104a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5")},
+            {action:'seacage',hue:'#0EA5E9',ko:'가두리 운영 현황',title:'Sea Cage Ops',sub:'Live dashboard',icon:lineIcon("M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z")},
+            {action:'hr',hue:'#6366F1',ko:'인사 및 근태 관리',title:'Workforce & HR',sub:'Live dashboard',icon:lineIcon("M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z")},
+            {action:'stockcheck',hue:'#F97316',ko:'재고 관리 현황',title:'Farm Stock Check',sub:'Critical items & reorder list',icon:lineIcon("M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01")}
+        ];
+        const ACTION_FNS={stockcheck:()=>openStockCheckView(),wq:()=>openWaterQuality(),spawn:()=>openSpawning(),purchase:()=>openPurchasing(),processing:()=>openProcessingView(),hr:()=>openHRView(),seacage:()=>openSeaCageManagerView(),landfarm:()=>openLandFarmManagerView()};
         function renderMgrList(){const el=document.getElementById('mgr-list');if(!el)return;const tempBadge=(typeof scGetCachedTempBadge==='function')?scGetCachedTempBadge():null;el.innerHTML=MGR_VIEWS.map(v=>{const onclick=v.action?`(ACTION_FNS['${v.action}']||function(){})()`:` openManagerReport('${v.appKey}','${v.tab}')`;const sub=v.sub?`<div class="text-xs" style="color:var(--text-mut);margin-top:1px;">${v.sub}</div>`:'';const tempRow=(v.action==='seacage'&&tempBadge)?`<div class="text-xs" style="color:var(--${tempBadge.freshness});margin-top:2px;font-weight:600;">🌡 ${tempBadge.temp.toFixed(1)}°C · ${tempBadge.agoText}</div>`:'';return`<button onclick="${onclick}" class="mgr-row"><div class="flex items-center gap-3.5"><span class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:color-mix(in srgb,${v.hue} 12%,transparent);color:${v.hue};border:1px solid color-mix(in srgb,${v.hue} 24%,transparent);"><span style="width:22px;height:22px;display:inline-flex">${v.icon}</span></span><div><div class="eyebrow ko" style="color:${v.hue};">${v.ko}</div><div class="text-base font-semibold tracking-tight" style="margin-top:1px;">${v.title}</div>${sub}${tempRow}</div></div>${chevR}</button>`;}).join('');}
 
         /* ── View manager ────────────────────────────────────── */
-        const ALL_VIEWS=['wq-data-view','spawn-data-view','purchase-data-view','proc-data-view','hr-data-view','seacage-data-view','stock-data-view','manager-report-frame'];
+        const ALL_VIEWS=['wq-data-view','spawn-data-view','purchase-data-view','proc-data-view','hr-data-view','seacage-data-view','stock-data-view','landfarm-data-view','manager-report-frame'];
         function showView(id){document.getElementById('manager-menu-grid').classList.add('hidden');ALL_VIEWS.forEach(v=>document.getElementById(v).classList.add('hidden'));document.getElementById(id).classList.remove('hidden');}
-        function closeView(){rumbleDevice(40);ALL_VIEWS.forEach(v=>document.getElementById(v).classList.add('hidden'));document.getElementById('manager-menu-grid').classList.remove('hidden');}
+        function closeView(){rumbleDevice(40);ALL_VIEWS.forEach(v=>document.getElementById(v).classList.add('hidden'));if(typeof _mgrViewOrigin!=='undefined'&&_mgrViewOrigin==='landfarm'){_mgrViewOrigin='menu';openLandFarmManagerView();}else{document.getElementById('manager-menu-grid').classList.remove('hidden');}}
         function openFullTab(which){const m={wq:()=>{const u=getGasUrl('daily-water-quality');return`https://jamesaaa0203.github.io/daily-water-quality/?targetTab=manager&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');},spawn:()=>{const u=getGasUrl('Abalone-Spawning-and-Purchasing-Log');return`https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/?targetTab=spawning&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');},purchase:()=>{const u=getGasUrl('Abalone-Spawning-and-Purchasing-Log');return`https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/?targetTab=purchasing&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');}};const fn=m[which];if(fn)window.open(fn(),'_blank','noopener,noreferrer');}
 
         /* ── GAS URL settings ────────────────────────────────── */
-        const GAS_KEYS={'Abalone-Spawning-and-Purchasing-Log':'mgr_spawning_gas_url','Abalone-Processing-Log':'mgr_processing_gas_url','hatchery-hr':'mgr_hr_gas_url','daily-water-quality':'mgr_wq_gas_url','sea-cage':'mgr_seacage_gas_url','farm-stock-check': 'mgr_stockcheck_gas_url',};
+        const GAS_KEYS={'Abalone-Spawning-and-Purchasing-Log':'mgr_spawning_gas_url','Abalone-Processing-Log':'mgr_processing_gas_url','hatchery-hr':'mgr_hr_gas_url','daily-water-quality':'mgr_wq_gas_url','sea-cage':'mgr_seacage_gas_url','farm-stock-check': 'mgr_stockcheck_gas_url','land-farm':'mgr_landfarm_gas_url',};
         function getGasUrl(k){const key=GAS_KEYS[k];return key?store.get(key):null;}
         function toggleGasSettings(){const d=document.getElementById('gas-settings-drawer'),s=document.getElementById('gas-settings-status');d.classList.toggle('hidden');s.textContent=d.classList.contains('hidden')?'Configure ▾':'Close ▴';}
-        function saveGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url','gas-sc-url':'mgr_seacage_gas_url','gas-stockcheck-url':'mgr_stockcheck_gas_url'};for(const[id,k]of Object.entries(m)){const v=document.getElementById(id).value.trim();if(v)store.set(k,v);}const c=document.getElementById('gas-save-confirm');c.classList.remove('hidden');setTimeout(()=>c.classList.add('hidden'),2500);}
-        function loadSavedGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url','gas-sc-url':'mgr_seacage_gas_url','gas-stockcheck-url':'mgr_stockcheck_gas_url'};for(const[id,k]of Object.entries(m)){const v=store.get(k);if(v)document.getElementById(id).value=v;}}
+        function saveGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url','gas-sc-url':'mgr_seacage_gas_url','gas-stockcheck-url':'mgr_stockcheck_gas_url','gas-landfarm-url':'mgr_landfarm_gas_url'};for(const[id,k]of Object.entries(m)){const v=document.getElementById(id).value.trim();if(v)store.set(k,v);}const c=document.getElementById('gas-save-confirm');c.classList.remove('hidden');setTimeout(()=>c.classList.add('hidden'),2500);}
+        function loadSavedGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url','gas-sc-url':'mgr_seacage_gas_url','gas-stockcheck-url':'mgr_stockcheck_gas_url','gas-landfarm-url':'mgr_landfarm_gas_url'};for(const[id,k]of Object.entries(m)){const v=store.get(k);if(v)document.getElementById(id).value=v;}}
 
         /* ── Overlay helpers ─────────────────────────────────── */
         function closeOverlay(id,e){if(e&&e.target!==document.getElementById(id))return;document.getElementById(id).classList.remove('open');}
@@ -1329,7 +1337,7 @@ window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{
         function rumbleDevice(d){if('vibrate'in navigator)navigator.vibrate(d);}
 
         /* ── Tabs ────────────────────────────────────────────── */
-        function switchTab(target){rumbleDevice(35);const scw=document.getElementById('seacage-worker-view');if(scw)scw.classList.add('hidden');const ops=document.getElementById('dashboard-view'),auth=document.getElementById('manager-auth-view'),mgr=document.getElementById('manager-dashboard-view'),oBtn=document.getElementById('nav-ops-btn'),mBtn=document.getElementById('nav-mgr-btn');if(target==='ops'){ops.classList.remove('hidden');auth.classList.add('hidden');mgr.classList.add('hidden');oBtn.classList.add('active');mBtn.classList.remove('active');}else{ops.classList.add('hidden');oBtn.classList.remove('active');mBtn.classList.add('active');if(isManagerAuthenticated){mgr.classList.remove('hidden');auth.classList.add('hidden');}else{auth.classList.remove('hidden');mgr.classList.add('hidden');}}}
+        function switchTab(target){rumbleDevice(35);const scw=document.getElementById('seacage-worker-view');if(scw)scw.classList.add('hidden');const lfw=document.getElementById('landfarm-worker-view');if(lfw)lfw.classList.add('hidden');const ops=document.getElementById('dashboard-view'),auth=document.getElementById('manager-auth-view'),mgr=document.getElementById('manager-dashboard-view'),oBtn=document.getElementById('nav-ops-btn'),mBtn=document.getElementById('nav-mgr-btn');if(target==='ops'){ops.classList.remove('hidden');auth.classList.add('hidden');mgr.classList.add('hidden');oBtn.classList.add('active');mBtn.classList.remove('active');}else{ops.classList.add('hidden');oBtn.classList.remove('active');mBtn.classList.add('active');if(isManagerAuthenticated){mgr.classList.remove('hidden');auth.classList.add('hidden');}else{auth.classList.remove('hidden');mgr.classList.add('hidden');}}}
         function populateMonthSelector(){const sel=document.getElementById('mgr-month-select'),now=new Date();sel.innerHTML='';for(let i=-1;i<=12;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);const val=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,lbl=d.toLocaleDateString('en-US',{month:'long',year:'numeric'});const o=document.createElement('option');o.value=val;o.textContent=lbl;if(i===0)o.selected=true;sel.appendChild(o);}}
         function openManagerReport(appKey,tabContext){rumbleDevice(45);showView('manager-report-frame');document.getElementById('fetch-fail-banner').classList.add('hidden');buildAndLoadURL(appKey,tabContext);}
         function buildAndLoadURL(appKey,tabContext){const month=document.getElementById('mgr-month-select').value,iframe=document.getElementById('mgr-iframe-engine');iframe.dataset.appKey=appKey;iframe.dataset.tabContext=tabContext;let url=`https://jamesaaa0203.github.io/${appKey}?targetTab=${tabContext}&pin=${MASTER_PIN}&month=${month}`;const g=getGasUrl(appKey);if(g)url+=`&gasUrl=${encodeURIComponent(g)}`;currentReportURL=url;iframe.src=url;}
@@ -1344,7 +1352,7 @@ window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{
         function clearPin(){rumbleDevice(60);inputPin="";renderPinDots();}
         function renderPinDots(){const dots=document.getElementById('pin-dots').children;for(let i=0;i<4;i++){const on=i<inputPin.length;dots[i].className="w-3.5 h-3.5 rounded-full"+(on?" pin-on":"");dots[i].style.border=on?"2px solid var(--accent)":"2px solid var(--border-2)";}}
         function verifyPin(){if(inputPin===MASTER_PIN){inputPin="";renderPinDots();completeManagerAuth();}else{rumbleDevice([300,100,300]);inputPin="";renderPinDots();const d=document.getElementById('pin-dots');d.animate([{transform:'translateX(0)'},{transform:'translateX(-8px)'},{transform:'translateX(8px)'},{transform:'translateX(0)'}],{duration:360});}}
-        function lockManagerView(){rumbleDevice(100);isManagerAuthenticated=false;store.srem('mgr_auth');closeManagerReport();switchTab('ops');}
+        function lockManagerView(){rumbleDevice(100);isManagerAuthenticated=false;store.srem('mgr_auth');if(typeof _mgrViewOrigin!=='undefined')_mgrViewOrigin='menu';closeManagerReport();switchTab('ops');}
         function completeManagerAuth(){rumbleDevice([80,50,80]);isManagerAuthenticated=true;store.sset('mgr_auth','1');loadSavedGasUrls();switchTab('mgr');}
 
         /* ── Month change handlers ───────────────────────────── */
@@ -1384,7 +1392,8 @@ function changePurchaseMonth(val){ rumbleDevice(25); purchaseMonth=val; renderPu
             'setup-processing-url': 'mgr_processing_gas_url',
             'setup-sc-url':         'mgr_seacage_gas_url',
             'setup-hr-url':         'mgr_hr_gas_url',
-            'setup-stockcheck-url': 'mgr_stockcheck_gas_url'
+            'setup-stockcheck-url': 'mgr_stockcheck_gas_url',
+            'setup-landfarm-url':   'mgr_landfarm_gas_url'
         };
         function initSetupCard(){
             if(store.get(SETUP_DONE_KEY)==='1') return;
@@ -2432,6 +2441,860 @@ function sendStockOrderMessage(){
     });
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
 }
+
+        /* ═══════════════════════════════════════════════════════════════════
+           LAND FARM — 80 land-based tanks (3 broodstock · 10 diatom · 67 spat)
+           GAS key: land-farm · doGet callback: handleLandFarmData
+           Umbrella for all land-side activity: Tanks, Growth, Batches
+           (cross-referenced from Spawning Trials), plus quick links to
+           Water Quality, Spawning Trials, Processing Log & Purchasing.
+           ═══════════════════════════════════════════════════════════════════ */
+        const LF_TANK_TOTAL = 80;
+        const LF_TARGET_GROWTH_MM_DAY = 0.15;
+        const LF_TARGET_SETTLE_MIN = 7000, LF_TARGET_SETTLE_MAX = 10000;
+        const LF_TARGET_BIOMASS_KG = 3000;   // 3 ton land + sea cage combined
+        const LF_TARGET_PROCESSED_KG = 1500; // 1.5 ton annual
+
+        let lfData = {growth:[],mortality:[],transfer:[],cleaning:[],sankina_transport:[],sankina_baseline:[],processed_baseline:[],tank_baseline:[]};
+        let lfActiveWorkerTab = 'tankcheck';
+        let lfMgrSubTab = null; // null = showing the Land Farm sub-menu
+
+        let lfGrDate = new Date().toISOString().split('T')[0];
+        let lfTcTank='', lfTcQty='';
+        let lfTfSource='', lfTfDest='', lfTfQty='', lfTfLength='';
+        let lfSkDate=new Date().toISOString().split('T')[0], lfSkQty='', lfSkNotes='';
+        let lfSkSamples=[]; // {kg, pcs} — matches the paper form's 5-sample average weight section
+
+        function lfTankLabel(n){ return 'T'+String(n).padStart(2,'0'); }
+        function lfTankType(n){
+          if(n===2) return 'Incubation';
+          if(n===5||n===7||n===9) return 'Broodstock';
+          if(n>=60&&n<=80&&n%2===0) return 'Diatom';
+          return 'Spat';
+        }
+
+        /* ── GAS fetch & post ─────────────────────────────────────────── */
+        function fetchLFData(showSpin){
+          const url=getGasUrl('land-farm'), ic=document.getElementById('landfarm-refresh-ic')||document.getElementById('landfarm-mgr-refresh-ic');
+          if(showSpin&&ic)ic.classList.add('spin');
+          if(!url){ if(ic)ic.classList.remove('spin'); return Promise.resolve(); }
+          return new Promise((resolve)=>{
+            const _timeout=setTimeout(()=>{if(ic)ic.classList.remove('spin');resolve();},12000);
+            window.handleLandFarmData=function(data){
+              clearTimeout(_timeout);
+              lfData={growth:data.growth||[],mortality:data.mortality||[],
+                      transfer:data.transfer||[],cleaning:data.cleaning||[],
+                      sankina_transport:data.sankina_transport||[],sankina_baseline:data.sankina_baseline||[],
+                      processed_baseline:data.processed_baseline||[],tank_baseline:data.tank_baseline||[]};
+              if(ic)ic.classList.remove('spin');
+              renderLFWorkerTab(lfActiveWorkerTab);
+              resolve();
+            };
+            const s=document.createElement('script');
+            s.src=`${url}${url.includes('?')?'&':'?'}callback=handleLandFarmData&_=${Date.now()}`;
+            s.onerror=()=>{ if(ic)ic.classList.remove('spin'); console.warn('Land Farm JSONP load error'); resolve(); };
+            document.body.appendChild(s);
+            s.onload=function(){ s.remove(); };
+          });
+        }
+        async function lfPost(type,payload){
+          const url=getGasUrl('land-farm');
+          if(!url){alert('Land Farm GAS URL not configured.\\nSet it in Module GAS Connections.');return false;}
+          try{
+            await fetch(url,{method:'POST',mode:'no-cors',body:JSON.stringify({type,...payload})});
+            rumbleDevice([80,50,80]);
+            await fetchLFData(false);
+            return true;
+          }catch(e){alert('Network error. Try again.');return false;}
+        }
+
+        /* ── Worker navigation ────────────────────────────────────────── */
+        function openLandFarmWorkerView(){
+          rumbleDevice(45);
+          document.getElementById('dashboard-view').classList.add('hidden');
+          document.getElementById('landfarm-worker-view').classList.remove('hidden');
+          fetchLFData(false);
+          showLFWorkerHome();
+        }
+        function closeLandFarmWorkerView(){
+          rumbleDevice(40);
+          document.getElementById('landfarm-worker-view').classList.add('hidden');
+          document.getElementById('dashboard-view').classList.remove('hidden');
+        }
+
+        /* ── Worker landing — big card buttons, same visual language as
+           Ops Home. Water Quality / Spawning / Processing are external
+           apps (unchanged URLs); Tank Check / Growth / Transfer render
+           inline below with a simple back link. ─────────────────────── */
+        const LF_WORKER_CARDS=[
+          {ext:true,hue:'#3B82F6',title:'Water Quality',bm:'Kualiti Air',desc:'DO, temperature & salinity logs',href:'https://jamesaaa0203.github.io/daily-water-quality/',icon:lineIcon("M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5l6.74-6.76z")},
+          {ext:true,hue:'#8B5CF6',title:'Spawning Trials',bm:'Ujian Pemijahan',desc:'Induction & conditioning',href:'https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/',icon:lineIcon("M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.656 48.656 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3")},
+          {ext:true,hue:'#0D9488',title:'Processing Log',bm:'Log Pemprosesan',desc:'Cooking sessions & yield',href:'https://jamesaaa0203.github.io/Abalone-Processing-Log/',icon:flameIcon},
+          {ext:false,hue:'#EF4444',title:'Tank Check',bm:'Semakan Tangki',desc:'Kematian & pembersihan tangki',tab:'tankcheck',icon:lineIcon("M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z")},
+          {ext:false,hue:'#10B981',title:'Growth',bm:'Kadar Pertumbuhan',desc:'Purata panjang cangkerang ladang',tab:'growth',icon:lineIcon("M2.25 18L9 11.25l4.306 4.306a11.95 11.95 0 015.814-5.518l2.74-1.22m0 0l-5.94-2.281m5.94 2.28l-2.28 5.941")},
+          {ext:false,hue:'#10B981',title:'Tank Transfer',bm:'Pindah Tangki',desc:'Pindah antara tangki (splitkan kepadatan)',tab:'transfer',icon:lineIcon("M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5")},
+          {ext:false,hue:'#F97316',title:'Sankina Transport',bm:'Penghantaran Sankina',desc:'Rekod penghantaran bahan mentah ke Sankina',tab:'sankina',icon:lineIcon("M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.443c0-1.028-.835-1.863-1.863-1.863H3.375c-1.036 0-1.875.84-1.875 1.875v9.442c0 .621.504 1.125 1.125 1.125H4.5m6.75-6h4.128c.408 0 .783.245.94.622l1.32 3.18")}
+        ];
+        function showLFWorkerHome(){
+          lfActiveWorkerTab=null;
+          const html=LF_WORKER_CARDS.map(c=>{
+            const onclick=c.ext?`openModule('${c.href}')`:`showLFWorkerTab('${c.tab}')`;
+            return `<button class="module" onclick="${onclick}" style="--hue:${c.hue}"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">${c.icon}</span><div class="min-w-0"><div class="module-bm">${c.bm}</div><div class="module-title">${c.title}</div><div class="module-desc">${c.desc}</div></div></div>${chevR}</button>`;
+          }).join('');
+          document.getElementById('landfarm-worker-body').innerHTML=`<div class="space-y-3">${html}</div>`;
+        }
+        function showLFWorkerTab(tab){
+          rumbleDevice(35);
+          lfActiveWorkerTab=tab;
+          renderLFWorkerTab(tab);
+        }
+        function renderLFWorkerTab(tab){
+          if(tab==='growth')    renderLFGrowthForm();
+          if(tab==='tankcheck') renderLFTankCheckForm();
+          if(tab==='transfer')  renderLFTransferForm();
+          if(tab==='sankina')   renderLFSankinaTransportForm();
+        }
+        const LF_BACK_BTN=`<button onclick="showLFWorkerHome()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:#10B981;"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"/></svg>Land Farm</button>`;
+
+        /* ── Form 0: Sankina Transport (worker, no PIN) ────────────────
+           Logs a shipment of raw material leaving Land Farm for Sankina.
+           Feeds directly into the manager Sankina stock calculations. */
+        function renderLFSankinaTransportForm(){
+          const recent=[...(lfData.sankina_transport||[])].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
+          const recentHtml=recent.length?recent.map(r=>{
+            const temps=(r.departure_temp_c||r.arrival_temp_c)?`<span style="color:var(--text-dim);"> · ${r.departure_temp_c||'—'}°C → ${r.arrival_temp_c||'—'}°C</span>`:'';
+            const driver=r.driver_name?`<div style="font-size:10px;color:var(--text-dim);">${r.driver_name}${r.vehicle_plate?' · '+r.vehicle_plate:''}</div>`:'';
+            return`<div style="padding:6px 0;border-bottom:1px solid var(--border);">
+              <div style="display:flex;justify-content:space-between;font-size:11.5px;"><span style="color:var(--text-mut);">${fmtCleanDate(r.date)}${temps}</span><span class="num" style="font-weight:700;">${(parseFloat(r.quantity_kg)||0).toFixed(1)} kg</span></div>
+              ${driver}
+            </div>`;
+          }).join(''):'<p class="text-xs" style="color:var(--text-dim);padding:6px 0;">Tiada rekod baru-baru ini.</p>';
+          const totKg=lfSkSamples.reduce((s,x)=>s+x.kg,0), totPcs=lfSkSamples.reduce((s,x)=>s+x.pcs,0);
+          const totalAvg=totPcs>0?(totKg*1000/totPcs):null;
+          const sampleRows=lfSkSamples.map((s,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:11.5px;">
+            <span style="color:var(--text-mut);">Sampel ${i+1}: ${s.kg} kg · ${s.pcs} pcs</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="num" style="font-weight:700;">${(s.kg*1000/s.pcs).toFixed(2)} g/pc</span>
+              <button onclick="lfSkRemoveSample(${i})" style="font-size:10px;background:rgba(239,68,68,.1);color:var(--alert);padding:3px 7px;border-radius:7px;font-weight:700;">✕</button>
+            </div>
+          </div>`).join('');
+          document.getElementById('landfarm-worker-body').innerHTML=`${LF_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+            <div style="font-size:13px;font-weight:700;color:#F97316;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">🚚 Penghantaran ke Sankina</div>
+            <p style="font-size:11px;color:var(--text-dim);margin-bottom:16px;">Rekod setiap penghantaran bahan mentah dari ladang ke Sankina.</p>
+            <label class="eyebrow" style="display:block;margin-bottom:6px;">Tarikh</label>
+            <input type="date" id="lf-sk-date" value="${lfSkDate}" oninput="lfSkDate=this.value" class="gas-input" style="margin-bottom:16px;">
+            <label class="eyebrow" style="display:block;margin-bottom:6px;">Jumlah Berat (kg)</label>
+            <input type="number" step="0.1" inputmode="decimal" id="lf-sk-qty" placeholder="Contoh: 120" class="gas-input" style="margin-bottom:16px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;">
+              <div><label class="eyebrow" style="display:block;margin-bottom:6px;">Suhu Berlepas (°C)</label>
+              <input type="number" step="0.1" inputmode="decimal" id="lf-sk-tdep" placeholder="Contoh: 4.5" class="gas-input"></div>
+              <div><label class="eyebrow" style="display:block;margin-bottom:6px;">Suhu Tiba (°C)</label>
+              <input type="number" step="0.1" inputmode="decimal" id="lf-sk-tarr" placeholder="Contoh: 6.0" class="gas-input"></div>
+            </div>
+
+            <div style="padding:16px;background:var(--surface-2);border-radius:14px;border:1px solid var(--border);margin-bottom:20px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <span style="font-size:12px;font-weight:700;color:#F97316;">⚖️ Sampel Purata Berat</span>
+                <span style="font-size:10px;color:var(--text-dim);">${lfSkSamples.length} sampel · sasaran ~5</span>
+              </div>
+              <p style="font-size:10.5px;color:var(--text-dim);margin-bottom:12px;">Timbang setiap kumpulan (contoh: 1 kg), kira jumlah keping — sama seperti borang kertas.</p>
+              <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:10px;">
+                <div style="flex:1;"><label class="eyebrow" style="display:block;margin-bottom:5px;">Berat (kg)</label>
+                <input type="number" step="0.01" inputmode="decimal" id="lf-sk-sample-kg" placeholder="1.0" class="gas-input"></div>
+                <div style="flex:1;"><label class="eyebrow" style="display:block;margin-bottom:5px;">Bil. Keping</label>
+                <input type="number" inputmode="numeric" id="lf-sk-sample-pcs" placeholder="16" class="gas-input"></div>
+                <button onclick="lfSkAddSample()" style="padding:10px 14px;background:var(--surface);border:1.5px solid var(--border-2);border-radius:11px;font-weight:700;font-size:13px;color:var(--text);white-space:nowrap;">+ Tambah</button>
+              </div>
+              ${sampleRows?`<div style="margin-bottom:10px;">${sampleRows}</div>`:''}
+              ${totalAvg!=null?`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(249,115,22,.1);border:1px dashed rgba(249,115,22,.35);border-radius:10px;">
+                <span style="font-size:11.5px;font-weight:600;color:var(--text-mut);">Purata Keseluruhan (${totKg.toFixed(2)} kg / ${totPcs} pcs)</span>
+                <span class="num" style="font-size:18px;font-weight:800;color:#F97316;">${totalAvg.toFixed(2)} g/pc</span>
+              </div>`:`<p style="font-size:10.5px;color:var(--text-dim);text-align:center;padding:6px 0;">Tambah sekurang-kurangnya 1 sampel untuk kira purata.</p>`}
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+              <div><label class="eyebrow" style="display:block;margin-bottom:6px;">Nama Pemandu</label>
+              <input type="text" id="lf-sk-driver" placeholder="Contoh: Syamsuddin" class="gas-input"></div>
+              <div><label class="eyebrow" style="display:block;margin-bottom:6px;">No. Plat Kenderaan</label>
+              <input type="text" id="lf-sk-plate" placeholder="Contoh: ST 1111 B" class="gas-input"></div>
+            </div>
+            <label class="eyebrow" style="display:block;margin-bottom:6px;">Nota (pilihan)</label>
+            <textarea id="lf-sk-notes" rows="2" placeholder="Nota tambahan…" class="gas-input" style="margin-bottom:20px;resize:vertical;"></textarea>
+            <button onclick="submitLFSankinaTransport()" style="width:100%;padding:15px;background:#F97316;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar Rekod →</button>
+          </div>
+          <div class="card mt-3" style="padding:14px;">
+            <div class="eyebrow mb-2">Penghantaran Terkini</div>
+            ${recentHtml}
+          </div>`;
+        }
+        function lfSkAddSample(){
+          const kg=parseFloat(document.getElementById('lf-sk-sample-kg')?.value);
+          const pcs=parseInt(document.getElementById('lf-sk-sample-pcs')?.value);
+          if(!kg||kg<=0||!pcs||pcs<=0){alert('Sila isi berat dan bilangan keping yang sah.');return;}
+          rumbleDevice(30);
+          lfSkSamples=[...lfSkSamples,{kg,pcs}];
+          renderLFSankinaTransportForm();
+        }
+        function lfSkRemoveSample(i){
+          rumbleDevice(25);
+          lfSkSamples=lfSkSamples.filter((_,idx)=>idx!==i);
+          renderLFSankinaTransportForm();
+        }
+        async function submitLFSankinaTransport(){
+          const qty=parseFloat(document.getElementById('lf-sk-qty')?.value);
+          const date=document.getElementById('lf-sk-date')?.value||lfSkDate;
+          const notes=document.getElementById('lf-sk-notes')?.value||'';
+          const tDep=document.getElementById('lf-sk-tdep')?.value||'';
+          const tArr=document.getElementById('lf-sk-tarr')?.value||'';
+          const driver=document.getElementById('lf-sk-driver')?.value||'';
+          const plate=document.getElementById('lf-sk-plate')?.value||'';
+          if(!qty||qty<=0){alert('Sila isi kuantiti yang sah.');return;}
+          const totKg=lfSkSamples.reduce((s,x)=>s+x.kg,0), totPcs=lfSkSamples.reduce((s,x)=>s+x.pcs,0);
+          const avgWt=totPcs>0?(totKg*1000/totPcs):'';
+          rumbleDevice(45);
+          const ok=await lfPost('sankina_transport',{date,quantity_kg:qty,departure_temp_c:tDep,arrival_temp_c:tArr,avg_weight_g:avgWt,sample_breakdown:JSON.stringify(lfSkSamples),driver_name:driver,vehicle_plate:plate,notes});
+          if(ok){alert('Berjaya disimpan! ✓');lfSkQty='';lfSkNotes='';lfSkSamples=[];renderLFSankinaTransportForm();}
+        }
+
+        /* ── Form 1: Growth (farm-wide average, logged ~biweekly) ─────── */
+        function renderLFGrowthForm(){
+          const sorted=[...(lfData.growth||[])].map(g=>({date:parseAnyDate(g.date),len:parseFloat(g.avg_length_cm)})).filter(g=>g.date&&isFinite(g.len)).sort((a,b)=>a.date-b.date);
+          const latest=sorted.length?sorted[sorted.length-1]:null;
+          document.getElementById('landfarm-worker-body').innerHTML=`${LF_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+            <div style="font-size:13px;font-weight:700;color:#10B981;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">📏 Purata Pertumbuhan Ladang</div>
+            <p style="font-size:11px;color:var(--text-dim);margin-bottom:16px;">Satu nombor purata untuk seluruh ladang · log setiap ~2 minggu</p>
+            ${latest?`<div style="padding:12px 16px;background:rgba(16,185,129,.08);border:1px dashed rgba(16,185,129,.3);border-radius:12px;margin-bottom:16px;">
+              <div style="font-size:11px;color:var(--text-mut);">Ukuran terakhir · ${fmtCleanDate(latest.date)}</div>
+              <span class="num" style="font-size:22px;font-weight:800;color:#10B981;">${latest.len.toFixed(2)} cm</span>
+            </div>`:''}
+            <label class="eyebrow" style="display:block;margin-bottom:6px;">Tarikh</label>
+            <input type="date" id="lf-gr-date" value="${lfGrDate}" oninput="lfGrDate=this.value" class="gas-input" style="margin-bottom:16px;">
+            <label class="eyebrow" style="display:block;margin-bottom:6px;">Purata Panjang Cangkerang (cm)</label>
+            <input type="number" step="0.01" inputmode="decimal" id="lf-gr-avglen" placeholder="Contoh: 1.35" class="gas-input" style="margin-bottom:20px;">
+            <button onclick="submitLFGrowth()" style="width:100%;padding:15px;background:#10B981;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar Ukuran →</button>
+          </div>`;
+        }
+        async function submitLFGrowth(){
+          const avgLen=parseFloat(document.getElementById('lf-gr-avglen')?.value);
+          const date=document.getElementById('lf-gr-date')?.value||lfGrDate;
+          if(!avgLen){alert('Sila isi purata panjang cangkerang.');return;}
+          rumbleDevice(45);
+          const ok=await lfPost('growth',{date,avg_length_cm:avgLen});
+          if(ok){alert('Berjaya disimpan! ✓');renderLFGrowthForm();}
+        }
+
+        /* ── Form 2: Tank Check (mortality + cleaning, combined) ──────── */
+        function renderLFTankCheckForm(){
+          document.getElementById('landfarm-worker-body').innerHTML=`${LF_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+            <div style="font-size:13px;font-weight:700;color:var(--alert);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">🔎 Semakan Tangki</div>
+            <p style="font-size:11px;color:var(--text-dim);margin-bottom:16px;">Semakan = pembersihan (100% pertukaran air). Satu penyerahan merekodkan kedua-duanya.</p>
+            <label class="eyebrow" style="display:block;margin-bottom:6px;">Tangki (1–80)</label>
+            <input type="number" inputmode="numeric" id="lf-tc-tank" placeholder="Ex: 15" value="${lfTcTank}" oninput="lfTcTank=this.value" class="gas-input" style="margin-bottom:12px;">
+            <label class="eyebrow" style="display:block;margin-bottom:6px;">Kuantiti Mati Ditemui</label>
+            <input type="number" inputmode="numeric" id="lf-tc-qty" placeholder="Contoh: 0" value="${lfTcQty}" oninput="lfTcQty=this.value" class="gas-input" style="margin-bottom:12px;">
+            <label class="eyebrow" style="display:block;margin-bottom:6px;">Nota (pilihan)</label>
+            <textarea id="lf-tc-notes" rows="2" placeholder="Nota tambahan…" class="gas-input" style="margin-bottom:20px;resize:vertical;"></textarea>
+            <button onclick="submitLFTankCheck()" style="width:100%;padding:15px;background:var(--alert);color:white;font-weight:700;border-radius:12px;font-size:14px;">✓ Sahkan Semakan &amp; Pembersihan</button>
+          </div>`;
+        }
+        async function submitLFTankCheck(){
+          const tankNum=parseInt(document.getElementById('lf-tc-tank')?.value||lfTcTank);
+          const qtyRaw=document.getElementById('lf-tc-qty')?.value??lfTcQty;
+          const qty=qtyRaw===''?0:parseInt(qtyRaw);
+          const notes=document.getElementById('lf-tc-notes')?.value||'';
+          if(!tankNum){alert('Sila isi nombor Tangki.');return;}
+          rumbleDevice(45);
+          const ok=await lfPost('mortality',{date:new Date().toISOString().split('T')[0],tank_id:lfTankLabel(tankNum),dead_count:qty,notes});
+          if(ok){lfTcTank='';lfTcQty='';renderLFTankCheckForm();}
+        }
+
+        /* ── Form 3: Tank Transfer (occasional — splitting high-density tanks) */
+        function renderLFTransferForm(){
+          document.getElementById('landfarm-worker-body').innerHTML=`${LF_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+            <div style="font-size:13px;font-weight:700;color:#10B981;letter-spacing:.08em;text-transform:uppercase;margin-bottom:20px;">🔀 Pindah Antara Tangki</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+              <div><label class="eyebrow" style="display:block;margin-bottom:6px;">Dari Tangki</label>
+              <input type="number" inputmode="numeric" id="lf-tf-source" placeholder="Ex: 14" value="${lfTfSource}" oninput="lfTfSource=this.value" class="gas-input"></div>
+              <div><label class="eyebrow" style="display:block;margin-bottom:6px;">Ke Tangki</label>
+              <input type="number" inputmode="numeric" id="lf-tf-dest" placeholder="Ex: 20" value="${lfTfDest}" oninput="lfTfDest=this.value" class="gas-input"></div>
+            </div>
+            <label class="eyebrow" style="display:block;margin-bottom:6px;">Kuantiti Dipindah</label>
+            <input type="number" inputmode="numeric" id="lf-tf-qty" placeholder="Contoh: 2000" value="${lfTfQty}" oninput="lfTfQty=this.value" class="gas-input" style="margin-bottom:16px;">
+            <label class="eyebrow" style="display:block;margin-bottom:6px;">Panjang Cangkerang (cm, pilihan · ~0.5cm)</label>
+            <input type="number" step="0.1" inputmode="decimal" id="lf-tf-length" placeholder="0.5" value="${lfTfLength}" oninput="lfTfLength=this.value" class="gas-input" style="margin-bottom:20px;">
+            <button onclick="submitLFTransfer()" style="width:100%;padding:15px;background:#10B981;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar Rekod Pemindahan →</button>
+          </div>`;
+        }
+        async function submitLFTransfer(){
+          const source=parseInt(document.getElementById('lf-tf-source')?.value||lfTfSource);
+          const dest=parseInt(document.getElementById('lf-tf-dest')?.value||lfTfDest);
+          const qty=parseInt(document.getElementById('lf-tf-qty')?.value||lfTfQty);
+          const len=parseFloat(document.getElementById('lf-tf-length')?.value||lfTfLength)||'';
+          if(!source||!dest||!qty){alert('Sila isi Tangki Sumber, Destinasi & Kuantiti.');return;}
+          rumbleDevice(45);
+          const ok=await lfPost('transfer',{date:new Date().toISOString().split('T')[0],source_tank:lfTankLabel(source),dest_tank:lfTankLabel(dest),quantity:qty,shell_length:len});
+          if(ok){lfTfSource='';lfTfDest='';lfTfQty='';lfTfLength='';renderLFTransferForm();}
+        }
+
+        /* ── Spawning Trials cross-reference (tank stocking source) ────
+           Land Farm no longer keeps its own batch/settlement log — that
+           data already lives in the Spawning Trials sheet ("Tank
+           Assignments" + "Spat Count Json" fields, keyed by Trial ID).
+           This parser is defensive because the exact JSON shape is
+           written by a separate app; it tries several common key names
+           and falls back gracefully instead of breaking the dashboard. */
+        function lfGetTank(o){ return o&&(o.tank||o.tankId||o.tank_id||o.id||o.name||null); }
+        function lfGetQty(o){ const v=o&&(o.qty??o.count??o.pcs??o.quantity??o.larvae??o.larvae_count??null); const n=parseFloat(v); return isFinite(n)?n:null; }
+        function lfParseTrialTanks(trial){
+          let assignments=[],counts=[];
+          try{ const raw=trial.tankAssignments; assignments=raw?JSON.parse(raw):[]; if(!Array.isArray(assignments))assignments=[]; }catch(e){ assignments=[]; }
+          try{ const raw=trial.spatCountJson; counts=raw?JSON.parse(raw):[]; if(!Array.isArray(counts))counts=[]; }catch(e){ counts=[]; }
+          const map={};
+          assignments.forEach(a=>{const t=lfGetTank(a);if(!t)return;if(!map[t])map[t]={tank:String(t),larvae:0,settled:null};const q=lfGetQty(a);if(q!=null)map[t].larvae+=q;});
+          counts.forEach(cnt=>{const t=lfGetTank(cnt);if(!t)return;if(!map[t])map[t]={tank:String(t),larvae:0,settled:0};const q=lfGetQty(cnt);if(q!=null)map[t].settled=(map[t].settled||0)+q;});
+          return Object.values(map);
+        }
+        let _lfTrialTankCache=null, _lfTrialTankCacheRef=null;
+        function lfAllTrialTankRows(){
+          if(_lfTrialTankCache && _lfTrialTankCacheRef===spawnLogs) return _lfTrialTankCache;
+          const rows=[];
+          (spawnLogs||[]).forEach(trial=>{
+            const tanks=lfParseTrialTanks(trial);
+            tanks.forEach(t=>rows.push({...t,trialId:trial.trialId,fertTime:trial.fertilisationTime||trial.date,spatStatus:trial.spatStatus}));
+          });
+          _lfTrialTankCache=rows; _lfTrialTankCacheRef=spawnLogs;
+          return rows;
+        }
+        function lfEnsureSpawnLogsLoaded(){
+          if(spawnLogs&&spawnLogs.length) return Promise.resolve();
+          return loadSpawnPurchase();
+        }
+        function lfNormTankId(rawTank){
+          const n=parseInt(String(rawTank).replace(/\D/g,''))||0;
+          return lfTankLabel(n);
+        }
+
+        /* ── Metric helpers (manager) ─────────────────────────────────── */
+        function lfGetTankBaseline(tankId){
+          const rows=(lfData.tank_baseline||[]).filter(r=>r.tank_id===tankId&&r.date);
+          if(!rows.length) return null;
+          return[...rows].sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+        }
+        function lfTankMetrics(tankId){
+          const trialRows=lfAllTrialTankRows().filter(r=>lfNormTankId(r.tank)===tankId);
+          const baseline=lfGetTankBaseline(tankId);
+          if(baseline){
+            // Manual count set (e.g. after a physical recount) — use it as
+            // the starting point, then apply real transfers/mortality logged
+            // AFTER that date. Ignores older trial-data estimate entirely
+            // for this tank, since the manual count supersedes it.
+            const bd=baseline.date;
+            const tIn=(lfData.transfer||[]).filter(t=>t.dest_tank===tankId&&new Date(t.date)>new Date(bd)).reduce((s,t)=>s+(parseInt(t.quantity)||0),0);
+            const tOut=(lfData.transfer||[]).filter(t=>t.source_tank===tankId&&new Date(t.date)>new Date(bd)).reduce((s,t)=>s+(parseInt(t.quantity)||0),0);
+            const dead=(lfData.mortality||[]).filter(m=>m.tank_id===tankId&&new Date(m.date)>new Date(bd)).reduce((s,m)=>s+(parseInt(m.dead_count)||0),0);
+            const live=Math.max(0,(baseline.live_count||0)+tIn-tOut-dead);
+            return{stocked:baseline.live_count||0,tIn,tOut,dead,live,trialRows,hasBaseline:true,baselineDate:bd};
+          }
+          const stocked=trialRows.reduce((s,r)=>s+(r.larvae||0),0);
+          const tIn=(lfData.transfer||[]).filter(t=>t.dest_tank===tankId).reduce((s,t)=>s+(parseInt(t.quantity)||0),0);
+          const tOut=(lfData.transfer||[]).filter(t=>t.source_tank===tankId).reduce((s,t)=>s+(parseInt(t.quantity)||0),0);
+          const dead=(lfData.mortality||[]).filter(m=>m.tank_id===tankId).reduce((s,m)=>s+(parseInt(m.dead_count)||0),0);
+          const live=Math.max(0,stocked+tIn-tOut-dead);
+          return{stocked,tIn,tOut,dead,live,trialRows,hasBaseline:false,baselineDate:null};
+        }
+        async function lfSetTankBaseline(n){
+          rumbleDevice(35);
+          const tankId=lfTankLabel(n);
+          const m=lfTankMetrics(tankId);
+          const countStr=prompt(`Current live count for ${tankId} (from physical count):`, m.live);
+          if(countStr===null)return; // cancelled
+          const count=parseInt(countStr);
+          if(!isFinite(count)||count<0){alert('Please enter a valid whole number ≥ 0.');return;}
+          const ok=await lfPost('tank_baseline',{date:new Date().toISOString().split('T')[0],tank_id:tankId,live_count:count});
+          if(ok){rumbleDevice([40,30,70]);openLFTankDetail(n);}
+        }
+        function lfLastMortCheck(tankId){
+          const logs=(lfData.mortality||[]).filter(m=>m.tank_id===tankId);
+          if(!logs.length)return null;
+          return[...logs].sort((a,b)=>new Date(b.date)-new Date(a.date))[0].date;
+        }
+        function lfLastCleaning(tankId){
+          const logs=(lfData.cleaning||[]).filter(c=>c.tank_id===tankId);
+          if(!logs.length)return null;
+          return[...logs].sort((a,b)=>new Date(b.date)-new Date(a.date))[0].date;
+        }
+        function lfDaysSince(dateStr){
+          const d=parseAnyDate(dateStr);if(!d)return null;
+          return Math.max(0,Math.floor((new Date()-d)/86400000));
+        }
+        function lfGetGlobalLive(){
+          let total=0;for(let n=1;n<=LF_TANK_TOTAL;n++)total+=lfTankMetrics(lfTankLabel(n)).live;
+          return total;
+        }
+        function lfFarmGrowthSeries(){
+          return[...(lfData.growth||[])].map(g=>({date:parseAnyDate(g.date),len:parseFloat(g.avg_length_cm)})).filter(g=>g.date&&isFinite(g.len)).sort((a,b)=>a.date-b.date);
+        }
+        function lfCurrentGrowthRate(){
+          const s=lfFarmGrowthSeries();
+          if(s.length<2)return null;
+          const first=s[0],last=s[s.length-1];
+          const days=(last.date-first.date)/86400000;
+          if(days<=0)return null;
+          return((last.len-first.len)*10)/days; // mm/day
+        }
+        function lfAvgSettlement(){
+          const rows=lfAllTrialTankRows().filter(r=>r.settled!=null);
+          if(!rows.length)return null;
+          return rows.reduce((s,r)=>s+r.settled,0)/rows.length;
+        }
+        function lfEstimateBiomassKg(){
+          let wl;try{wl=scLoadWLTable();}catch(e){wl=[{length:0.5,weight:0.0833}];}
+          const rate=lfFarmGrowthSeries();
+          const avgLen=rate.length?rate[rate.length-1].len:null;
+          if(!avgLen)return 0;
+          let totalLive=0;
+          for(let n=1;n<=LF_TANK_TOTAL;n++)totalLive+=lfTankMetrics(lfTankLabel(n)).live;
+          try{return(totalLive*scEstimateWeight(avgLen,wl))/1000;}catch(e){return 0;}
+        }
+        function scEstimateCurrentBiomassKg(){
+          try{
+            const wl=scLoadWLTable(),cls=scLoadBioClasses();
+            return cls.reduce((s,cl)=>{if(!cl.length||!cl.count)return s;return s+(cl.count*scEstimateWeight(cl.length,wl)/1000);},0);
+          }catch(e){return 0;}
+        }
+        /* ── Processed Abalone — manual baseline + running total ────────
+           Processing Log history may not cleanly cover "since Jan 1" if
+           this tracker started mid-year. Instead: manager sets a one-time
+           baseline ("current stock as of today"), and everything logged
+           in Processing Log AFTER that date is added on top — accurate
+           going forward without needing to reconstruct old history.
+           Saved to the Land Farm sheet (same as the Sankina baseline),
+           NOT localStorage — so every manager's phone shows the same
+           number, not just the one that set it. */
+        function lfGetProcessedBaseline(){
+          const rows=(lfData.processed_baseline||[]).filter(r=>r.date);
+          if(!rows.length) return{kg:0,date:null};
+          return[...rows].sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+        }
+        async function lfSetProcessedBaseline(){
+          rumbleDevice(35);
+          const current=lfGetProcessedBaseline();
+          const kgStr=prompt('Current processed abalone stock (kg), as of today:', current.kg||0);
+          if(kgStr===null)return; // cancelled
+          const kg=parseFloat(kgStr);
+          if(!isFinite(kg)||kg<0){alert('Please enter a valid number ≥ 0.');return;}
+          const ok=await lfPost('processed_baseline',{date:new Date().toISOString().split('T')[0],kg});
+          if(ok){rumbleDevice([40,30,70]);renderLFMgrOverview();}
+        }
+        function lfProcessedThisYearKg(){
+          const baseline=lfGetProcessedBaseline();
+          if(baseline.date){
+            const baseDate=parseAnyDate(baseline.date);
+            const sinceBaseline=(procLogs||[]).filter(r=>{const d=parseAnyDate(r.date);return d&&baseDate&&d>baseDate;}).reduce((s,r)=>s+(r.yieldWeight||0),0);
+            return(baseline.kg||0)+sinceBaseline;
+          }
+          // No baseline set yet — fall back to calendar-year sum as a rough estimate
+          const yr=new Date().getFullYear();
+          return(procLogs||[]).filter(r=>{const d=parseAnyDate(r.date);return d&&d.getFullYear()===yr;}).reduce((s,r)=>s+(r.yieldWeight||0),0);
+        }
+        function lfWQStatusBadge(){
+          if(!wqSessions.length)return null;
+          const latest=wqSessions[0];
+          const checks=['do','temp','salinity','ph'].map(k=>{const cfg=WQ_RANGES[k],v=latest[k];return v!=null&&v>=cfg.min&&v<=cfg.max;});
+          return{ok:checks.every(Boolean),date:latest.date};
+        }
+
+        /* ── Sankina stock tracking ────────────────────────────────────
+           Three numbers, each rooted in a manual baseline (set via "Update
+           Stock Count") and moved automatically by real logged events since
+           that baseline date:
+             Raw @ Land Farm   = baseline − transport shipments sent
+             Raw @ Sankina     = baseline + shipments received − Processing
+                                  Log "Live Weight" consumed (cooked)
+             Finished @ Sankina= baseline + Processing Log "Yield Weight"
+                                  produced. (No "collected/sold" log exists
+                                  yet, so this only grows — reset the
+                                  baseline whenever stock physically leaves.) */
+        function lfGetSankinaBaseline(){
+          const rows=(lfData.sankina_baseline||[]).filter(r=>r.date);
+          if(!rows.length) return{date:null,raw_land_kg:0,raw_sankina_kg:0,finished_sankina_kg:0};
+          return[...rows].sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+        }
+        function lfSankinaTransportSince(afterDate){
+          if(!afterDate) return(lfData.sankina_transport||[]).reduce((s,r)=>s+(parseFloat(r.quantity_kg)||0),0);
+          const bd=parseAnyDate(afterDate);
+          return(lfData.sankina_transport||[]).filter(r=>{const d=parseAnyDate(r.date);return d&&bd&&d>bd;}).reduce((s,r)=>s+(parseFloat(r.quantity_kg)||0),0);
+        }
+        function lfProcFieldSince(afterDate,field){
+          const bd=afterDate?parseAnyDate(afterDate):null;
+          return(procLogs||[]).filter(r=>{if(!bd)return true;const d=parseAnyDate(r.date);return d&&d>bd;}).reduce((s,r)=>s+(r[field]||0),0);
+        }
+        function lfSankinaStock(){
+          const b=lfGetSankinaBaseline();
+          const transportSince=lfSankinaTransportSince(b.date);
+          const liveWeightSince=b.date?lfProcFieldSince(b.date,'liveWeight'):0;
+          const yieldWeightSince=b.date?lfProcFieldSince(b.date,'yieldWeight'):0;
+          return{
+            hasBaseline:!!b.date, baselineDate:b.date,
+            rawLand:Math.max(0,(b.raw_land_kg||0)-transportSince),
+            rawSankina:Math.max(0,(b.raw_sankina_kg||0)+transportSince-liveWeightSince),
+            finishedSankina:(b.finished_sankina_kg||0)+yieldWeightSince,
+            transportSince, liveWeightSince, yieldWeightSince
+          };
+        }
+        async function lfSetSankinaBaseline(){
+          rumbleDevice(35);
+          const cur=lfSankinaStock();
+          const rawLandStr=prompt('Raw material at Land Farm (kg):', cur.rawLand.toFixed(1));
+          if(rawLandStr===null)return;
+          const rawSankinaStr=prompt('Raw material at Sankina (kg):', cur.rawSankina.toFixed(1));
+          if(rawSankinaStr===null)return;
+          const finishedStr=prompt('Finished product at Sankina (kg):', cur.finishedSankina.toFixed(1));
+          if(finishedStr===null)return;
+          const rawLand=parseFloat(rawLandStr),rawSankina=parseFloat(rawSankinaStr),finished=parseFloat(finishedStr);
+          if(![rawLand,rawSankina,finished].every(v=>isFinite(v)&&v>=0)){alert('Please enter valid numbers ≥ 0.');return;}
+          const ok=await lfPost('sankina_baseline',{date:new Date().toISOString().split('T')[0],raw_land_kg:rawLand,raw_sankina_kg:rawSankina,finished_sankina_kg:finished});
+          if(ok){rumbleDevice([40,30,70]);showLFMgrTab('sankina');}
+        }
+
+        /* ── Manager: entry point — goes STRAIGHT to the Overview hero,
+           same pattern as Sea Cage. No intermediate menu tap. Water
+           Quality / Spawning / Processing / Purchasing are one tap away
+           via the "Linked Modules" section at the bottom of Overview. ── */
+        async function openLandFarmManagerView(){
+          rumbleDevice(45);showView('landfarm-data-view');
+          lfMgrSubTab='overview'; // always land on the hero Overview, never remember the last sub-tab
+          _lfMgrShell();
+          document.getElementById('lf-mgr-content').innerHTML=msgCard(`<p class="text-sm" style="color:var(--text-mut);">Loading…</p>`);
+          const url=getGasUrl('land-farm');
+          if(!wqSessions.length) loadWaterQuality();     // fire-and-forget, doesn't block Overview
+          if(!procLogs.length) fetchProcData();          // fire-and-forget, doesn't block Overview
+          // The two data sources Overview actually needs (tank logs + spawning
+          // trial cross-reference) load in parallel instead of one after another.
+          await Promise.all([
+            url ? fetchLFData(false) : Promise.resolve(),
+            lfEnsureSpawnLogsLoaded()
+          ]);
+          _lfMgrRender();
+        }
+        async function refreshLFManagerView(){
+          const ic=document.getElementById('landfarm-mgr-refresh-ic');if(ic)ic.classList.add('spin');
+          await Promise.all([fetchLFData(false), loadSpawnPurchase()]);
+          _lfMgrRender();
+          if(ic)ic.classList.remove('spin');
+        }
+        function _lfMgrShell(){
+          const tabs=[{id:'overview',icon:'📊',l:'Overview'},{id:'tanks',icon:'🧪',l:'Tanks'},{id:'growth',icon:'📈',l:'Growth'},{id:'batches',icon:'🐣',l:'Batches'},{id:'sankina',icon:'🚚',l:'Sankina'}];
+          if(!lfMgrSubTab)lfMgrSubTab='overview';
+          document.getElementById('landfarm-body').innerHTML=`
+            <div style="display:flex;padding:4px;background:var(--surface-2);border:1px solid var(--border);border-radius:15px;gap:3px;overflow-x:auto;">
+              ${tabs.map(t=>`<button id="lf-mgr-tab-${t.id}" onclick="showLFMgrTab('${t.id}')"
+                style="flex:1;min-width:56px;padding:9px 2px;border-radius:11px;font-size:9px;font-weight:700;letter-spacing:.01em;transition:all .2s;white-space:nowrap;
+                background:${lfMgrSubTab===t.id?'#10B981':''};color:${lfMgrSubTab===t.id?'white':'var(--text-mut)'};">
+                ${t.icon} ${t.l}</button>`).join('')}
+            </div>
+            <div id="lf-mgr-content"></div>`;
+        }
+        function showLFMgrTab(tab){
+          rumbleDevice(30);
+          lfMgrSubTab=tab;
+          ['overview','tanks','growth','batches','sankina'].forEach(t=>{
+            const b=document.getElementById('lf-mgr-tab-'+t);
+            if(b){b.style.background=t===tab?'#10B981':'';b.style.color=t===tab?'white':'var(--text-mut)';}
+          });
+          _lfMgrRender();
+        }
+        function _lfMgrRender(){
+          if(!document.getElementById('lf-mgr-content'))return;
+          if(lfMgrSubTab==='overview') renderLFMgrOverview();
+          if(lfMgrSubTab==='tanks')    renderLFMgrTanks();
+          if(lfMgrSubTab==='growth')   renderLFMgrGrowth();
+          if(lfMgrSubTab==='batches')  renderLFMgrBatches();
+          if(lfMgrSubTab==='sankina')  renderLFMgrSankina();
+        }
+        function lfLinkedModulesCard(){
+          const tiles=[
+            {id:'wq',hue:'#3B82F6',title:'Water<br>Quality',fn:'openWaterQuality',icon:lineIcon("M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5l6.74-6.76z")},
+            {id:'spawn',hue:'#8B5CF6',title:'Spawning<br>Trials',fn:'openSpawning',icon:lineIcon("M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.656 48.656 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3")},
+            {id:'processing',hue:'#0D9488',title:'Processing<br>Log',fn:'openProcessingView',icon:flameIcon},
+            {id:'purchase',hue:'#D97706',title:'Purchasing',fn:'openPurchasing',icon:lineIcon("M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h16.5M4.5 9h15M5.25 14.25h13.5")}
+          ];
+          return `<div>
+            <div class="eyebrow px-1 mb-2">Linked Modules · <span class="ko">연결된 모듈</span></div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+              ${tiles.map(t=>`<button onclick="lfOpenLinked('${t.fn}')" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:14px 4px;background:color-mix(in srgb,${t.hue} 10%,transparent);border:1px solid color-mix(in srgb,${t.hue} 24%,transparent);border-radius:16px;transition:transform .1s;" ontouchstart="this.style.transform='scale(.93)'" ontouchend="this.style.transform=''">
+                <span style="width:22px;height:22px;color:${t.hue};display:inline-flex;">${t.icon}</span>
+                <span style="font-size:9.5px;font-weight:700;line-height:1.25;color:${t.hue};text-align:center;">${t.title}</span>
+              </button>`).join('')}
+            </div>
+          </div>`;
+        }
+        /* Tracks whether we're "inside" Land Farm so the linked module's
+           back button returns here instead of the Executive Terminal. */
+        let _mgrViewOrigin='menu'; // 'menu' | 'landfarm'
+        function lfOpenLinked(fnName){
+          _mgrViewOrigin='landfarm';
+          window[fnName]();
+        }
+
+        /* ── Manager: OVERVIEW (hero — everything at a glance) ────────── */
+        function renderLFMgrOverview(){
+          const liveTotal=lfGetGlobalLive();
+          const avgSettle=lfAvgSettlement();
+          const settleCol=avgSettle==null?'var(--text-dim)':(avgSettle>=LF_TARGET_SETTLE_MIN&&avgSettle<=LF_TARGET_SETTLE_MAX)?'var(--ok)':(avgSettle<LF_TARGET_SETTLE_MIN?'var(--attention)':'var(--ok)');
+          const growthRate=lfCurrentGrowthRate();
+          const growthCol=growthRate==null?'var(--text-dim)':growthRate>=LF_TARGET_GROWTH_MM_DAY?'var(--ok)':growthRate>=LF_TARGET_GROWTH_MM_DAY*0.7?'var(--attention)':'var(--alert)';
+          const landBiomass=lfEstimateBiomassKg();
+          const processedKg=lfProcessedThisYearKg();
+          const processedPct=Math.min(100,(processedKg/LF_TARGET_PROCESSED_KG)*100);
+          const processedBaseline=lfGetProcessedBaseline();
+          const wq=lfWQStatusBadge();
+
+          document.getElementById('lf-mgr-content').innerHTML=`
+            <div class="card" style="padding:22px;border-left:4px solid #10B981;">
+              <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;">
+                Total Live Spats · <span class="ko">총 생존 개체</span>
+              </div>
+              <div class="num" style="font-size:44px;font-weight:900;color:#10B981;letter-spacing:-.03em;line-height:1;">${liveTotal.toLocaleString()}</div>
+              <div style="font-size:12px;color:var(--text-dim);margin-top:8px;">Across ${LF_TANK_TOTAL} land tanks (1 incubation · 3 broodstock · 11 diatom · 65 spat)</div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div class="kpi" style="--kpi-hue:${settleCol};">
+                <div class="kpi-label">Avg Settlement</div><div class="kpi-ko ko">평균 정착률</div>
+                <div class="flex items-baseline gap-1 kpi-val" style="color:${settleCol};">${avgSettle!=null?Math.round(avgSettle).toLocaleString():'—'}</div>
+                <div class="kpi-hint">Target ${LF_TARGET_SETTLE_MIN.toLocaleString()}–${LF_TARGET_SETTLE_MAX.toLocaleString()}/tank</div>
+              </div>
+              <div class="kpi" style="--kpi-hue:${growthCol};">
+                <div class="kpi-label">Growth Rate</div><div class="kpi-ko ko">성장률</div>
+                <div class="flex items-baseline gap-1 kpi-val" style="color:${growthCol};">${growthRate!=null?growthRate.toFixed(2):'—'}<span class="kpi-unit">mm/d</span></div>
+                <div class="kpi-hint">Target ${LF_TARGET_GROWTH_MM_DAY} mm/day · farm-wide</div>
+              </div>
+            </div>
+
+            <div style="padding:16px 18px;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);">Land Biomass · <span class="ko">육상 생물량</span></div>
+                <span class="num" style="font-size:16px;font-weight:800;color:#10B981;">${landBiomass.toFixed(1)} kg</span>
+              </div>
+              <div style="font-size:10px;color:var(--text-dim);margin-top:6px;">Est. from live count × latest farm-wide shell length. Sea Cage biomass is tracked separately on its own dashboard.</div>
+            </div>
+
+            <div style="padding:16px 18px;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);">Processed Abalone</div>
+                <span style="font-size:11px;font-weight:700;color:#0D9488;">${processedKg.toFixed(1)} / ${LF_TARGET_PROCESSED_KG.toLocaleString()} kg</span>
+              </div>
+              <div style="height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden;">
+                <div style="height:100%;width:${processedPct}%;background:#0D9488;border-radius:4px;transition:width .5s;"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+                <div style="font-size:10px;color:var(--text-dim);">${processedBaseline.date?`Baseline ${processedBaseline.kg.toFixed(1)} kg as of ${fmtCleanDate(processedBaseline.date)} + logged since`:'No baseline set — showing calendar-year estimate from Processing Log'}</div>
+                <button onclick="lfSetProcessedBaseline()" style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:8px;background:color-mix(in srgb,#0D9488 10%,transparent);color:#0D9488;border:1px solid color-mix(in srgb,#0D9488 24%,transparent);white-space:nowrap;margin-left:8px;">${processedBaseline.date?'Update':'Set stock'}</button>
+              </div>
+            </div>
+
+            <div style="padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);">Water Quality</div>
+                <div style="font-size:12px;color:var(--text-mut);margin-top:2px;">${wq?fmtCleanDate(wq.date)+' latest reading':'No WQ data yet'}</div>
+              </div>
+              ${wq?`<span class="pill" style="background:color-mix(in srgb,${wq.ok?'var(--ok)':'var(--attention)'} 14%,transparent);color:${wq.ok?'var(--ok)':'var(--attention)'};">${wq.ok?'Stable':'Review'}</span>`:`<span class="pill" style="background:var(--surface-2);color:var(--text-dim);">—</span>`}
+            </div>
+
+            ${lfLinkedModulesCard()}`;
+        }
+
+        /* ── Manager: TANKS — physical floor-plan layout ─────────────────
+           Two columns matching the real room: odd tanks (T1,T3,T5…T79)
+           on the left, even tanks (T2,T4…T80) on the right, a walkway
+           between them, with Breeding Room / UV Tank shown as fixed
+           landmarks (not interactive, not part of the T1–80 count) —
+           mirrors James's hand-drawn floor plan. Both landmark boxes are
+           a fixed height so Tank 1 and Tank 2's rows line up exactly. */
+        const LF_TYPE_TAG={Broodstock:'BS',Diatom:'DI',Incubation:'IN',Spat:''};
+        function _lfFloorTankRow(n){
+          const tankId=lfTankLabel(n),type=lfTankType(n),m=lfTankMetrics(tankId);
+          const active=m.stocked>0||m.live>0;
+          const col=active?'#10B981':'#64748B';
+          const bg=active?'rgba(16,185,129,.10)':'rgba(100,116,139,.06)';
+          const tag=LF_TYPE_TAG[type];
+          return`<button onclick="openLFTankDetail(${n})" style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:${bg};border:1.5px solid ${col}44;border-radius:10px;width:100%;transition:transform .1s;" ontouchstart="this.style.transform='scale(.96)'" ontouchend="this.style.transform=''">
+            <div style="display:flex;align-items:center;gap:5px;">
+              <span style="font-size:10.5px;font-weight:800;color:${col};font-family:'Space Grotesk',sans-serif;">${tankId}</span>
+              ${tag?`<span style="font-size:6.5px;font-weight:700;padding:1px 4px;border-radius:4px;background:${col}22;color:${col};letter-spacing:.03em;">${tag}</span>`:''}
+            </div>
+            <span class="num" style="font-size:13px;font-weight:800;color:${active?col:'var(--text-dim)'};">${active?m.live.toLocaleString():'—'}</span>
+          </button>`;
+        }
+        function renderLFMgrTanks(){
+          const oddRows=[],evenRows=[];
+          for(let n=1;n<=LF_TANK_TOTAL;n+=2)oddRows.push(_lfFloorTankRow(n));
+          for(let n=2;n<=LF_TANK_TOTAL;n+=2)evenRows.push(_lfFloorTankRow(n));
+          // Fixed height so both landmark boxes match exactly, regardless of
+          // whether one has a subtitle line — otherwise Tank 1's row starts
+          // lower than Tank 2's row because Breeding Room's box is taller.
+          const landmark=(emoji,title,sub)=>`<div style="height:52px;padding:6px 4px;border:1.5px dashed var(--border-2);border-radius:10px;text-align:center;background:var(--surface-2);display:flex;flex-direction:column;align-items:center;justify-content:center;box-sizing:border-box;">
+            <div style="font-size:13px;line-height:1;">${emoji}</div>
+            <div style="font-size:7px;font-weight:800;letter-spacing:.02em;text-transform:uppercase;color:var(--text-mut);margin-top:2px;line-height:1.2;">${title}</div>
+            ${sub?`<div style="font-size:6px;color:var(--text-dim);margin-top:1px;">${sub}</div>`:''}
+          </div>`;
+          document.getElementById('lf-mgr-content').innerHTML=`
+            <p style="font-size:11px;color:var(--text-dim);">Tap any tank for live count, stocked-since date & trial origin. Layout matches the physical room.</p>
+            <div style="display:grid;grid-template-columns:1fr 20px 1fr;gap:6px;align-items:start;">
+              <!-- Odd column: Breeding Room sits directly above it -->
+              <div>
+                <div style="margin-bottom:6px;">${landmark('🌑','Breeding Room','4 big · 2 small')}</div>
+                <div style="display:flex;flex-direction:column;gap:5px;">${oddRows.join('')}</div>
+              </div>
+              <!-- Walkway -->
+              <div style="display:flex;align-items:center;justify-content:center;padding-top:58px;">
+                <span style="writing-mode:vertical-rl;font-size:8px;font-weight:800;letter-spacing:.15em;color:var(--text-dim);text-transform:uppercase;">Walkway</span>
+              </div>
+              <!-- Even column: UV Tank sits directly above it -->
+              <div>
+                <div style="margin-bottom:6px;">${landmark('☀️','UV Tank')}</div>
+                <div style="display:flex;flex-direction:column;gap:5px;">${evenRows.join('')}</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:12px;padding:6px 2px;">
+              <span style="font-size:9px;font-weight:600;color:#10B981;">● Stocked</span>
+              <span style="font-size:9px;font-weight:600;color:#64748B;">● Empty / no logs</span>
+              <span style="font-size:9px;font-weight:600;color:var(--text-dim);">BS · Broodstock &nbsp; DI · Diatom &nbsp; IN · Incubation</span>
+            </div>`;
+        }
+        function openLFTankDetail(n){
+          rumbleDevice(30);
+          const tankId=lfTankLabel(n),type=lfTankType(n),m=lfTankMetrics(tankId);
+          const lastMort=lfLastMortCheck(tankId),daysMort=lfDaysSince(lastMort);
+          const lastClean=lfLastCleaning(tankId),daysClean=lfDaysSince(lastClean);
+          const trials=m.trialRows||[];
+          const earliestFert=trials.map(t=>parseAnyDate(t.fertTime)).filter(Boolean).sort((a,b)=>a-b)[0];
+          const stockedSinceDays=earliestFert?lfDaysSince(earliestFert):null;
+          const headHtml=`<div style="font-size:22px;font-weight:700;">${tankId}</div>
+            <div style="font-size:13px;color:var(--text-mut);">${type} tank · 육상 탱크 상세</div>`;
+          const originRows=trials.length?trials.map(t=>`<div class="grade-row"><div><div class="text-sm font-semibold">${t.trialId||'—'}</div><div class="text-xs" style="color:var(--text-dim);">${t.fertTime?fmtCleanDate(t.fertTime):'—'} · ${t.spatStatus||''}</div></div><div class="num text-sm font-semibold" style="color:#10B981;">${t.larvae?t.larvae.toLocaleString():'—'}${t.settled!=null?' → '+t.settled.toLocaleString():''}</div></div>`).join(''):'<p class="text-xs" style="color:var(--text-dim);padding:8px 0;">No spawning trial recorded for this tank yet.</p>';
+          const baselineNote=m.hasBaseline
+            ?`<div style="padding:10px 12px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:10px;font-size:11px;color:#0f766e;margin-bottom:10px;">✓ Manual count set ${fmtCleanDate(m.baselineDate)} — live count above is this count, adjusted for anything logged since.</div>`
+            :`<div style="padding:10px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;font-size:11px;color:var(--text-dim);margin-bottom:10px;">Estimated from spawning trial data — no physical count set for this tank yet.</div>`;
+          const bodyHtml=`<div class="info-grid mb-3">
+              <div class="info-item"><div class="info-key">Live Count</div><div class="info-val" style="color:#10B981;font-size:20px;">${m.live.toLocaleString()}</div></div>
+              <div class="info-item"><div class="info-key">Stocked Since</div><div class="info-val">${stockedSinceDays!=null?stockedSinceDays+'d ago':'—'}</div></div>
+              <div class="info-item"><div class="info-key" style="color:${(daysMort==null||daysMort>7)?'var(--alert)':'var(--text-dim)'};">Last Checked</div><div class="info-val" style="color:${(daysMort==null||daysMort>7)?'var(--alert)':'var(--text)'};">${daysMort!=null?daysMort+'d ago':'Never'}</div></div>
+              <div class="info-item"><div class="info-key">Last Cleaned</div><div class="info-val">${daysClean!=null?daysClean+'d ago':'Never'}</div></div>
+            </div>
+            ${baselineNote}
+            <button onclick="lfSetTankBaseline(${n})" style="width:100%;padding:11px;background:#10B981;color:white;font-weight:700;border-radius:10px;font-size:13px;margin-bottom:14px;">✏️ Set Live Count (physical recount)</button>
+            <div class="eyebrow mb-2">Batch Origin · <span class="ko">배치 출처</span></div>
+            <div class="card" style="padding:14px;">${originRows}</div>
+            <div class="card mt-3" style="padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">
+              <span class="text-sm font-semibold">${m.hasBaseline?'Manual count':'Total stocked (all-time)'}</span>
+              <span class="num" style="font-size:18px;font-weight:800;">${m.stocked.toLocaleString()}</span>
+            </div>`;
+          openDetailOverlay(headHtml,bodyHtml);
+        }
+
+        /* ── Manager: GROWTH (farm-wide trend chart) ──────────────────── */
+        function renderLFMgrGrowth(){
+          const series=lfFarmGrowthSeries();
+          const rate=lfCurrentGrowthRate();
+          const ratio=rate!=null?rate/LF_TARGET_GROWTH_MM_DAY:null;
+          const col=ratio==null?'var(--text-dim)':ratio>=1?'var(--ok)':ratio>=0.7?'var(--attention)':'var(--alert)';
+          const label=ratio==null?'No trend yet':ratio>=1?'On target':ratio>=0.7?'Slightly below':'Significantly below';
+          const vals=series.map(s=>s.len);
+          const labels=series.map(s=>`${s.date.getDate()}/${s.date.getMonth()+1}`);
+          const chart=buildChartSVG(vals,labels,{color:'#10B981',dp:2});
+          document.getElementById('lf-mgr-content').innerHTML=`
+            <div class="card" style="padding:18px;border-left:4px solid ${col};">
+              <div class="eyebrow" style="color:#10B981;">Current Growth Rate</div>
+              <div class="num" style="font-size:32px;font-weight:900;color:${col};margin-top:4px;">${rate!=null?rate.toFixed(2):'—'} <span style="font-size:14px;color:var(--text-dim);">mm/day</span></div>
+              <span class="pill" style="background:color-mix(in srgb,${col} 14%,transparent);color:${col};margin-top:8px;display:inline-block;">${label}</span>
+              <p style="font-size:11px;color:var(--text-dim);margin-top:8px;">Target: ${LF_TARGET_GROWTH_MM_DAY} mm/day · computed from first vs. latest farm-wide measurement.</p>
+            </div>
+            <div class="card" style="padding:14px;"><div class="eyebrow mb-2">Shell Length Trend · <span class="ko">평균 성장 추이</span></div>${chart}</div>`;
+        }
+
+        /* ── Manager: BATCHES (from Spawning Trials, cross-referenced) ─── */
+        function renderLFMgrBatches(){
+          const rows=lfAllTrialTankRows();
+          const cards=rows.map(r=>{
+            const settleRate=(r.settled!=null&&r.larvae>0)?(r.settled/r.larvae*100):null;
+            const daysSince=lfDaysSince(r.fertTime);
+            const m=lfTankMetrics(lfNormTankId(r.tank));
+            const survival=r.larvae>0?Math.min(100,(m.live/r.larvae*100)):null;
+            const survCol=survival==null?'var(--text-dim)':survival>=70?'var(--ok)':survival>=40?'var(--attention)':'var(--alert)';
+            return`<div style="padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:14px;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+                <div><div style="font-size:14px;font-weight:700;">${r.trialId||'—'} → ${r.tank}</div>
+                <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">${daysSince!=null?daysSince+'d since fertilisation':'—'} · ${r.spatStatus||''}</div></div>
+                <span class="pill" style="background:color-mix(in srgb,${survCol} 14%,transparent);color:${survCol};">${survival!=null?survival.toFixed(0)+'% survival':'—'}</span>
+              </div>
+              <div style="display:flex;gap:16px;padding-top:10px;border-top:1px solid var(--border);">
+                <div><div style="font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);">Assigned</div>
+                <div class="num" style="font-size:16px;font-weight:800;margin-top:2px;">${r.larvae?r.larvae.toLocaleString():'—'}</div></div>
+                <div><div style="font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);">Spat Count</div>
+                <div class="num" style="font-size:16px;font-weight:800;margin-top:2px;color:${r.settled!=null?'#10B981':'var(--text-dim)'};">${r.settled!=null?r.settled.toLocaleString():'Pending'}</div></div>
+                <div><div style="font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);">Settle Rate</div>
+                <div class="num" style="font-size:16px;font-weight:800;margin-top:2px;">${settleRate!=null?settleRate.toFixed(1)+'%':'—'}</div></div>
+              </div>
+            </div>`;
+          }).join('');
+          document.getElementById('lf-mgr-content').innerHTML=`
+            <p style="font-size:11px;color:var(--text-dim);">Sourced live from the Spawning Trials sheet (Tank Assignments + Spat Count) — no separate batch entry needed.</p>
+            <div style="display:flex;flex-direction:column;gap:8px;">${cards||msgCard('<p class="text-sm" style="color:var(--text-dim);">No tank-assigned trials found yet. If trials exist but nothing shows here, the JSON field shape may differ — let James know and share a sample.</p>')}</div>`;
+        }
+
+        /* ── Manager: SANKINA (raw/finished stock + transport history) ─── */
+        function renderLFMgrSankina(){
+          const s=lfSankinaStock();
+          const tile=(label,ko,val,col)=>`<div class="kpi" style="--kpi-hue:${col};">
+            <div class="kpi-label">${label}</div><div class="kpi-ko ko">${ko}</div>
+            <div class="flex items-baseline gap-1 kpi-val" style="color:${col};font-size:22px;">${val.toFixed(1)}<span class="kpi-unit">kg</span></div>
+          </div>`;
+          const transport=[...(lfData.sankina_transport||[])].sort((a,b)=>new Date(b.date)-new Date(a.date));
+          const totalTransport=transport.reduce((sum,r)=>sum+(parseFloat(r.quantity_kg)||0),0);
+          const transportCards=transport.slice(0,25).map(r=>{
+            const tDep=r.departure_temp_c,tArr=r.arrival_temp_c;
+            const temps=(tDep||tArr)?`<span>${tDep||'—'}°C → ${tArr||'—'}°C</span>`:'';
+            const avgWt=r.avg_weight_g?`<span>${(parseFloat(r.avg_weight_g)||0).toFixed(1)}g/pc</span>`:'';
+            const meta=[temps,avgWt].filter(Boolean).join(' · ');
+            const driver=(r.driver_name||r.vehicle_plate)?`<div style="font-size:10.5px;color:var(--text-dim);margin-top:2px;">${r.driver_name||'—'}${r.vehicle_plate?' · '+r.vehicle_plate:''}</div>`:'';
+            return`<div style="padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="font-size:13px;font-weight:600;">${fmtCleanDate(r.date)}</div>
+                <span class="num" style="font-size:15px;font-weight:800;color:#F97316;">${(parseFloat(r.quantity_kg)||0).toFixed(1)} kg</span>
+              </div>
+              ${meta?`<div style="font-size:10.5px;color:var(--text-mut);margin-top:3px;">${meta}</div>`:''}
+              ${driver}
+              ${r.notes?`<div style="font-size:10.5px;color:var(--text-dim);margin-top:3px;font-style:italic;">${r.notes}</div>`:''}
+            </div>`;
+          }).join('');
+
+          document.getElementById('lf-mgr-content').innerHTML=`
+            ${!s.hasBaseline?`<div class="card" style="padding:16px;border-left:4px solid var(--attention);">
+              <p class="text-sm font-semibold" style="color:var(--attention);">No stock count set yet</p>
+              <p class="text-xs mt-1" style="color:var(--text-mut);">Tap "Update Stock Count" below to enter today's actual raw & finished stock. Everything logged after that point will track automatically.</p>
+            </div>`:''}
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              ${tile('Raw · Land Farm','육상 원료',s.rawLand,'#10B981')}
+              ${tile('Raw · Sankina','산키나 원료',s.rawSankina,'#F97316')}
+            </div>
+            ${tile('Finished · Sankina','산키나 완제품',s.finishedSankina,'#0D9488')}
+            <div style="padding:12px 14px;background:var(--surface-2);border-radius:12px;border:1px solid var(--border);">
+              <div style="font-size:11px;color:var(--text-mut);">${s.hasBaseline?`Baseline set ${fmtCleanDate(s.baselineDate)} · ${s.transportSince.toFixed(1)} kg shipped · ${s.liveWeightSince.toFixed(1)} kg cooked · ${s.yieldWeightSince.toFixed(1)} kg produced since`:'No baseline yet — all figures show as 0.'}</div>
+            </div>
+            <button onclick="lfSetSankinaBaseline()" style="width:100%;padding:13px;background:#F97316;color:white;font-weight:700;border-radius:12px;font-size:13px;">📋 Update Stock Count</button>
+
+            <div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding:0 2px;">
+                <div class="eyebrow">Transport History · <span class="ko">운송 이력</span></div>
+                <span style="font-size:10px;color:var(--text-dim);">${transport.length} shipment${transport.length!==1?'s':''} · ${totalTransport.toFixed(1)} kg total</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;">${transportCards||msgCard('<p class="text-sm" style="color:var(--text-dim);">No shipments logged yet.</p>')}</div>
+            </div>
+            <p style="font-size:10.5px;color:var(--text-dim);">Note: Finished @ Sankina only increases (from Processing Log yield) — there's no "collected/sold" log yet, so reset it with Update Stock Count whenever product actually leaves.</p>`;
+        }
+
   
          /* ── Farm Specs Overlay ──────────────────────────────── */         function openFarmSpecs(){           document.getElementById('farmSpecsOverlay').classList.remove('hidden');           document.body.style.overflow='hidden';           rumbleDevice(30);         }         function closeFarmSpecs(){           document.getElementById('farmSpecsOverlay').classList.add('hidden');           document.body.style.overflow='';         }         document.addEventListener('keydown',function(e){if(e.key==='Escape')closeFarmSpecs();});           if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -2785,6 +3648,25 @@ function renderUpcomingLeaves(allLeave){
     <div id="sc-content-transfer" class="hidden"></div>
     <div id="sc-content-mortality" class="hidden"></div>
     <div id="sc-content-growth" class="hidden"></div>
+  </div>
+</main>
+
+ <main id="landfarm-worker-view" class="hidden flex-1 flex flex-col min-h-0 w-full">
+  <div class="flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full overflow-y-auto">
+    <div class="flex items-center justify-between">
+      <button onclick="closeLandFarmWorkerView()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:var(--accent);">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"/></svg>
+        <span class="ko">뒤로</span> Ops Home
+      </button>
+      <button onclick="fetchLFData(true)" class="icon-btn">
+        <svg id="landfarm-refresh-ic" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356M3.985 19.644V14.65h4.992m-4.969-3.65a8.25 8.25 0 0113.803-3.7L21 8.25m-18 7.5l3.181 3.182a8.25 8.25 0 0013.803-3.7"/></svg>
+      </button>
+    </div>
+    <div>
+      <span class="eyebrow" style="color:#10B981;">육상 양식장 · Land Farm</span>
+      <h3 class="text-2xl font-semibold tracking-tight" style="margin-top:1px;">Ladang Daratan</h3>
+    </div>
+    <div id="landfarm-worker-body"></div>
   </div>
 </main>
 </body>
