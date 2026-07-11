@@ -495,9 +495,20 @@ function buildOTSummaryText(monthOT){
 
         /* ── GAS URL settings ────────────────────────────────── */
         const GAS_KEYS={'Abalone-Spawning-and-Purchasing-Log':'mgr_spawning_gas_url','Abalone-Processing-Log':'mgr_processing_gas_url','hatchery-hr':'mgr_hr_gas_url','daily-water-quality':'mgr_wq_gas_url','sea-cage':'mgr_seacage_gas_url','farm-stock-check': 'mgr_stockcheck_gas_url','land-farm':'mgr_landfarm_gas_url',};
-        function getGasUrl(k){const key=GAS_KEYS[k];return key?store.get(key):null;}
+        function cleanGasUrl(v){
+          // Strips ALL whitespace-like characters anywhere in the string —
+          // not just leading/trailing (.trim() misses these): regular
+          // whitespace, non-breaking space, zero-width space, and BOM.
+          // A valid GAS URL never legitimately contains any of these, so
+          // it's safe to strip them wherever they appear, not just the ends.
+          // This guards against invisible characters that sneak in when a
+          // URL is copied from WhatsApp, Notion, Google Docs, or gets
+          // mangled by a phone keyboard's autocorrect.
+          return String(v||'').replace(/[\s\u00A0\u200B\u200C\u200D\uFEFF]+/g,'');
+        }
+        function getGasUrl(k){const key=GAS_KEYS[k];if(!key)return null;const raw=store.get(key);return raw?cleanGasUrl(raw):null;}
         function toggleGasSettings(){const d=document.getElementById('gas-settings-drawer'),s=document.getElementById('gas-settings-status');d.classList.toggle('hidden');s.textContent=d.classList.contains('hidden')?'Configure ▾':'Close ▴';}
-        function saveGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url','gas-sc-url':'mgr_seacage_gas_url','gas-stockcheck-url':'mgr_stockcheck_gas_url','gas-landfarm-url':'mgr_landfarm_gas_url'};for(const[id,k]of Object.entries(m)){const v=document.getElementById(id).value.trim();if(v)store.set(k,v);}const c=document.getElementById('gas-save-confirm');c.classList.remove('hidden');setTimeout(()=>c.classList.add('hidden'),2500);}
+        function saveGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url','gas-sc-url':'mgr_seacage_gas_url','gas-stockcheck-url':'mgr_stockcheck_gas_url','gas-landfarm-url':'mgr_landfarm_gas_url'};for(const[id,k]of Object.entries(m)){const v=cleanGasUrl(document.getElementById(id).value);if(v)store.set(k,v);}const c=document.getElementById('gas-save-confirm');c.classList.remove('hidden');setTimeout(()=>c.classList.add('hidden'),2500);}
         function loadSavedGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url','gas-sc-url':'mgr_seacage_gas_url','gas-stockcheck-url':'mgr_stockcheck_gas_url','gas-landfarm-url':'mgr_landfarm_gas_url'};for(const[id,k]of Object.entries(m)){const v=store.get(k);if(v)document.getElementById(id).value=v;}}
 
         /* ── Overlay helpers ─────────────────────────────────── */
@@ -1406,7 +1417,8 @@ function changePurchaseMonth(val){ rumbleDevice(25); purchaseMonth=val; renderPu
         function saveSetupUrls(){
             for(const[inputId,storeKey] of Object.entries(SETUP_URL_MAP)){
                 const el=document.getElementById(inputId);
-                if(el&&el.value.trim()) store.set(storeKey,el.value.trim());
+                const v=el?cleanGasUrl(el.value):'';
+                if(v) store.set(storeKey,v);
             }
             store.set(SETUP_DONE_KEY,'1');
             document.getElementById('setup-card').style.display='none';
