@@ -2478,7 +2478,8 @@ function sendStockOrderMessage(){
         let lfTfSource='', lfTfDest='', lfTfQty='', lfTfLength='';
         let lfSkDate=new Date().toISOString().split('T')[0], lfSkQty='', lfSkNotes='';
         let lfSkSamples=[]; // {kg, pcs} — matches the paper form's 5-sample average weight section         
-        let lfFpDate=new Date().toISOString().split('T')[0]; // finished-product entry date
+        let lfFpDate=new Date().toISOString().split('T')[0]; // finished-product entry date         
+        let lfSpawnScope=currentMonthStr(); // 'ALL' or 'YYYY-MM' — spawning card/detail scope
         function lfTankLabel(n){ return 'T'+String(n).padStart(2,'0'); }
         function lfTankType(n){
           if(n===2) return 'Incubation';
@@ -3100,7 +3101,7 @@ function sendStockOrderMessage(){
             <div style="padding:16px 18px;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
                 <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);">Processed Abalone · <span class="ko">가공 전복</span></div>
-                <span style="font-size:11px;font-weight:700;color:#0D9488;">${finished.toFixed(1)} / ${LF_TARGET_PROCESSED_KG.toLocaleString()} kg · ${processedPct.toFixed(0)}%</span>
+                <span style="font-size:11px;font-weight:700;color:#0D9488;">${finished.toFixed(1)} / ${LF_TARGET_PROCESSED_KG.toLocaleString()} kg · ${processedPct.toFixed(1)}%</span>
               </div>
               <div style="height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden;">
                 <div style="height:100%;width:${processedPct}%;background:#0D9488;border-radius:4px;transition:width .5s;"></div>
@@ -3129,7 +3130,7 @@ function sendStockOrderMessage(){
                 <div>
                   <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8B5CF6;">Spawning Trials · <span class="ko">산란 시험</span></div>
                   <div class="num" style="font-size:32px;font-weight:900;color:#8B5CF6;letter-spacing:-.02em;margin-top:6px;">${spawn.total>0?spawn.total.toLocaleString():'—'}</div>
-                  <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">total eggs · all-time</div>
+                  <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">total eggs · ${lfSpawnScopeLabel()}</div>
                 </div>
                 <span style="font-size:11px;color:var(--text-dim);">Tap ›</span>
               </div>
@@ -3159,42 +3160,68 @@ function sendStockOrderMessage(){
             <div style="font-size:8px;color:var(--text-dim);">${unit||'&nbsp;'}</div>
           </div>`;
         }
-        function lfSpawningTotals(){
+        function setLFSpawnScope(scope){
+          lfSpawnScope=scope;
+          rumbleDevice(20);
+          openLFSpawningDetail();
+          try{ if(lfMgrSubTab==='overview'&&document.getElementById('lf-mgr-content'))renderLFMgrOverview(); }catch(e){}
+        }
+        function openLFSpawningDetail(){
+          rumbleDevice(30);
+          const t=lfSpawningTotals();
+          const months=lfSpawnMonthsAvailable();
+          const opts=months.map(m=>`<option value="${m}"${m===lfSpawnScope?' selected':''}>${monthLabel(m)}</option>`).join('');
+          const allActive=lfSpawnScope==='ALL';
+          const picker=`<div style="display:flex;gap:8px;align-items:center;margin-top:12px;">
+            <select onchange="setLFSpawnScope(this.value)" style="flex:1;background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:600;outline:none;">${opts}</select>
+            <button onclick="setLFSpawnScope('ALL')" style="padding:8px 12px;border-radius:10px;font-size:12px;font-weight:700;white-space:nowrap;background:${allActive?'#8B5CF6':'var(--surface-2)'};color:${allActive?'white':'var(--text-mut)'};border:1px solid ${allActive?'#8B5CF6':'var(--border)'};">All-time</button>
+          </div>`;
+          const head=`<div style="font-size:22px;font-weight:700;">Spawning Trials</div>
+            <div style="font-size:13px;color:var(--text-mut);">산란 결과 · ${lfSpawnScopeLabel()}</div>
+            <div class="flex items-baseline gap-2 mt-3"><span class="num" style="font-size:36px;font-weight:900;color:#8B5CF6;">${t.total>0?t.total.toLocaleString():'—'}</span><span style="font-size:13px;color:var(--text-dim);">total eggs</span></div>
+            ${picker}`;
+          const moonCard=(key,eggs,emoji,col)=>`<button onclick="openLFMoonDetail('${key}')" class="moon-card" style="--mc:${col};">
+            <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span style="font-size:20px;">${emoji}</span><span class="moon-name">${key}</span></div><span style="font-size:11px;color:var(--text-dim);">Tap for detail ›</span></div>
+            <div class="moon-eggs" style="color:${col};">${eggs>0?eggs.toLocaleString():'—'}</div>
+            <div class="moon-eggs-label">Total eggs · ${lfSpawnScopeLabel()}</div>
+          </button>`;
+          openDetailOverlay(head,`<div class="space-y-3">${moonCard('Full Moon',t.full,'🌕','#8B5CF6')}${moonCard('New Moon',t.new,'🌑','#3B82F6')}</div>`);
+        }
+        function openLFMoonDetail(moonKey){
+          rumbleDevice(25);
+          const trials=(spawnLogs||[]).filter(r=>normalizeMoon(r.moonCycle)===moonKey&&(lfSpawnScope==='ALL'||isMonthMatch(r.date,lfSpawnScope)));
+          const total=trials.reduce((s,r)=>s+(parseInt(r.totalEggs)||0),0);
+          const col=MOON_COLOR[moonKey]||'#8B5CF6',emoji=MOON_EMOJI[moonKey]||'🌙';
+          const head=`<button onclick="openLFSpawningDetail()" class="flex items-center gap-1.5 text-sm font-semibold mb-2" style="color:var(--accent);">‹ Back</button>
+            <div class="flex items-center gap-2"><span style="font-size:22px;">${emoji}</span><div><div class="text-xl font-semibold tracking-tight">${moonKey}</div><div class="text-sm" style="color:var(--text-mut);">${lfSpawnScopeLabel()} · ${trials.length} trial${trials.length!==1?'s':''}</div></div></div>
+            <div class="flex items-baseline gap-2 mt-3"><span class="num" style="font-size:32px;font-weight:900;color:${col};">${total>0?total.toLocaleString():'—'}</span><span style="font-size:13px;color:var(--text-dim);">total eggs</span></div>`;
+          const rows=[...trials].sort((a,b)=>(parseAnyDate(b.date)||0)-(parseAnyDate(a.date)||0)).map(r=>{
+            const eggs=parseInt(r.totalEggs)||0;
+            const eff=trialEffectiveOutcome(r),ec=effectiveOutcomeColor(eff);
+            return`<div class="grade-row"><div><div class="text-sm font-semibold">${fmtCleanDate(r.date)}</div><div class="text-xs" style="color:${ec};">${eff} · ${r.eggQuality||'—'} quality</div></div><div class="num text-sm font-semibold" style="color:${col};">${eggs>0?eggs.toLocaleString():'—'}</div></div>`;
+          }).join('')||'<p class="text-xs" style="color:var(--text-dim);padding:8px 0;">No trials recorded for this period.</p>';
+          openDetailOverlay(head,`<div class="card" style="padding:14px;">${rows}</div>`);
+        }
+        function lfSpawningTotals(scope){
+          scope=scope||lfSpawnScope;
           let total=0,full=0,moonNew=0;
           (spawnLogs||[]).forEach(r=>{
+            if(scope!=='ALL'&&!isMonthMatch(r.date,scope))return;
             const eggs=parseInt(r.totalEggs)||0;total+=eggs;
             const m=normalizeMoon(r.moonCycle);
             if(m==='Full Moon')full+=eggs;else if(m==='New Moon')moonNew+=eggs;
           });
           return{total,full,new:moonNew};
         }
-        function openLFSpawningDetail(){
-          rumbleDevice(30);
-          const t=lfSpawningTotals();
-          const head=`<div style="font-size:22px;font-weight:700;">Spawning Trials</div>
-            <div style="font-size:13px;color:var(--text-mut);">총 산란 결과 · All-time egg totals</div>
-            <div class="flex items-baseline gap-2 mt-3"><span class="num" style="font-size:36px;font-weight:900;color:#8B5CF6;">${t.total>0?t.total.toLocaleString():'—'}</span><span style="font-size:13px;color:var(--text-dim);">total eggs</span></div>`;
-          const moonCard=(key,eggs,emoji,col)=>`<button onclick="openLFMoonDetail('${key}')" class="moon-card" style="--mc:${col};">
-            <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span style="font-size:20px;">${emoji}</span><span class="moon-name">${key}</span></div><span style="font-size:11px;color:var(--text-dim);">Tap for detail ›</span></div>
-            <div class="moon-eggs" style="color:${col};">${eggs>0?eggs.toLocaleString():'—'}</div>
-            <div class="moon-eggs-label">Total eggs</div>
-          </button>`;
-          openDetailOverlay(head,`<div class="space-y-3">${moonCard('Full Moon',t.full,'🌕','#8B5CF6')}${moonCard('New Moon',t.new,'🌑','#3B82F6')}</div>`);
+        function lfSpawnScopeLabel(scope){
+          scope=scope||lfSpawnScope;
+          return scope==='ALL'?'All-time':monthLabel(scope);
         }
-        function openLFMoonDetail(moonKey){
-          rumbleDevice(25);
-          const trials=(spawnLogs||[]).filter(r=>normalizeMoon(r.moonCycle)===moonKey);
-          const total=trials.reduce((s,r)=>s+(parseInt(r.totalEggs)||0),0);
-          const col=MOON_COLOR[moonKey]||'#8B5CF6',emoji=MOON_EMOJI[moonKey]||'🌙';
-          const head=`<button onclick="openLFSpawningDetail()" class="flex items-center gap-1.5 text-sm font-semibold mb-2" style="color:var(--accent);">‹ Back</button>
-            <div class="flex items-center gap-2"><span style="font-size:22px;">${emoji}</span><div><div class="text-xl font-semibold tracking-tight">${moonKey}</div><div class="text-sm" style="color:var(--text-mut);">${trials.length} trial${trials.length!==1?'s':''}</div></div></div>
-            <div class="flex items-baseline gap-2 mt-3"><span class="num" style="font-size:32px;font-weight:900;color:${col};">${total>0?total.toLocaleString():'—'}</span><span style="font-size:13px;color:var(--text-dim);">total eggs</span></div>`;
-          const rows=[...trials].sort((a,b)=>(parseAnyDate(b.date)||0)-(parseAnyDate(a.date)||0)).map(r=>{
-            const eggs=parseInt(r.totalEggs)||0;
-            const eff=trialEffectiveOutcome(r),ec=effectiveOutcomeColor(eff);
-            return`<div class="grade-row"><div><div class="text-sm font-semibold">${fmtCleanDate(r.date)}</div><div class="text-xs" style="color:${ec};">${eff} · ${r.eggQuality||'—'} quality</div></div><div class="num text-sm font-semibold" style="color:${col};">${eggs>0?eggs.toLocaleString():'—'}</div></div>`;
-          }).join('')||'<p class="text-xs" style="color:var(--text-dim);padding:8px 0;">No trials recorded for this moon cycle.</p>';
-          openDetailOverlay(head,`<div class="card" style="padding:14px;">${rows}</div>`);
+        function lfSpawnMonthsAvailable(){
+          const set=new Set();
+          (spawnLogs||[]).forEach(r=>{const d=parseAnyDate(r.date);if(d)set.add(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);});
+          if(!set.has(currentMonthStr()))set.add(currentMonthStr());
+          return[...set].sort().reverse();
         }
         function openLFBiomassDetail(){
           rumbleDevice(30);
