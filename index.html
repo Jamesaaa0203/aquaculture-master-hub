@@ -530,8 +530,9 @@ function buildOTSummaryText(monthOT){
     window.handleWQData=function(data){
         ic&&ic.classList.remove('spin');
         if(data&&data.error){body.innerHTML=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Access denied — check URL / PIN.</p>`);return;}
-        if(!Array.isArray(data)||!data.length){body.innerHTML=msgCard(`<p class="text-sm">No readings yet.</p>`);return;}
+       if(!Array.isArray(data)||!data.length){body.innerHTML=msgCard(`<p class="text-sm">No readings yet.</p>`);return;}
         renderWQ(data);
+        try{ if(typeof lfMgrSubTab!=='undefined'&&lfMgrSubTab==='overview'&&document.getElementById('landfarm-data-view')&&!document.getElementById('landfarm-data-view').classList.contains('hidden')&&document.getElementById('lf-mgr-content'))renderLFMgrOverview(); }catch(e){}
     };
     const s=document.createElement('script');
     s.src=`${url}${url.includes('?')?'&':'?'}pin=${MASTER_PIN}&callback=handleWQData&_=${Date.now()}`;
@@ -591,6 +592,7 @@ function buildOTSummaryText(monthOT){
         }));
         populateMonthSelect('proc-month-select',procLogs,procMonth);
         renderProc();
+        try{ if(typeof lfMgrSubTab!=='undefined'&&(lfMgrSubTab==='sankina'||lfMgrSubTab==='overview')&&document.getElementById('landfarm-data-view')&&!document.getElementById('landfarm-data-view').classList.contains('hidden')&&document.getElementById('lf-mgr-content'))_lfMgrRender(); }catch(e){}
     };
     const s=document.createElement('script');
     s.src=`${url}${url.includes('?')?'&':'?'}action=getLogs&pin=${MASTER_PIN}&callback=handleProcData&_=${Date.now()}`;
@@ -2467,7 +2469,7 @@ function sendStockOrderMessage(){
         const LF_TARGET_BIOMASS_KG = 3000;   // 3 ton land + sea cage combined
         const LF_TARGET_PROCESSED_KG = 1500; // 1.5 ton annual
 
-        let lfData = {growth:[],mortality:[],transfer:[],cleaning:[],sankina_transport:[],sankina_baseline:[],processed_baseline:[],tank_baseline:[]};
+        let lfData = {growth:[],mortality:[],transfer:[],cleaning:[],sankina_transport:[],sankina_baseline:[],processed_baseline:[],tank_baseline:[],finished_product:[]};
         let lfActiveWorkerTab = 'tankcheck';
         let lfMgrSubTab = null; // null = showing the Land Farm sub-menu
 
@@ -2475,8 +2477,8 @@ function sendStockOrderMessage(){
         let lfTcTank='', lfTcQty='';
         let lfTfSource='', lfTfDest='', lfTfQty='', lfTfLength='';
         let lfSkDate=new Date().toISOString().split('T')[0], lfSkQty='', lfSkNotes='';
-        let lfSkSamples=[]; // {kg, pcs} — matches the paper form's 5-sample average weight section
-
+        let lfSkSamples=[]; // {kg, pcs} — matches the paper form's 5-sample average weight section         
+        let lfFpDate=new Date().toISOString().split('T')[0]; // finished-product entry date
         function lfTankLabel(n){ return 'T'+String(n).padStart(2,'0'); }
         function lfTankType(n){
           if(n===2) return 'Incubation';
@@ -2497,7 +2499,7 @@ function sendStockOrderMessage(){
               lfData={growth:data.growth||[],mortality:data.mortality||[],
                       transfer:data.transfer||[],cleaning:data.cleaning||[],
                       sankina_transport:data.sankina_transport||[],sankina_baseline:data.sankina_baseline||[],
-                      processed_baseline:data.processed_baseline||[],tank_baseline:data.tank_baseline||[]};
+                      processed_baseline:data.processed_baseline||[],tank_baseline:data.tank_baseline||[],                       finished_product:data.finished_product||[]};
               if(ic)ic.classList.remove('spin');
               renderLFWorkerTab(lfActiveWorkerTab);
               resolve();
@@ -2943,15 +2945,19 @@ function sendStockOrderMessage(){
         }
         function lfSankinaStock(){
           const b=lfGetSankinaBaseline();
-          const transportSince=lfSankinaTransportSince(b.date);
-          const liveWeightSince=b.date?lfProcFieldSince(b.date,'liveWeight'):0;
-          const yieldWeightSince=b.date?lfProcFieldSince(b.date,'yieldWeight'):0;
+          const hasBaseline=!!b.date;
+          const bd=hasBaseline?parseAnyDate(b.date):null;
+          const transportSince=hasBaseline?lfSankinaTransportSince(b.date):0;
+          const procYieldSince=hasBaseline?lfProcFieldSince(b.date,'yieldWeight'):0;
+          const fp=(lfData.finished_product||[]).filter(r=>{if(!bd)return false;const d=parseAnyDate(r.date);return d&&d>bd;});
+          const finishedRawSince=fp.reduce((s,r)=>s+(parseFloat(r.raw_kg)||0),0);
+          const finishedYieldSince=fp.reduce((s,r)=>s+(parseFloat(r.yield_kg)||0),0);
           return{
-            hasBaseline:!!b.date, baselineDate:b.date,
-            rawLand:Math.max(0,(b.raw_land_kg||0)-transportSince),
-            rawSankina:Math.max(0,(b.raw_sankina_kg||0)+transportSince-liveWeightSince),
-            finishedSankina:(b.finished_sankina_kg||0)+yieldWeightSince,
-            transportSince, liveWeightSince, yieldWeightSince
+            hasBaseline, baselineDate:b.date,
+            rawLand:Math.max(0,(b.raw_land_kg||0)+procYieldSince-transportSince),
+            rawSankina:Math.max(0,(b.raw_sankina_kg||0)+transportSince-finishedRawSince),
+            finishedSankina:(b.finished_sankina_kg||0)+finishedYieldSince,
+            transportSince, procYieldSince, finishedRawSince, finishedYieldSince
           };
         }
         async function lfSetSankinaBaseline(){
@@ -2966,6 +2972,15 @@ function sendStockOrderMessage(){
           const rawLand=parseFloat(rawLandStr),rawSankina=parseFloat(rawSankinaStr),finished=parseFloat(finishedStr);
           if(![rawLand,rawSankina,finished].every(v=>isFinite(v)&&v>=0)){alert('Please enter valid numbers ≥ 0.');return;}
           const ok=await lfPost('sankina_baseline',{date:new Date().toISOString().split('T')[0],raw_land_kg:rawLand,raw_sankina_kg:rawSankina,finished_sankina_kg:finished});
+          if(ok){rumbleDevice([40,30,70]);showLFMgrTab('sankina');}
+        }
+        async function submitLFFinishedProduct(){
+          const date=document.getElementById('lf-fp-date')?.value||lfFpDate;
+          const raw=parseFloat(document.getElementById('lf-fp-raw')?.value);
+          const yieldKg=parseFloat(document.getElementById('lf-fp-yield')?.value);
+          if(!isFinite(yieldKg)||yieldKg<=0){alert('Please enter a valid Yield / Finished weight (kg).');return;}
+          rumbleDevice(45);
+          const ok=await lfPost('finished_product',{date,raw_kg:isFinite(raw)?raw:'',yield_kg:yieldKg});
           if(ok){rumbleDevice([40,30,70]);showLFMgrTab('sankina');}
         }
 
@@ -2996,7 +3011,7 @@ function sendStockOrderMessage(){
           if(ic)ic.classList.remove('spin');
         }
         function _lfMgrShell(){
-          const tabs=[{id:'overview',icon:'📊',l:'Overview'},{id:'tanks',icon:'🧪',l:'Tanks'},{id:'growth',icon:'📈',l:'Growth'},{id:'batches',icon:'🐣',l:'Batches'},{id:'sankina',icon:'🚚',l:'Sankina'}];
+          const tabs=[{id:'overview',icon:'📊',l:'Overview'},{id:'tanks',icon:'🧪',l:'Tanks'},{id:'growth',icon:'📈',l:'Growth'},{id:'batches',icon:'🐣',l:'Batches'},{id:'sankina',icon:'🏭',l:'Processing'}];
           if(!lfMgrSubTab)lfMgrSubTab='overview';
           document.getElementById('landfarm-body').innerHTML=`
             <div style="display:flex;padding:4px;background:var(--surface-2);border:1px solid var(--border);border-radius:15px;gap:3px;overflow-x:auto;">
@@ -3052,15 +3067,13 @@ function sendStockOrderMessage(){
         /* ── Manager: OVERVIEW (hero — everything at a glance) ────────── */
         function renderLFMgrOverview(){
           const liveTotal=lfGetGlobalLive();
-          const avgSettle=lfAvgSettlement();
-          const settleCol=avgSettle==null?'var(--text-dim)':(avgSettle>=LF_TARGET_SETTLE_MIN&&avgSettle<=LF_TARGET_SETTLE_MAX)?'var(--ok)':(avgSettle<LF_TARGET_SETTLE_MIN?'var(--attention)':'var(--ok)');
           const growthRate=lfCurrentGrowthRate();
           const growthCol=growthRate==null?'var(--text-dim)':growthRate>=LF_TARGET_GROWTH_MM_DAY?'var(--ok)':growthRate>=LF_TARGET_GROWTH_MM_DAY*0.7?'var(--attention)':'var(--alert)';
           const landBiomass=lfEstimateBiomassKg();
-          const processedKg=lfProcessedThisYearKg();
-          const processedPct=Math.min(100,(processedKg/LF_TARGET_PROCESSED_KG)*100);
-          const processedBaseline=lfGetProcessedBaseline();
-          const wq=lfWQStatusBadge();
+          const finished=lfSankinaStock().finishedSankina;
+          const processedPct=Math.min(100,(finished/LF_TARGET_PROCESSED_KG)*100);
+          const wqLatest=wqSessions.length?wqSessions[0]:null;
+          const spawn=lfSpawningTotals();
 
           document.getElementById('lf-mgr-content').innerHTML=`
             <div class="card" style="padding:22px;border-left:4px solid #10B981;">
@@ -3072,51 +3085,146 @@ function sendStockOrderMessage(){
             </div>
 
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-              <div class="kpi" style="--kpi-hue:${settleCol};">
-                <div class="kpi-label">Avg Settlement</div><div class="kpi-ko ko">평균 정착률</div>
-                <div class="flex items-baseline gap-1 kpi-val" style="color:${settleCol};">${avgSettle!=null?Math.round(avgSettle).toLocaleString():'—'}</div>
-                <div class="kpi-hint">Target ${LF_TARGET_SETTLE_MIN.toLocaleString()}–${LF_TARGET_SETTLE_MAX.toLocaleString()}/tank</div>
-              </div>
               <div class="kpi" style="--kpi-hue:${growthCol};">
                 <div class="kpi-label">Growth Rate</div><div class="kpi-ko ko">성장률</div>
                 <div class="flex items-baseline gap-1 kpi-val" style="color:${growthCol};">${growthRate!=null?growthRate.toFixed(2):'—'}<span class="kpi-unit">mm/d</span></div>
-                <div class="kpi-hint">Target ${LF_TARGET_GROWTH_MM_DAY} mm/day · farm-wide</div>
+                <div class="kpi-hint">Target ${LF_TARGET_GROWTH_MM_DAY} mm/day</div>
               </div>
-            </div>
-
-            <div style="padding:16px 18px;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);">
-              <div style="display:flex;justify-content:space-between;align-items:center;">
-                <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);">Land Biomass · <span class="ko">육상 생물량</span></div>
-                <span class="num" style="font-size:16px;font-weight:800;color:#10B981;">${landBiomass.toFixed(1)} kg</span>
+              <div onclick="openLFBiomassDetail()" class="kpi" style="--kpi-hue:#10B981;cursor:pointer;">
+                <div class="kpi-label">Land Biomass</div><div class="kpi-ko ko">육상 생물량</div>
+                <div class="flex items-baseline gap-1 kpi-val" style="color:#10B981;">${landBiomass.toFixed(1)}<span class="kpi-unit">kg</span></div>
+                <div class="kpi-hint">Tap for size breakdown ›</div>
               </div>
-              <div style="font-size:10px;color:var(--text-dim);margin-top:6px;">Est. from live count × latest farm-wide shell length. Sea Cage biomass is tracked separately on its own dashboard.</div>
             </div>
 
             <div style="padding:16px 18px;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);">Processed Abalone</div>
-                <span style="font-size:11px;font-weight:700;color:#0D9488;">${processedKg.toFixed(1)} / ${LF_TARGET_PROCESSED_KG.toLocaleString()} kg</span>
+                <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);">Processed Abalone · <span class="ko">가공 전복</span></div>
+                <span style="font-size:11px;font-weight:700;color:#0D9488;">${finished.toFixed(1)} / ${LF_TARGET_PROCESSED_KG.toLocaleString()} kg · ${processedPct.toFixed(0)}%</span>
               </div>
               <div style="height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden;">
                 <div style="height:100%;width:${processedPct}%;background:#0D9488;border-radius:4px;transition:width .5s;"></div>
               </div>
               <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
-                <div style="font-size:10px;color:var(--text-dim);">${processedBaseline.date?`Baseline ${processedBaseline.kg.toFixed(1)} kg as of ${fmtCleanDate(processedBaseline.date)} + logged since`:'No baseline set — showing calendar-year estimate from Processing Log'}</div>
-                <button onclick="lfSetProcessedBaseline()" style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:8px;background:color-mix(in srgb,#0D9488 10%,transparent);color:#0D9488;border:1px solid color-mix(in srgb,#0D9488 24%,transparent);white-space:nowrap;margin-left:8px;">${processedBaseline.date?'Update':'Set stock'}</button>
+                <div style="font-size:10px;color:var(--text-dim);">Finished product at factory · from Processing tab</div>
+                <button onclick="showLFMgrTab('sankina')" style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:8px;background:color-mix(in srgb,#0D9488 10%,transparent);color:#0D9488;border:1px solid color-mix(in srgb,#0D9488 24%,transparent);white-space:nowrap;margin-left:8px;">Manage ›</button>
               </div>
             </div>
 
-            <div style="padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:center;">
-              <div>
-                <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);">Water Quality</div>
-                <div style="font-size:12px;color:var(--text-mut);margin-top:2px;">${wq?fmtCleanDate(wq.date)+' latest reading':'No WQ data yet'}</div>
+            <div class="card" style="padding:16px 18px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;${wqLatest?'margin-bottom:12px;':''}">
+                <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);">Water Quality · <span class="ko">수질</span></div>
+                <div style="font-size:11px;color:var(--text-mut);">${wqLatest?fmtCleanDate(wqLatest.date)+' avg':'No data yet'}</div>
               </div>
-              ${wq?`<span class="pill" style="background:color-mix(in srgb,${wq.ok?'var(--ok)':'var(--attention)'} 14%,transparent);color:${wq.ok?'var(--ok)':'var(--attention)'};">${wq.ok?'Stable':'Review'}</span>`:`<span class="pill" style="background:var(--surface-2);color:var(--text-dim);">—</span>`}
+              ${wqLatest?`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+                ${_lfWqMini('DO',wqLatest.do,'mg/L',2,WQ_RANGES.do)}
+                ${_lfWqMini('Temp',wqLatest.temp,'°C',1,WQ_RANGES.temp)}
+                ${_lfWqMini('Salinity',wqLatest.salinity,'ppt',0,WQ_RANGES.salinity)}
+                ${_lfWqMini('pH',wqLatest.ph,'',1,WQ_RANGES.ph)}
+              </div>`:''}
             </div>
+
+            <button onclick="openLFSpawningDetail()" class="card" style="padding:18px;border-left:4px solid #8B5CF6;text-align:left;width:100%;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div>
+                  <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8B5CF6;">Spawning Trials · <span class="ko">산란 시험</span></div>
+                  <div class="num" style="font-size:32px;font-weight:900;color:#8B5CF6;letter-spacing:-.02em;margin-top:6px;">${spawn.total>0?spawn.total.toLocaleString():'—'}</div>
+                  <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">total eggs · all-time</div>
+                </div>
+                <span style="font-size:11px;color:var(--text-dim);">Tap ›</span>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:12px;">
+                <div style="flex:1;padding:8px 10px;background:var(--surface-2);border-radius:10px;border:1px solid var(--border);text-align:center;">
+                  <div style="font-size:16px;">🌕</div>
+                  <div class="num" style="font-size:15px;font-weight:800;color:#8B5CF6;margin-top:2px;">${spawn.full>0?spawn.full.toLocaleString():'—'}</div>
+                  <div style="font-size:9px;color:var(--text-dim);">Full Moon</div>
+                </div>
+                <div style="flex:1;padding:8px 10px;background:var(--surface-2);border-radius:10px;border:1px solid var(--border);text-align:center;">
+                  <div style="font-size:16px;">🌑</div>
+                  <div class="num" style="font-size:15px;font-weight:800;color:#3B82F6;margin-top:2px;">${spawn.new>0?spawn.new.toLocaleString():'—'}</div>
+                  <div style="font-size:9px;color:var(--text-dim);">New Moon</div>
+                </div>
+              </div>
+            </button>
 
             ${lfLinkedModulesCard()}`;
         }
 
+        function _lfWqMini(label,val,unit,dp,cfg){
+          const ok=val!=null&&val>=cfg.min&&val<=cfg.max;
+          const col=val==null?'var(--text-dim)':ok?'var(--text)':'var(--attention)';
+          return `<div style="text-align:center;padding:8px 4px;background:var(--surface-2);border-radius:10px;border:1px solid var(--border);">
+            <div style="font-size:9px;font-weight:600;color:var(--text-dim);">${label}</div>
+            <div class="num" style="font-size:16px;font-weight:800;color:${col};margin-top:3px;">${val!=null?val.toFixed(dp):'—'}</div>
+            <div style="font-size:8px;color:var(--text-dim);">${unit||'&nbsp;'}</div>
+          </div>`;
+        }
+        function lfSpawningTotals(){
+          let total=0,full=0,moonNew=0;
+          (spawnLogs||[]).forEach(r=>{
+            const eggs=parseInt(r.totalEggs)||0;total+=eggs;
+            const m=normalizeMoon(r.moonCycle);
+            if(m==='Full Moon')full+=eggs;else if(m==='New Moon')moonNew+=eggs;
+          });
+          return{total,full,new:moonNew};
+        }
+        function openLFSpawningDetail(){
+          rumbleDevice(30);
+          const t=lfSpawningTotals();
+          const head=`<div style="font-size:22px;font-weight:700;">Spawning Trials</div>
+            <div style="font-size:13px;color:var(--text-mut);">총 산란 결과 · All-time egg totals</div>
+            <div class="flex items-baseline gap-2 mt-3"><span class="num" style="font-size:36px;font-weight:900;color:#8B5CF6;">${t.total>0?t.total.toLocaleString():'—'}</span><span style="font-size:13px;color:var(--text-dim);">total eggs</span></div>`;
+          const moonCard=(key,eggs,emoji,col)=>`<button onclick="openLFMoonDetail('${key}')" class="moon-card" style="--mc:${col};">
+            <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span style="font-size:20px;">${emoji}</span><span class="moon-name">${key}</span></div><span style="font-size:11px;color:var(--text-dim);">Tap for detail ›</span></div>
+            <div class="moon-eggs" style="color:${col};">${eggs>0?eggs.toLocaleString():'—'}</div>
+            <div class="moon-eggs-label">Total eggs</div>
+          </button>`;
+          openDetailOverlay(head,`<div class="space-y-3">${moonCard('Full Moon',t.full,'🌕','#8B5CF6')}${moonCard('New Moon',t.new,'🌑','#3B82F6')}</div>`);
+        }
+        function openLFMoonDetail(moonKey){
+          rumbleDevice(25);
+          const trials=(spawnLogs||[]).filter(r=>normalizeMoon(r.moonCycle)===moonKey);
+          const total=trials.reduce((s,r)=>s+(parseInt(r.totalEggs)||0),0);
+          const col=MOON_COLOR[moonKey]||'#8B5CF6',emoji=MOON_EMOJI[moonKey]||'🌙';
+          const head=`<button onclick="openLFSpawningDetail()" class="flex items-center gap-1.5 text-sm font-semibold mb-2" style="color:var(--accent);">‹ Back</button>
+            <div class="flex items-center gap-2"><span style="font-size:22px;">${emoji}</span><div><div class="text-xl font-semibold tracking-tight">${moonKey}</div><div class="text-sm" style="color:var(--text-mut);">${trials.length} trial${trials.length!==1?'s':''}</div></div></div>
+            <div class="flex items-baseline gap-2 mt-3"><span class="num" style="font-size:32px;font-weight:900;color:${col};">${total>0?total.toLocaleString():'—'}</span><span style="font-size:13px;color:var(--text-dim);">total eggs</span></div>`;
+          const rows=[...trials].sort((a,b)=>(parseAnyDate(b.date)||0)-(parseAnyDate(a.date)||0)).map(r=>{
+            const eggs=parseInt(r.totalEggs)||0;
+            const eff=trialEffectiveOutcome(r),ec=effectiveOutcomeColor(eff);
+            return`<div class="grade-row"><div><div class="text-sm font-semibold">${fmtCleanDate(r.date)}</div><div class="text-xs" style="color:${ec};">${eff} · ${r.eggQuality||'—'} quality</div></div><div class="num text-sm font-semibold" style="color:${col};">${eggs>0?eggs.toLocaleString():'—'}</div></div>`;
+          }).join('')||'<p class="text-xs" style="color:var(--text-dim);padding:8px 0;">No trials recorded for this moon cycle.</p>';
+          openDetailOverlay(head,`<div class="card" style="padding:14px;">${rows}</div>`);
+        }
+        function openLFBiomassDetail(){
+          rumbleDevice(30);
+          let wl;try{wl=scLoadWLTable();}catch(e){wl=[{length:0.5,weight:0.0833}];}
+          const series=lfFarmGrowthSeries();
+          const avgLen=series.length?series[series.length-1].len:null;
+          const totalLive=lfGetGlobalLive();
+          const biomass=lfEstimateBiomassKg();
+          const avgWtPer=avgLen!=null?scEstimateWeight(avgLen,wl):null;
+          const fmtW=w=>w==null?'—':(w<1?(w*1000).toFixed(1)+' mg':w.toFixed(3)+' g');
+          const head=`<div style="font-size:22px;font-weight:700;">Land Biomass</div>
+            <div style="font-size:13px;color:var(--text-mut);">육상 생물량 · Average weight by size</div>
+            <div class="flex items-baseline gap-2 mt-3"><span class="num" style="font-size:34px;font-weight:900;color:#10B981;">${biomass.toFixed(1)}</span><span style="font-size:14px;color:var(--text-dim);">kg total</span></div>`;
+          const sizes=[];for(let L=0.5;L<=3.001;L+=0.25)sizes.push(Math.round(L*100)/100);
+          const rows=sizes.map(L=>{
+            const w=scEstimateWeight(L,wl);
+            const isCur=avgLen!=null&&Math.abs(L-avgLen)<0.125;
+            return`<div class="grade-row" style="${isCur?'background:color-mix(in srgb,#10B981 8%,transparent);border-radius:8px;padding-left:8px;padding-right:8px;':''}"><div><div class="text-sm font-semibold">${L.toFixed(2)} cm${isCur?' <span style="font-size:10px;color:#10B981;font-weight:700;">← farm avg</span>':''}</div></div><div class="num text-sm font-semibold" style="color:#10B981;">${fmtW(w)}</div></div>`;
+          }).join('');
+          openDetailOverlay(head,`<div class="info-grid mb-3">
+              <div class="info-item"><div class="info-key">Farm Avg Length</div><div class="info-val" style="color:#10B981;">${avgLen!=null?avgLen.toFixed(2)+' cm':'—'}</div></div>
+              <div class="info-item"><div class="info-key">Avg Weight / pc</div><div class="info-val" style="color:#10B981;">${fmtW(avgWtPer)}</div></div>
+              <div class="info-item"><div class="info-key">Total Live</div><div class="info-val">${totalLive.toLocaleString()}</div></div>
+              <div class="info-item"><div class="info-key">Total Biomass</div><div class="info-val" style="color:#10B981;">${biomass.toFixed(1)} kg</div></div>
+            </div>
+            <div class="eyebrow mb-2">Weight at Length · <span class="ko">크기별 평균 무게</span></div>
+            <div class="card" style="padding:14px;">${rows}</div>
+            <p class="text-xs mt-3 px-1" style="color:var(--text-dim);">Estimated from the shared weight-at-length curve (calibrated with Sea Cage field data). Add or edit calibration points in Sea Cage → Biomass.</p>`);
+        }
+        
         /* ── Manager: TANKS — physical floor-plan layout ─────────────────
            Two columns matching the real room: odd tanks (T1,T3,T5…T79)
            on the left, even tanks (T2,T4…T80) on the right, a walkway
@@ -3257,7 +3365,7 @@ function sendStockOrderMessage(){
         }
 
         /* ── Manager: SANKINA (raw/finished stock + transport history) ─── */
-        function renderLFMgrSankina(){
+       function renderLFMgrSankina(){
           const s=lfSankinaStock();
           const tile=(label,ko,val,col)=>`<div class="kpi" style="--kpi-hue:${col};">
             <div class="kpi-label">${label}</div><div class="kpi-ko ko">${ko}</div>
@@ -3281,21 +3389,55 @@ function sendStockOrderMessage(){
               ${r.notes?`<div style="font-size:10.5px;color:var(--text-dim);margin-top:3px;font-style:italic;">${r.notes}</div>`:''}
             </div>`;
           }).join('');
+          const fp=[...(lfData.finished_product||[])].sort((a,b)=>new Date(b.date)-new Date(a.date));
+          const fpCards=fp.slice(0,25).map(r=>{
+            const raw=parseFloat(r.raw_kg)||0,yld=parseFloat(r.yield_kg)||0;
+            const pct=raw>0?(yld/raw*100).toFixed(1):null;
+            return`<div style="padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="font-size:13px;font-weight:600;">${fmtCleanDate(r.date)}</div>
+                <span class="num" style="font-size:15px;font-weight:800;color:#0D9488;">${yld.toFixed(1)} kg</span>
+              </div>
+              <div style="font-size:10.5px;color:var(--text-mut);margin-top:3px;">Raw in: ${raw>0?raw.toFixed(1)+' kg':'—'}${pct!=null?' · yield '+pct+'%':''}</div>
+            </div>`;
+          }).join('');
 
           document.getElementById('lf-mgr-content').innerHTML=`
             ${!s.hasBaseline?`<div class="card" style="padding:16px;border-left:4px solid var(--attention);">
               <p class="text-sm font-semibold" style="color:var(--attention);">No stock count set yet</p>
-              <p class="text-xs mt-1" style="color:var(--text-mut);">Tap "Update Stock Count" below to enter today's actual raw & finished stock. Everything logged after that point will track automatically.</p>
+              <p class="text-xs mt-1" style="color:var(--text-mut);">Tap "Update Stock Count" to enter today's actual raw & finished stock. From that point, Processing Log yield, transport, and finished entries track automatically.</p>
             </div>`:''}
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
               ${tile('Raw · Land Farm','육상 원료',s.rawLand,'#10B981')}
               ${tile('Raw · Sankina','산키나 원료',s.rawSankina,'#F97316')}
             </div>
             ${tile('Finished · Sankina','산키나 완제품',s.finishedSankina,'#0D9488')}
-            <div style="padding:12px 14px;background:var(--surface-2);border-radius:12px;border:1px solid var(--border);">
-              <div style="font-size:11px;color:var(--text-mut);">${s.hasBaseline?`Baseline set ${fmtCleanDate(s.baselineDate)} · ${s.transportSince.toFixed(1)} kg shipped · ${s.liveWeightSince.toFixed(1)} kg cooked · ${s.yieldWeightSince.toFixed(1)} kg produced since`:'No baseline yet — all figures show as 0.'}</div>
+            <div style="padding:12px 14px;background:var(--surface-2);border-radius:12px;border:1px solid var(--border);font-size:11px;color:var(--text-mut);line-height:1.6;">
+              ${s.hasBaseline?`Since baseline (${fmtCleanDate(s.baselineDate)}): +${s.procYieldSince.toFixed(1)} kg processed, −${s.transportSince.toFixed(1)} kg shipped, ${s.finishedYieldSince.toFixed(1)} kg finished.`:'No baseline yet — all figures show as 0 until you set one.'}
             </div>
-            <button onclick="lfSetSankinaBaseline()" style="width:100%;padding:13px;background:#F97316;color:white;font-weight:700;border-radius:12px;font-size:13px;">📋 Update Stock Count</button>
+            <button onclick="lfSetSankinaBaseline()" style="width:100%;padding:13px;background:var(--surface-2);color:var(--text-mut);border:1.5px solid var(--border-2);font-weight:700;border-radius:12px;font-size:13px;">📋 Update Stock Count (reset baseline)</button>
+
+            <div class="card" style="padding:18px;">
+              <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#0D9488;margin-bottom:4px;">Add Finished Product · <span class="ko">완제품 추가</span></div>
+              <p style="font-size:11px;color:var(--text-dim);margin-bottom:14px;">Log each finished batch from Sankina. Deducts raw from factory stock, adds yield to finished — auto-totalled above.</p>
+              <label class="eyebrow" style="display:block;margin-bottom:6px;">Date</label>
+              <input type="date" id="lf-fp-date" value="${lfFpDate}" oninput="lfFpDate=this.value" class="gas-input" style="margin-bottom:14px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;">
+                <div><label class="eyebrow" style="display:block;margin-bottom:6px;">Raw In (kg)</label>
+                <input type="number" step="0.1" inputmode="decimal" id="lf-fp-raw" placeholder="e.g. 100" class="gas-input"></div>
+                <div><label class="eyebrow" style="display:block;margin-bottom:6px;">Yield / Finished (kg)</label>
+                <input type="number" step="0.1" inputmode="decimal" id="lf-fp-yield" placeholder="e.g. 55" class="gas-input"></div>
+              </div>
+              <button onclick="submitLFFinishedProduct()" style="width:100%;padding:14px;background:#0D9488;color:white;font-weight:700;border-radius:12px;font-size:14px;">Add Finished Product →</button>
+            </div>
+
+            ${fp.length?`<div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding:0 2px;">
+                <div class="eyebrow">Finished Product History · <span class="ko">완제품 이력</span></div>
+                <span style="font-size:10px;color:var(--text-dim);">${fp.length} batch${fp.length!==1?'es':''}</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;">${fpCards}</div>
+            </div>`:''}
 
             <div>
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding:0 2px;">
@@ -3304,9 +3446,8 @@ function sendStockOrderMessage(){
               </div>
               <div style="display:flex;flex-direction:column;gap:8px;">${transportCards||msgCard('<p class="text-sm" style="color:var(--text-dim);">No shipments logged yet.</p>')}</div>
             </div>
-            <p style="font-size:10.5px;color:var(--text-dim);">Note: Finished @ Sankina only increases (from Processing Log yield) — there's no "collected/sold" log yet, so reset it with Update Stock Count whenever product actually leaves.</p>`;
+            <p style="font-size:10.5px;color:var(--text-dim);line-height:1.6;">Flow: Processing Log yield → Raw @ Land Farm. Transport → moves raw to factory. Finished Product entry → deducts factory raw, adds finished. "Update Stock Count" resets all three to a fresh baseline.</p>`;
         }
-
   
          /* ── Farm Specs Overlay ──────────────────────────────── */         function openFarmSpecs(){           document.getElementById('farmSpecsOverlay').classList.remove('hidden');           document.body.style.overflow='hidden';           rumbleDevice(30);         }         function closeFarmSpecs(){           document.getElementById('farmSpecsOverlay').classList.add('hidden');           document.body.style.overflow='';         }         document.addEventListener('keydown',function(e){if(e.key==='Escape')closeFarmSpecs();});           if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
