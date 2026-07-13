@@ -2466,7 +2466,7 @@ function sendStockOrderMessage(){
         const LF_TARGET_BIOMASS_KG = 3000;   // 3 ton land + sea cage combined
         const LF_TARGET_PROCESSED_KG = 1500; // 1.5 ton annual
 
-        let lfData = {growth:[],mortality:[],transfer:[],cleaning:[],sankina_transport:[],sankina_baseline:[],processed_baseline:[],tank_baseline:[],finished_product:[]};
+        let lfData = {growth:[],mortality:[],transfer:[],cleaning:[],sankina_transport:[],sankina_baseline:[],processed_baseline:[],tank_baseline:[],finished_product:[],length_baseline:[]};
         let lfActiveWorkerTab = 'tankcheck';
         let lfMgrSubTab = null; // null = showing the Land Farm sub-menu
 
@@ -2497,7 +2497,7 @@ function sendStockOrderMessage(){
               lfData={growth:data.growth||[],mortality:data.mortality||[],
                       transfer:data.transfer||[],cleaning:data.cleaning||[],
                       sankina_transport:data.sankina_transport||[],sankina_baseline:data.sankina_baseline||[],
-                      processed_baseline:data.processed_baseline||[],tank_baseline:data.tank_baseline||[],                       finished_product:data.finished_product||[]};
+                      processed_baseline:data.processed_baseline||[],tank_baseline:data.tank_baseline||[],                       finished_product:data.finished_product||[],length_baseline:data.length_baseline||[]};
               if(ic)ic.classList.remove('spin');
               renderLFWorkerTab(lfActiveWorkerTab);
               resolve();
@@ -2856,13 +2856,29 @@ function sendStockOrderMessage(){
           if(!rows.length)return null;
           return rows.reduce((s,r)=>s+r.settled,0)/rows.length;
         }
+        function lfGetLengthBaseline(){
+          const rows=(lfData.length_baseline||[]).filter(r=>r.date);
+          if(!rows.length) return null;
+          return[...rows].sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+        }
         function lfEstimateBiomassKg(){
-          // NOTE: since the Growth log now stores rate (mm/day) instead of
-          // absolute shell length (cm), we no longer have a valid length to
-          // feed into the weight-length lookup below. Returning 0 rather
-          // than silently computing a wrong number from a rate value.
-          // See James: pending decision on how to source current avg length.
-          return 0;
+          let wl;try{wl=scLoadWLTable();}catch(e){wl=[{length:0.5,weight:0.0833}];}
+          const baseline=lfGetLengthBaseline();
+          const avgLen=baseline?parseFloat(baseline.avg_length_cm):null;
+          if(!avgLen)return 0;
+          let totalLive=0;
+          for(let n=1;n<=LF_TANK_TOTAL;n++)totalLive+=lfTankMetrics(lfTankLabel(n)).live;
+          try{return(totalLive*scEstimateWeight(avgLen,wl))/1000;}catch(e){return 0;}
+        }
+        async function lfSetLengthBaseline(){
+          rumbleDevice(35);
+          const baseline=lfGetLengthBaseline();
+          const valStr=prompt('Current average shell length across the farm (cm), from physical measurement:', baseline?baseline.avg_length_cm:'');
+          if(valStr===null)return; // cancelled
+          const val=parseFloat(valStr);
+          if(!isFinite(val)||val<=0){alert('Please enter a valid length in cm.');return;}
+          const ok=await lfPost('length_baseline',{date:new Date().toISOString().split('T')[0],avg_length_cm:val});
+          if(ok){rumbleDevice([40,30,70]);openLFBiomassDetail();}
         }
         function scEstimateCurrentBiomassKg(){
           try{
@@ -3218,7 +3234,10 @@ function sendStockOrderMessage(){
         function openLFBiomassDetail(){
           rumbleDevice(30);
           let wl;try{wl=scLoadWLTable();}catch(e){wl=[{length:0.5,weight:0.0833}];}
-          const avgLen=null; // no longer sourced from Growth log — see James re: pending decision
+          const baseline=lfGetLengthBaseline();
+          const avgLen=baseline?parseFloat(baseline.avg_length_cm):null;
+          const daysSince=baseline?lfDaysSince(baseline.date):null;
+          const stale=daysSince==null||daysSince>14;
           const totalLive=lfGetGlobalLive();
           const biomass=lfEstimateBiomassKg();
           const avgWtPer=avgLen!=null?scEstimateWeight(avgLen,wl):null;
@@ -3226,13 +3245,18 @@ function sendStockOrderMessage(){
           const head=`<div style="font-size:22px;font-weight:700;">Land Biomass</div>
             <div style="font-size:13px;color:var(--text-mut);">육상 생물량 · Average weight by size</div>
             <div class="flex items-baseline gap-2 mt-3"><span class="num" style="font-size:34px;font-weight:900;color:#10B981;">${biomass.toFixed(1)}</span><span style="font-size:14px;color:var(--text-dim);">kg total</span></div>`;
+          const staleNote=baseline
+            ?`<div style="padding:10px 12px;background:${stale?'rgba(217,119,6,.1)':'rgba(16,185,129,.08)'};border:1px solid ${stale?'rgba(217,119,6,.3)':'rgba(16,185,129,.25)'};border-radius:10px;font-size:11px;color:${stale?'var(--attention)':'#0f766e'};margin-bottom:10px;">${stale?'⚠️':'✓'} Last measured ${fmtCleanDate(baseline.date)} (${daysSince}d ago)${stale?' — due for a re-check (biweekly)':''}.</div>`
+            :`<div style="padding:10px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;font-size:11px;color:var(--text-dim);margin-bottom:10px;">No avg shell length recorded yet — biomass will show 0 until set.</div>`;
           const sizes=[];for(let L=0.5;L<=3.001;L+=0.25)sizes.push(Math.round(L*100)/100);
           const rows=sizes.map(L=>{
             const w=scEstimateWeight(L,wl);
             const isCur=avgLen!=null&&Math.abs(L-avgLen)<0.125;
             return`<div class="grade-row" style="${isCur?'background:color-mix(in srgb,#10B981 8%,transparent);border-radius:8px;padding-left:8px;padding-right:8px;':''}"><div><div class="text-sm font-semibold">${L.toFixed(2)} cm${isCur?' <span style="font-size:10px;color:#10B981;font-weight:700;">← farm avg</span>':''}</div></div><div class="num text-sm font-semibold" style="color:#10B981;">${fmtW(w)}</div></div>`;
           }).join('');
-          openDetailOverlay(head,`<div class="info-grid mb-3">
+          openDetailOverlay(head,`${staleNote}
+            <button onclick="lfSetLengthBaseline()" style="width:100%;padding:11px;background:#10B981;color:white;font-weight:700;border-radius:10px;font-size:13px;margin-bottom:14px;">📏 Update Avg Shell Length</button>
+            <div class="info-grid mb-3">
               <div class="info-item"><div class="info-key">Farm Avg Length</div><div class="info-val" style="color:#10B981;">${avgLen!=null?avgLen.toFixed(2)+' cm':'—'}</div></div>
               <div class="info-item"><div class="info-key">Avg Weight / pc</div><div class="info-val" style="color:#10B981;">${fmtW(avgWtPer)}</div></div>
               <div class="info-item"><div class="info-key">Total Live</div><div class="info-val">${totalLive.toLocaleString()}</div></div>
