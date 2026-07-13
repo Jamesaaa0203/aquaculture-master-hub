@@ -1459,12 +1459,22 @@ let scTfDate = new Date().toISOString().split('T')[0],scTfUnit='',scTfPetak='1',
 let scMortType='harian',scMortUnit='',scMortPetak='1',scMortQty='',scMortBatch='';
 let scGrUnit='',scGrPetak='1',scSamples=[],scGrDate=new Date().toISOString().split('T')[0];
  
-/* ── Biomass localStorage ─────────────────────────────────────────── */
+/* ── Biomass: Weight-at-Length calibration (shared across all phones,
+   synced via the Land Farm GAS backend — same list feeds both the
+   Sea Cage Biomass tab and the Land Farm Biomass card) ────────────── */
 function scLoadWLTable() {
-  try { const r=localStorage.getItem(SC_BIO_WL_KEY); if(r) return JSON.parse(r); } catch(e){}
+  const rows=lfData.wl_calibration||[];
+  if(rows.length){
+    try{
+      const parsed=JSON.parse(rows[rows.length-1].table_json);
+      if(Array.isArray(parsed)&&parsed.length) return parsed;
+    }catch(e){}
+  }
   return [{length:0.5,weight:0.0833,source:'Field Jun 2026'}];
 }
-function scSaveWLTable(t){ try{localStorage.setItem(SC_BIO_WL_KEY,JSON.stringify(t));}catch(e){} }
+async function scSaveWLTable(t){
+  await lfPost('wl_calibration',{table_json:JSON.stringify(t)});
+}
 function scLoadBioClasses() {
   try { const r=localStorage.getItem(SC_BIO_CLASSES_KEY); if(r) return JSON.parse(r); } catch(e){}
   return [{length:0.5,count:0}];
@@ -1986,6 +1996,11 @@ function showSCMgrTab(tab){
     const b=document.getElementById('sc-mgr-tab-'+t);
     if(b){b.style.background=t===tab?'var(--accent)':'';b.style.color=t===tab?'white':'var(--text-mut)';}
   });
+  if(tab==='biomass'){
+    // Weight-at-length calibration is now shared/synced via the Land
+    // Farm backend, so make sure it's loaded before rendering.
+    lfEnsureDataLoaded().then(()=>{ if(scMgrSubTab==='biomass') _scMgrRender(); });
+  }
   _scMgrRender();
 }
 function _scMgrRender(){
@@ -2249,6 +2264,7 @@ function renderSCMgrBiomass(){
         <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);">Weight-at-Length Reference</div>
         <button onclick="scBioAddWLPrompt()" style="font-size:11px;padding:5px 10px;background:rgba(14,165,233,.1);color:#0EA5E9;border-radius:8px;font-weight:700;">+ Add Point</button>
       </div>
+      <p style="font-size:10px;color:var(--text-dim);margin-bottom:8px;">🔄 Shared across all phones — edits here sync everywhere, including the Land Farm Biomass card.</p>
       ${wlRows}
     </div>
  
@@ -2291,15 +2307,22 @@ function scBioAddClass(){
 function scBioRemoveClass(i){
   const cls=scLoadBioClasses();cls.splice(i,1);if(!cls.length)cls.push({length:0,count:0});scSaveBioClasses(cls);renderSCMgrBiomass();
 }
-function scBioRemoveWL(i){
-  const wl=scLoadWLTable();if(wl.length<=1){alert('Must keep at least one calibration point.');return;}wl.splice(i,1);scSaveWLTable(wl);renderSCMgrBiomass();
+async function scBioRemoveWL(i){
+  const wl=scLoadWLTable();if(wl.length<=1){alert('Must keep at least one calibration point.');return;}
+  wl.splice(i,1);
+  rumbleDevice(30);
+  await scSaveWLTable(wl);
+  renderSCMgrBiomass();
 }
-function scBioAddWLPrompt(){
+async function scBioAddWLPrompt(){
   const l=parseFloat(prompt('Shell length (cm):', ''));if(!l||l<=0)return;
   const w=parseFloat(prompt('Average weight at that length (g):', ''));if(!w||w<=0)return;
   const src=prompt('Source / date:', 'Field measurement')||'Field measurement';
   const wl=scLoadWLTable();wl.push({length:l,weight:w,source:src});
-  wl.sort((a,b)=>a.length-b.length);scSaveWLTable(wl);renderSCMgrBiomass();
+  wl.sort((a,b)=>a.length-b.length);
+  rumbleDevice([40,30,70]);
+  await scSaveWLTable(wl);
+  renderSCMgrBiomass();
 }
         /* ═══════════════════════════════════════════════════════
    FARM STOCK CHECK — Native Manager Dashboard
@@ -2466,7 +2489,8 @@ function sendStockOrderMessage(){
         const LF_TARGET_BIOMASS_KG = 3000;   // 3 ton land + sea cage combined
         const LF_TARGET_PROCESSED_KG = 1500; // 1.5 ton annual
 
-        let lfData = {growth:[],mortality:[],transfer:[],cleaning:[],sankina_transport:[],sankina_baseline:[],processed_baseline:[],tank_baseline:[],finished_product:[],length_baseline:[]};
+        let lfData = {growth:[],mortality:[],transfer:[],cleaning:[],sankina_transport:[],sankina_baseline:[],processed_baseline:[],tank_baseline:[],finished_product:[],length_baseline:[],wl_calibration:[]};
+        let _lfDataLoaded = false; // set true once fetchLFData completes at least once — lets other modules (e.g. Sea Cage Biomass tab) know it's safe to read lfData
         let lfActiveWorkerTab = 'tankcheck';
         let lfMgrSubTab = null; // null = showing the Land Farm sub-menu
 
@@ -2497,7 +2521,9 @@ function sendStockOrderMessage(){
               lfData={growth:data.growth||[],mortality:data.mortality||[],
                       transfer:data.transfer||[],cleaning:data.cleaning||[],
                       sankina_transport:data.sankina_transport||[],sankina_baseline:data.sankina_baseline||[],
-                      processed_baseline:data.processed_baseline||[],tank_baseline:data.tank_baseline||[],                       finished_product:data.finished_product||[],length_baseline:data.length_baseline||[]};
+                      processed_baseline:data.processed_baseline||[],tank_baseline:data.tank_baseline||[],                       finished_product:data.finished_product||[],length_baseline:data.length_baseline||[],
+                      wl_calibration:data.wl_calibration||[]};
+              _lfDataLoaded=true;
               if(ic)ic.classList.remove('spin');
               renderLFWorkerTab(lfActiveWorkerTab);
               resolve();
@@ -2508,6 +2534,10 @@ function sendStockOrderMessage(){
             document.body.appendChild(s);
             s.onload=function(){ s.remove(); };
           });
+        }
+        function lfEnsureDataLoaded(){
+          if(_lfDataLoaded) return Promise.resolve();
+          return fetchLFData(false);
         }
         async function lfPost(type,payload){
           const url=getGasUrl('land-farm');
