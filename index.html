@@ -3241,7 +3241,7 @@ function sendStockOrderMessage(){
           const totalLive=lfGetGlobalLive();
           const biomass=lfEstimateBiomassKg();
           const avgWtPer=avgLen!=null?scEstimateWeight(avgLen,wl):null;
-          const fmtW=w=>w==null?'—':(w<1?(w*1000).toFixed(1)+' mg':w.toFixed(3)+' g');
+          const fmtW=w=>w==null?'—':w.toFixed(3)+' g';
           const head=`<div style="font-size:22px;font-weight:700;">Land Biomass</div>
             <div style="font-size:13px;color:var(--text-mut);">육상 생물량 · Average weight by size</div>
             <div class="flex items-baseline gap-2 mt-3"><span class="num" style="font-size:34px;font-weight:900;color:#10B981;">${biomass.toFixed(1)}</span><span style="font-size:14px;color:var(--text-dim);">kg total</span></div>`;
