@@ -1457,7 +1457,7 @@ let scMortRptOffset    = 0;
  
 let scTfDate = new Date().toISOString().split('T')[0],scTfUnit='',scTfPetak='1',scTfSize='0.5 - 0.8',scTfQty='';
 let scMortType='harian',scMortUnit='',scMortPetak='1',scMortQty='',scMortBatch='';
-let scGrUnit='',scGrPetak='1',scSamples=[];
+let scGrUnit='',scGrPetak='1',scSamples=[],scGrDate=new Date().toISOString().split('T')[0];
  
 /* ── Biomass localStorage ─────────────────────────────────────────── */
 function scLoadWLTable() {
@@ -1495,7 +1495,7 @@ function scGetGlobal(){
 function scGetAvgGrowth(uId,petak){
   const logs=scData.growth?.filter(g=>+g.unitId===+uId&&String(g.petak)===String(petak));
   if(!logs?.length)return'—';
-  return(logs.reduce((s,l)=>s+parseFloat(l.length||0),0)/logs.length).toFixed(1)+' cm';
+  return(logs.reduce((s,l)=>s+parseFloat(l.length||0),0)/logs.length).toFixed(2)+' mm/d';
 }
 function scElapsedDays(){return Math.floor((new Date()-SC_EPOCH)/86400000);}
 function scCurrentWeek(){return Math.floor(scElapsedDays()/7)+1;}
@@ -1917,42 +1917,39 @@ async function submitSCPostMortality(){
 /* ── TAB 4: Growth (worker) ──────────────────────────────────────── */
 function renderSCGrowthForm(){
   const c=document.getElementById('sc-content-growth');if(!c)return;
-  const avg=scSamples.length?(scSamples.reduce((a,b)=>a+b,0)/scSamples.length).toFixed(2):null;
-  const locked=scSamples.length>0;
-  const pet=p=>`<button ${locked?'disabled':''} onclick="scGrPetak='${p}';renderSCGrowthForm()" style="flex:1;padding:10px;border-radius:11px;font-weight:700;font-size:13px;border:1.5px solid ${scGrPetak===p?'#10B981':'var(--border-2)'};background:${scGrPetak===p?'#10B981':'var(--surface)'};color:${scGrPetak===p?'white':'var(--text)'};${locked?'opacity:.4':''}">Petak ${p}</button>`;
+  const pet=p=>`<button onclick="scGrPetak='${p}';renderSCGrowthForm()" style="flex:1;padding:10px;border-radius:11px;font-weight:700;font-size:13px;border:1.5px solid ${scGrPetak===p?'#10B981':'var(--border-2)'};background:${scGrPetak===p?'#10B981':'var(--surface)'};color:${scGrPetak===p?'white':'var(--text)'};">Petak ${p}</button>`;
+  const latest=scGetAvgGrowth(scGrUnit,scGrPetak);
   c.innerHTML=`<div class="card" style="padding:24px;">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
-      <div><div style="font-size:13px;font-weight:700;color:#10B981;letter-spacing:.08em;text-transform:uppercase;">📏 Pengukuran Pertumbuhan</div>
-      <p style="font-size:11px;color:var(--text-dim);margin-top:4px;">Ukur dalam sentimeter (cm)</p></div>
-      <span style="padding:5px 12px;border-radius:999px;background:rgba(16,185,129,.12);color:#10B981;font-size:12px;font-weight:700;">${scSamples.length} sampel</span>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:16px;">
+    <div style="font-size:13px;font-weight:700;color:#10B981;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">📈 Kadar Pertumbuhan</div>
+    <p style="font-size:11px;color:var(--text-dim);margin-bottom:16px;">Satu nombor purata sahaja · mm/hari</p>
+    ${scGrUnit&&latest!=='—'?`<div style="padding:12px 16px;background:rgba(16,185,129,.08);border:1px dashed rgba(16,185,129,.3);border-radius:12px;margin-bottom:16px;">
+      <div style="font-size:11px;color:var(--text-mut);">Kadar terakhir · Unit ${scGrUnit} Petak ${scGrPetak}</div>
+      <span class="num" style="font-size:22px;font-weight:800;color:#10B981;">${latest}</span>
+    </div>`:''}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
       <div><label class="eyebrow" style="display:block;margin-bottom:6px;">Unit</label>
-      <input type="number" inputmode="numeric" ${locked?'disabled':''} id="sc-gr-unit" placeholder="1–24" value="${scGrUnit}" oninput="scGrUnit=this.value" class="gas-input" style="${locked?'opacity:.4':''}"></div>
+      <input type="number" inputmode="numeric" id="sc-gr-unit" placeholder="1–24" value="${scGrUnit}" oninput="scGrUnit=this.value" class="gas-input"></div>
       <div><label class="eyebrow" style="display:block;margin-bottom:6px;">Petak</label>
       <div style="display:flex;gap:8px;">${pet('1')}${pet('2')}</div></div>
     </div>
-    ${avg?`<div style="padding:12px 16px;background:rgba(14,165,233,.08);border:1px dashed rgba(14,165,233,.3);border-radius:12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-      <div style="font-size:13px;color:var(--text-mut);">Purata sekarang</div>
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span class="num" style="font-size:22px;font-weight:800;color:#0EA5E9;">${avg} cm</span>
-        <button onclick="scSamples=[];renderSCGrowthForm()" style="font-size:10px;background:rgba(239,68,68,.1);color:var(--alert);padding:4px 8px;border-radius:8px;font-weight:700;">Reset</button>
-      </div></div>`:''}
-    <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:12px;">
-      <div style="flex:1;"><label class="eyebrow" style="display:block;margin-bottom:6px;">Saiz Sampel Berikut (cm)</label>
-      <input type="number" step="0.01" inputmode="decimal" id="sc-gr-sample" placeholder="Contoh: 4.5" class="gas-input"></div>
-      <button onclick="scAddSample()" style="padding:10px 16px;background:var(--surface-2);border:1.5px solid var(--border-2);border-radius:11px;font-weight:700;font-size:13px;color:var(--text);white-space:nowrap;">+ Tambah</button>
-    </div>
-    ${scSamples.length?`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px;padding:10px;background:var(--surface-2);border-radius:12px;border:1px solid var(--border);max-height:80px;overflow-y:auto;">
-      ${scSamples.map((s,i)=>`<span style="font-size:10px;padding:3px 8px;border-radius:9px;background:rgba(14,165,233,.12);color:#0EA5E9;font-weight:700;">#${i+1}: ${s}cm</span>`).join('')}
-    </div>`:''}
-    <button onclick="submitSCGrowth()" ${!scSamples.length||!scGrUnit?'disabled':''}
-      style="width:100%;padding:15px;font-weight:700;border-radius:12px;font-size:14px;background:${scSamples.length&&scGrUnit?'#10B981':'var(--surface-2)'};color:${scSamples.length&&scGrUnit?'white':'var(--text-dim)'};">
-      🚀 Hantar ${scSamples.length} Sampel ke Cloud
-    </button></div>`;
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Tarikh</label>
+    <input type="date" id="sc-gr-date" value="${scGrDate}" oninput="scGrDate=this.value" class="gas-input" style="margin-bottom:16px;">
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Purata Kadar Pertumbuhan (mm/hari)</label>
+    <input type="number" step="0.01" inputmode="decimal" id="sc-gr-avg" placeholder="Contoh: 0.09" class="gas-input" style="margin-bottom:20px;">
+    <button onclick="submitSCGrowth()" style="width:100%;padding:15px;background:#10B981;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar Kadar →</button>
+  </div>`;
 }
-function scAddSample(){const v=parseFloat(document.getElementById('sc-gr-sample')?.value);if(!v||v<=0)return;scSamples=[...scSamples,v];document.getElementById('sc-gr-sample').value='';renderSCGrowthForm();}
-async function submitSCGrowth(){const unit=parseInt(document.getElementById('sc-gr-unit')?.value||scGrUnit);if(!unit||scSamples.length<1)return;rumbleDevice(45);await scPost({action:'growth_batch_log',unitId:unit,petak:scGrPetak,samples:scSamples});scSamples=[];scGrUnit='';renderSCGrowthForm();}
+async function submitSCGrowth(){
+  const unit=parseInt(document.getElementById('sc-gr-unit')?.value||scGrUnit);
+  const date=document.getElementById('sc-gr-date')?.value||scGrDate;
+  const avg=parseFloat(document.getElementById('sc-gr-avg')?.value);
+  if(!unit){alert('Sila isi Unit.');return;}
+  if(!avg){alert('Sila isi purata kadar pertumbuhan.');return;}
+  rumbleDevice(45);
+  await scPost({action:'growth_batch_log',date,unitId:unit,petak:scGrPetak,samples:[avg]});
+  document.getElementById('sc-gr-avg').value='';
+  renderSCGrowthForm();
+}
  
 /* ═══════════════════════════════════════════════════════════════════
    MANAGER VIEW
@@ -2673,28 +2670,28 @@ function sendStockOrderMessage(){
 
         /* ── Form 1: Growth (farm-wide average, logged ~biweekly) ─────── */
         function renderLFGrowthForm(){
-          const sorted=[...(lfData.growth||[])].map(g=>({date:parseAnyDate(g.date),len:parseFloat(g.avg_length_cm)})).filter(g=>g.date&&isFinite(g.len)).sort((a,b)=>a.date-b.date);
+          const sorted=[...(lfData.growth||[])].map(g=>({date:parseAnyDate(g.date),rate:parseFloat(g.avg_length_cm)})).filter(g=>g.date&&isFinite(g.rate)).sort((a,b)=>a.date-b.date);
           const latest=sorted.length?sorted[sorted.length-1]:null;
           document.getElementById('landfarm-worker-body').innerHTML=`${LF_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
-            <div style="font-size:13px;font-weight:700;color:#10B981;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">📏 Purata Pertumbuhan Ladang</div>
+            <div style="font-size:13px;font-weight:700;color:#10B981;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">📈 Kadar Pertumbuhan Ladang</div>
             <p style="font-size:11px;color:var(--text-dim);margin-bottom:16px;">Satu nombor purata untuk seluruh ladang · log setiap ~2 minggu</p>
             ${latest?`<div style="padding:12px 16px;background:rgba(16,185,129,.08);border:1px dashed rgba(16,185,129,.3);border-radius:12px;margin-bottom:16px;">
-              <div style="font-size:11px;color:var(--text-mut);">Ukuran terakhir · ${fmtCleanDate(latest.date)}</div>
-              <span class="num" style="font-size:22px;font-weight:800;color:#10B981;">${latest.len.toFixed(2)} cm</span>
+              <div style="font-size:11px;color:var(--text-mut);">Kadar terakhir · ${fmtCleanDate(latest.date)}</div>
+              <span class="num" style="font-size:22px;font-weight:800;color:#10B981;">${latest.rate.toFixed(2)} mm/hari</span>
             </div>`:''}
             <label class="eyebrow" style="display:block;margin-bottom:6px;">Tarikh</label>
             <input type="date" id="lf-gr-date" value="${lfGrDate}" oninput="lfGrDate=this.value" class="gas-input" style="margin-bottom:16px;">
-            <label class="eyebrow" style="display:block;margin-bottom:6px;">Purata Panjang Cangkerang (cm)</label>
-            <input type="number" step="0.01" inputmode="decimal" id="lf-gr-avglen" placeholder="Contoh: 1.35" class="gas-input" style="margin-bottom:20px;">
-            <button onclick="submitLFGrowth()" style="width:100%;padding:15px;background:#10B981;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar Ukuran →</button>
+            <label class="eyebrow" style="display:block;margin-bottom:6px;">Purata Kadar Pertumbuhan (mm/hari)</label>
+            <input type="number" step="0.01" inputmode="decimal" id="lf-gr-avglen" placeholder="Contoh: 0.09" class="gas-input" style="margin-bottom:20px;">
+            <button onclick="submitLFGrowth()" style="width:100%;padding:15px;background:#10B981;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar Kadar →</button>
           </div>`;
         }
         async function submitLFGrowth(){
-          const avgLen=parseFloat(document.getElementById('lf-gr-avglen')?.value);
+          const avgRate=parseFloat(document.getElementById('lf-gr-avglen')?.value);
           const date=document.getElementById('lf-gr-date')?.value||lfGrDate;
-          if(!avgLen){alert('Sila isi purata panjang cangkerang.');return;}
+          if(!avgRate){alert('Sila isi purata kadar pertumbuhan.');return;}
           rumbleDevice(45);
-          const ok=await lfPost('growth',{date,avg_length_cm:avgLen});
+          const ok=await lfPost('growth',{date,avg_length_cm:avgRate});
           if(ok){alert('Berjaya disimpan! ✓');renderLFGrowthForm();}
         }
 
@@ -2847,15 +2844,12 @@ function sendStockOrderMessage(){
           return total;
         }
         function lfFarmGrowthSeries(){
-          return[...(lfData.growth||[])].map(g=>({date:parseAnyDate(g.date),len:parseFloat(g.avg_length_cm)})).filter(g=>g.date&&isFinite(g.len)).sort((a,b)=>a.date-b.date);
+          return[...(lfData.growth||[])].map(g=>({date:parseAnyDate(g.date),rate:parseFloat(g.avg_length_cm)})).filter(g=>g.date&&isFinite(g.rate)).sort((a,b)=>a.date-b.date);
         }
         function lfCurrentGrowthRate(){
           const s=lfFarmGrowthSeries();
-          if(s.length<2)return null;
-          const first=s[0],last=s[s.length-1];
-          const days=(last.date-first.date)/86400000;
-          if(days<=0)return null;
-          return((last.len-first.len)*10)/days; // mm/day
+          if(!s.length)return null;
+          return s[s.length-1].rate; // latest logged reading, mm/day
         }
         function lfAvgSettlement(){
           const rows=lfAllTrialTankRows().filter(r=>r.settled!=null);
@@ -2863,13 +2857,12 @@ function sendStockOrderMessage(){
           return rows.reduce((s,r)=>s+r.settled,0)/rows.length;
         }
         function lfEstimateBiomassKg(){
-          let wl;try{wl=scLoadWLTable();}catch(e){wl=[{length:0.5,weight:0.0833}];}
-          const rate=lfFarmGrowthSeries();
-          const avgLen=rate.length?rate[rate.length-1].len:null;
-          if(!avgLen)return 0;
-          let totalLive=0;
-          for(let n=1;n<=LF_TANK_TOTAL;n++)totalLive+=lfTankMetrics(lfTankLabel(n)).live;
-          try{return(totalLive*scEstimateWeight(avgLen,wl))/1000;}catch(e){return 0;}
+          // NOTE: since the Growth log now stores rate (mm/day) instead of
+          // absolute shell length (cm), we no longer have a valid length to
+          // feed into the weight-length lookup below. Returning 0 rather
+          // than silently computing a wrong number from a rate value.
+          // See James: pending decision on how to source current avg length.
+          return 0;
         }
         function scEstimateCurrentBiomassKg(){
           try{
@@ -3012,7 +3005,7 @@ function sendStockOrderMessage(){
           if(ic)ic.classList.remove('spin');
         }
         function _lfMgrShell(){
-          const tabs=[{id:'overview',icon:'📊',l:'Overview'},{id:'tanks',icon:'🧪',l:'Tanks'},{id:'growth',icon:'📈',l:'Growth'},{id:'batches',icon:'🐣',l:'Batches'},{id:'sankina',icon:'🏭',l:'Processing'}];
+          const tabs=[{id:'overview',icon:'📊',l:'Overview'},{id:'tanks',icon:'🧪',l:'Tanks'},{id:'batches',icon:'🐣',l:'Batches'},{id:'sankina',icon:'🏭',l:'Processing'}];
           if(!lfMgrSubTab)lfMgrSubTab='overview';
           document.getElementById('landfarm-body').innerHTML=`
             <div style="display:flex;padding:4px;background:var(--surface-2);border:1px solid var(--border);border-radius:15px;gap:3px;overflow-x:auto;">
@@ -3026,7 +3019,7 @@ function sendStockOrderMessage(){
         function showLFMgrTab(tab){
           rumbleDevice(30);
           lfMgrSubTab=tab;
-          ['overview','tanks','growth','batches','sankina'].forEach(t=>{
+          ['overview','tanks','batches','sankina'].forEach(t=>{
             const b=document.getElementById('lf-mgr-tab-'+t);
             if(b){b.style.background=t===tab?'#10B981':'';b.style.color=t===tab?'white':'var(--text-mut)';}
           });
@@ -3036,7 +3029,6 @@ function sendStockOrderMessage(){
           if(!document.getElementById('lf-mgr-content'))return;
           if(lfMgrSubTab==='overview') renderLFMgrOverview();
           if(lfMgrSubTab==='tanks')    renderLFMgrTanks();
-          if(lfMgrSubTab==='growth')   renderLFMgrGrowth();
           if(lfMgrSubTab==='batches')  renderLFMgrBatches();
           if(lfMgrSubTab==='sankina')  renderLFMgrSankina();
         }
@@ -3086,10 +3078,10 @@ function sendStockOrderMessage(){
             </div>
 
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-              <div class="kpi" style="--kpi-hue:${growthCol};">
+              <div onclick="openLFGrowthDetail()" class="kpi" style="--kpi-hue:${growthCol};cursor:pointer;">
                 <div class="kpi-label">Growth Rate</div><div class="kpi-ko ko">성장률</div>
                 <div class="flex items-baseline gap-1 kpi-val" style="color:${growthCol};">${growthRate!=null?growthRate.toFixed(2):'—'}<span class="kpi-unit">mm/d</span></div>
-                <div class="kpi-hint">Target ${LF_TARGET_GROWTH_MM_DAY} mm/day</div>
+                <div class="kpi-hint">Tap for trend & log ›</div>
               </div>
               <div onclick="openLFBiomassDetail()" class="kpi" style="--kpi-hue:#10B981;cursor:pointer;">
                 <div class="kpi-label">Land Biomass</div><div class="kpi-ko ko">육상 생물량</div>
@@ -3226,8 +3218,7 @@ function sendStockOrderMessage(){
         function openLFBiomassDetail(){
           rumbleDevice(30);
           let wl;try{wl=scLoadWLTable();}catch(e){wl=[{length:0.5,weight:0.0833}];}
-          const series=lfFarmGrowthSeries();
-          const avgLen=series.length?series[series.length-1].len:null;
+          const avgLen=null; // no longer sourced from Growth log — see James re: pending decision
           const totalLive=lfGetGlobalLive();
           const biomass=lfEstimateBiomassKg();
           const avgWtPer=avgLen!=null?scEstimateWeight(avgLen,wl):null;
@@ -3341,24 +3332,27 @@ function sendStockOrderMessage(){
           openDetailOverlay(headHtml,bodyHtml);
         }
 
-        /* ── Manager: GROWTH (farm-wide trend chart) ──────────────────── */
-        function renderLFMgrGrowth(){
+        /* ── Manager: GROWTH (farm-wide trend chart + log, tap-through) ── */
+        function openLFGrowthDetail(){
+          rumbleDevice(30);
           const series=lfFarmGrowthSeries();
           const rate=lfCurrentGrowthRate();
           const ratio=rate!=null?rate/LF_TARGET_GROWTH_MM_DAY:null;
           const col=ratio==null?'var(--text-dim)':ratio>=1?'var(--ok)':ratio>=0.7?'var(--attention)':'var(--alert)';
-          const label=ratio==null?'No trend yet':ratio>=1?'On target':ratio>=0.7?'Slightly below':'Significantly below';
-          const vals=series.map(s=>s.len);
+          const label=ratio==null?'No readings yet':ratio>=1?'On target':ratio>=0.7?'Slightly below':'Significantly below';
+          const vals=series.map(s=>s.rate);
           const labels=series.map(s=>`${s.date.getDate()}/${s.date.getMonth()+1}`);
           const chart=buildChartSVG(vals,labels,{color:'#10B981',dp:2});
-          document.getElementById('lf-mgr-content').innerHTML=`
-            <div class="card" style="padding:18px;border-left:4px solid ${col};">
-              <div class="eyebrow" style="color:#10B981;">Current Growth Rate</div>
-              <div class="num" style="font-size:32px;font-weight:900;color:${col};margin-top:4px;">${rate!=null?rate.toFixed(2):'—'} <span style="font-size:14px;color:var(--text-dim);">mm/day</span></div>
-              <span class="pill" style="background:color-mix(in srgb,${col} 14%,transparent);color:${col};margin-top:8px;display:inline-block;">${label}</span>
-              <p style="font-size:11px;color:var(--text-dim);margin-top:8px;">Target: ${LF_TARGET_GROWTH_MM_DAY} mm/day · computed from first vs. latest farm-wide measurement.</p>
-            </div>
-            <div class="card" style="padding:14px;"><div class="eyebrow mb-2">Shell Length Trend · <span class="ko">평균 성장 추이</span></div>${chart}</div>`;
+          const head=`<div style="font-size:22px;font-weight:700;">Growth Rate</div>
+            <div style="font-size:13px;color:var(--text-mut);">성장률 · Farm-wide average growth rate</div>
+            <div class="flex items-baseline gap-2 mt-3"><span class="num" style="font-size:34px;font-weight:900;color:${col};">${rate!=null?rate.toFixed(2):'—'}</span><span style="font-size:14px;color:var(--text-dim);">mm/day</span></div>
+            <span class="pill" style="background:color-mix(in srgb,${col} 14%,transparent);color:${col};margin-top:8px;display:inline-block;">${label}</span>
+            <p style="font-size:11px;color:var(--text-dim);margin-top:8px;">Target: ${LF_TARGET_GROWTH_MM_DAY} mm/day · latest reading logged by workers.</p>`;
+          const rows=[...series].reverse().map(s=>`<div class="grade-row"><div class="text-sm font-semibold">${fmtCleanDate(s.date)}</div><div class="num text-sm font-semibold" style="color:#10B981;">${s.rate.toFixed(2)} mm/day</div></div>`).join('')||'<p class="text-xs" style="color:var(--text-dim);padding:8px 0;">No readings logged yet.</p>';
+          const body=`<div class="card" style="padding:14px;margin-bottom:12px;"><div class="eyebrow mb-2">Growth Rate Trend · <span class="ko">성장률 추이</span></div>${chart}</div>
+            <div class="eyebrow mb-2">Reading Log · <span class="ko">측정 기록</span></div>
+            <div class="card" style="padding:14px;">${rows}</div>`;
+          openDetailOverlay(head,body);
         }
 
         /* ── Manager: BATCHES (from Spawning Trials, cross-referenced) ─── */
