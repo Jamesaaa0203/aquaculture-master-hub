@@ -1976,7 +1976,10 @@ async function openSeaCageManagerView(){
 }
 async function refreshSCManagerView(){
   const ic=document.getElementById('sc-mgr-refresh-ic');if(ic)ic.classList.add('spin');
-  await fetchSCData(false);_scMgrRender();
+  const jobs=[fetchSCData(false)];
+  if(scMgrSubTab==='biomass') jobs.push(fetchLFData(false)); // pulls the latest shared WL calibration too
+  await Promise.all(jobs);
+  _scMgrRender();
   if(ic)ic.classList.remove('spin');
 }
 function _scMgrShell(){
@@ -1997,9 +2000,11 @@ function showSCMgrTab(tab){
     if(b){b.style.background=t===tab?'var(--accent)':'';b.style.color=t===tab?'white':'var(--text-mut)';}
   });
   if(tab==='biomass'){
-    // Weight-at-length calibration is now shared/synced via the Land
-    // Farm backend, so make sure it's loaded before rendering.
-    lfEnsureDataLoaded().then(()=>{ if(scMgrSubTab==='biomass') _scMgrRender(); });
+    // Weight-at-length calibration is shared/synced via the Land Farm
+    // backend and can change from any other phone at any time — so
+    // always pull a fresh copy here rather than relying on whatever
+    // was cached at page load.
+    fetchLFData(false).then(()=>{ if(scMgrSubTab==='biomass') _scMgrRender(); });
   }
   _scMgrRender();
 }
