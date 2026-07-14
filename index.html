@@ -123,6 +123,8 @@
 
         /* GAS / nav / misc */
         .gas-input { width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:9px 12px; font-size:13px; color:var(--text); outline:none; transition:border-color .2s; }
+        .ng-input { width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:9px 12px; font-size:13px; color:var(--text); outline:none; transition:border-color .2s; }
+        .ng-pill { cursor:pointer; }
         .gas-input:focus { border-color:var(--accent); }
         .gas-input::placeholder { color:var(--text-dim); }
         .navbar { background:color-mix(in srgb,var(--surface) 88%,transparent); backdrop-filter:saturate(1.4) blur(14px); -webkit-backdrop-filter:saturate(1.4) blur(14px); border-top:1px solid var(--border); padding-bottom:calc(.6rem + env(safe-area-inset-bottom)); }
@@ -186,7 +188,7 @@
             </div>
         </div>
 
-        <!-- ── FIRST-TIME SETUP CARD ─────────────────────── -->         <div id="setup-card" class="card" style="padding:20px;display:none;">             <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">                 <div style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex:none;background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);">                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>                 </div>                 <div>                     <div class="text-base font-semibold">First-Time Setup</div>                     <div class="text-xs" style="color:var(--text-mut);margin-top:1px;">Paste your module links below</div>                 </div>             </div>             <p class="text-xs mb-4" style="color:var(--text-dim);line-height:1.6;">Only fill in the modules you use. Leave others blank. This screen won't appear again on this device after you save.</p>             <div class="space-y-3">                 <div><label class="eyebrow block mb-1.5">Water Quality</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="setup-wq-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Spawning &amp; Purchasing</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"id="setup-spawning-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Processing Log</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="setup-processing-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Sea Cage Ops</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"id="setup-sc-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Hatchery HR Suite</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"id="setup-hr-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Farm Stock Check</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"id="setup-stockcheck-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Land Farm</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="setup-landfarm-url" placeholder="/exec URL" class="gas-input"></div>             </div>             <button onclick="saveSetupUrls()" class="w-full py-3 rounded-xl text-sm font-semibold text-white mt-4" style="background:var(--accent);">Save &amp; Continue →</button>         </div>          <div id="module-list" class="space-y-3"></div>
+        <!-- ── FIRST-TIME SETUP CARD ─────────────────────── -->         <div id="setup-card" class="card" style="padding:20px;display:none;">             <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">                 <div style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex:none;background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);">                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>                 </div>                 <div>                     <div class="text-base font-semibold">First-Time Setup</div>                     <div class="text-xs" style="color:var(--text-mut);margin-top:1px;">Paste your module links below</div>                 </div>             </div>             <p class="text-xs mb-4" style="color:var(--text-dim);line-height:1.6;">Only fill in the modules you use. Leave others blank. This screen won't appear again on this device after you save.</p>             <div class="space-y-3">                 <div><label class="eyebrow block mb-1.5">Water Quality</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="setup-wq-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Spawning &amp; Purchasing</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"id="setup-spawning-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Processing Log</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="setup-processing-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Sea Cage Ops</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"id="setup-sc-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Hatchery HR Suite</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"id="setup-hr-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Farm Stock Check</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"id="setup-stockcheck-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Land Farm</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="setup-landfarm-url" placeholder="/exec URL" class="gas-input"></div>                 <div><label class="eyebrow block mb-1.5">Night Guard</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="setup-ng-url" placeholder="/exec URL" class="gas-input"></div>             </div>             <button onclick="saveSetupUrls()" class="w-full py-3 rounded-xl text-sm font-semibold text-white mt-4" style="background:var(--accent);">Save &amp; Continue →</button>         </div>          <div id="module-list" class="space-y-3"></div>
     </main>
 
     <!-- ── MANAGER AUTH ───────────────────────────────────────── -->
@@ -232,7 +234,7 @@
                     <div><label class="eyebrow block mb-1.5">Spawning &amp; Purchasing</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-spawning-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
                     <div><label class="eyebrow block mb-1.5">Processing Log</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-processing-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
                     <div><label class="eyebrow block mb-1.5">Sea Cage Ops</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-sc-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div><div><label class="eyebrow block mb-1.5">Hatchery HR Suite</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-hr-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div> <div><label class="eyebrow block mb-1.5">Farm Stock Check</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-stockcheck-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
-                    <div><label class="eyebrow block mb-1.5">Land Farm</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-landfarm-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
+                    <div><label class="eyebrow block mb-1.5">Land Farm</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-landfarm-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div><div><label class="eyebrow block mb-1.5">Night Guard</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-ng-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
                     <button onclick="saveGasUrls()" class="w-full py-2.5 rounded-xl text-sm font-semibold text-white" style="background:var(--accent);">Save all URLs</button>
                     <p id="gas-save-confirm" class="hidden text-xs font-semibold text-center" style="color:var(--ok);">✓ Saved</p>
                 </div>
@@ -306,6 +308,23 @@
     <h3 class="text-2xl font-semibold tracking-tight" style="margin-top:1px;">Live Dashboard</h3>
   </div>
   <div id="seacage-body"></div>
+</div>
+
+<div id="nightguard-data-view" class="hidden flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full overflow-y-auto">
+  <div class="flex items-center justify-between gap-2">
+    <button onclick="closeView()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:var(--accent);">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"/></svg>
+      <span class="ko">뒤로</span> Menu
+    </button>
+    <button onclick="fetchNGData(true).then(renderNGManagerView)" class="icon-btn">
+      <svg id="ng-mgr-refresh-ic" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356M3.985 19.644V14.65h4.992m-4.969-3.65a8.25 8.25 0 0113.803-3.7L21 8.25m-18 7.5l3.181 3.182a8.25 8.25 0 0013.803-3.7"/></svg>
+    </button>
+  </div>
+  <div>
+    <span class="eyebrow" style="color:#7C3AED;">야간 경비 현황 · Night Guard</span>
+    <h3 class="text-2xl font-semibold tracking-tight" style="margin-top:1px;">Live Dashboard</h3>
+  </div>
+  <div id="nightguard-body"></div>
 </div>
 
         <!-- STOCK CHECK VIEW -->
@@ -469,7 +488,7 @@ function buildOTSummaryText(monthOT){
 }
 
         /* ── Worker modules ──────────────────────────────────── */
-        const MODULES=[{hue:'#10B981',action:'openLandFarmWorkerView',title:'Land Farm',bm:'Ladang Daratan',desc:'Kualiti air, pemijahan, pemprosesan & tangki',icon:lineIcon("M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082M9.75 3.104a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5")},{hue:'#0EA5E9',action:'openSeaCageWorkerView',title:'Sea Cage Ops',bm:'Operasi Sangkar Laut',desc:'Transfer, kematian & ukur pertumbuhan',icon:lineIcon("M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z")},{hue:'#6366F1',href:'https://jamesaaa0203.github.io/hatchery-hr/?v=2',title:'Hatchery HR Suite',bm:'Sumber Manusia',desc:'OT, leave & balances',icon:lineIcon("M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z")},{hue:'#F97316',
+        const MODULES=[{hue:'#10B981',action:'openLandFarmWorkerView',title:'Land Farm',bm:'Ladang Daratan',desc:'Kualiti air, pemijahan, pemprosesan & tangki',icon:lineIcon("M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082M9.75 3.104a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5")},{hue:'#0EA5E9',action:'openSeaCageWorkerView',title:'Sea Cage Ops',bm:'Operasi Sangkar Laut',desc:'Transfer, kematian & ukur pertumbuhan',icon:lineIcon("M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z")},{hue:'#6366F1',href:'https://jamesaaa0203.github.io/hatchery-hr/?v=2',title:'Hatchery HR Suite',bm:'Sumber Manusia',desc:'OT, leave & balances',icon:lineIcon("M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z")},{hue:'#7C3AED',action:'openNightGuardWorkerView',title:'Night Guard',bm:'Pengawal Malam',desc:'Syif, rondaan & laporan insiden',icon:lineIcon("M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.745 3.745 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z")},{hue:'#F97316',
   href:'https://jamesaaa0203.github.io/Stock-Checking-/',
   title:'Farm Stock Check',
   bm:'Semakan Stok Ladang',
@@ -482,19 +501,20 @@ function buildOTSummaryText(monthOT){
             {action:'landfarm',hue:'#10B981',ko:'육상 양식장 현황',title:'Land Farm',sub:'Tanks, WQ, spawning, processing & purchasing',icon:lineIcon("M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082M9.75 3.104a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5")},
             {action:'seacage',hue:'#0EA5E9',ko:'가두리 운영 현황',title:'Sea Cage Ops',sub:'Live dashboard',icon:lineIcon("M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z")},
             {action:'hr',hue:'#6366F1',ko:'인사 및 근태 관리',title:'Workforce & HR',sub:'Live dashboard',icon:lineIcon("M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z")},
-            {action:'stockcheck',hue:'#F97316',ko:'재고 관리 현황',title:'Farm Stock Check',sub:'Critical items & reorder list',icon:lineIcon("M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01")}
+            {action:'stockcheck',hue:'#F97316',ko:'재고 관리 현황',title:'Farm Stock Check',sub:'Critical items & reorder list',icon:lineIcon("M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01")},
+            {action:'nightguard',hue:'#7C3AED',ko:'야간 경비 현황',title:'Night Guard',sub:'Shifts, patrols & incidents',icon:lineIcon("M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.745 3.745 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z")}
         ];
-        const ACTION_FNS={stockcheck:()=>openStockCheckView(),wq:()=>openWaterQuality(),spawn:()=>openSpawning(),purchase:()=>openPurchasing(),processing:()=>openProcessingView(),hr:()=>openHRView(),seacage:()=>openSeaCageManagerView(),landfarm:()=>openLandFarmManagerView()};
+        const ACTION_FNS={stockcheck:()=>openStockCheckView(),wq:()=>openWaterQuality(),spawn:()=>openSpawning(),purchase:()=>openPurchasing(),processing:()=>openProcessingView(),hr:()=>openHRView(),seacage:()=>openSeaCageManagerView(),landfarm:()=>openLandFarmManagerView(),nightguard:()=>openNightGuardManagerView()};
         function renderMgrList(){const el=document.getElementById('mgr-list');if(!el)return;const tempBadge=(typeof scGetCachedTempBadge==='function')?scGetCachedTempBadge():null;el.innerHTML=MGR_VIEWS.map(v=>{const onclick=v.action?`(ACTION_FNS['${v.action}']||function(){})()`:` openManagerReport('${v.appKey}','${v.tab}')`;const sub=v.sub?`<div class="text-xs" style="color:var(--text-mut);margin-top:1px;">${v.sub}</div>`:'';const tempRow=(v.action==='seacage'&&tempBadge)?`<div class="text-xs" style="color:var(--${tempBadge.freshness});margin-top:2px;font-weight:600;">🌡 ${tempBadge.temp.toFixed(1)}°C · ${tempBadge.agoText}</div>`:'';return`<button onclick="${onclick}" class="mgr-row"><div class="flex items-center gap-3.5"><span class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:color-mix(in srgb,${v.hue} 12%,transparent);color:${v.hue};border:1px solid color-mix(in srgb,${v.hue} 24%,transparent);"><span style="width:22px;height:22px;display:inline-flex">${v.icon}</span></span><div><div class="eyebrow ko" style="color:${v.hue};">${v.ko}</div><div class="text-base font-semibold tracking-tight" style="margin-top:1px;">${v.title}</div>${sub}${tempRow}</div></div>${chevR}</button>`;}).join('');}
 
         /* ── View manager ────────────────────────────────────── */
-        const ALL_VIEWS=['wq-data-view','spawn-data-view','purchase-data-view','proc-data-view','hr-data-view','seacage-data-view','stock-data-view','landfarm-data-view','manager-report-frame'];
+        const ALL_VIEWS=['wq-data-view','spawn-data-view','purchase-data-view','proc-data-view','hr-data-view','seacage-data-view','stock-data-view','landfarm-data-view','nightguard-data-view','manager-report-frame'];
         function showView(id){document.getElementById('manager-menu-grid').classList.add('hidden');ALL_VIEWS.forEach(v=>document.getElementById(v).classList.add('hidden'));document.getElementById(id).classList.remove('hidden');}
         function closeView(){rumbleDevice(40);ALL_VIEWS.forEach(v=>document.getElementById(v).classList.add('hidden'));if(typeof _mgrViewOrigin!=='undefined'&&_mgrViewOrigin==='landfarm'){_mgrViewOrigin='menu';openLandFarmManagerView();}else{document.getElementById('manager-menu-grid').classList.remove('hidden');}}
         function openFullTab(which){const m={wq:()=>{const u=getGasUrl('daily-water-quality');return`https://jamesaaa0203.github.io/daily-water-quality/?targetTab=manager&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');},spawn:()=>{const u=getGasUrl('Abalone-Spawning-and-Purchasing-Log');return`https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/?targetTab=spawning&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');},purchase:()=>{const u=getGasUrl('Abalone-Spawning-and-Purchasing-Log');return`https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/?targetTab=purchasing&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');}};const fn=m[which];if(fn)window.open(fn(),'_blank','noopener,noreferrer');}
 
         /* ── GAS URL settings ────────────────────────────────── */
-        const GAS_KEYS={'Abalone-Spawning-and-Purchasing-Log':'mgr_spawning_gas_url','Abalone-Processing-Log':'mgr_processing_gas_url','hatchery-hr':'mgr_hr_gas_url','daily-water-quality':'mgr_wq_gas_url','sea-cage':'mgr_seacage_gas_url','farm-stock-check': 'mgr_stockcheck_gas_url','land-farm':'mgr_landfarm_gas_url',};
+        const GAS_KEYS={'Abalone-Spawning-and-Purchasing-Log':'mgr_spawning_gas_url','Abalone-Processing-Log':'mgr_processing_gas_url','hatchery-hr':'mgr_hr_gas_url','daily-water-quality':'mgr_wq_gas_url','sea-cage':'mgr_seacage_gas_url','farm-stock-check': 'mgr_stockcheck_gas_url','land-farm':'mgr_landfarm_gas_url','night-guard':'mgr_nightguard_gas_url',};
         function cleanGasUrl(v){
           // Strips ALL whitespace-like characters anywhere in the string —
           // not just leading/trailing (.trim() misses these): regular
@@ -507,9 +527,128 @@ function buildOTSummaryText(monthOT){
           return String(v||'').replace(/[\s\u00A0\u200B\u200C\u200D\uFEFF]+/g,'');
         }
         function getGasUrl(k){const key=GAS_KEYS[k];if(!key)return null;const raw=store.get(key);return raw?cleanGasUrl(raw):null;}
+
+        /* ── Shared safe-submit utility ──────────────────────────────────
+           Used by every worker/manager form's POST helper (lfPost, scPost,
+           and any future module's post function) so duplicate-submission
+           protection, button-lock, and offline queueing behave identically
+           everywhere instead of being reimplemented per module.
+
+           WHY THIS EXISTS: fetch() to GAS runs with mode:'no-cors', so the
+           browser can never read whether the server actually accepted the
+           request — catch(e) only fires on a genuine connectivity failure
+           (no signal), never on a server-side rejection. That means:
+             - A real network failure is the ONLY case we can detect here,
+               and it's exactly the case worth queueing for later (e.g. a
+               guard or worker out at the sea cages with a weak signal).
+             - The server (GAS) is the one actually responsible for
+               rejecting true duplicates — see the client_id dedup checks
+               added to every GAS file. This wrapper's job is just to make
+               sure every submission CARRIES a client_id, and to stop the
+               same submission being fired twice from a panicked re-tap. */
+
+        function generateClientId(prefix){
+          return (prefix||'sub')+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
+        }
+
+        const OFFLINE_QUEUE_KEY='app_offline_submit_queue';
+
+        function getOfflineQueue(){
+          try{ return JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY)||'[]'); }
+          catch(e){ return []; }
+        }
+        function setOfflineQueue(q){
+          try{ localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(q)); }catch(e){}
+        }
+        function queueOfflineSubmit(url, bodyObj){
+          const q=getOfflineQueue();
+          q.push({ id: generateClientId('queued'), url, body: bodyObj, queuedAt: new Date().toISOString() });
+          setOfflineQueue(q);
+          updateOfflineQueueBadge();
+        }
+
+        // Tries to resend every queued submission, in order. Successful
+        // items are removed; items that fail (still offline) stay queued
+        // for the next attempt. Safe to call repeatedly — each queued item
+        // already carries the same client_id it was created with, so the
+        // server-side dedup check treats a resend exactly like any other
+        // retry: harmless if it already went through.
+        let _flushingQueue=false;
+        async function flushOfflineQueue(){
+          if(_flushingQueue) return;
+          const q=getOfflineQueue();
+          if(!q.length) return;
+          _flushingQueue=true;
+          const remaining=[];
+          for(const item of q){
+            try{
+              await fetch(item.url,{method:'POST',mode:'no-cors',body:JSON.stringify(item.body)});
+            }catch(e){
+              remaining.push(item); // still can't reach it — keep for next attempt
+            }
+          }
+          setOfflineQueue(remaining);
+          updateOfflineQueueBadge();
+          _flushingQueue=false;
+        }
+
+        // Small non-intrusive badge, only shown when something's actually
+        // pending. Looks for #offline-queue-badge if present in the page;
+        // silently does nothing if that element hasn't been added yet, so
+        // this is safe to call from anywhere without requiring UI markup
+        // to exist first.
+        function updateOfflineQueueBadge(){
+          const n=getOfflineQueue().length;
+          const el=document.getElementById('offline-queue-badge');
+          if(!el)return;
+          if(n>0){ el.textContent=n+' menunggu dihantar'; el.classList.remove('hidden'); }
+          else{ el.classList.add('hidden'); }
+        }
+
+        window.addEventListener('online', flushOfflineQueue);
+        document.addEventListener('DOMContentLoaded', ()=>{ flushOfflineQueue(); updateOfflineQueueBadge(); });
+        setInterval(flushOfflineQueue, 30000); // safety net in case the 'online' event doesn't fire reliably on the device
+
+        // The core wrapper. `payload` gets a client_id attached under BOTH
+        // `client_id` and `clientId` keys, since different GAS backends
+        // read different casing — harmless to send both, each script just
+        // reads the one it expects.
+        //   btn: optional button element to lock while sending (falls back
+        //        to document.activeElement, which on a phone tap is
+        //        reliably the button just pressed, so most call sites don't
+        //        need to pass this explicitly).
+        //   successMsg / lang: text shown on confirmation.
+        async function submitFormSafely(url, payload, opts){
+          opts=opts||{};
+          const btn = opts.btn || (document.activeElement instanceof HTMLElement ? document.activeElement : null);
+          const originalText = btn ? btn.textContent : null;
+          const originalDisabled = btn ? btn.disabled : null;
+
+          if(!url){ alert(opts.notConfiguredMsg || 'GAS URL not configured.'); return false; }
+
+          const clientId = generateClientId(opts.prefix||'sub');
+          const body = Object.assign({}, payload, { client_id: clientId, clientId: clientId });
+
+          if(btn){ btn.disabled=true; btn.dataset._origText=originalText; btn.textContent=opts.sendingText||'Menghantar...'; }
+
+          try{
+            await fetch(url,{method:'POST',mode:'no-cors',body:JSON.stringify(body)});
+            rumbleDevice([80,50,80]);
+            if(opts.showAlert!==false) alert(opts.successMsg || 'Berjaya disimpan! ✓');
+            return true;
+          }catch(e){
+            // Genuine connectivity failure — queue it rather than losing the
+            // data or making the worker guess whether it actually sent.
+            queueOfflineSubmit(url, body);
+            alert(opts.queuedMsg || 'Tiada talian. Data disimpan & akan dihantar automatik bila online. ✓');
+            return true; // treated as "handled" from the caller's point of view — data is safe either way
+          }finally{
+            if(btn){ btn.disabled = originalDisabled===null?false:originalDisabled; btn.textContent = originalText; }
+          }
+        }
         function toggleGasSettings(){const d=document.getElementById('gas-settings-drawer'),s=document.getElementById('gas-settings-status');d.classList.toggle('hidden');s.textContent=d.classList.contains('hidden')?'Configure ▾':'Close ▴';}
-        function saveGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url','gas-sc-url':'mgr_seacage_gas_url','gas-stockcheck-url':'mgr_stockcheck_gas_url','gas-landfarm-url':'mgr_landfarm_gas_url'};for(const[id,k]of Object.entries(m)){const v=cleanGasUrl(document.getElementById(id).value);if(v)store.set(k,v);}const c=document.getElementById('gas-save-confirm');c.classList.remove('hidden');setTimeout(()=>c.classList.add('hidden'),2500);}
-        function loadSavedGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url','gas-sc-url':'mgr_seacage_gas_url','gas-stockcheck-url':'mgr_stockcheck_gas_url','gas-landfarm-url':'mgr_landfarm_gas_url'};for(const[id,k]of Object.entries(m)){const v=store.get(k);if(v)document.getElementById(id).value=v;}}
+        function saveGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url','gas-sc-url':'mgr_seacage_gas_url','gas-stockcheck-url':'mgr_stockcheck_gas_url','gas-landfarm-url':'mgr_landfarm_gas_url','gas-ng-url':'mgr_nightguard_gas_url'};for(const[id,k]of Object.entries(m)){const v=cleanGasUrl(document.getElementById(id).value);if(v)store.set(k,v);}const c=document.getElementById('gas-save-confirm');c.classList.remove('hidden');setTimeout(()=>c.classList.add('hidden'),2500);}
+        function loadSavedGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url','gas-sc-url':'mgr_seacage_gas_url','gas-stockcheck-url':'mgr_stockcheck_gas_url','gas-landfarm-url':'mgr_landfarm_gas_url','gas-ng-url':'mgr_nightguard_gas_url'};for(const[id,k]of Object.entries(m)){const v=store.get(k);if(v)document.getElementById(id).value=v;}}
 
         /* ── Overlay helpers ─────────────────────────────────── */
         function closeOverlay(id,e){if(e&&e.target!==document.getElementById(id))return;document.getElementById(id).classList.remove('open');}
@@ -1350,7 +1489,7 @@ window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{
         function rumbleDevice(d){if('vibrate'in navigator)navigator.vibrate(d);}
 
         /* ── Tabs ────────────────────────────────────────────── */
-        function switchTab(target){rumbleDevice(35);const scw=document.getElementById('seacage-worker-view');if(scw)scw.classList.add('hidden');const lfw=document.getElementById('landfarm-worker-view');if(lfw)lfw.classList.add('hidden');const ops=document.getElementById('dashboard-view'),auth=document.getElementById('manager-auth-view'),mgr=document.getElementById('manager-dashboard-view'),oBtn=document.getElementById('nav-ops-btn'),mBtn=document.getElementById('nav-mgr-btn');if(target==='ops'){ops.classList.remove('hidden');auth.classList.add('hidden');mgr.classList.add('hidden');oBtn.classList.add('active');mBtn.classList.remove('active');}else{ops.classList.add('hidden');oBtn.classList.remove('active');mBtn.classList.add('active');if(isManagerAuthenticated){mgr.classList.remove('hidden');auth.classList.add('hidden');}else{auth.classList.remove('hidden');mgr.classList.add('hidden');}}}
+        function switchTab(target){rumbleDevice(35);const scw=document.getElementById('seacage-worker-view');if(scw)scw.classList.add('hidden');const lfw=document.getElementById('landfarm-worker-view');if(lfw)lfw.classList.add('hidden');const ngw=document.getElementById('nightguard-worker-view');if(ngw)ngw.classList.add('hidden');const ops=document.getElementById('dashboard-view'),auth=document.getElementById('manager-auth-view'),mgr=document.getElementById('manager-dashboard-view'),oBtn=document.getElementById('nav-ops-btn'),mBtn=document.getElementById('nav-mgr-btn');if(target==='ops'){ops.classList.remove('hidden');auth.classList.add('hidden');mgr.classList.add('hidden');oBtn.classList.add('active');mBtn.classList.remove('active');}else{ops.classList.add('hidden');oBtn.classList.remove('active');mBtn.classList.add('active');if(isManagerAuthenticated){mgr.classList.remove('hidden');auth.classList.add('hidden');}else{auth.classList.remove('hidden');mgr.classList.add('hidden');}}}
         function populateMonthSelector(){const sel=document.getElementById('mgr-month-select'),now=new Date();sel.innerHTML='';for(let i=-1;i<=12;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);const val=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,lbl=d.toLocaleDateString('en-US',{month:'long',year:'numeric'});const o=document.createElement('option');o.value=val;o.textContent=lbl;if(i===0)o.selected=true;sel.appendChild(o);}}
         function openManagerReport(appKey,tabContext){rumbleDevice(45);showView('manager-report-frame');document.getElementById('fetch-fail-banner').classList.add('hidden');buildAndLoadURL(appKey,tabContext);}
         function buildAndLoadURL(appKey,tabContext){const month=document.getElementById('mgr-month-select').value,iframe=document.getElementById('mgr-iframe-engine');iframe.dataset.appKey=appKey;iframe.dataset.tabContext=tabContext;let url=`https://jamesaaa0203.github.io/${appKey}?targetTab=${tabContext}&pin=${MASTER_PIN}&month=${month}`;const g=getGasUrl(appKey);if(g)url+=`&gasUrl=${encodeURIComponent(g)}`;currentReportURL=url;iframe.src=url;}
@@ -1406,7 +1545,8 @@ function changePurchaseMonth(val){ rumbleDevice(25); purchaseMonth=val; renderPu
             'setup-sc-url':         'mgr_seacage_gas_url',
             'setup-hr-url':         'mgr_hr_gas_url',
             'setup-stockcheck-url': 'mgr_stockcheck_gas_url',
-            'setup-landfarm-url':   'mgr_landfarm_gas_url'
+            'setup-landfarm-url':   'mgr_landfarm_gas_url',
+            'setup-ng-url':         'mgr_nightguard_gas_url'
         };
         function initSetupCard(){
             if(store.get(SETUP_DONE_KEY)==='1') return;
@@ -1705,14 +1845,17 @@ function fetchSCData(showSpin){
     s.onload=function(){ s.remove(); };
   });
 }
-async function scPost(payload){
+async function scPost(payload,btn){
   const url=getGasUrl('sea-cage');
-  if(!url){alert('Sea Cage GAS URL not configured.\nSet it in Module GAS Connections.');return;}
-  try{
-    await fetch(url,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)});
-    rumbleDevice([80,50,80]);alert('Berjaya disimpan! ✓');
-    await fetchSCData(false);
-  }catch(e){alert('Ralat cloud. Cuba semula.');}
+  const ok=await submitFormSafely(url,payload,{
+    btn,
+    prefix:'sc',
+    notConfiguredMsg:'Sea Cage GAS URL not configured.\nSet it in Module GAS Connections.',
+    successMsg:'Berjaya disimpan! ✓',
+    queuedMsg:'Tiada talian. Data disimpan & akan dihantar automatik bila online. ✓'
+  });
+  if(ok) await fetchSCData(false);
+  return ok;
 }
  
 /* ── Worker navigation ───────────────────────────────────────────── */
@@ -2545,15 +2688,17 @@ function sendStockOrderMessage(){
           if(_lfDataLoaded) return Promise.resolve();
           return fetchLFData(false);
         }
-        async function lfPost(type,payload){
+        async function lfPost(type,payload,btn){
           const url=getGasUrl('land-farm');
-          if(!url){alert('Land Farm GAS URL not configured.\\nSet it in Module GAS Connections.');return false;}
-          try{
-            await fetch(url,{method:'POST',mode:'no-cors',body:JSON.stringify({type,...payload})});
-            rumbleDevice([80,50,80]);
-            await fetchLFData(false);
-            return true;
-          }catch(e){alert('Network error. Try again.');return false;}
+          const ok=await submitFormSafely(url,Object.assign({type},payload),{
+            btn,
+            prefix:'lf',
+            notConfiguredMsg:'Land Farm GAS URL not configured.\nSet it in Module GAS Connections.',
+            successMsg:'Berjaya disimpan! ✓',
+            queuedMsg:'Tiada talian. Data disimpan & akan dihantar automatik bila online. ✓'
+          });
+          if(ok) await fetchLFData(false);
+          return ok;
         }
 
         /* ── Worker navigation ────────────────────────────────────────── */
@@ -3692,6 +3837,365 @@ function renderUpcomingLeaves(allLeave){
     }).join('');
     return `<div class="card" style="padding:14px;"><div class="eyebrow mb-2">Upcoming Leaves · <span class="ko">예정된 휴가</span></div>${rows}</div>`;
 }
+
+/* ═══════════════════════════════════════════════════════
+   NIGHT GUARD — worker-facing forms (Malay labels)
+   GAS key: night-guard · doGet callback: handleNightGuardData
+   Data stays in fixed English codes internally — labels shown
+   here are display-only, exactly matching the codes the GAS
+   validateFields() function expects. See NG_CODE_* maps below.
+   ═══════════════════════════════════════════════════════ */
+let ngData={shift_log:[],patrol_round:[],incident:[]};
+let ngActiveTab='shift';
+const NG_GUARD_NAMES=['Lan']; // night guard roster — add more names here as guards are hired
+
+const NG_ZONE_OPTS=[['zone_a','Zon A (1-12)'],['zone_b','Zon B (13-24)'],['all','Semua']];
+const NG_WEATHER_OPTS=[['calm','Tenang'],['strong_wind','Angin Kuat'],['storm','Ribut / Hujan Lebat'],['rough_sea','Laut Bergelora']];
+const NG_YESNO_OPTS=[['yes','Ya'],['no','Tidak']];
+const NG_INCIDENT_OPTS=[['intrusion','Pencerobohan'],['theft','Kecurian'],['cage_net_damage','Kerosakan Sangkar/Jaring'],['spat_escape','Spat Terlepas'],['equipment_failure','Kerosakan Peralatan'],['other','Lain-lain']];
+const NG_SEVERITY_OPTS=[['low','Rendah'],['medium','Sederhana'],['high','Tinggi']];
+
+function ngPillGroup(name,opts,selected){
+  return opts.map(([val,label])=>
+    `<button type="button" onclick="ngSelectPill('${name}','${val}')" id="ng-pill-${name}-${val}" class="ng-pill${selected===val?' active':''}" style="flex:1;min-width:80px;padding:10px 6px;border-radius:10px;font-size:12px;font-weight:600;border:1.5px solid ${selected===val?'#7C3AED':'var(--border)'};background:${selected===val?'color-mix(in srgb,#7C3AED 14%,transparent)':'var(--surface-2)'};color:${selected===val?'#7C3AED':'var(--text-mut)'};">${label}</button>`
+  ).join('');
+}
+function ngSelectPill(name,val){
+  document.querySelectorAll(`[id^="ng-pill-${name}-"]`).forEach(el=>{
+    const isThis=el.id===`ng-pill-${name}-${val}`;
+    el.classList.toggle('active',isThis);
+    el.style.borderColor=isThis?'#7C3AED':'var(--border)';
+    el.style.background=isThis?'color-mix(in srgb,#7C3AED 14%,transparent)':'var(--surface-2)';
+    el.style.color=isThis?'#7C3AED':'var(--text-mut)';
+  });
+  ngFormState[name]=val;
+}
+let ngFormState={};
+
+async function ngPost(type,payload,btn){
+  const url=getGasUrl('night-guard');
+  const ok=await submitFormSafely(url,Object.assign({type},payload),{
+    btn,
+    prefix:'ng',
+    notConfiguredMsg:'Night Guard GAS URL not configured.\nSet it in Module GAS Connections.',
+    successMsg:'Berjaya disimpan! ✓',
+    queuedMsg:'Tiada talian. Data disimpan & akan dihantar automatik bila online. ✓'
+  });
+  if(ok) await fetchNGData(false);
+  return ok;
+}
+
+function fetchNGData(showSpin){
+  const url=getGasUrl('night-guard'), ic=document.getElementById('ng-refresh-ic');
+  if(showSpin&&ic)ic.classList.add('spin');
+  if(!url){ if(ic)ic.classList.remove('spin'); return Promise.resolve(); }
+  return new Promise((resolve)=>{
+    const _timeout=setTimeout(()=>{if(ic)ic.classList.remove('spin');resolve();},12000);
+    window.handleNightGuardData=function(data){
+      clearTimeout(_timeout);
+      ngData={shift_log:data.shift_log||[],patrol_round:data.patrol_round||[],incident:data.incident||[]};
+      if(ic)ic.classList.remove('spin');
+      showNGWorkerTab(ngActiveTab);
+      resolve();
+    };
+    const s=document.createElement('script');
+    s.src=url+(url.includes('?')?'&':'?')+'callback=handleNightGuardData&_t='+Date.now();
+    s.onerror=()=>{clearTimeout(_timeout);if(ic)ic.classList.remove('spin');resolve();};
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(),13000);
+  });
+}
+
+function openNightGuardWorkerView(){
+  rumbleDevice(45);
+  document.getElementById('dashboard-view').classList.add('hidden');
+  document.getElementById('nightguard-worker-view').classList.remove('hidden');
+  fetchNGData(false);
+  showNGWorkerTab('shift');
+}
+function closeNightGuardWorkerView(){
+  rumbleDevice(40);
+  document.getElementById('nightguard-worker-view').classList.add('hidden');
+  document.getElementById('dashboard-view').classList.remove('hidden');
+}
+
+function showNGWorkerTab(tab){
+  ngActiveTab=tab;
+  ['shift','patrol','incident'].forEach(t=>{
+    const btn=document.getElementById('ng-tab-'+t), body=document.getElementById('ng-content-'+t);
+    if(btn){btn.style.background=t===tab?'#7C3AED':'transparent';btn.style.color=t===tab?'white':'var(--text-mut)';}
+    if(body)body.classList.toggle('hidden',t!==tab);
+  });
+  if(tab==='shift') renderNGShiftForm();
+  if(tab==='patrol') renderNGPatrolForm();
+  if(tab==='incident') renderNGIncidentForm();
+}
+
+function ngGuardSelect(id){
+  return `<select id="${id}" class="ng-input"><option value="">Pilih nama...</option>${NG_GUARD_NAMES.map(n=>`<option value="${n}">${n}</option>`).join('')}</select>`;
+}
+
+function renderNGShiftForm(){
+  ngFormState={};
+  const todayLastShift=[...ngData.shift_log].filter(r=>r.event_type==='start').sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp))[0];
+  const lastOpenShift=todayLastShift && !ngData.shift_log.some(r=>r.event_type==='end'&&r.date===todayLastShift.date&&r.guard_name===todayLastShift.guard_name&&new Date(r.timestamp)>new Date(todayLastShift.timestamp));
+
+  document.getElementById('ng-content-shift').innerHTML=`
+    <div class="card" style="padding:16px;">
+      <div class="eyebrow mb-3">${lastOpenShift?'Tamat Syif · Shift End':'Mula Syif · Shift Start'}</div>
+      ${lastOpenShift?`<p class="text-xs mb-3" style="color:var(--text-mut);">Syif dibuka oleh <b>${todayLastShift.guard_name}</b> pada ${fmtCleanDate(todayLastShift.date)}</p>`:''}
+      <div class="space-y-3">
+        ${!lastOpenShift?`<div><label class="eyebrow block mb-1.5">Nama Pengawal</label>${ngGuardSelect('ng-shift-guard')}</div>`:''}
+        <div><label class="eyebrow block mb-1.5">Cuaca</label><div style="display:flex;flex-wrap:wrap;gap:6px;">${ngPillGroup('shift_weather',NG_WEATHER_OPTS,null)}</div></div>
+        <div><label class="eyebrow block mb-1.5">${lastOpenShift?'Ringkasan Syif (pilihan)':'Nota Serah Tugas (pilihan)'}</label><textarea id="ng-shift-notes" rows="2" class="ng-input" placeholder="Catatan..."></textarea></div>
+      </div>
+      <button onclick="submitNGShift(${lastOpenShift?`'${todayLastShift.guard_name}'`:'null'})" class="w-full py-3 rounded-xl text-sm font-semibold text-white mt-4" style="background:#7C3AED;">${lastOpenShift?'Tamat Syif':'Mula Syif'}</button>
+    </div>`;
+}
+
+async function submitNGShift(carryGuardName){
+  const isEnd=!!carryGuardName;
+  const guardName=isEnd?carryGuardName:document.getElementById('ng-shift-guard').value;
+  if(!guardName){alert('Sila pilih nama pengawal.');return;}
+  const weather=ngFormState['shift_weather']||'';
+  const notes=document.getElementById('ng-shift-notes').value.trim();
+  const date=new Date().toISOString().split('T')[0];
+  await ngPost(isEnd?'shift_end':'shift_start',{date,guard_name:guardName,weather,notes});
+}
+
+function renderNGPatrolForm(){
+  ngFormState={};
+  document.getElementById('ng-content-patrol').innerHTML=`
+    <div class="card" style="padding:16px;">
+      <div class="eyebrow mb-3">Rondaan · Patrol Round</div>
+      <div class="space-y-3">
+        <div><label class="eyebrow block mb-1.5">Nama Pengawal</label>${ngGuardSelect('ng-patrol-guard')}</div>
+        <div><label class="eyebrow block mb-1.5">Zon</label><div style="display:flex;flex-wrap:wrap;gap:6px;">${ngPillGroup('zone',NG_ZONE_OPTS,null)}</div></div>
+        <div><label class="eyebrow block mb-1.5">Struktur sangkar dan jaring kukuh?</label><div style="display:flex;gap:6px;">${ngPillGroup('net_intact',NG_YESNO_OPTS,null)}</div></div>
+        <div id="ng-net-note-wrap" class="hidden"><input id="ng-net-note" class="ng-input" placeholder="Catatan kerosakan..."></div>
+        <div><label class="eyebrow block mb-1.5">Aktiviti mencurigakan dilihat?</label><div style="display:flex;gap:6px;">${ngPillGroup('suspicious_activity',NG_YESNO_OPTS,null)}</div></div>
+        <div id="ng-suspicious-note-wrap" class="hidden"><input id="ng-suspicious-note" class="ng-input" placeholder="Butiran..."></div>
+        <div><label class="eyebrow block mb-1.5">Spat merangkak ke atas jaring?</label><div style="display:flex;gap:6px;">${ngPillGroup('spat_crawl',NG_YESNO_OPTS,null)}</div></div>
+        <div id="ng-spat-detail-wrap" class="hidden"><input id="ng-spat-detail" class="ng-input" placeholder="Sangkar mana & anggaran (cth: Sangkar 5: 12)"></div>
+        <div><label class="eyebrow block mb-1.5">Lampu/Generator berfungsi?</label><div style="display:flex;gap:6px;">${ngPillGroup('lighting_ok',NG_YESNO_OPTS,null)}</div></div>
+        <div><label class="eyebrow block mb-1.5">Cuaca</label><div style="display:flex;flex-wrap:wrap;gap:6px;">${ngPillGroup('patrol_weather',NG_WEATHER_OPTS,null)}</div></div>
+        <div><label class="eyebrow block mb-1.5">Catatan (pilihan)</label><textarea id="ng-patrol-remarks" rows="2" class="ng-input" placeholder="Catatan..."></textarea></div>
+      </div>
+      <button onclick="submitNGPatrol()" class="w-full py-3 rounded-xl text-sm font-semibold text-white mt-4" style="background:#7C3AED;">Hantar Rondaan</button>
+    </div>`;
+
+  // Show/hide detail note fields based on Yes/No selection
+  ['net_intact','suspicious_activity','spat_crawl'].forEach(field=>{
+    document.querySelectorAll(`[id^="ng-pill-${field}-"]`).forEach(el=>{
+      el.addEventListener('click',()=>{
+        const wrapId={net_intact:'ng-net-note-wrap',suspicious_activity:'ng-suspicious-note-wrap',spat_crawl:'ng-spat-detail-wrap'}[field];
+        const wrap=document.getElementById(wrapId);
+        const badValue={net_intact:'no',suspicious_activity:'yes',spat_crawl:'yes'}[field];
+        if(wrap) wrap.classList.toggle('hidden',ngFormState[field]!==badValue);
+      });
+    });
+  });
+}
+
+async function submitNGPatrol(){
+  const guardName=document.getElementById('ng-patrol-guard').value;
+  if(!guardName){alert('Sila pilih nama pengawal.');return;}
+  const zone=ngFormState['zone'];
+  if(!zone){alert('Sila pilih zon.');return;}
+  const payload={
+    date:new Date().toISOString().split('T')[0],
+    guard_name:guardName,
+    zone,
+    net_intact:ngFormState['net_intact']||'',
+    net_note:(document.getElementById('ng-net-note')||{}).value||'',
+    suspicious_activity:ngFormState['suspicious_activity']||'',
+    suspicious_note:(document.getElementById('ng-suspicious-note')||{}).value||'',
+    spat_crawl:ngFormState['spat_crawl']||'',
+    spat_crawl_detail:(document.getElementById('ng-spat-detail')||{}).value||'',
+    lighting_ok:ngFormState['lighting_ok']||'',
+    weather:ngFormState['patrol_weather']||'',
+    remarks:document.getElementById('ng-patrol-remarks').value.trim()
+  };
+  await ngPost('patrol_round',payload);
+}
+
+function renderNGIncidentForm(){
+  ngFormState={};
+  const recent=[...ngData.incident].sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp)).slice(0,5);
+  const recentHtml=recent.length?`<div class="card" style="padding:14px;margin-top:14px;"><div class="eyebrow mb-2">Laporan Terkini</div>${recent.map(r=>{
+      const lbl=(NG_INCIDENT_OPTS.find(o=>o[0]===r.incident_type)||[,r.incident_type])[1];
+      return `<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;"><b>${lbl}</b> · ${r.location||''} <span style="color:var(--text-dim);">· ${fmtCleanDate(r.date)}</span></div>`;
+    }).join('')}</div>`:'';
+
+  document.getElementById('ng-content-incident').innerHTML=`
+    <div class="card" style="padding:16px;">
+      <div class="eyebrow mb-3">Laporan Insiden · Incident Report</div>
+      <div class="space-y-3">
+        <div><label class="eyebrow block mb-1.5">Nama Pengawal</label>${ngGuardSelect('ng-incident-guard')}</div>
+        <div><label class="eyebrow block mb-1.5">Jenis Insiden</label><div style="display:flex;flex-wrap:wrap;gap:6px;">${ngPillGroup('incident_type',NG_INCIDENT_OPTS,null)}</div></div>
+        <div><label class="eyebrow block mb-1.5">Lokasi</label><input id="ng-incident-location" class="ng-input" placeholder="cth: Zon B, Sangkar 18"></div>
+        <div><label class="eyebrow block mb-1.5">Penerangan</label><textarea id="ng-incident-desc" rows="3" class="ng-input" placeholder="Apa yang berlaku..."></textarea></div>
+        <div><label class="eyebrow block mb-1.5">Tindakan Diambil</label><textarea id="ng-incident-action" rows="2" class="ng-input" placeholder="Tindakan..."></textarea></div>
+        <div><label class="eyebrow block mb-1.5">Dimaklumkan Kepada</label><input id="ng-incident-notified" class="ng-input" placeholder="Nama..."></div>
+        <div><label class="eyebrow block mb-1.5">Tahap Keseriusan</label><div style="display:flex;gap:6px;">${ngPillGroup('severity',NG_SEVERITY_OPTS,null)}</div></div>
+      </div>
+      <button onclick="submitNGIncident()" class="w-full py-3 rounded-xl text-sm font-semibold text-white mt-4" style="background:var(--alert);">Hantar Laporan</button>
+    </div>
+    ${recentHtml}`;
+}
+
+async function submitNGIncident(){
+  const guardName=document.getElementById('ng-incident-guard').value;
+  if(!guardName){alert('Sila pilih nama pengawal.');return;}
+  const incidentType=ngFormState['incident_type'];
+  if(!incidentType){alert('Sila pilih jenis insiden.');return;}
+  const now=new Date();
+  const payload={
+    date:now.toISOString().split('T')[0],
+    guard_name:guardName,
+    incident_type:incidentType,
+    location:document.getElementById('ng-incident-location').value.trim(),
+    description:document.getElementById('ng-incident-desc').value.trim(),
+    action_taken:document.getElementById('ng-incident-action').value.trim(),
+    notified_person:document.getElementById('ng-incident-notified').value.trim(),
+    notified_time:now.toISOString(),
+    severity:ngFormState['severity']||''
+  };
+  await ngPost('incident',payload);
+}
+
+/* ── Night Guard — manager dashboard ─────────────────────────────── */
+const NG_SHIFT_START_TARGET_MIN = 17*60; // 5:00 PM target
+const NG_ROUND_GAP_ALERT_MIN = 150;      // flag if no round logged in 2.5h
+
+function fmtNGTime(iso){ const d=new Date(iso); if(isNaN(d))return '—'; return d.toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit',hour12:true}); }
+function fmtNGDuration(mins){ if(mins==null||isNaN(mins))return '—'; const h=Math.floor(mins/60), m=Math.round(mins%60); return h>0?`${h}j ${m}m`:`${m}m`; }
+
+// Pairs sequential shift_start/shift_end events per guard into shift
+// records. A start with no matching end yet is returned with open:true
+// — that's how "who's on duty right now" is derived, no separate
+// status field needed.
+function ngPairShifts(){
+  const byGuard={};
+  [...ngData.shift_log].sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp)).forEach(r=>{
+    const g=r.guard_name||'—';
+    if(!byGuard[g]) byGuard[g]=[];
+    byGuard[g].push(r);
+  });
+  const shifts=[];
+  Object.keys(byGuard).forEach(g=>{
+    let openStart=null;
+    byGuard[g].forEach(r=>{
+      if(r.event_type==='start'){ openStart=r; }
+      else if(r.event_type==='end'){
+        if(openStart){ shifts.push({guard:g,date:openStart.date,start:openStart,end:r,open:false}); openStart=null; }
+        else { shifts.push({guard:g,date:r.date,start:null,end:r,open:false}); }
+      }
+    });
+    if(openStart){ shifts.push({guard:g,date:openStart.date,start:openStart,end:null,open:true}); }
+  });
+  return shifts.sort((a,b)=>new Date(b.start?b.start.timestamp:b.end.timestamp)-new Date(a.start?a.start.timestamp:a.end.timestamp));
+}
+
+function ngCurrentStatus(){
+  const openShift=ngPairShifts().find(s=>s.open);
+  if(!openShift) return {onDuty:false};
+  const startTime=new Date(openShift.start.timestamp);
+  const rounds=[...ngData.patrol_round].filter(r=>r.guard_name===openShift.guard && new Date(r.timestamp)>=startTime).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
+  const lastRound=rounds[0];
+  const now=new Date();
+  const minutesSinceStart=(now-startTime)/60000;
+  const minutesSinceLastRound=lastRound?(now-new Date(lastRound.timestamp))/60000:minutesSinceStart;
+  return {onDuty:true,guard:openShift.guard,startTime,roundsCount:rounds.length,minutesSinceLastRound,gapAlert:minutesSinceLastRound>NG_ROUND_GAP_ALERT_MIN,lastRound};
+}
+
+function ngWeeklyStats(){
+  const weekAgo=new Date(); weekAgo.setDate(weekAgo.getDate()-7);
+  const inWeek=r=>{const d=new Date(r.date); return !isNaN(d)&&d>=weekAgo;};
+  const rounds=ngData.patrol_round.filter(inWeek).length;
+  const incidents=ngData.incident.filter(inWeek).length;
+  const shifts=ngPairShifts().filter(s=>s.start && new Date(s.start.date)>=weekAgo);
+  const onTime=shifts.filter(s=>{
+    const t=new Date(s.start.timestamp); const mins=t.getHours()*60+t.getMinutes();
+    return Math.abs(mins-NG_SHIFT_START_TARGET_MIN)<=30; // within 30 min of 5pm
+  }).length;
+  const onTimePct=shifts.length?Math.round(onTime/shifts.length*100):null;
+  return {rounds,incidents,shiftsCount:shifts.length,onTimePct};
+}
+
+function openNightGuardManagerView(){
+  rumbleDevice(45); showView('nightguard-data-view');
+  fetchNGData(false).then(renderNGManagerView);
+}
+
+function renderNGManagerView(){
+  const status=ngCurrentStatus();
+  const stats=ngWeeklyStats();
+
+  const statusCard = status.onDuty ? `
+    <div class="card" style="padding:16px;border:1.5px solid color-mix(in srgb,${status.gapAlert?'var(--alert)':'#7C3AED'} 30%,transparent);">
+      <div class="flex items-center gap-2 mb-2">${status.gapAlert?'<span class="dot" style="background:var(--alert);box-shadow:0 0 0 3px color-mix(in srgb,var(--alert) 22%,transparent);"></span>':'<span class="dot ok"></span>'}<span class="text-xs font-semibold" style="color:var(--text-mut);">SEDANG BERTUGAS · On Duty</span></div>
+      <div class="text-lg font-semibold">${status.guard}</div>
+      <div class="text-xs mt-1" style="color:var(--text-dim);">Mula: ${fmtNGTime(status.startTime)} · ${status.roundsCount} rondaan malam ini</div>
+      <div class="text-xs mt-1" style="color:${status.gapAlert?'var(--alert)':'var(--text-mut)'};font-weight:${status.gapAlert?700:400};">
+        ${status.lastRound?`Rondaan terakhir: ${fmtNGDuration(status.minutesSinceLastRound)} lalu`:'Belum ada rondaan direkodkan'}${status.gapAlert?' ⚠️ Semak status pengawal':''}
+      </div>
+    </div>` : `
+    <div class="card" style="padding:16px;border:1.5px solid color-mix(in srgb,var(--text-dim) 20%,transparent);">
+      <div class="flex items-center gap-2"><span class="dot" style="background:var(--text-dim);"></span><span class="text-xs font-semibold" style="color:var(--text-mut);">TIADA PENGAWAL BERTUGAS · No active shift</span></div>
+    </div>`;
+
+  const kpiRow = `<div class="grid grid-cols-3 gap-2">
+    <div class="card" style="padding:12px;text-align:center;"><div class="text-xl font-bold" style="color:#7C3AED;">${stats.rounds}</div><div class="text-[10px] mt-0.5" style="color:var(--text-mut);">Rondaan (7 hari)</div></div>
+    <div class="card" style="padding:12px;text-align:center;"><div class="text-xl font-bold" style="color:var(--alert);">${stats.incidents}</div><div class="text-[10px] mt-0.5" style="color:var(--text-mut);">Insiden (7 hari)</div></div>
+    <div class="card" style="padding:12px;text-align:center;"><div class="text-xl font-bold" style="color:var(--ok);">${stats.onTimePct!=null?stats.onTimePct+'%':'—'}</div><div class="text-[10px] mt-0.5" style="color:var(--text-mut);">Syif Tepat Masa</div></div>
+  </div>`;
+
+  const recentIncidents=[...ngData.incident].sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp)).slice(0,8);
+  const SEV_COLOR={low:'var(--text-mut)',medium:'var(--attention)',high:'var(--alert)'};
+  const incidentRows=recentIncidents.length? recentIncidents.map(r=>{
+    const lbl=(NG_INCIDENT_OPTS.find(o=>o[0]===r.incident_type)||[,r.incident_type])[1];
+    const sevLbl=(NG_SEVERITY_OPTS.find(o=>o[0]===r.severity)||[,r.severity||'—'])[1];
+    const col=SEV_COLOR[r.severity]||'var(--text-mut)';
+    return `<div style="padding:10px 0;border-bottom:1px solid var(--border);">
+      <div class="flex items-center justify-between">
+        <span class="text-sm font-semibold">${lbl}</span>
+        <span class="pill" style="background:color-mix(in srgb,${col} 14%,transparent);color:${col};">${sevLbl}</span>
+      </div>
+      <div class="text-xs mt-1" style="color:var(--text-mut);">${r.location||'—'} · ${fmtCleanDate(r.date)} · ${r.guard_name||''}</div>
+      ${r.description?`<div class="text-xs mt-1" style="color:var(--text-dim);">${r.description}</div>`:''}
+    </div>`;
+  }).join('') : `<div class="text-xs py-3" style="color:var(--text-dim);">Tiada insiden direkodkan.</div>`;
+
+  const recentRounds=[...ngData.patrol_round].sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp)).slice(0,10);
+  const roundRows=recentRounds.map(r=>{
+    const zoneLbl=(NG_ZONE_OPTS.find(o=>o[0]===r.zone)||[,r.zone])[1];
+    const flagged = r.net_intact==='no' || r.suspicious_activity==='yes';
+    return `<tr style="${flagged?'background:color-mix(in srgb,var(--alert) 6%,transparent);':''}">
+      <td>${fmtNGTime(r.timestamp)}</td><td>${zoneLbl}</td>
+      <td>${r.net_intact==='no'?'⚠️ Rosak':'OK'}</td>
+      <td>${r.suspicious_activity==='yes'?'⚠️ Ya':'—'}</td>
+      <td>${r.spat_crawl==='yes'?(r.spat_crawl_detail||'Ya'):'—'}</td>
+    </tr>`;
+  }).join('');
+  const roundsTable = recentRounds.length ? `<table class="data-table"><thead><tr><th>Masa</th><th>Zon</th><th>Jaring</th><th>Mencurigakan</th><th>Spat</th></tr></thead><tbody>${roundRows}</tbody></table>` : `<div class="text-xs py-3" style="color:var(--text-dim);">Tiada rondaan direkodkan.</div>`;
+
+  const shifts=ngPairShifts().slice(0,10);
+  const shiftRows=shifts.map(s=>{
+    const startT=s.start?fmtNGTime(s.start.timestamp):'—';
+    const endT=s.end?fmtNGTime(s.end.timestamp):(s.open?'Sedang bertugas':'—');
+    return `<tr><td>${fmtCleanDate(s.date)}</td><td>${s.guard}</td><td>${startT}</td><td>${endT}</td></tr>`;
+  }).join('');
+  const shiftTable = shifts.length ? `<table class="data-table"><thead><tr><th>Tarikh</th><th>Pengawal</th><th>Mula</th><th>Tamat</th></tr></thead><tbody>${shiftRows}</tbody></table>` : `<div class="text-xs py-3" style="color:var(--text-dim);">Tiada rekod syif.</div>`;
+
+  document.getElementById('nightguard-body').innerHTML = `
+    ${statusCard}
+    ${kpiRow}
+    <div class="card" style="padding:14px;"><div class="eyebrow mb-2">Laporan Insiden Terkini · Recent Incidents</div>${incidentRows}</div>
+    <div class="card" style="padding:14px;"><div class="eyebrow mb-2">Rondaan Terkini · Recent Patrol Rounds</div>${roundsTable}</div>
+    <div class="card" style="padding:14px;"><div class="eyebrow mb-2">Log Syif · Shift Log</div>${shiftTable}</div>
+  `;
+}
     </script>
  <div id="farmSpecsOverlay" class="fixed inset-0 z-50 hidden">
   <div class="absolute inset-0 bg-black bg-opacity-60" onclick="closeFarmSpecs()"></div>
@@ -3950,5 +4454,32 @@ function renderUpcomingLeaves(allLeave){
     <div id="landfarm-worker-body"></div>
   </div>
 </main>
+
+ <main id="nightguard-worker-view" class="hidden flex-1 flex flex-col min-h-0 w-full">
+  <div class="flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full overflow-y-auto">
+    <div class="flex items-center justify-between">
+      <button onclick="closeNightGuardWorkerView()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:var(--accent);">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"/></svg>
+        <span class="ko">뒤로</span> Ops Home
+      </button>
+      <button onclick="fetchNGData(true)" class="icon-btn">
+        <svg id="ng-refresh-ic" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356M3.985 19.644V14.65h4.992m-4.969-3.65a8.25 8.25 0 0113.803-3.7L21 8.25m-18 7.5l3.181 3.182a8.25 8.25 0 0013.803-3.7"/></svg>
+      </button>
+    </div>
+    <div>
+      <span class="eyebrow" style="color:#7C3AED;">야간 경비 · Night Guard</span>
+      <h3 class="text-2xl font-semibold tracking-tight" style="margin-top:1px;">Pengawal Malam</h3>
+    </div>
+    <div style="display:flex;padding:4px;background:var(--surface-2);border:1px solid var(--border);border-radius:14px;gap:4px;overflow-x:auto;">
+      <button onclick="showNGWorkerTab('shift')" id="ng-tab-shift" style="flex:1;min-width:70px;padding:8px 2px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.04em;background:#7C3AED;color:white;transition:all .2s;">Syif</button>
+      <button onclick="showNGWorkerTab('patrol')" id="ng-tab-patrol" style="flex:1;min-width:70px;padding:8px 2px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.04em;color:var(--text-mut);transition:all .2s;">Rondaan</button>
+      <button onclick="showNGWorkerTab('incident')" id="ng-tab-incident" style="flex:1;min-width:70px;padding:8px 2px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.04em;color:var(--text-mut);transition:all .2s;">Insiden</button>
+    </div>
+    <div id="ng-content-shift"></div>
+    <div id="ng-content-patrol" class="hidden"></div>
+    <div id="ng-content-incident" class="hidden"></div>
+  </div>
+</main>
+
 </body>
 </html>
