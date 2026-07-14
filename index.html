@@ -4065,6 +4065,13 @@ async function submitNGIncident(){
 }
 
 /* ── Night Guard — manager dashboard ─────────────────────────────── */
+// English label maps for the SAME fixed codes used in the worker forms
+// above — the codes never change, only the display language does.
+const NG_ZONE_OPTS_EN={zone_a:'Zone A (1-12)',zone_b:'Zone B (13-24)',all:'All'};
+const NG_WEATHER_OPTS_EN={calm:'Calm',strong_wind:'Strong Wind',storm:'Storm / Heavy Rain',rough_sea:'Rough Sea'};
+const NG_INCIDENT_OPTS_EN={intrusion:'Intrusion',theft:'Theft',cage_net_damage:'Cage/Net Damage',spat_escape:'Spat Escape',equipment_failure:'Equipment Failure',other:'Other'};
+const NG_SEVERITY_OPTS_EN={low:'Low',medium:'Medium',high:'High'};
+
 const NG_SHIFT_START_TARGET_MIN = 17*60; // 5:00 PM target
 const NG_ROUND_GAP_ALERT_MIN = 150;      // flag if no round logged in 2.5h
 
@@ -4134,28 +4141,28 @@ function renderNGManagerView(){
 
   const statusCard = status.onDuty ? `
     <div class="card" style="padding:16px;border:1.5px solid color-mix(in srgb,${status.gapAlert?'var(--alert)':'#7C3AED'} 30%,transparent);">
-      <div class="flex items-center gap-2 mb-2">${status.gapAlert?'<span class="dot" style="background:var(--alert);box-shadow:0 0 0 3px color-mix(in srgb,var(--alert) 22%,transparent);"></span>':'<span class="dot ok"></span>'}<span class="text-xs font-semibold" style="color:var(--text-mut);">SEDANG BERTUGAS · On Duty</span></div>
+      <div class="flex items-center gap-2 mb-2">${status.gapAlert?'<span class="dot" style="background:var(--alert);box-shadow:0 0 0 3px color-mix(in srgb,var(--alert) 22%,transparent);"></span>':'<span class="dot ok"></span>'}<span class="text-xs font-semibold" style="color:var(--text-mut);">ON DUTY · <span class="ko">근무 중</span></span></div>
       <div class="text-lg font-semibold">${status.guard}</div>
-      <div class="text-xs mt-1" style="color:var(--text-dim);">Mula: ${fmtNGTime(status.startTime)} · ${status.roundsCount} rondaan malam ini</div>
+      <div class="text-xs mt-1" style="color:var(--text-dim);">Started: ${fmtNGTime(status.startTime)} · ${status.roundsCount} round${status.roundsCount===1?'':'s'} tonight</div>
       <div class="text-xs mt-1" style="color:${status.gapAlert?'var(--alert)':'var(--text-mut)'};font-weight:${status.gapAlert?700:400};">
-        ${status.lastRound?`Rondaan terakhir: ${fmtNGDuration(status.minutesSinceLastRound)} lalu`:'Belum ada rondaan direkodkan'}${status.gapAlert?' ⚠️ Semak status pengawal':''}
+        ${status.lastRound?`Last round: ${fmtNGDuration(status.minutesSinceLastRound)} ago`:'No rounds logged yet'}${status.gapAlert?' ⚠️ Check on guard':''}
       </div>
     </div>` : `
     <div class="card" style="padding:16px;border:1.5px solid color-mix(in srgb,var(--text-dim) 20%,transparent);">
-      <div class="flex items-center gap-2"><span class="dot" style="background:var(--text-dim);"></span><span class="text-xs font-semibold" style="color:var(--text-mut);">TIADA PENGAWAL BERTUGAS · No active shift</span></div>
+      <div class="flex items-center gap-2"><span class="dot" style="background:var(--text-dim);"></span><span class="text-xs font-semibold" style="color:var(--text-mut);">NO ACTIVE SHIFT · <span class="ko">근무 중인 경비원 없음</span></span></div>
     </div>`;
 
   const kpiRow = `<div class="grid grid-cols-3 gap-2">
-    <div class="card" style="padding:12px;text-align:center;"><div class="text-xl font-bold" style="color:#7C3AED;">${stats.rounds}</div><div class="text-[10px] mt-0.5" style="color:var(--text-mut);">Rondaan (7 hari)</div></div>
-    <div class="card" style="padding:12px;text-align:center;"><div class="text-xl font-bold" style="color:var(--alert);">${stats.incidents}</div><div class="text-[10px] mt-0.5" style="color:var(--text-mut);">Insiden (7 hari)</div></div>
-    <div class="card" style="padding:12px;text-align:center;"><div class="text-xl font-bold" style="color:var(--ok);">${stats.onTimePct!=null?stats.onTimePct+'%':'—'}</div><div class="text-[10px] mt-0.5" style="color:var(--text-mut);">Syif Tepat Masa</div></div>
+    <div class="card" style="padding:12px;text-align:center;"><div class="text-xl font-bold" style="color:#7C3AED;">${stats.rounds}</div><div class="text-[10px] mt-0.5" style="color:var(--text-mut);">Rounds (7d)</div></div>
+    <div class="card" style="padding:12px;text-align:center;"><div class="text-xl font-bold" style="color:var(--alert);">${stats.incidents}</div><div class="text-[10px] mt-0.5" style="color:var(--text-mut);">Incidents (7d)</div></div>
+    <div class="card" style="padding:12px;text-align:center;"><div class="text-xl font-bold" style="color:var(--ok);">${stats.onTimePct!=null?stats.onTimePct+'%':'—'}</div><div class="text-[10px] mt-0.5" style="color:var(--text-mut);">On-Time Shifts</div></div>
   </div>`;
 
   const recentIncidents=[...ngData.incident].sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp)).slice(0,8);
   const SEV_COLOR={low:'var(--text-mut)',medium:'var(--attention)',high:'var(--alert)'};
   const incidentRows=recentIncidents.length? recentIncidents.map(r=>{
-    const lbl=(NG_INCIDENT_OPTS.find(o=>o[0]===r.incident_type)||[,r.incident_type])[1];
-    const sevLbl=(NG_SEVERITY_OPTS.find(o=>o[0]===r.severity)||[,r.severity||'—'])[1];
+    const lbl=NG_INCIDENT_OPTS_EN[r.incident_type]||r.incident_type||'—';
+    const sevLbl=NG_SEVERITY_OPTS_EN[r.severity]||r.severity||'—';
     const col=SEV_COLOR[r.severity]||'var(--text-mut)';
     return `<div style="padding:10px 0;border-bottom:1px solid var(--border);">
       <div class="flex items-center justify-between">
@@ -4165,35 +4172,35 @@ function renderNGManagerView(){
       <div class="text-xs mt-1" style="color:var(--text-mut);">${r.location||'—'} · ${fmtCleanDate(r.date)} · ${r.guard_name||''}</div>
       ${r.description?`<div class="text-xs mt-1" style="color:var(--text-dim);">${r.description}</div>`:''}
     </div>`;
-  }).join('') : `<div class="text-xs py-3" style="color:var(--text-dim);">Tiada insiden direkodkan.</div>`;
+  }).join('') : `<div class="text-xs py-3" style="color:var(--text-dim);">No incidents recorded.</div>`;
 
   const recentRounds=[...ngData.patrol_round].sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp)).slice(0,10);
   const roundRows=recentRounds.map(r=>{
-    const zoneLbl=(NG_ZONE_OPTS.find(o=>o[0]===r.zone)||[,r.zone])[1];
+    const zoneLbl=NG_ZONE_OPTS_EN[r.zone]||r.zone||'—';
     const flagged = r.net_intact==='no' || r.suspicious_activity==='yes';
     return `<tr style="${flagged?'background:color-mix(in srgb,var(--alert) 6%,transparent);':''}">
       <td>${fmtNGTime(r.timestamp)}</td><td>${zoneLbl}</td>
-      <td>${r.net_intact==='no'?'⚠️ Rosak':'OK'}</td>
-      <td>${r.suspicious_activity==='yes'?'⚠️ Ya':'—'}</td>
-      <td>${r.spat_crawl==='yes'?(r.spat_crawl_detail||'Ya'):'—'}</td>
+      <td>${r.net_intact==='no'?'⚠️ Damaged':'OK'}</td>
+      <td>${r.suspicious_activity==='yes'?'⚠️ Yes':'—'}</td>
+      <td>${r.spat_crawl==='yes'?(r.spat_crawl_detail||'Yes'):'—'}</td>
     </tr>`;
   }).join('');
-  const roundsTable = recentRounds.length ? `<table class="data-table"><thead><tr><th>Masa</th><th>Zon</th><th>Jaring</th><th>Mencurigakan</th><th>Spat</th></tr></thead><tbody>${roundRows}</tbody></table>` : `<div class="text-xs py-3" style="color:var(--text-dim);">Tiada rondaan direkodkan.</div>`;
+  const roundsTable = recentRounds.length ? `<table class="data-table"><thead><tr><th>Time</th><th>Zone</th><th>Net</th><th>Suspicious</th><th>Spat Crawl</th></tr></thead><tbody>${roundRows}</tbody></table>` : `<div class="text-xs py-3" style="color:var(--text-dim);">No patrol rounds recorded.</div>`;
 
   const shifts=ngPairShifts().slice(0,10);
   const shiftRows=shifts.map(s=>{
     const startT=s.start?fmtNGTime(s.start.timestamp):'—';
-    const endT=s.end?fmtNGTime(s.end.timestamp):(s.open?'Sedang bertugas':'—');
+    const endT=s.end?fmtNGTime(s.end.timestamp):(s.open?'On duty':'—');
     return `<tr><td>${fmtCleanDate(s.date)}</td><td>${s.guard}</td><td>${startT}</td><td>${endT}</td></tr>`;
   }).join('');
-  const shiftTable = shifts.length ? `<table class="data-table"><thead><tr><th>Tarikh</th><th>Pengawal</th><th>Mula</th><th>Tamat</th></tr></thead><tbody>${shiftRows}</tbody></table>` : `<div class="text-xs py-3" style="color:var(--text-dim);">Tiada rekod syif.</div>`;
+  const shiftTable = shifts.length ? `<table class="data-table"><thead><tr><th>Date</th><th>Guard</th><th>Start</th><th>End</th></tr></thead><tbody>${shiftRows}</tbody></table>` : `<div class="text-xs py-3" style="color:var(--text-dim);">No shift records yet.</div>`;
 
   document.getElementById('nightguard-body').innerHTML = `
     ${statusCard}
     ${kpiRow}
-    <div class="card" style="padding:14px;"><div class="eyebrow mb-2">Laporan Insiden Terkini · Recent Incidents</div>${incidentRows}</div>
-    <div class="card" style="padding:14px;"><div class="eyebrow mb-2">Rondaan Terkini · Recent Patrol Rounds</div>${roundsTable}</div>
-    <div class="card" style="padding:14px;"><div class="eyebrow mb-2">Log Syif · Shift Log</div>${shiftTable}</div>
+    <div class="card" style="padding:14px;"><div class="eyebrow mb-2">Recent Incidents · <span class="ko">최근 사고 보고</span></div>${incidentRows}</div>
+    <div class="card" style="padding:14px;"><div class="eyebrow mb-2">Recent Patrol Rounds · <span class="ko">최근 순찰</span></div>${roundsTable}</div>
+    <div class="card" style="padding:14px;"><div class="eyebrow mb-2">Shift Log · <span class="ko">근무 기록</span></div>${shiftTable}</div>
   `;
 }
     </script>
