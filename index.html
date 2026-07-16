@@ -3052,93 +3052,6 @@ function sendStockOrderMessage(){
           const ok=await lfPost('tank_baseline',{date:new Date().toISOString().split('T')[0],tank_id:tankId,live_count:count});
           if(ok){rumbleDevice([40,30,70]);openLFTankDetail(n);}
         }
-
-        /* ── Bulk Baseline Update — paste a physical-count list for many
-           tanks at once instead of tapping through them one by one.
-           Accepts lines like "Tank 10: 2,476 spats" or "Tank 27: 3,214
-           spats (Varied)" — matches how James actually writes his tally
-           sheet, so nothing needs reformatting before pasting. Only the
-           tanks present in the pasted text get updated; everything else
-           is left alone. ────────────────────────────────────────────── */
-        let lfBulkDate=new Date().toISOString().split('T')[0];
-        let lfBulkBusy=false;
-        function lfParseBulkBaseline(text){
-          const lines=(text||'').split('\n');
-          const map=new Map(); // tank number -> {n,tankId,count} — later line wins on duplicates
-          const errors=[];
-          lines.forEach(raw=>{
-            const line=raw.trim();
-            if(!line) return;
-            const m=line.match(/tank\s*(\d{1,2})\s*:\s*([\d,]+)\s*spats?/i);
-            if(!m){ errors.push(line); return; }
-            const n=parseInt(m[1],10);
-            const count=parseInt(m[2].replace(/,/g,''),10);
-            if(!(n>=1&&n<=LF_TANK_TOTAL)||!isFinite(count)){ errors.push(line); return; }
-            map.set(n,{n,tankId:lfTankLabel(n),count});
-          });
-          return{parsed:[...map.values()].sort((a,b)=>a.n-b.n),errors};
-        }
-        function openLFBulkBaseline(){
-          rumbleDevice(30);
-          const head=`<div style="font-size:22px;font-weight:700;">Bulk Update Baseline</div>
-            <div style="font-size:13px;color:var(--text-mut);">일괄 기준선 업데이트 · Paste your physical count list</div>`;
-          const body=`
-            <div class="eyebrow mb-2">Count Date</div>
-            <input type="date" id="lf-bulk-date" value="${lfBulkDate}" class="gas-input" style="margin-bottom:14px;" oninput="lfBulkDate=this.value">
-            <div class="eyebrow mb-2">Paste Counts</div>
-            <p style="font-size:11px;color:var(--text-dim);margin-bottom:8px;">One tank per line — e.g. <code>Tank 10: 2,476 spats</code>. Only tanks listed here get updated; the rest stay untouched.</p>
-            <textarea id="lf-bulk-text" rows="10" placeholder="Tank 10: 2,476 spats
-Tank 11: 3,352 spats
-Tank 14: 2,929 spats" class="gas-input" style="margin-bottom:10px;font-family:monospace;font-size:12px;" oninput="renderLFBulkPreview()"></textarea>
-            <div id="lf-bulk-preview" style="margin-bottom:14px;"></div>
-            <button id="lf-bulk-submit-btn" onclick="submitLFBulkBaseline()" style="width:100%;padding:13px;background:#10B981;color:white;font-weight:700;border-radius:10px;font-size:14px;">✓ Save All Recognized Tanks</button>`;
-          openDetailOverlay(head,body);
-          renderLFBulkPreview();
-        }
-        function renderLFBulkPreview(){
-          const el=document.getElementById('lf-bulk-preview');
-          if(!el) return;
-          const text=document.getElementById('lf-bulk-text')?.value||'';
-          const{parsed,errors}=lfParseBulkBaseline(text);
-          if(!parsed.length&&!errors.length){ el.innerHTML=''; return; }
-          const okList=parsed.map(p=>`<span style="display:inline-block;padding:3px 8px;margin:2px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:6px;font-size:11px;font-weight:600;color:#0f766e;">${p.tankId}: ${p.count.toLocaleString()}</span>`).join('');
-          const errList=errors.length?`<div style="margin-top:8px;padding:8px 10px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:8px;font-size:11px;color:var(--alert);">⚠️ ${errors.length} line(s) not recognized — check spelling/format:<br>${errors.map(e=>`&bull; ${e}`).join('<br>')}</div>`:'';
-          el.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--text-dim);margin-bottom:6px;">${parsed.length} tank(s) recognized</div><div>${okList}</div>${errList}`;
-        }
-        async function lfPostBulkRow(payload){
-          const url=getGasUrl('land-farm');
-          if(!url){ alert('Land Farm GAS URL not configured.\nSet it in Module GAS Connections.'); return false; }
-          return submitFormSafely(url,Object.assign({type:'tank_baseline'},payload),{showAlert:false});
-        }
-        async function submitLFBulkBaseline(){
-          if(lfBulkBusy) return;
-          const text=document.getElementById('lf-bulk-text')?.value||'';
-          const date=document.getElementById('lf-bulk-date')?.value||lfBulkDate;
-          if(!date){ alert('Please set a count date.'); return; }
-          const{parsed,errors}=lfParseBulkBaseline(text);
-          if(!parsed.length){ alert('No valid tank lines detected.\nExpecting lines like "Tank 10: 2,476 spats".'); return; }
-          if(errors.length){
-            const proceed=confirm(`${errors.length} line(s) could not be parsed and will be skipped:\n\n${errors.slice(0,6).join('\n')}${errors.length>6?'\n...':''}\n\nContinue saving the ${parsed.length} recognized tank(s)?`);
-            if(!proceed) return;
-          }
-          lfBulkBusy=true;
-          const btn=document.getElementById('lf-bulk-submit-btn');
-          if(btn) btn.disabled=true;
-          let ok=0,fail=0;
-          for(let i=0;i<parsed.length;i++){
-            const p=parsed[i];
-            if(btn) btn.textContent=`Saving ${i+1}/${parsed.length}… (${p.tankId})`;
-            const success=await lfPostBulkRow({date,tank_id:p.tankId,live_count:p.count});
-            if(success) ok++; else fail++;
-          }
-          lfBulkBusy=false;
-          rumbleDevice([80,50,80]);
-          alert(`Bulk update done.\n${ok} tank(s) saved${fail?`, ${fail} failed — check connection and retry those`:''}.`);
-          await fetchLFData(false);
-          closeOverlay('detail-overlay');
-          renderLFMgrTanks();
-        }
-
         function lfLastMortCheck(tankId){
           const logs=(lfData.mortality||[]).filter(m=>m.tank_id===tankId);
           if(!logs.length)return null;
@@ -3616,10 +3529,7 @@ Tank 14: 2,929 spats" class="gas-input" style="margin-bottom:10px;font-family:mo
             ${sub?`<div style="font-size:6px;color:var(--text-dim);margin-top:1px;">${sub}</div>`:''}
           </div>`;
           document.getElementById('lf-mgr-content').innerHTML=`
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:2px;">
-              <p style="font-size:11px;color:var(--text-dim);margin:0;">Tap any tank for live count, stocked-since date & trial origin. Layout matches the physical room.</p>
-              <button onclick="openLFBulkBaseline()" style="flex-shrink:0;padding:8px 12px;background:var(--surface-2);border:1.5px solid var(--border-2);border-radius:10px;font-size:11px;font-weight:700;color:var(--text);white-space:nowrap;">📋 Bulk Update</button>
-            </div>
+            <p style="font-size:11px;color:var(--text-dim);">Tap any tank for live count, stocked-since date & trial origin. Layout matches the physical room.</p>
             <div style="display:grid;grid-template-columns:1fr 20px 1fr;gap:6px;align-items:start;">
               <!-- Odd column: Breeding Room sits directly above it -->
               <div>
@@ -4302,18 +4212,34 @@ function renderNGManagerView(){
     </div>`;
   }).join('') : `<div class="text-xs py-3" style="color:var(--text-dim);">No incidents recorded.</div>`;
 
+  function ngSpatChips(detail){
+    if(!detail) return '';
+    return detail.split(';').map(s=>s.trim()).filter(Boolean).map(s=>
+      `<span class="pill" style="background:color-mix(in srgb,#7C3AED 12%,transparent);color:#7C3AED;margin:2px 4px 2px 0;display:inline-block;">${s}</span>`
+    ).join('');
+  }
+
   const recentRounds=[...ngData.patrol_round].sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp)).slice(0,10);
-  const roundRows=recentRounds.map(r=>{
+  const roundCards = recentRounds.length ? recentRounds.map(r=>{
     const zoneLbl=NG_ZONE_OPTS_EN[r.zone]||r.zone||'—';
-    const flagged = r.net_intact==='no' || r.suspicious_activity==='yes';
-    return `<tr style="${flagged?'background:color-mix(in srgb,var(--alert) 6%,transparent);':''}">
-      <td>${fmtNGTime(r.timestamp)}</td><td>${zoneLbl}</td>
-      <td>${r.net_intact==='no'?'⚠️ Damaged':'OK'}</td>
-      <td>${r.suspicious_activity==='yes'?'⚠️ Yes':'—'}</td>
-      <td>${r.spat_crawl==='yes'?(r.spat_crawl_detail||'Yes'):'—'}</td>
-    </tr>`;
-  }).join('');
-  const roundsTable = recentRounds.length ? `<table class="data-table"><thead><tr><th>Time</th><th>Zone</th><th>Net</th><th>Suspicious</th><th>Spat Crawl</th></tr></thead><tbody>${roundRows}</tbody></table>` : `<div class="text-xs py-3" style="color:var(--text-dim);">No patrol rounds recorded.</div>`;
+    const netBad=r.net_intact==='no', suspiciousBad=r.suspicious_activity==='yes', lightingBad=r.lighting_ok==='no', spatYes=r.spat_crawl==='yes';
+    const flagged=netBad||suspiciousBad||lightingBad;
+    return `<div style="padding:10px 0;border-bottom:1px solid var(--border);${flagged?'border-left:3px solid var(--alert);padding-left:8px;margin-left:-8px;':''}">
+      <div class="flex items-center justify-between flex-wrap gap-1">
+        <span class="text-sm font-semibold">${fmtNGTime(r.timestamp)} · ${zoneLbl}</span>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;">
+          ${netBad?`<span class="pill" style="background:color-mix(in srgb,var(--alert) 14%,transparent);color:var(--alert);">Net Damaged</span>`:''}
+          ${suspiciousBad?`<span class="pill" style="background:color-mix(in srgb,var(--alert) 14%,transparent);color:var(--alert);">Suspicious</span>`:''}
+          ${lightingBad?`<span class="pill" style="background:color-mix(in srgb,var(--attention) 14%,transparent);color:var(--attention);">Lighting Off</span>`:''}
+          ${!flagged?`<span class="pill" style="background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok);">OK</span>`:''}
+        </div>
+      </div>
+      ${r.net_note?`<div class="text-xs mt-1" style="color:var(--text-dim);">Net: ${r.net_note}</div>`:''}
+      ${r.suspicious_note?`<div class="text-xs mt-1" style="color:var(--text-dim);">${r.suspicious_note}</div>`:''}
+      ${spatYes?`<div class="text-xs mt-1.5" style="color:var(--text-mut);">Spat crawl-out:<br>${ngSpatChips(r.spat_crawl_detail)}</div>`:''}
+      ${r.remarks?`<div class="text-xs mt-1" style="color:var(--text-dim);">${r.remarks}</div>`:''}
+    </div>`;
+  }).join('') : `<div class="text-xs py-3" style="color:var(--text-dim);">No patrol rounds recorded.</div>`;
 
   const shifts=ngPairShifts().slice(0,10);
   const shiftRows=shifts.map(s=>{
@@ -4327,7 +4253,7 @@ function renderNGManagerView(){
     ${statusCard}
     ${kpiRow}
     <div class="card" style="padding:14px;"><div class="eyebrow mb-2">Recent Incidents · <span class="ko">최근 사고 보고</span></div>${incidentRows}</div>
-    <div class="card" style="padding:14px;"><div class="eyebrow mb-2">Recent Patrol Rounds · <span class="ko">최근 순찰</span></div>${roundsTable}</div>
+    <div class="card" style="padding:14px;"><div class="eyebrow mb-2">Recent Patrol Rounds · <span class="ko">최근 순찰</span></div>${roundCards}</div>
     <div class="card" style="padding:14px;"><div class="eyebrow mb-2">Shift Log · <span class="ko">근무 기록</span></div>${shiftTable}</div>
   `;
 }
