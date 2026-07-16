@@ -3871,6 +3871,24 @@ function ngSelectPill(name,val){
   ngFormState[name]=val;
 }
 let ngFormState={};
+let ngSpatRows=[{cage:'',count:''}];
+
+function ngSpatRowHtml(i,row){
+  const cageOpts=Array.from({length:24},(_,k)=>k+1).map(c=>`<option value="${c}" ${String(row.cage)===String(c)?'selected':''}>Sangkar ${c}</option>`).join('');
+  return `<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;">
+    <select class="ng-input" style="flex:1;" onchange="ngUpdateSpatRow(${i},'cage',this.value)"><option value="">Pilih sangkar...</option>${cageOpts}</select>
+    <input type="number" min="0" inputmode="numeric" class="ng-input" style="width:88px;" placeholder="Bil." value="${row.count}" oninput="ngUpdateSpatRow(${i},'count',this.value)">
+    ${ngSpatRows.length>1?`<button type="button" onclick="ngRemoveSpatRow(${i})" class="icon-btn" style="flex:none;width:34px;height:34px;">✕</button>`:''}
+  </div>`;
+}
+function ngRenderSpatRows(){
+  const wrap=document.getElementById('ng-spat-rows');
+  if(!wrap)return;
+  wrap.innerHTML=ngSpatRows.map((r,i)=>ngSpatRowHtml(i,r)).join('')+`<button type="button" onclick="ngAddSpatRow()" class="text-xs font-semibold" style="color:#7C3AED;padding:6px 0;">+ Tambah Sangkar</button>`;
+}
+function ngUpdateSpatRow(i,field,val){ ngSpatRows[i][field]=val; }
+function ngAddSpatRow(){ ngSpatRows.push({cage:'',count:''}); ngRenderSpatRows(); }
+function ngRemoveSpatRow(i){ ngSpatRows.splice(i,1); if(!ngSpatRows.length) ngSpatRows=[{cage:'',count:''}]; ngRenderSpatRows(); }
 
 async function ngPost(type,payload,btn){
   const url=getGasUrl('night-guard');
@@ -3935,28 +3953,41 @@ function ngGuardSelect(id){
   return `<select id="${id}" class="ng-input"><option value="">Pilih nama...</option>${NG_GUARD_NAMES.map(n=>`<option value="${n}">${n}</option>`).join('')}</select>`;
 }
 
+const NG_LAST_GUARD_KEY='ng_last_guard';
+
+function ngOpenShiftForGuard(name){
+  if(!name) return null;
+  return ngPairShifts().find(s=>s.open && s.guard===name) || null;
+}
+
 function renderNGShiftForm(){
   ngFormState={};
-  const todayLastShift=[...ngData.shift_log].filter(r=>r.event_type==='start').sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp))[0];
-  const lastOpenShift=todayLastShift && !ngData.shift_log.some(r=>r.event_type==='end'&&r.date===todayLastShift.date&&r.guard_name===todayLastShift.guard_name&&new Date(r.timestamp)>new Date(todayLastShift.timestamp));
+  const existingSelect=document.getElementById('ng-shift-guard');
+  const selectedGuard = (existingSelect ? existingSelect.value : '') || localStorage.getItem(NG_LAST_GUARD_KEY) || '';
+  const openShift = ngOpenShiftForGuard(selectedGuard);
 
   document.getElementById('ng-content-shift').innerHTML=`
     <div class="card" style="padding:16px;">
-      <div class="eyebrow mb-3">${lastOpenShift?'Tamat Syif · Shift End':'Mula Syif · Shift Start'}</div>
-      ${lastOpenShift?`<p class="text-xs mb-3" style="color:var(--text-mut);">Syif dibuka oleh <b>${todayLastShift.guard_name}</b> pada ${fmtCleanDate(todayLastShift.date)}</p>`:''}
+      <div class="eyebrow mb-3">${openShift?'Tamat Syif · Shift End':'Mula Syif · Shift Start'}</div>
       <div class="space-y-3">
-        ${!lastOpenShift?`<div><label class="eyebrow block mb-1.5">Nama Pengawal</label>${ngGuardSelect('ng-shift-guard')}</div>`:''}
+        <div><label class="eyebrow block mb-1.5">Nama Pengawal</label>
+          <select id="ng-shift-guard" class="ng-input" onchange="renderNGShiftForm()">
+            <option value="">Pilih nama...</option>
+            ${NG_GUARD_NAMES.map(n=>`<option value="${n}" ${n===selectedGuard?'selected':''}>${n}</option>`).join('')}
+          </select>
+        </div>
+        ${openShift?`<p class="text-xs" style="color:var(--text-mut);">Syif dibuka sejak ${fmtNGTime(openShift.start.timestamp)}</p>`:''}
         <div><label class="eyebrow block mb-1.5">Cuaca</label><div style="display:flex;flex-wrap:wrap;gap:6px;">${ngPillGroup('shift_weather',NG_WEATHER_OPTS,null)}</div></div>
-        <div><label class="eyebrow block mb-1.5">${lastOpenShift?'Ringkasan Syif (pilihan)':'Nota Serah Tugas (pilihan)'}</label><textarea id="ng-shift-notes" rows="2" class="ng-input" placeholder="Catatan..."></textarea></div>
+        <div><label class="eyebrow block mb-1.5">${openShift?'Ringkasan Syif (pilihan)':'Nota Serah Tugas (pilihan)'}</label><textarea id="ng-shift-notes" rows="2" class="ng-input" placeholder="Catatan..."></textarea></div>
       </div>
-      <button onclick="submitNGShift(${lastOpenShift?`'${todayLastShift.guard_name}'`:'null'})" class="w-full py-3 rounded-xl text-sm font-semibold text-white mt-4" style="background:#7C3AED;">${lastOpenShift?'Tamat Syif':'Mula Syif'}</button>
+      <button onclick="submitNGShift(${openShift?'true':'false'})" class="w-full py-3 rounded-xl text-sm font-semibold text-white mt-4" style="background:#7C3AED;">${openShift?'Tamat Syif':'Mula Syif'}</button>
     </div>`;
 }
 
-async function submitNGShift(carryGuardName){
-  const isEnd=!!carryGuardName;
-  const guardName=isEnd?carryGuardName:document.getElementById('ng-shift-guard').value;
+async function submitNGShift(isEnd){
+  const guardName=document.getElementById('ng-shift-guard').value;
   if(!guardName){alert('Sila pilih nama pengawal.');return;}
+  localStorage.setItem(NG_LAST_GUARD_KEY,guardName); // remembered for next time on this device
   const weather=ngFormState['shift_weather']||'';
   const notes=document.getElementById('ng-shift-notes').value.trim();
   const date=new Date().toISOString().split('T')[0];
@@ -3965,6 +3996,7 @@ async function submitNGShift(carryGuardName){
 
 function renderNGPatrolForm(){
   ngFormState={};
+  ngSpatRows=[{cage:'',count:''}];
   document.getElementById('ng-content-patrol').innerHTML=`
     <div class="card" style="padding:16px;">
       <div class="eyebrow mb-3">Rondaan · Patrol Round</div>
@@ -3976,13 +4008,18 @@ function renderNGPatrolForm(){
         <div><label class="eyebrow block mb-1.5">Aktiviti mencurigakan dilihat?</label><div style="display:flex;gap:6px;">${ngPillGroup('suspicious_activity',NG_YESNO_OPTS,null)}</div></div>
         <div id="ng-suspicious-note-wrap" class="hidden"><input id="ng-suspicious-note" class="ng-input" placeholder="Butiran..."></div>
         <div><label class="eyebrow block mb-1.5">Spat merangkak ke atas jaring?</label><div style="display:flex;gap:6px;">${ngPillGroup('spat_crawl',NG_YESNO_OPTS,null)}</div></div>
-        <div id="ng-spat-detail-wrap" class="hidden"><input id="ng-spat-detail" class="ng-input" placeholder="Sangkar mana & anggaran (cth: Sangkar 5: 12)"></div>
+        <div id="ng-spat-detail-wrap" class="hidden">
+          <label class="eyebrow block mb-1.5">Sangkar & Anggaran Bilangan</label>
+          <div id="ng-spat-rows"></div>
+        </div>
         <div><label class="eyebrow block mb-1.5">Lampu/Generator berfungsi?</label><div style="display:flex;gap:6px;">${ngPillGroup('lighting_ok',NG_YESNO_OPTS,null)}</div></div>
         <div><label class="eyebrow block mb-1.5">Cuaca</label><div style="display:flex;flex-wrap:wrap;gap:6px;">${ngPillGroup('patrol_weather',NG_WEATHER_OPTS,null)}</div></div>
         <div><label class="eyebrow block mb-1.5">Catatan (pilihan)</label><textarea id="ng-patrol-remarks" rows="2" class="ng-input" placeholder="Catatan..."></textarea></div>
       </div>
       <button onclick="submitNGPatrol()" class="w-full py-3 rounded-xl text-sm font-semibold text-white mt-4" style="background:#7C3AED;">Hantar Rondaan</button>
     </div>`;
+
+  ngRenderSpatRows();
 
   // Show/hide detail note fields based on Yes/No selection
   ['net_intact','suspicious_activity','spat_crawl'].forEach(field=>{
@@ -4002,6 +4039,7 @@ async function submitNGPatrol(){
   if(!guardName){alert('Sila pilih nama pengawal.');return;}
   const zone=ngFormState['zone'];
   if(!zone){alert('Sila pilih zon.');return;}
+  const spatCrawlDetail=ngSpatRows.filter(r=>r.cage&&r.count!=='').map(r=>`Sangkar ${r.cage}: ${r.count}`).join('; ');
   const payload={
     date:new Date().toISOString().split('T')[0],
     guard_name:guardName,
@@ -4011,7 +4049,7 @@ async function submitNGPatrol(){
     suspicious_activity:ngFormState['suspicious_activity']||'',
     suspicious_note:(document.getElementById('ng-suspicious-note')||{}).value||'',
     spat_crawl:ngFormState['spat_crawl']||'',
-    spat_crawl_detail:(document.getElementById('ng-spat-detail')||{}).value||'',
+    spat_crawl_detail:spatCrawlDetail,
     lighting_ok:ngFormState['lighting_ok']||'',
     weather:ngFormState['patrol_weather']||'',
     remarks:document.getElementById('ng-patrol-remarks').value.trim()
