@@ -4274,6 +4274,16 @@ async function maintPost(sheetName,dataObj,btn){
   });
   return ok;
 }
+async function maintConfigAction(action,dataObj,btn){
+  const url=getGasUrl('maintenance');
+  const ok=await submitFormSafely(url,{action,data:dataObj},{
+    btn,
+    prefix:'maintcfg',
+    showAlert:false, // silent — this always runs right after a maintPost() that already showed its own confirmation
+    notConfiguredMsg:'Maintenance GAS URL not configured.\nSet it in Module GAS Connections.'
+  });
+  return ok;
+}
 
 function openMaintenanceWorkerView(){
   rumbleDevice(45);
@@ -4299,6 +4309,7 @@ function showMaintWorkerHome(){
    <button class="module" onclick="showMaintTab('blower')" style="--hue:#10B981"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">💨</span><div class="min-w-0"><div class="module-bm">Blower</div><div class="module-title">Blower</div><div class="module-desc">Status berfungsi (harian)</div></div></div>${chevR}</button>
     <button class="module" onclick="showMaintTab('breeding')" style="--hue:#EC4899"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🧪</span><div class="min-w-0"><div class="module-bm">Bilik Pembiakan</div><div class="module-title">Breeding Room</div><div class="module-desc">Tangki, pam &amp; mikroskop (2x/bulan)</div></div></div>${chevR}</button>
     <button class="module" onclick="showMaintTab('pumproom')" style="--hue:#F97316"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🔧</span><div class="min-w-0"><div class="module-bm">Bilik Pam</div><div class="module-title">Pump Room</div><div class="module-desc">Semakan mingguan &amp; pembersihan bulanan</div></div></div>${chevR}</button>
+    <button class="module" onclick="showMaintTab('generator')" style="--hue:#DC2626"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">⚡</span><div class="min-w-0"><div class="module-bm">Generator Set</div><div class="module-title">Generator</div><div class="module-desc">Bahan api, jam operasi &amp; penyelenggaraan</div></div></div>${chevR}</button>
     <div class="text-xs px-1" style="color:var(--text-dim);">More Maintenance items coming soon.</div>
   </div>`;
 }
@@ -4312,6 +4323,7 @@ function showMaintTab(tab){
   if(tab==='blower') renderBlowerCheckForm();
   if(tab==='breeding') renderBreedingRoomForm();
   if(tab==='pumproom') renderPumpRoomMenu();
+  if(tab==='generator') renderGeneratorMenu();
 }
 
 /* ── Container Check — Exception-based pattern (this same shape
@@ -4679,6 +4691,100 @@ async function submitPumpRoomCleaning(){
   rumbleDevice(45);
   const ok=await maintPost('Pump_Room_Cleaning',{Cleaning_Date:cleaningDate,Worker:worker});
   if(ok) renderPumpRoomMenu();
+}
+
+/* ═══════════════════════════════════════════════════════
+   GENERATOR — Weekly Check, Refuel, Maintenance Done
+   (three triggers into one Generator_Log; Maintenance Done
+   also resets the countdown baseline in Generator_Config)
+   ═══════════════════════════════════════════════════════ */
+const GEN_BACK_BTN=`<button onclick="renderGeneratorMenu()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:#DC2626;"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"/></svg>Generator</button>`;
+
+function renderGeneratorMenu(){
+  document.getElementById('maintenance-worker-body').innerHTML=`${MAINT_BACK_BTN}<div class="space-y-3" style="margin-top:12px;">
+    <div class="eyebrow px-1">Setiap Isnin · Every Monday</div>
+    <button class="module" onclick="renderGeneratorWeeklyForm()" style="--hue:#DC2626"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">⛽</span><div class="min-w-0"><div class="module-bm">Semakan Mingguan</div><div class="module-title">Weekly Check</div><div class="module-desc">Paras minyak, stok &amp; jam operasi</div></div></div>${chevR}</button>
+    <div class="eyebrow px-1" style="margin-top:14px;">Setiap Kali Isi Minyak · Every Refuel</div>
+    <button class="module" onclick="renderGeneratorRefuelForm()" style="--hue:#DC2626"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🛢️</span><div class="min-w-0"><div class="module-bm">Isi Minyak</div><div class="module-title">Refuel</div><div class="module-desc">Rekod jumlah minyak diisi</div></div></div>${chevR}</button>
+    <div class="eyebrow px-1" style="margin-top:14px;">Selepas Servis · After Service</div>
+    <button class="module" onclick="renderGeneratorMaintenanceForm()" style="--hue:#DC2626"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🛠️</span><div class="min-w-0"><div class="module-bm">Penyelenggaraan Selesai</div><div class="module-title">Maintenance Done</div><div class="module-desc">Reset kiraan jam ke servis seterusnya</div></div></div>${chevR}</button>
+  </div>`;
+}
+
+function renderGeneratorWeeklyForm(){
+  const workerOpts=MAINT_WORKER_NAMES.map(n=>`<option value="${n}">${n}</option>`).join('');
+  document.getElementById('maintenance-worker-body').innerHTML=`${GEN_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+    <div style="font-size:13px;font-weight:700;color:#DC2626;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">⛽ Semakan Mingguan Generator</div>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Nama Pekerja</label>
+    <select id="maint-gw-worker" class="gas-input" style="margin-bottom:16px;"><option value="">Pilih nama...</option>${workerOpts}</select>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Paras Minyak Ditunjukkan (gauge)</label>
+    <input type="number" step="0.1" inputmode="decimal" id="maint-gw-fuellevel" placeholder="Ex: 75" class="gas-input" style="margin-bottom:12px;">
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Baki Stok Minyak (L)</label>
+    <input type="number" step="0.1" inputmode="decimal" id="maint-gw-stock" placeholder="Ex: 150" class="gas-input" style="margin-bottom:12px;">
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Jumlah Jam Operasi (Hour Meter)</label>
+    <input type="number" step="0.1" inputmode="decimal" id="maint-gw-hours" placeholder="Ex: 1234.5" class="gas-input" style="margin-bottom:20px;">
+    <button onclick="submitGeneratorWeekly()" style="width:100%;padding:15px;background:#DC2626;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar Semakan →</button>
+  </div>`;
+}
+async function submitGeneratorWeekly(){
+  const worker=document.getElementById('maint-gw-worker')?.value;
+  if(!worker){alert('Sila pilih nama pekerja.');return;}
+  const fuelLevel=document.getElementById('maint-gw-fuellevel')?.value||'';
+  const stock=document.getElementById('maint-gw-stock')?.value||'';
+  const hours=document.getElementById('maint-gw-hours')?.value||'';
+  rumbleDevice(45);
+  const ok=await maintPost('Generator_Log',{Entry_Type:'Weekly Check',Fuel_Level_Shown:fuelLevel,Remaining_Fuel_Stock_L:stock,Run_Time_Hours:hours,Worker:worker});
+  if(ok) renderGeneratorMenu();
+}
+
+function renderGeneratorRefuelForm(){
+  const workerOpts=MAINT_WORKER_NAMES.map(n=>`<option value="${n}">${n}</option>`).join('');
+  document.getElementById('maintenance-worker-body').innerHTML=`${GEN_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+    <div style="font-size:13px;font-weight:700;color:#DC2626;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">🛢️ Isi Minyak Generator</div>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Nama Pekerja</label>
+    <select id="maint-gr-worker" class="gas-input" style="margin-bottom:16px;"><option value="">Pilih nama...</option>${workerOpts}</select>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Jumlah Minyak Diisi (L)</label>
+    <input type="number" step="0.1" inputmode="decimal" id="maint-gr-amount" placeholder="Ex: 50" class="gas-input" style="margin-bottom:20px;">
+    <button onclick="submitGeneratorRefuel()" style="width:100%;padding:15px;background:#DC2626;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar Rekod →</button>
+  </div>`;
+}
+async function submitGeneratorRefuel(){
+  const worker=document.getElementById('maint-gr-worker')?.value;
+  if(!worker){alert('Sila pilih nama pekerja.');return;}
+  const amount=document.getElementById('maint-gr-amount')?.value||'';
+  if(!amount){alert('Sila isi jumlah minyak.');return;}
+  rumbleDevice(45);
+  const ok=await maintPost('Generator_Log',{Entry_Type:'Refuel',Refuel_Amount_L:amount,Worker:worker});
+  if(ok) renderGeneratorMenu();
+}
+
+function renderGeneratorMaintenanceForm(){
+  const workerOpts=MAINT_WORKER_NAMES.map(n=>`<option value="${n}">${n}</option>`).join('');
+  document.getElementById('maintenance-worker-body').innerHTML=`${GEN_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+    <div style="font-size:13px;font-weight:700;color:#DC2626;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">🛠️ Penyelenggaraan Selesai</div>
+    <p style="font-size:11px;color:var(--text-dim);margin-bottom:16px;">Ini akan reset kiraan jam ke servis seterusnya.</p>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Nama Pekerja</label>
+    <select id="maint-gm-worker" class="gas-input" style="margin-bottom:16px;"><option value="">Pilih nama...</option>${workerOpts}</select>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Jam Operasi Semasa Servis (Hour Meter)</label>
+    <input type="number" step="0.1" inputmode="decimal" id="maint-gm-hours" placeholder="Ex: 1234.5" class="gas-input" style="margin-bottom:12px;">
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Selang Penyelenggaraan (jam)</label>
+    <input type="number" id="maint-gm-interval" value="500" class="gas-input" style="margin-bottom:20px;">
+    <button onclick="submitGeneratorMaintenance()" style="width:100%;padding:15px;background:#DC2626;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar &amp; Reset Kiraan →</button>
+  </div>`;
+}
+async function submitGeneratorMaintenance(){
+  const worker=document.getElementById('maint-gm-worker')?.value;
+  if(!worker){alert('Sila pilih nama pekerja.');return;}
+  const hours=document.getElementById('maint-gm-hours')?.value||'';
+  const interval=document.getElementById('maint-gm-interval')?.value||500;
+  if(!hours){alert('Sila isi jam operasi semasa servis.');return;}
+  rumbleDevice(45);
+  const logOk=await maintPost('Generator_Log',{Entry_Type:'Maintenance Done',Run_Time_Hours:hours,Worker:worker});
+  if(logOk){
+    const today=new Date().toISOString().split('T')[0];
+    await maintConfigAction('updateGeneratorConfig',{Maintenance_Interval_Hours:interval,Last_Maintenance_Hour_Reading:hours,Last_Maintenance_Date:today});
+    renderGeneratorMenu();
+  }
 }
     </script>
  <div id="farmSpecsOverlay" class="fixed inset-0 z-50 hidden">
