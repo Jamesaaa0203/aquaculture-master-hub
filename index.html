@@ -4334,7 +4334,7 @@ function showMaintWorkerHome(){
     <button class="module" onclick="showMaintTab('forklift')" style="--hue:#F59E0B"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🏗️</span><div class="min-w-0"><div class="module-bm">Forklift</div><div class="module-title">Forklift</div><div class="module-desc">Isi minyak &amp; penyelenggaraan</div></div></div>${chevR}</button>
     <button class="module" onclick="showMaintTab('jetty')" style="--hue:#0EA5E9"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">⚓</span><div class="min-w-0"><div class="module-bm">Jeti</div><div class="module-title">Jetty</div><div class="module-desc">Keadaan (mingguan)</div></div></div>${chevR}</button>
     <button class="module" onclick="showMaintTab('boats')" style="--hue:#0EA5E9"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🚤</span><div class="min-w-0"><div class="module-bm">Bot</div><div class="module-title">Boats</div><div class="module-desc">Baik pulih &amp; penyelenggaraan</div></div></div>${chevR}</button>
-    <div class="text-xs px-1" style="color:var(--text-dim);">More Maintenance items coming soon.</div>
+    <button class="module" onclick="showMaintTab('seaweed')" style="--hue:#059669"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🌿</span><div class="min-w-0"><div class="module-bm">Rumpai Laut</div><div class="module-title">Seaweed Culture</div><div class="module-desc">Batch baru, semakan mingguan &amp; tuai</div></div></div>${chevR}</button>
   </div>`;
 }
 function showMaintTab(tab){
@@ -4352,6 +4352,7 @@ function showMaintTab(tab){
   if(tab==='forklift') renderForkliftMenu();
   if(tab==='jetty') renderJettyForm();
   if(tab==='boats') renderBoatMenu();
+  if(tab==='seaweed') renderSeaweedMenu();
 }
 
 /* ── Container Check — Exception-based pattern (this same shape
@@ -5029,6 +5030,134 @@ async function submitBigBoatMaintenance(){
   rumbleDevice(45);
   const ok=await maintPost('Big_Boat_Maintenance',{Maintenance_Date:date,Part_Maintained:part,Cost:cost});
   if(ok) renderBoatMenu();
+}
+
+/* ═══════════════════════════════════════════════════════
+   SEAWEED CULTURE — new batch, weekly length check, harvest
+   (built now for future use — species list grows as you add
+   batches, no fixed species list needed up front)
+   ═══════════════════════════════════════════════════════ */
+const SEAWEED_BACK_BTN=`<button onclick="renderSeaweedMenu()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:#059669;"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"/></svg>Seaweed Culture</button>`;
+
+function renderSeaweedMenu(){
+  document.getElementById('maintenance-worker-body').innerHTML=`${MAINT_BACK_BTN}<div class="space-y-3" style="margin-top:12px;">
+    <button class="module" onclick="renderSeaweedNewBatchForm()" style="--hue:#059669"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🌱</span><div class="min-w-0"><div class="module-bm">Batch Baru</div><div class="module-title">New Batch</div><div class="module-desc">Mula batch tanaman baru</div></div></div>${chevR}</button>
+    <button class="module" onclick="renderSeaweedWeeklyForm()" style="--hue:#059669"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">📏</span><div class="min-w-0"><div class="module-bm">Semakan Mingguan</div><div class="module-title">Weekly Length Check</div><div class="module-desc">Ukur panjang rumpai</div></div></div>${chevR}</button>
+    <button class="module" onclick="renderSeaweedHarvestForm()" style="--hue:#059669"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🎋</span><div class="min-w-0"><div class="module-bm">Tuai</div><div class="module-title">Harvest</div><div class="module-desc">Rekod berat tuaian</div></div></div>${chevR}</button>
+  </div>`;
+}
+
+/* ── New Batch — species is free text with suggestions from past
+   batches (via <datalist>), so the list grows naturally without
+   needing to predefine species anywhere. ─────────────────────── */
+function renderSeaweedNewBatchForm(){
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('maintenance-worker-body').innerHTML=`${SEAWEED_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+    <div style="font-size:13px;font-weight:700;color:#059669;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">🌱 Batch Rumpai Laut Baru</div>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Spesies</label>
+    <input type="text" id="maint-swn-species" list="maint-sw-species-list" placeholder="Ex: Kappaphycus alvarezii" class="gas-input" style="margin-bottom:14px;">
+    <datalist id="maint-sw-species-list"></datalist>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Lokasi Sangkar</label>
+    <input type="text" id="maint-swn-location" placeholder="Ex: Sangkar 5" class="gas-input" style="margin-bottom:14px;">
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Tarikh Tanam</label>
+    <input type="date" id="maint-swn-date" value="${today}" class="gas-input" style="margin-bottom:14px;">
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Berat Awal (kg)</label>
+    <input type="number" step="0.01" inputmode="decimal" id="maint-swn-weight" placeholder="Ex: 5" class="gas-input" style="margin-bottom:20px;">
+    <button onclick="submitSeaweedNewBatch()" style="width:100%;padding:15px;background:#059669;color:white;font-weight:700;border-radius:12px;font-size:14px;">Daftar Batch →</button>
+  </div>`;
+  // Populate species suggestions in the background — doesn't block the form
+  maintFetchSheet('Seaweed_Batch',(rows)=>{
+    const species=[...new Set(rows.map(r=>r.Species).filter(Boolean))];
+    const dl=document.getElementById('maint-sw-species-list');
+    if(dl) dl.innerHTML=species.map(s=>`<option value="${s}">`).join('');
+  },()=>{});
+}
+async function submitSeaweedNewBatch(){
+  const species=document.getElementById('maint-swn-species')?.value||'';
+  const location=document.getElementById('maint-swn-location')?.value||'';
+  const date=document.getElementById('maint-swn-date')?.value||'';
+  const weight=document.getElementById('maint-swn-weight')?.value||'';
+  if(!species){alert('Sila isi spesies.');return;}
+  if(!location){alert('Sila isi lokasi sangkar.');return;}
+  rumbleDevice(45);
+  const batchId=generateClientId('sw'); // reuses the app's existing id generator
+  const ok=await maintConfigAction('addSeaweedBatch',{Batch_ID:batchId,Species:species,Cage_Location:location,Planting_Date:date,Initial_Weight:weight});
+  if(ok){ alert('Berjaya disimpan! ✓'); renderSeaweedMenu(); }
+}
+
+/* ── Shared batch-picker used by both Weekly Check and Harvest ─── */
+function seaweedBatchOptions(rows){
+  return rows.map(r=>`<option value="${r.Batch_ID}">${r.Species} · ${r.Cage_Location} (${r.Planting_Date})</option>`).join('');
+}
+
+function renderSeaweedWeeklyForm(){
+  document.getElementById('maintenance-worker-body').innerHTML=`${SEAWEED_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;"><p style="font-size:12px;color:var(--text-mut);">Memuatkan senarai batch...</p></div>`;
+  maintFetchSheet('Seaweed_Batch',
+    (rows)=>{
+      if(!rows.length){
+        document.getElementById('maintenance-worker-body').innerHTML=`${SEAWEED_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+          <p style="font-size:13px;font-weight:600;margin-bottom:10px;">Tiada batch didaftarkan lagi.</p>
+          <button onclick="renderSeaweedNewBatchForm()" style="width:100%;padding:14px;background:#059669;color:white;font-weight:700;border-radius:12px;font-size:13px;">🌱 Daftar Batch Dahulu</button>
+        </div>`;
+        return;
+      }
+      document.getElementById('maintenance-worker-body').innerHTML=`${SEAWEED_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+        <div style="font-size:13px;font-weight:700;color:#059669;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">📏 Semakan Panjang Mingguan</div>
+        <label class="eyebrow" style="display:block;margin-bottom:6px;">Batch</label>
+        <select id="maint-sww-batch" class="gas-input" style="margin-bottom:14px;">${seaweedBatchOptions(rows)}</select>
+        <label class="eyebrow" style="display:block;margin-bottom:6px;">Panjang (cm)</label>
+        <input type="number" step="0.1" inputmode="decimal" id="maint-sww-length" placeholder="Ex: 25" class="gas-input" style="margin-bottom:20px;">
+        <button onclick="submitSeaweedWeekly()" style="width:100%;padding:15px;background:#059669;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar Semakan →</button>
+      </div>`;
+    },
+    ()=>{ document.getElementById('maintenance-worker-body').innerHTML=`${SEAWEED_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;"><p style="font-size:13px;color:var(--alert);">Gagal muatkan senarai batch. Cuba lagi.</p></div>`; }
+  );
+}
+async function submitSeaweedWeekly(){
+  const batchId=document.getElementById('maint-sww-batch')?.value;
+  const length=document.getElementById('maint-sww-length')?.value||'';
+  if(!batchId){alert('Sila pilih batch.');return;}
+  if(!length){alert('Sila isi panjang.');return;}
+  rumbleDevice(45);
+  const ok=await maintPost('Seaweed_Weekly_Length',{Batch_ID:batchId,Length_cm:length});
+  if(ok) renderSeaweedMenu();
+}
+
+function renderSeaweedHarvestForm(){
+  document.getElementById('maintenance-worker-body').innerHTML=`${SEAWEED_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;"><p style="font-size:12px;color:var(--text-mut);">Memuatkan senarai batch...</p></div>`;
+  maintFetchSheet('Seaweed_Batch',
+    (rows)=>{
+      if(!rows.length){
+        document.getElementById('maintenance-worker-body').innerHTML=`${SEAWEED_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+          <p style="font-size:13px;font-weight:600;margin-bottom:10px;">Tiada batch didaftarkan lagi.</p>
+          <button onclick="renderSeaweedNewBatchForm()" style="width:100%;padding:14px;background:#059669;color:white;font-weight:700;border-radius:12px;font-size:13px;">🌱 Daftar Batch Dahulu</button>
+        </div>`;
+        return;
+      }
+      const today=new Date().toISOString().split('T')[0];
+      document.getElementById('maintenance-worker-body').innerHTML=`${SEAWEED_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+        <div style="font-size:13px;font-weight:700;color:#059669;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">🎋 Rekod Tuaian</div>
+        <label class="eyebrow" style="display:block;margin-bottom:6px;">Batch</label>
+        <select id="maint-swh-batch" class="gas-input" style="margin-bottom:14px;">${seaweedBatchOptions(rows)}</select>
+        <label class="eyebrow" style="display:block;margin-bottom:6px;">Tarikh Tuai</label>
+        <input type="date" id="maint-swh-date" value="${today}" class="gas-input" style="margin-bottom:14px;">
+        <label class="eyebrow" style="display:block;margin-bottom:6px;">Berat Tuaian (kg)</label>
+        <input type="number" step="0.01" inputmode="decimal" id="maint-swh-weight" placeholder="Ex: 45" class="gas-input" style="margin-bottom:20px;">
+        <button onclick="submitSeaweedHarvest()" style="width:100%;padding:15px;background:#059669;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar Rekod →</button>
+      </div>`;
+    },
+    ()=>{ document.getElementById('maintenance-worker-body').innerHTML=`${SEAWEED_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;"><p style="font-size:13px;color:var(--alert);">Gagal muatkan senarai batch. Cuba lagi.</p></div>`; }
+  );
+}
+async function submitSeaweedHarvest(){
+  const batchId=document.getElementById('maint-swh-batch')?.value;
+  const date=document.getElementById('maint-swh-date')?.value||'';
+  const weight=document.getElementById('maint-swh-weight')?.value||'';
+  if(!batchId){alert('Sila pilih batch.');return;}
+  if(!weight){alert('Sila isi berat tuaian.');return;}
+  rumbleDevice(45);
+  const ok=await maintPost('Seaweed_Harvest',{Batch_ID:batchId,Harvest_Date:date,Harvest_Weight:weight});
+  if(ok) renderSeaweedMenu();
 }
     </script>
  <div id="farmSpecsOverlay" class="fixed inset-0 z-50 hidden">
