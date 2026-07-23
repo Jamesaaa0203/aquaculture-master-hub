@@ -4292,12 +4292,14 @@ const MAINT_BACK_BTN=`<button onclick="showMaintWorkerHome()" class="flex items-
 function showMaintWorkerHome(){
   document.getElementById('maintenance-worker-body').innerHTML=`<div class="space-y-3">
     <button class="module" onclick="showMaintTab('containers')" style="--hue:#F59E0B"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">📦</span><div class="min-w-0"><div class="module-bm">Bekas Alatan</div><div class="module-title">Containers</div><div class="module-desc">Alatan dipulangkan &amp; berkunci</div></div></div>${chevR}</button>
+    <button class="module" onclick="showMaintTab('office')" style="--hue:#F59E0B"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🏢</span><div class="min-w-0"><div class="module-bm">Pejabat</div><div class="module-title">Office</div><div class="module-desc">Aircond off &amp; berkunci</div></div></div>${chevR}</button>
     <div class="text-xs px-1" style="color:var(--text-dim);">More Maintenance items coming soon.</div>
   </div>`;
 }
 function showMaintTab(tab){
   rumbleDevice(35);
   if(tab==='containers') renderContainerCheckForm();
+  if(tab==='office') renderOfficeCheckForm();
 }
 
 /* ── Container Check — Exception-based pattern (this same shape
@@ -4327,6 +4329,35 @@ async function submitContainerCheck(status){
   if(status==='Issue'&&!issueNote){alert('Sila isi butiran masalah.');return;}
   rumbleDevice(45);
   const ok=await maintPost('Container_Check',{Status:status,Issue_Note:issueNote,Worker:worker});
+  if(ok) showMaintWorkerHome();
+}
+
+/* ── Office Check — same exception pattern as Containers ──── */
+function renderOfficeCheckForm(){
+  const workerOpts=MAINT_WORKER_NAMES.map(n=>`<option value="${n}">${n}</option>`).join('');
+  document.getElementById('maintenance-worker-body').innerHTML=`${MAINT_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+    <div style="font-size:13px;font-weight:700;color:#F59E0B;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">🏢 Semakan Pejabat</div>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Nama Pekerja</label>
+    <select id="maint-off-worker" class="gas-input" style="margin-bottom:20px;"><option value="">Pilih nama...</option>${workerOpts}</select>
+    <button onclick="submitOfficeCheck('All Normal')" style="width:100%;padding:15px;background:#10B981;color:white;font-weight:700;border-radius:12px;font-size:14px;margin-bottom:10px;">✓ Semua Normal</button>
+    <button onclick="toggleOfficeIssueForm()" style="width:100%;padding:13px;background:var(--surface-2);color:var(--text);font-weight:600;border-radius:12px;font-size:13px;border:1px solid var(--border);">⚠ Ada Masalah</button>
+    <div id="maint-off-issue-block" class="hidden" style="margin-top:16px;">
+      <label class="eyebrow" style="display:block;margin-bottom:6px;">Butiran Masalah</label>
+      <textarea id="maint-off-issue-note" rows="2" class="gas-input" placeholder="Contoh: Aircond masih hidup / Tidak berkunci" style="margin-bottom:14px;resize:vertical;"></textarea>
+      <button onclick="submitOfficeCheck('Issue')" style="width:100%;padding:14px;background:var(--alert);color:white;font-weight:700;border-radius:12px;font-size:13px;">Hantar Laporan Masalah</button>
+    </div>
+  </div>`;
+}
+function toggleOfficeIssueForm(){
+  document.getElementById('maint-off-issue-block').classList.toggle('hidden');
+}
+async function submitOfficeCheck(status){
+  const worker=document.getElementById('maint-off-worker')?.value;
+  if(!worker){alert('Sila pilih nama pekerja.');return;}
+  const issueNote=status==='Issue'?(document.getElementById('maint-off-issue-note')?.value||''):'';
+  if(status==='Issue'&&!issueNote){alert('Sila isi butiran masalah.');return;}
+  rumbleDevice(45);
+  const ok=await maintPost('Office_Check',{Status:status,Issue_Note:issueNote,Worker:worker});
   if(ok) showMaintWorkerHome();
 }
     </script>
