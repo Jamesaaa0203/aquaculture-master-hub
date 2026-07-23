@@ -4291,6 +4291,7 @@ const MAINT_BACK_BTN=`<button onclick="showMaintWorkerHome()" class="flex items-
 
 function showMaintWorkerHome(){
   document.getElementById('maintenance-worker-body').innerHTML=`<div class="space-y-3">
+    <button class="module" onclick="showMaintTab('tanks')" style="--hue:#EF4444"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🐚</span><div class="min-w-0"><div class="module-bm">Tangki Abalone</div><div class="module-title">Abalone Tanks</div><div class="module-desc">Semakan harian &amp; 3-hari</div></div></div>${chevR}</button>
     <button class="module" onclick="showMaintTab('containers')" style="--hue:#F59E0B"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">📦</span><div class="min-w-0"><div class="module-bm">Bekas Alatan</div><div class="module-title">Containers</div><div class="module-desc">Alatan dipulangkan &amp; berkunci</div></div></div>${chevR}</button>
     <button class="module" onclick="showMaintTab('office')" style="--hue:#F59E0B"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🏢</span><div class="min-w-0"><div class="module-bm">Pejabat</div><div class="module-title">Office</div><div class="module-desc">Aircond off &amp; berkunci</div></div></div>${chevR}</button>
     <div class="text-xs px-1" style="color:var(--text-dim);">More Maintenance items coming soon.</div>
@@ -4298,6 +4299,7 @@ function showMaintWorkerHome(){
 }
 function showMaintTab(tab){
   rumbleDevice(35);
+  if(tab==='tanks') renderTankHomeMenu();
   if(tab==='containers') renderContainerCheckForm();
   if(tab==='office') renderOfficeCheckForm();
 }
@@ -4359,6 +4361,123 @@ async function submitOfficeCheck(status){
   rumbleDevice(45);
   const ok=await maintPost('Office_Check',{Status:status,Issue_Note:issueNote,Worker:worker});
   if(ok) showMaintWorkerHome();
+}
+
+/* ═══════════════════════════════════════════════════════
+   ABALONE TANKS — Daily Check (Normal / Baby) + 3-Day Full Check
+   ═══════════════════════════════════════════════════════ */
+let maintTankLastWorker=''; // remembered across tank sub-screens so worker doesn't re-pick every time
+
+const TANK_BACK_BTN=`<button onclick="renderTankHomeMenu()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:#EF4444;"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"/></svg>Tangki Abalone</button>`;
+
+function renderTankHomeMenu(){
+  document.getElementById('maintenance-worker-body').innerHTML=`${MAINT_BACK_BTN}<div class="space-y-3" style="margin-top:12px;">
+    <div class="eyebrow px-1">Semakan Harian · Daily Check</div>
+    <button class="module" onclick="renderTankDailyCheckForm('Normal Tank')" style="--hue:#10B981"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">💧</span><div class="min-w-0"><div class="module-bm">Air + Aerasi</div><div class="module-title">Normal Tank</div><div class="module-desc">Tangki biasa — air &amp; aerasi</div></div></div>${chevR}</button>
+    <button class="module" onclick="renderTankDailyCheckForm('Baby Tank')" style="--hue:#0EA5E9"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🌊</span><div class="min-w-0"><div class="module-bm">Aerasi Sahaja</div><div class="module-title">Baby Tank</div><div class="module-desc">Tangki spat baru — aerasi sahaja</div></div></div>${chevR}</button>
+    <div class="eyebrow px-1" style="margin-top:14px;">Semakan Penuh · 3-Day Full Check</div>
+    <button class="module" onclick="renderTank3DayCheckForm()" style="--hue:#EF4444"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🔍</span><div class="min-w-0"><div class="module-bm">Semakan 3 Hari</div><div class="module-title">Full Tank Check</div><div class="module-desc">Bocor, rosak &amp; keadaan tangki</div></div></div>${chevR}</button>
+  </div>`;
+}
+
+/* ── Daily Check — one screen per group (Normal Tank / Baby Tank),
+   worker taps "All Normal" for the whole group, or logs individual
+   tank issues one at a time without leaving the screen. ────────── */
+function renderTankDailyCheckForm(group){
+  rumbleDevice(35);
+  const workerOpts=MAINT_WORKER_NAMES.map(n=>`<option value="${n}" ${n===maintTankLastWorker?'selected':''}>${n}</option>`).join('');
+  const hue=group==='Baby Tank'?'#0EA5E9':'#10B981';
+  document.getElementById('maintenance-worker-body').innerHTML=`${TANK_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+    <div style="font-size:13px;font-weight:700;color:${hue};letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">🐚 Semakan Harian · ${group}</div>
+    <p style="font-size:11px;color:var(--text-dim);margin-bottom:16px;">${group==='Baby Tank'?'Semak aerasi sahaja (tiada air).':'Semak air &amp; aerasi.'}</p>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Nama Pekerja</label>
+    <select id="maint-tank-daily-worker" class="gas-input" style="margin-bottom:20px;" onchange="maintTankLastWorker=this.value"><option value="">Pilih nama...</option>${workerOpts}</select>
+    <button onclick="submitTankDailyCheck('${group}','All Normal')" style="width:100%;padding:15px;background:#10B981;color:white;font-weight:700;border-radius:12px;font-size:14px;margin-bottom:10px;">✓ Semua Normal</button>
+    <button onclick="toggleTankDailyIssueForm()" style="width:100%;padding:13px;background:var(--surface-2);color:var(--text);font-weight:600;border-radius:12px;font-size:13px;border:1px solid var(--border);">⚠ Laporkan Masalah</button>
+    <div id="maint-tank-daily-issue-block" class="hidden" style="margin-top:16px;">
+      <label class="eyebrow" style="display:block;margin-bottom:6px;">Nombor Tangki</label>
+      <input type="number" inputmode="numeric" id="maint-tank-daily-tankno" placeholder="Ex: 15" class="gas-input" style="margin-bottom:12px;">
+      <label class="eyebrow" style="display:block;margin-bottom:6px;">Jenis Masalah</label>
+      <select id="maint-tank-daily-issuetype" class="gas-input" style="margin-bottom:14px;">
+        <option value="Water Off">Air Tertutup (Water Off)</option>
+        <option value="Aeration Off">Aerasi Tertutup (Aeration Off)</option>
+      </select>
+      <button onclick="submitTankDailyCheck('${group}','Issue Found')" style="width:100%;padding:14px;background:var(--alert);color:white;font-weight:700;border-radius:12px;font-size:13px;">Hantar Laporan Tangki Ini</button>
+      <p style="font-size:10.5px;color:var(--text-dim);margin-top:8px;">Selepas hantar, borang kekal terbuka untuk laporkan tangki lain jika perlu.</p>
+    </div>
+  </div>`;
+}
+function toggleTankDailyIssueForm(){
+  document.getElementById('maint-tank-daily-issue-block').classList.toggle('hidden');
+}
+async function submitTankDailyCheck(group,status){
+  const worker=document.getElementById('maint-tank-daily-worker')?.value;
+  if(!worker){alert('Sila pilih nama pekerja.');return;}
+  maintTankLastWorker=worker;
+  let tankNo='',issueType='';
+  if(status==='Issue Found'){
+    tankNo=document.getElementById('maint-tank-daily-tankno')?.value||'';
+    issueType=document.getElementById('maint-tank-daily-issuetype')?.value||'';
+    if(!tankNo){alert('Sila isi nombor tangki.');return;}
+  }
+  rumbleDevice(45);
+  const ok=await maintPost('Tank_Daily_Check',{Group:group,Status:status,Tank_No:tankNo,Issue_Type:issueType,Worker:worker});
+  if(ok){
+    if(status==='All Normal'){ renderTankHomeMenu(); }
+    else { const t=document.getElementById('maint-tank-daily-tankno'); if(t) t.value=''; }
+  }
+}
+
+/* ── 3-Day Full Check — "All Tanks Normal" default, or log
+   individual tank issues (Leaking/Broken/Other) one at a time. ─── */
+function renderTank3DayCheckForm(){
+  rumbleDevice(35);
+  const workerOpts=MAINT_WORKER_NAMES.map(n=>`<option value="${n}" ${n===maintTankLastWorker?'selected':''}>${n}</option>`).join('');
+  document.getElementById('maintenance-worker-body').innerHTML=`${TANK_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+    <div style="font-size:13px;font-weight:700;color:#EF4444;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">🐚 Semakan Penuh 3 Hari</div>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Nama Pekerja</label>
+    <select id="maint-tank-3d-worker" class="gas-input" style="margin-bottom:20px;" onchange="maintTankLastWorker=this.value"><option value="">Pilih nama...</option>${workerOpts}</select>
+    <button onclick="submitTank3DayCheck('All Normal')" style="width:100%;padding:15px;background:#10B981;color:white;font-weight:700;border-radius:12px;font-size:14px;margin-bottom:10px;">✓ Semua Tangki Normal</button>
+    <button onclick="toggleTank3DayIssueForm()" style="width:100%;padding:13px;background:var(--surface-2);color:var(--text);font-weight:600;border-radius:12px;font-size:13px;border:1px solid var(--border);">⚠ Laporkan Masalah</button>
+    <div id="maint-tank-3d-issue-block" class="hidden" style="margin-top:16px;">
+      <label class="eyebrow" style="display:block;margin-bottom:6px;">Nombor Tangki</label>
+      <input type="number" inputmode="numeric" id="maint-tank-3d-tankno" placeholder="Ex: 15" class="gas-input" style="margin-bottom:12px;">
+      <label class="eyebrow" style="display:block;margin-bottom:6px;">Jenis Masalah</label>
+      <select id="maint-tank-3d-issuetype" class="gas-input" style="margin-bottom:12px;">
+        <option value="Leaking">Bocor (Leaking)</option>
+        <option value="Broken">Rosak (Broken)</option>
+        <option value="Other">Lain-lain (Other)</option>
+      </select>
+      <label class="eyebrow" style="display:block;margin-bottom:6px;">Nota (pilihan)</label>
+      <textarea id="maint-tank-3d-note" rows="2" class="gas-input" placeholder="Nota tambahan…" style="margin-bottom:14px;resize:vertical;"></textarea>
+      <button onclick="submitTank3DayCheck('Issue Found')" style="width:100%;padding:14px;background:var(--alert);color:white;font-weight:700;border-radius:12px;font-size:13px;">Hantar Laporan Tangki Ini</button>
+      <p style="font-size:10.5px;color:var(--text-dim);margin-top:8px;">Selepas hantar, borang kekal terbuka untuk laporkan tangki lain jika perlu.</p>
+    </div>
+  </div>`;
+}
+function toggleTank3DayIssueForm(){
+  document.getElementById('maint-tank-3d-issue-block').classList.toggle('hidden');
+}
+async function submitTank3DayCheck(status){
+  const worker=document.getElementById('maint-tank-3d-worker')?.value;
+  if(!worker){alert('Sila pilih nama pekerja.');return;}
+  maintTankLastWorker=worker;
+  let tankNo='',issueType='',note='';
+  if(status==='Issue Found'){
+    tankNo=document.getElementById('maint-tank-3d-tankno')?.value||'';
+    issueType=document.getElementById('maint-tank-3d-issuetype')?.value||'';
+    note=document.getElementById('maint-tank-3d-note')?.value||'';
+    if(!tankNo){alert('Sila isi nombor tangki.');return;}
+  }
+  rumbleDevice(45);
+  const ok=await maintPost('Tank_3Day_Check',{Status:status,Tank_No:tankNo,Issue_Type:issueType,Issue_Note:note,Worker:worker});
+  if(ok){
+    if(status==='All Normal'){ renderTankHomeMenu(); }
+    else {
+      const t=document.getElementById('maint-tank-3d-tankno'); if(t) t.value='';
+      const n=document.getElementById('maint-tank-3d-note'); if(n) n.value='';
+    }
+  }
 }
     </script>
  <div id="farmSpecsOverlay" class="fixed inset-0 z-50 hidden">
