@@ -4294,6 +4294,9 @@ function showMaintWorkerHome(){
     <button class="module" onclick="showMaintTab('tanks')" style="--hue:#EF4444"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🐚</span><div class="min-w-0"><div class="module-bm">Tangki Abalone</div><div class="module-title">Abalone Tanks</div><div class="module-desc">Semakan harian &amp; 3-hari</div></div></div>${chevR}</button>
     <button class="module" onclick="showMaintTab('containers')" style="--hue:#F59E0B"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">📦</span><div class="min-w-0"><div class="module-bm">Bekas Alatan</div><div class="module-title">Containers</div><div class="module-desc">Alatan dipulangkan &amp; berkunci</div></div></div>${chevR}</button>
     <button class="module" onclick="showMaintTab('office')" style="--hue:#F59E0B"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🏢</span><div class="min-w-0"><div class="module-bm">Pejabat</div><div class="module-title">Office</div><div class="module-desc">Aircond off &amp; berkunci</div></div></div>${chevR}</button>
+    <button class="module" onclick="showMaintTab('reservoir')" style="--hue:#0EA5E9"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🪣</span><div class="min-w-0"><div class="module-bm">Tangki Takungan</div><div class="module-title">Reservoir</div><div class="module-desc">Keadaan &amp; kebocoran (bulanan)</div></div></div>${chevR}</button>
+    <button class="module" onclick="showMaintTab('sandfilter')" style="--hue:#8B5CF6"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🌀</span><div class="min-w-0"><div class="module-bm">Penapis Pasir</div><div class="module-title">Sand Filter</div><div class="module-desc">4 unit — PSI &amp; keadaan (2x sehari)</div></div></div>${chevR}</button>
+    <button class="module" onclick="showMaintTab('blower')" style="--hue:#10B981"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">💨</span><div class="min-w-0"><div class="module-bm">Blower</div><div class="module-title">Blower</div><div class="module-desc">Status berfungsi (harian)</div></div></div>${chevR}</button>
     <div class="text-xs px-1" style="color:var(--text-dim);">More Maintenance items coming soon.</div>
   </div>`;
 }
@@ -4302,6 +4305,9 @@ function showMaintTab(tab){
   if(tab==='tanks') renderTankHomeMenu();
   if(tab==='containers') renderContainerCheckForm();
   if(tab==='office') renderOfficeCheckForm();
+  if(tab==='reservoir') renderReservoirCheckForm();
+  if(tab==='sandfilter') renderSandFilterCheckForm();
+  if(tab==='blower') renderBlowerCheckForm();
 }
 
 /* ── Container Check — Exception-based pattern (this same shape
@@ -4478,6 +4484,91 @@ async function submitTank3DayCheck(status){
       const n=document.getElementById('maint-tank-3d-note'); if(n) n.value='';
     }
   }
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESERVOIR — monthly condition + leak check
+   ═══════════════════════════════════════════════════════ */
+function renderReservoirCheckForm(){
+  const workerOpts=MAINT_WORKER_NAMES.map(n=>`<option value="${n}">${n}</option>`).join('');
+  document.getElementById('maintenance-worker-body').innerHTML=`${MAINT_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+    <div style="font-size:13px;font-weight:700;color:#0EA5E9;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">🪣 Semakan Tangki Takungan</div>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Nama Pekerja</label>
+    <select id="maint-res-worker" class="gas-input" style="margin-bottom:16px;"><option value="">Pilih nama...</option>${workerOpts}</select>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Keadaan</label>
+    <select id="maint-res-condition" class="gas-input" style="margin-bottom:16px;"><option value="Good">Baik (Good)</option><option value="Issue">Ada Masalah (Issue)</option></select>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Bocor?</label>
+    <select id="maint-res-leaking" class="gas-input" style="margin-bottom:20px;"><option value="No">Tidak (No)</option><option value="Yes">Ya (Yes)</option></select>
+    <button onclick="submitReservoirCheck()" style="width:100%;padding:15px;background:#0EA5E9;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar Semakan →</button>
+  </div>`;
+}
+async function submitReservoirCheck(){
+  const worker=document.getElementById('maint-res-worker')?.value;
+  if(!worker){alert('Sila pilih nama pekerja.');return;}
+  const condition=document.getElementById('maint-res-condition').value;
+  const leaking=document.getElementById('maint-res-leaking').value;
+  rumbleDevice(45);
+  const ok=await maintPost('Reservoir_Check',{Condition:condition,Leaking:leaking,Worker:worker});
+  if(ok) showMaintWorkerHome();
+}
+
+/* ═══════════════════════════════════════════════════════
+   SAND FILTER — 4 units, PSI + condition, 2x/day
+   ═══════════════════════════════════════════════════════ */
+function renderSandFilterCheckForm(){
+  const workerOpts=MAINT_WORKER_NAMES.map(n=>`<option value="${n}">${n}</option>`).join('');
+  const filterRows=[1,2,3,4].map(i=>`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+      <div><label class="eyebrow" style="display:block;margin-bottom:6px;">Filter ${i} — PSI</label>
+        <input type="number" step="0.1" inputmode="decimal" id="maint-sf-${i}-psi" placeholder="Ex: 12" class="gas-input"></div>
+      <div><label class="eyebrow" style="display:block;margin-bottom:6px;">Filter ${i} — Keadaan</label>
+        <select id="maint-sf-${i}-cond" class="gas-input"><option value="Normal">Normal</option><option value="Abnormal">Abnormal</option></select></div>
+    </div>`).join('');
+  document.getElementById('maintenance-worker-body').innerHTML=`${MAINT_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+    <div style="font-size:13px;font-weight:700;color:#8B5CF6;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">🌀 Semakan Penapis Pasir</div>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Nama Pekerja</label>
+    <select id="maint-sf-worker" class="gas-input" style="margin-bottom:14px;"><option value="">Pilih nama...</option>${workerOpts}</select>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Sesi</label>
+    <select id="maint-sf-session" class="gas-input" style="margin-bottom:20px;"><option value="Morning">Pagi (Morning)</option><option value="Evening">Petang (Evening)</option></select>
+    ${filterRows}
+    <button onclick="submitSandFilterCheck()" style="width:100%;padding:15px;background:#8B5CF6;color:white;font-weight:700;border-radius:12px;font-size:14px;margin-top:8px;">Hantar Semakan →</button>
+  </div>`;
+}
+async function submitSandFilterCheck(){
+  const worker=document.getElementById('maint-sf-worker')?.value;
+  if(!worker){alert('Sila pilih nama pekerja.');return;}
+  const session=document.getElementById('maint-sf-session').value;
+  const data={Session:session,Worker:worker};
+  for(let i=1;i<=4;i++){
+    data[`Filter_${i}_PSI`]=document.getElementById(`maint-sf-${i}-psi`)?.value||'';
+    data[`Filter_${i}_Condition`]=document.getElementById(`maint-sf-${i}-cond`)?.value||'Normal';
+  }
+  rumbleDevice(45);
+  const ok=await maintPost('Sand_Filter_Check',data);
+  if(ok) showMaintWorkerHome();
+}
+
+/* ═══════════════════════════════════════════════════════
+   BLOWER — single unit, daily working/not
+   ═══════════════════════════════════════════════════════ */
+function renderBlowerCheckForm(){
+  const workerOpts=MAINT_WORKER_NAMES.map(n=>`<option value="${n}">${n}</option>`).join('');
+  document.getElementById('maintenance-worker-body').innerHTML=`${MAINT_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+    <div style="font-size:13px;font-weight:700;color:#10B981;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">💨 Semakan Blower</div>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Nama Pekerja</label>
+    <select id="maint-bl-worker" class="gas-input" style="margin-bottom:16px;"><option value="">Pilih nama...</option>${workerOpts}</select>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Status</label>
+    <select id="maint-bl-status" class="gas-input" style="margin-bottom:20px;"><option value="Working">Berfungsi (Working)</option><option value="Not Working">Tidak Berfungsi (Not Working)</option></select>
+    <button onclick="submitBlowerCheck()" style="width:100%;padding:15px;background:#10B981;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar Semakan →</button>
+  </div>`;
+}
+async function submitBlowerCheck(){
+  const worker=document.getElementById('maint-bl-worker')?.value;
+  if(!worker){alert('Sila pilih nama pekerja.');return;}
+  const status=document.getElementById('maint-bl-status').value;
+  rumbleDevice(45);
+  const ok=await maintPost('Blower_Check',{Status:status,Worker:worker});
+  if(ok) showMaintWorkerHome();
 }
     </script>
  <div id="farmSpecsOverlay" class="fixed inset-0 z-50 hidden">
