@@ -4332,6 +4332,8 @@ function showMaintWorkerHome(){
     <button class="module" onclick="showMaintTab('generator')" style="--hue:#DC2626"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">⚡</span><div class="min-w-0"><div class="module-bm">Generator Set</div><div class="module-title">Generator</div><div class="module-desc">Bahan api, jam operasi &amp; penyelenggaraan</div></div></div>${chevR}</button>
     <button class="module" onclick="showMaintTab('cars')" style="--hue:#3B82F6"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🚗</span><div class="min-w-0"><div class="module-bm">Kereta Syarikat</div><div class="module-title">Company Cars</div><div class="module-desc">Log perjalanan &amp; nombor plat</div></div></div>${chevR}</button>
     <button class="module" onclick="showMaintTab('forklift')" style="--hue:#F59E0B"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🏗️</span><div class="min-w-0"><div class="module-bm">Forklift</div><div class="module-title">Forklift</div><div class="module-desc">Isi minyak &amp; penyelenggaraan</div></div></div>${chevR}</button>
+    <button class="module" onclick="showMaintTab('jetty')" style="--hue:#0EA5E9"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">⚓</span><div class="min-w-0"><div class="module-bm">Jeti</div><div class="module-title">Jetty</div><div class="module-desc">Keadaan (mingguan)</div></div></div>${chevR}</button>
+    <button class="module" onclick="showMaintTab('boats')" style="--hue:#0EA5E9"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🚤</span><div class="min-w-0"><div class="module-bm">Bot</div><div class="module-title">Boats</div><div class="module-desc">Baik pulih &amp; penyelenggaraan</div></div></div>${chevR}</button>
     <div class="text-xs px-1" style="color:var(--text-dim);">More Maintenance items coming soon.</div>
   </div>`;
 }
@@ -4348,6 +4350,8 @@ function showMaintTab(tab){
   if(tab==='generator') renderGeneratorMenu();
   if(tab==='cars') renderCarMenu();
   if(tab==='forklift') renderForkliftMenu();
+  if(tab==='jetty') renderJettyForm();
+  if(tab==='boats') renderBoatMenu();
 }
 
 /* ── Container Check — Exception-based pattern (this same shape
@@ -4941,6 +4945,90 @@ async function submitForkliftMaintenance(){
   rumbleDevice(45);
   const ok=await maintPost('Forklift_Maintenance',{Worker:worker,Service_Note:note});
   if(ok) renderForkliftMenu();
+}
+
+/* ═══════════════════════════════════════════════════════
+   JETTY — weekly condition check
+   ═══════════════════════════════════════════════════════ */
+function renderJettyForm(){
+  const workerOpts=MAINT_WORKER_NAMES.map(n=>`<option value="${n}">${n}</option>`).join('');
+  document.getElementById('maintenance-worker-body').innerHTML=`${MAINT_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+    <div style="font-size:13px;font-weight:700;color:#0EA5E9;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">⚓ Semakan Jeti</div>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Nama Pekerja</label>
+    <select id="maint-jt-worker" class="gas-input" style="margin-bottom:16px;"><option value="">Pilih nama...</option>${workerOpts}</select>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Keadaan</label>
+    <select id="maint-jt-condition" class="gas-input" style="margin-bottom:16px;"><option value="Normal">Normal</option><option value="Issue">Ada Masalah</option></select>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Nota (pilihan)</label>
+    <textarea id="maint-jt-note" rows="2" class="gas-input" placeholder="Nota tambahan…" style="margin-bottom:20px;resize:vertical;"></textarea>
+    <button onclick="submitJettyCheck()" style="width:100%;padding:15px;background:#0EA5E9;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar Semakan →</button>
+  </div>`;
+}
+async function submitJettyCheck(){
+  const worker=document.getElementById('maint-jt-worker')?.value;
+  if(!worker){alert('Sila pilih nama pekerja.');return;}
+  const condition=document.getElementById('maint-jt-condition').value;
+  const note=document.getElementById('maint-jt-note')?.value||'';
+  rumbleDevice(45);
+  const ok=await maintPost('Jetty_Check',{Condition:condition,Note:note,Worker:worker});
+  if(ok) showMaintWorkerHome();
+}
+
+/* ═══════════════════════════════════════════════════════
+   BOATS — Small/Medium repair log, Big Boat maintenance log
+   ═══════════════════════════════════════════════════════ */
+const BOAT_BACK_BTN=`<button onclick="renderBoatMenu()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:#0EA5E9;"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"/></svg>Boats</button>`;
+
+function renderBoatMenu(){
+  document.getElementById('maintenance-worker-body').innerHTML=`${MAINT_BACK_BTN}<div class="space-y-3" style="margin-top:12px;">
+    <button class="module" onclick="renderBoatRepairForm()" style="--hue:#0EA5E9"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🔩</span><div class="min-w-0"><div class="module-bm">Bot Kecil/Sederhana</div><div class="module-title">Small / Medium Repair</div><div class="module-desc">Bahagian rosak, tarikh &amp; harga</div></div></div>${chevR}</button>
+    <button class="module" onclick="renderBigBoatMaintenanceForm()" style="--hue:#0EA5E9"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">⚙️</span><div class="min-w-0"><div class="module-bm">Bot Besar</div><div class="module-title">Big Boat Maintenance</div><div class="module-desc">Tarikh, bahagian diservis &amp; kos</div></div></div>${chevR}</button>
+  </div>`;
+}
+function renderBoatRepairForm(){
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('maintenance-worker-body').innerHTML=`${BOAT_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+    <div style="font-size:13px;font-weight:700;color:#0EA5E9;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">🔩 Baik Pulih Bot Kecil/Sederhana</div>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Bot</label>
+    <select id="maint-bt-boat" class="gas-input" style="margin-bottom:14px;"><option value="Small">Bot Kecil (Small)</option><option value="Medium">Bot Sederhana (Medium)</option></select>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Bahagian Rosak</label>
+    <input type="text" id="maint-bt-part" placeholder="Ex: Enjin, kemudi..." class="gas-input" style="margin-bottom:14px;">
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Tarikh Baik Pulih</label>
+    <input type="date" id="maint-bt-date" value="${today}" class="gas-input" style="margin-bottom:14px;">
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Harga (RM)</label>
+    <input type="number" step="0.01" inputmode="decimal" id="maint-bt-price" placeholder="Ex: 150" class="gas-input" style="margin-bottom:20px;">
+    <button onclick="submitBoatRepair()" style="width:100%;padding:15px;background:#0EA5E9;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar Rekod →</button>
+  </div>`;
+}
+async function submitBoatRepair(){
+  const boat=document.getElementById('maint-bt-boat').value;
+  const part=document.getElementById('maint-bt-part')?.value||'';
+  const date=document.getElementById('maint-bt-date')?.value||'';
+  const price=document.getElementById('maint-bt-price')?.value||'';
+  if(!part){alert('Sila isi bahagian rosak.');return;}
+  rumbleDevice(45);
+  const ok=await maintPost('Boat_Repair_Log',{Boat:boat,Broken_Part:part,Repair_Date:date,Price:price});
+  if(ok) renderBoatMenu();
+}
+function renderBigBoatMaintenanceForm(){
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('maintenance-worker-body').innerHTML=`${BOAT_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+    <div style="font-size:13px;font-weight:700;color:#0EA5E9;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">⚙️ Penyelenggaraan Bot Besar</div>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Tarikh Penyelenggaraan</label>
+    <input type="date" id="maint-bb-date" value="${today}" class="gas-input" style="margin-bottom:14px;">
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Bahagian Diservis</label>
+    <select id="maint-bb-part" class="gas-input" style="margin-bottom:14px;"><option value="Engine Oil">Minyak Enjin (Engine Oil)</option><option value="Filter">Penapis (Filter)</option><option value="Hull">Badan Bot (Hull)</option><option value="Other">Lain-lain (Other)</option></select>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Kos (RM)</label>
+    <input type="number" step="0.01" inputmode="decimal" id="maint-bb-cost" placeholder="Ex: 350" class="gas-input" style="margin-bottom:20px;">
+    <button onclick="submitBigBoatMaintenance()" style="width:100%;padding:15px;background:#0EA5E9;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar Rekod →</button>
+  </div>`;
+}
+async function submitBigBoatMaintenance(){
+  const date=document.getElementById('maint-bb-date')?.value||'';
+  const part=document.getElementById('maint-bb-part').value;
+  const cost=document.getElementById('maint-bb-cost')?.value||'';
+  rumbleDevice(45);
+  const ok=await maintPost('Big_Boat_Maintenance',{Maintenance_Date:date,Part_Maintained:part,Cost:cost});
+  if(ok) renderBoatMenu();
 }
     </script>
  <div id="farmSpecsOverlay" class="fixed inset-0 z-50 hidden">
