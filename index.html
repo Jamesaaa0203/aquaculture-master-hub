@@ -4296,7 +4296,9 @@ function showMaintWorkerHome(){
     <button class="module" onclick="showMaintTab('office')" style="--hue:#F59E0B"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🏢</span><div class="min-w-0"><div class="module-bm">Pejabat</div><div class="module-title">Office</div><div class="module-desc">Aircond off &amp; berkunci</div></div></div>${chevR}</button>
     <button class="module" onclick="showMaintTab('reservoir')" style="--hue:#0EA5E9"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🪣</span><div class="min-w-0"><div class="module-bm">Tangki Takungan</div><div class="module-title">Reservoir</div><div class="module-desc">Keadaan &amp; kebocoran (bulanan)</div></div></div>${chevR}</button>
     <button class="module" onclick="showMaintTab('sandfilter')" style="--hue:#8B5CF6"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🌀</span><div class="min-w-0"><div class="module-bm">Penapis Pasir</div><div class="module-title">Sand Filter</div><div class="module-desc">4 unit — PSI &amp; keadaan (2x sehari)</div></div></div>${chevR}</button>
-    <button class="module" onclick="showMaintTab('blower')" style="--hue:#10B981"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">💨</span><div class="min-w-0"><div class="module-bm">Blower</div><div class="module-title">Blower</div><div class="module-desc">Status berfungsi (harian)</div></div></div>${chevR}</button>
+   <button class="module" onclick="showMaintTab('blower')" style="--hue:#10B981"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">💨</span><div class="min-w-0"><div class="module-bm">Blower</div><div class="module-title">Blower</div><div class="module-desc">Status berfungsi (harian)</div></div></div>${chevR}</button>
+    <button class="module" onclick="showMaintTab('breeding')" style="--hue:#EC4899"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🧪</span><div class="min-w-0"><div class="module-bm">Bilik Pembiakan</div><div class="module-title">Breeding Room</div><div class="module-desc">Tangki, pam &amp; mikroskop (2x/bulan)</div></div></div>${chevR}</button>
+    <button class="module" onclick="showMaintTab('pumproom')" style="--hue:#F97316"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🔧</span><div class="min-w-0"><div class="module-bm">Bilik Pam</div><div class="module-title">Pump Room</div><div class="module-desc">Semakan mingguan &amp; pembersihan bulanan</div></div></div>${chevR}</button>
     <div class="text-xs px-1" style="color:var(--text-dim);">More Maintenance items coming soon.</div>
   </div>`;
 }
@@ -4308,6 +4310,8 @@ function showMaintTab(tab){
   if(tab==='reservoir') renderReservoirCheckForm();
   if(tab==='sandfilter') renderSandFilterCheckForm();
   if(tab==='blower') renderBlowerCheckForm();
+  if(tab==='breeding') renderBreedingRoomForm();
+  if(tab==='pumproom') renderPumpRoomMenu();
 }
 
 /* ── Container Check — Exception-based pattern (this same shape
@@ -4569,6 +4573,112 @@ async function submitBlowerCheck(){
   rumbleDevice(45);
   const ok=await maintPost('Blower_Check',{Status:status,Worker:worker});
   if(ok) showMaintWorkerHome();
+}
+
+/* ═══════════════════════════════════════════════════════
+   BREEDING ROOM — combined submission: spawning tanks +
+   UV pump + cool pump + microscope, all in one form (2x/month)
+   ═══════════════════════════════════════════════════════ */
+function renderBreedingRoomForm(){
+  const workerOpts=MAINT_WORKER_NAMES.map(n=>`<option value="${n}">${n}</option>`).join('');
+  document.getElementById('maintenance-worker-body').innerHTML=`${MAINT_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+    <div style="font-size:13px;font-weight:700;color:#EC4899;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">🧪 Semakan Bilik Pembiakan</div>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Nama Pekerja</label>
+    <select id="maint-br-worker" class="gas-input" style="margin-bottom:16px;"><option value="">Pilih nama...</option>${workerOpts}</select>
+
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Tangki Pemijahan</label>
+    <select id="maint-br-spawn-status" class="gas-input" onchange="toggleBreedingTankNo()" style="margin-bottom:12px;"><option value="All Normal">Semua Normal</option><option value="Issue Found">Ada Masalah (Bocor)</option></select>
+    <div id="maint-br-tankno-block" class="hidden" style="margin-bottom:16px;">
+      <label class="eyebrow" style="display:block;margin-bottom:6px;">Nombor Tangki Bocor</label>
+      <input type="number" inputmode="numeric" id="maint-br-tankno" placeholder="Ex: 3" class="gas-input">
+    </div>
+
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Pam UV (UV Water Pump)</label>
+    <select id="maint-br-uv" class="gas-input" style="margin-bottom:12px;"><option value="Good">Baik (Good)</option><option value="Issue">Ada Masalah (Issue)</option></select>
+
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Pam Air Sejuk (Cool Water Pump)</label>
+    <select id="maint-br-cool" class="gas-input" style="margin-bottom:12px;"><option value="Good">Baik (Good)</option><option value="Issue">Ada Masalah (Issue)</option></select>
+
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Mikroskop</label>
+    <select id="maint-br-microscope" class="gas-input" style="margin-bottom:20px;"><option value="Good">Baik (Good)</option><option value="Issue">Ada Masalah (Issue)</option></select>
+
+    <button onclick="submitBreedingRoomCheck()" style="width:100%;padding:15px;background:#EC4899;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar Semakan →</button>
+  </div>`;
+}
+function toggleBreedingTankNo(){
+  const val=document.getElementById('maint-br-spawn-status').value;
+  document.getElementById('maint-br-tankno-block').classList.toggle('hidden',val!=='Issue Found');
+}
+async function submitBreedingRoomCheck(){
+  const worker=document.getElementById('maint-br-worker')?.value;
+  if(!worker){alert('Sila pilih nama pekerja.');return;}
+  const spawnStatus=document.getElementById('maint-br-spawn-status').value;
+  const tankNo=spawnStatus==='Issue Found'?(document.getElementById('maint-br-tankno')?.value||''):'';
+  if(spawnStatus==='Issue Found'&&!tankNo){alert('Sila isi nombor tangki.');return;}
+  const uv=document.getElementById('maint-br-uv').value;
+  const cool=document.getElementById('maint-br-cool').value;
+  const micro=document.getElementById('maint-br-microscope').value;
+  rumbleDevice(45);
+  const ok=await maintPost('Breeding_Room_Check',{Spawning_Tanks_Status:spawnStatus,Spawning_Tank_No:tankNo,UV_Pump_Condition:uv,Cool_Pump_Condition:cool,Microscope_Condition:micro,Worker:worker});
+  if(ok) showMaintWorkerHome();
+}
+
+/* ═══════════════════════════════════════════════════════
+   PUMP ROOM — weekly condition check + monthly cleaning log
+   (two frequencies, so it gets its own small menu)
+   ═══════════════════════════════════════════════════════ */
+const PUMP_BACK_BTN=`<button onclick="renderPumpRoomMenu()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:#F97316;"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"/></svg>Bilik Pam</button>`;
+
+function renderPumpRoomMenu(){
+  document.getElementById('maintenance-worker-body').innerHTML=`${MAINT_BACK_BTN}<div class="space-y-3" style="margin-top:12px;">
+    <div class="eyebrow px-1">Semakan Mingguan · Weekly Check</div>
+    <button class="module" onclick="renderPumpRoomCheckForm()" style="--hue:#F97316"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🔧</span><div class="min-w-0"><div class="module-bm">Keadaan Pam</div><div class="module-title">Pump Condition</div><div class="module-desc">Rumah pam besar &amp; kecil</div></div></div>${chevR}</button>
+    <div class="eyebrow px-1" style="margin-top:14px;">Bulanan · Monthly</div>
+    <button class="module" onclick="renderPumpRoomCleaningForm()" style="--hue:#F97316"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🧹</span><div class="min-w-0"><div class="module-bm">Log Pembersihan</div><div class="module-title">Cleaning Log</div><div class="module-desc">Rekod tarikh pembersihan</div></div></div>${chevR}</button>
+  </div>`;
+}
+function renderPumpRoomCheckForm(){
+  const workerOpts=MAINT_WORKER_NAMES.map(n=>`<option value="${n}">${n}</option>`).join('');
+  document.getElementById('maintenance-worker-body').innerHTML=`${PUMP_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+    <div style="font-size:13px;font-weight:700;color:#F97316;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">🔧 Semakan Bilik Pam</div>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Nama Pekerja</label>
+    <select id="maint-pr-worker" class="gas-input" style="margin-bottom:16px;"><option value="">Pilih nama...</option>${workerOpts}</select>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Rumah Pam Besar</label>
+    <select id="maint-pr-big" class="gas-input" style="margin-bottom:12px;"><option value="Normal">Normal</option><option value="Issue">Ada Masalah</option></select>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Rumah Pam Kecil</label>
+    <select id="maint-pr-small" class="gas-input" style="margin-bottom:20px;"><option value="Normal">Normal</option><option value="Issue">Ada Masalah</option></select>
+    <button onclick="submitPumpRoomCheck()" style="width:100%;padding:15px;background:#F97316;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar Semakan →</button>
+  </div>`;
+}
+async function submitPumpRoomCheck(){
+  const worker=document.getElementById('maint-pr-worker')?.value;
+  if(!worker){alert('Sila pilih nama pekerja.');return;}
+  const big=document.getElementById('maint-pr-big').value;
+  const small=document.getElementById('maint-pr-small').value;
+  rumbleDevice(45);
+  const ok=await maintPost('Pump_Room_Check',{Big_Pump_House_Condition:big,Small_Pump_House_Condition:small,Worker:worker});
+  if(ok) renderPumpRoomMenu();
+}
+function renderPumpRoomCleaningForm(){
+  const workerOpts=MAINT_WORKER_NAMES.map(n=>`<option value="${n}">${n}</option>`).join('');
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('maintenance-worker-body').innerHTML=`${PUMP_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+    <div style="font-size:13px;font-weight:700;color:#F97316;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">🧹 Log Pembersihan Bilik Pam</div>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Nama Pekerja</label>
+    <select id="maint-prc-worker" class="gas-input" style="margin-bottom:16px;"><option value="">Pilih nama...</option>${workerOpts}</select>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Tarikh Pembersihan</label>
+    <input type="date" id="maint-prc-date" value="${today}" class="gas-input" style="margin-bottom:20px;">
+    <button onclick="submitPumpRoomCleaning()" style="width:100%;padding:15px;background:#F97316;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar Log →</button>
+  </div>`;
+}
+async function submitPumpRoomCleaning(){
+  const worker=document.getElementById('maint-prc-worker')?.value;
+  if(!worker){alert('Sila pilih nama pekerja.');return;}
+  const cleaningDate=document.getElementById('maint-prc-date')?.value||'';
+  if(!cleaningDate){alert('Sila isi tarikh pembersihan.');return;}
+  rumbleDevice(45);
+  const ok=await maintPost('Pump_Room_Cleaning',{Cleaning_Date:cleaningDate,Worker:worker});
+  if(ok) renderPumpRoomMenu();
 }
     </script>
  <div id="farmSpecsOverlay" class="fixed inset-0 z-50 hidden">
