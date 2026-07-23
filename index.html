@@ -234,7 +234,7 @@
                     <div><label class="eyebrow block mb-1.5">Spawning &amp; Purchasing</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-spawning-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
                     <div><label class="eyebrow block mb-1.5">Processing Log</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-processing-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
                     <div><label class="eyebrow block mb-1.5">Sea Cage Ops</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-sc-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div><div><label class="eyebrow block mb-1.5">Hatchery HR Suite</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-hr-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div> <div><label class="eyebrow block mb-1.5">Farm Stock Check</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-stockcheck-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
-                    <div><label class="eyebrow block mb-1.5">Land Farm</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-landfarm-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div><div><label class="eyebrow block mb-1.5">Night Guard</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-ng-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
+                    <div><label class="eyebrow block mb-1.5">Land Farm</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-landfarm-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div><div><label class="eyebrow block mb-1.5">Night Guard</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-ng-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div><div><label class="eyebrow block mb-1.5">Maintenance</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-maint-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
                     <button onclick="saveGasUrls()" class="w-full py-2.5 rounded-xl text-sm font-semibold text-white" style="background:var(--accent);">Save all URLs</button>
                     <p id="gas-save-confirm" class="hidden text-xs font-semibold text-center" style="color:var(--ok);">✓ Saved</p>
                 </div>
@@ -493,7 +493,7 @@ function buildOTSummaryText(monthOT){
   title:'Farm Stock Check',
   bm:'Semakan Stok Ladang',
   desc:'Consumables, supplies & reorder alerts',
-  icon:lineIcon("M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01")}];
+  icon:lineIcon("M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01")},{hue:'#F59E0B',action:'openMaintenanceWorkerView',title:'Maintenance',bm:'Penyelenggaraan',desc:'Containers, office, generator & more',icon:lineIcon("M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.909 4.909m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z")}];
         function renderModules(){document.getElementById('module-list').innerHTML=MODULES.map(m=>`<button class="module" onclick="${m.action?m.action+'()':'openModule(\''+m.href+'\')'}" style="--hue:${m.hue}"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">${m.icon}</span><div class="min-w-0"><div class="module-bm">${m.bm}</div><div class="module-title">${m.title}</div><div class="module-desc">${m.desc}</div></div></div>${chevR}</button>`).join('');}
         function openModule(href){             rumbleDevice(35);             const m=href.match(/github\.io\/([^\/\?#]+)/);             if(m){const k=m[1]==='Stock-Checking-'?'farm-stock-check':m[1];const g=getGasUrl(k);if(g)href+=(href.includes('?')?'&':'?')+'gasUrl='+encodeURIComponent(g);}             window.location.href=href;         }
 
@@ -514,7 +514,7 @@ function buildOTSummaryText(monthOT){
         function openFullTab(which){const m={wq:()=>{const u=getGasUrl('daily-water-quality');return`https://jamesaaa0203.github.io/daily-water-quality/?targetTab=manager&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');},spawn:()=>{const u=getGasUrl('Abalone-Spawning-and-Purchasing-Log');return`https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/?targetTab=spawning&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');},purchase:()=>{const u=getGasUrl('Abalone-Spawning-and-Purchasing-Log');return`https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/?targetTab=purchasing&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');}};const fn=m[which];if(fn)window.open(fn(),'_blank','noopener,noreferrer');}
 
         /* ── GAS URL settings ────────────────────────────────── */
-        const GAS_KEYS={'Abalone-Spawning-and-Purchasing-Log':'mgr_spawning_gas_url','Abalone-Processing-Log':'mgr_processing_gas_url','hatchery-hr':'mgr_hr_gas_url','daily-water-quality':'mgr_wq_gas_url','sea-cage':'mgr_seacage_gas_url','farm-stock-check': 'mgr_stockcheck_gas_url','land-farm':'mgr_landfarm_gas_url','night-guard':'mgr_nightguard_gas_url',};
+        const GAS_KEYS={'Abalone-Spawning-and-Purchasing-Log':'mgr_spawning_gas_url','Abalone-Processing-Log':'mgr_processing_gas_url','hatchery-hr':'mgr_hr_gas_url','daily-water-quality':'mgr_wq_gas_url','sea-cage':'mgr_seacage_gas_url','farm-stock-check': 'mgr_stockcheck_gas_url','land-farm':'mgr_landfarm_gas_url','night-guard':'mgr_nightguard_gas_url','maintenance':'mgr_maintenance_gas_url',};
         function cleanGasUrl(v){
           // Strips ALL whitespace-like characters anywhere in the string —
           // not just leading/trailing (.trim() misses these): regular
@@ -647,8 +647,8 @@ function buildOTSummaryText(monthOT){
           }
         }
         function toggleGasSettings(){const d=document.getElementById('gas-settings-drawer'),s=document.getElementById('gas-settings-status');d.classList.toggle('hidden');s.textContent=d.classList.contains('hidden')?'Configure ▾':'Close ▴';}
-        function saveGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url','gas-sc-url':'mgr_seacage_gas_url','gas-stockcheck-url':'mgr_stockcheck_gas_url','gas-landfarm-url':'mgr_landfarm_gas_url','gas-ng-url':'mgr_nightguard_gas_url'};for(const[id,k]of Object.entries(m)){const v=cleanGasUrl(document.getElementById(id).value);if(v)store.set(k,v);}const c=document.getElementById('gas-save-confirm');c.classList.remove('hidden');setTimeout(()=>c.classList.add('hidden'),2500);}
-        function loadSavedGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url','gas-sc-url':'mgr_seacage_gas_url','gas-stockcheck-url':'mgr_stockcheck_gas_url','gas-landfarm-url':'mgr_landfarm_gas_url','gas-ng-url':'mgr_nightguard_gas_url'};for(const[id,k]of Object.entries(m)){const v=store.get(k);if(v)document.getElementById(id).value=v;}}
+        function saveGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url','gas-sc-url':'mgr_seacage_gas_url','gas-stockcheck-url':'mgr_stockcheck_gas_url','gas-landfarm-url':'mgr_landfarm_gas_url','gas-ng-url':'mgr_nightguard_gas_url','gas-maint-url':'mgr_maintenance_gas_url'};for(const[id,k]of Object.entries(m)){const v=cleanGasUrl(document.getElementById(id).value);if(v)store.set(k,v);}const c=document.getElementById('gas-save-confirm');c.classList.remove('hidden');setTimeout(()=>c.classList.add('hidden'),2500);}
+function loadSavedGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url','gas-sc-url':'mgr_seacage_gas_url','gas-stockcheck-url':'mgr_stockcheck_gas_url','gas-landfarm-url':'mgr_landfarm_gas_url','gas-ng-url':'mgr_nightguard_gas_url','gas-maint-url':'mgr_maintenance_gas_url'};for(const[id,k]of Object.entries(m)){const v=store.get(k);if(v)document.getElementById(id).value=v;}}
 
         /* ── Overlay helpers ─────────────────────────────────── */
         function closeOverlay(id,e){if(e&&e.target!==document.getElementById(id))return;document.getElementById(id).classList.remove('open');}
@@ -4257,6 +4257,78 @@ function renderNGManagerView(){
     <div class="card" style="padding:14px;"><div class="eyebrow mb-2">Shift Log · <span class="ko">근무 기록</span></div>${shiftTable}</div>
   `;
 }
+
+/* ═══════════════════════════════════════════════════════
+   MAINTENANCE — Step 2 test module (Container Check)
+   ═══════════════════════════════════════════════════════ */
+const MAINT_WORKER_NAMES=['Sham','Popo','Hasad']; // add more names here as needed
+
+async function maintPost(sheetName,dataObj,btn){
+  const url=getGasUrl('maintenance');
+  const ok=await submitFormSafely(url,{action:'logEntry',sheet:sheetName,data:dataObj},{
+    btn,
+    prefix:'maint',
+    notConfiguredMsg:'Maintenance GAS URL not configured.\nSet it in Module GAS Connections.',
+    successMsg:'Berjaya disimpan! ✓',
+    queuedMsg:'Tiada talian. Data disimpan & akan dihantar automatik bila online. ✓'
+  });
+  return ok;
+}
+
+function openMaintenanceWorkerView(){
+  rumbleDevice(45);
+  document.getElementById('dashboard-view').classList.add('hidden');
+  document.getElementById('maintenance-worker-view').classList.remove('hidden');
+  showMaintWorkerHome();
+}
+function closeMaintenanceWorkerView(){
+  rumbleDevice(40);
+  document.getElementById('maintenance-worker-view').classList.add('hidden');
+  document.getElementById('dashboard-view').classList.remove('hidden');
+}
+
+const MAINT_BACK_BTN=`<button onclick="showMaintWorkerHome()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:#F59E0B;"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"/></svg>Maintenance</button>`;
+
+function showMaintWorkerHome(){
+  document.getElementById('maintenance-worker-body').innerHTML=`<div class="space-y-3">
+    <button class="module" onclick="showMaintTab('containers')" style="--hue:#F59E0B"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">📦</span><div class="min-w-0"><div class="module-bm">Bekas Alatan</div><div class="module-title">Containers</div><div class="module-desc">Alatan dipulangkan &amp; berkunci</div></div></div>${chevR}</button>
+    <div class="text-xs px-1" style="color:var(--text-dim);">More Maintenance items coming soon.</div>
+  </div>`;
+}
+function showMaintTab(tab){
+  rumbleDevice(35);
+  if(tab==='containers') renderContainerCheckForm();
+}
+
+/* ── Container Check — Exception-based pattern (this same shape
+   gets reused for Office, then Tank Daily Check, once confirmed) */
+function renderContainerCheckForm(){
+  const workerOpts=MAINT_WORKER_NAMES.map(n=>`<option value="${n}">${n}</option>`).join('');
+  document.getElementById('maintenance-worker-body').innerHTML=`${MAINT_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+    <div style="font-size:13px;font-weight:700;color:#F59E0B;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">📦 Semakan Bekas Alatan</div>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Nama Pekerja</label>
+    <select id="maint-cont-worker" class="gas-input" style="margin-bottom:20px;"><option value="">Pilih nama...</option>${workerOpts}</select>
+    <button onclick="submitContainerCheck('All Normal')" style="width:100%;padding:15px;background:#10B981;color:white;font-weight:700;border-radius:12px;font-size:14px;margin-bottom:10px;">✓ Semua Normal</button>
+    <button onclick="toggleContainerIssueForm()" style="width:100%;padding:13px;background:var(--surface-2);color:var(--text);font-weight:600;border-radius:12px;font-size:13px;border:1px solid var(--border);">⚠ Ada Masalah</button>
+    <div id="maint-cont-issue-block" class="hidden" style="margin-top:16px;">
+      <label class="eyebrow" style="display:block;margin-bottom:6px;">Butiran Masalah</label>
+      <textarea id="maint-cont-issue-note" rows="2" class="gas-input" placeholder="Contoh: Alatan belum dipulangkan / Tidak berkunci" style="margin-bottom:14px;resize:vertical;"></textarea>
+      <button onclick="submitContainerCheck('Issue')" style="width:100%;padding:14px;background:var(--alert);color:white;font-weight:700;border-radius:12px;font-size:13px;">Hantar Laporan Masalah</button>
+    </div>
+  </div>`;
+}
+function toggleContainerIssueForm(){
+  document.getElementById('maint-cont-issue-block').classList.toggle('hidden');
+}
+async function submitContainerCheck(status){
+  const worker=document.getElementById('maint-cont-worker')?.value;
+  if(!worker){alert('Sila pilih nama pekerja.');return;}
+  const issueNote=status==='Issue'?(document.getElementById('maint-cont-issue-note')?.value||''):'';
+  if(status==='Issue'&&!issueNote){alert('Sila isi butiran masalah.');return;}
+  rumbleDevice(45);
+  const ok=await maintPost('Container_Check',{Status:status,Issue_Note:issueNote,Worker:worker});
+  if(ok) showMaintWorkerHome();
+}
     </script>
  <div id="farmSpecsOverlay" class="fixed inset-0 z-50 hidden">
   <div class="absolute inset-0 bg-black bg-opacity-60" onclick="closeFarmSpecs()"></div>
@@ -4539,6 +4611,22 @@ function renderNGManagerView(){
     <div id="ng-content-shift"></div>
     <div id="ng-content-patrol" class="hidden"></div>
     <div id="ng-content-incident" class="hidden"></div>
+  </div>
+</main>
+
+ <main id="maintenance-worker-view" class="hidden flex-1 flex flex-col min-h-0 w-full">
+  <div class="flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full overflow-y-auto">
+    <div class="flex items-center justify-between">
+      <button onclick="closeMaintenanceWorkerView()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:var(--accent);">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"/></svg>
+        <span class="ko">뒤로</span> Ops Home
+      </button>
+    </div>
+    <div>
+      <span class="eyebrow" style="color:#F59E0B;">유지보수 · Maintenance</span>
+      <h3 class="text-2xl font-semibold tracking-tight" style="margin-top:1px;">Penyelenggaraan</h3>
+    </div>
+    <div id="maintenance-worker-body"></div>
   </div>
 </main>
 
