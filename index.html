@@ -327,6 +327,23 @@
   <div id="nightguard-body"></div>
 </div>
 
+<div id="maintenance-data-view" class="hidden flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full overflow-y-auto">
+  <div class="flex items-center justify-between gap-2">
+    <button onclick="closeView()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:var(--accent);">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"/></svg>
+      <span class="ko">뒤로</span> Menu
+    </button>
+    <button onclick="fetchMaintenanceSummary()" class="icon-btn">
+      <svg id="maint-mgr-refresh-ic" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356M3.985 19.644V14.65h4.992m-4.969-3.65a8.25 8.25 0 0113.803-3.7L21 8.25m-18 7.5l3.181 3.182a8.25 8.25 0 0013.803-3.7"/></svg>
+    </button>
+  </div>
+  <div>
+    <span class="eyebrow" style="color:#DC2626;">유지보수 현황 · Maintenance</span>
+    <h3 class="text-2xl font-semibold tracking-tight" style="margin-top:1px;">Status Overview</h3>
+  </div>
+  <div id="maintenance-mgr-body"></div>
+</div>
+
         <!-- STOCK CHECK VIEW -->
         <div id="stock-data-view" class="hidden flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full overflow-y-auto">
             <div class="flex items-center justify-between gap-2">
@@ -498,17 +515,18 @@ function buildOTSummaryText(monthOT){
         function openModule(href){             rumbleDevice(35);             const m=href.match(/github\.io\/([^\/\?#]+)/);             if(m){const k=m[1]==='Stock-Checking-'?'farm-stock-check':m[1];const g=getGasUrl(k);if(g)href+=(href.includes('?')?'&':'?')+'gasUrl='+encodeURIComponent(g);}             window.location.href=href;         }
 
         const MGR_VIEWS=[
-            {action:'landfarm',hue:'#10B981',ko:'육상 양식장 현황',title:'Land Farm',sub:'Tanks, WQ, spawning, processing & purchasing',icon:lineIcon("M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082M9.75 3.104a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5")},
-            {action:'seacage',hue:'#0EA5E9',ko:'가두리 운영 현황',title:'Sea Cage Ops',sub:'Live dashboard',icon:lineIcon("M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z")},
-            {action:'hr',hue:'#6366F1',ko:'인사 및 근태 관리',title:'Workforce & HR',sub:'Live dashboard',icon:lineIcon("M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z")},
-            {action:'stockcheck',hue:'#F97316',ko:'재고 관리 현황',title:'Farm Stock Check',sub:'Critical items & reorder list',icon:lineIcon("M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01")},
-            {action:'nightguard',hue:'#7C3AED',ko:'야간 경비 현황',title:'Night Guard',sub:'Shifts, patrols & incidents',icon:lineIcon("M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.745 3.745 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z")}
-        ];
-        const ACTION_FNS={stockcheck:()=>openStockCheckView(),wq:()=>openWaterQuality(),spawn:()=>openSpawning(),purchase:()=>openPurchasing(),processing:()=>openProcessingView(),hr:()=>openHRView(),seacage:()=>openSeaCageManagerView(),landfarm:()=>openLandFarmManagerView(),nightguard:()=>openNightGuardManagerView()};
+    {action:'maintenance',hue:'#DC2626',ko:'유지보수 현황',title:'Maintenance',sub:'Status overview — all scheduled checks',icon:lineIcon("M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.909 4.909m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z")},
+    {action:'landfarm',hue:'#10B981',ko:'육상 양식장 현황',title:'Land Farm',sub:'Tanks, WQ, spawning, processing & purchasing',icon:lineIcon("M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082M9.75 3.104a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5")},
+    {action:'seacage',hue:'#0EA5E9',ko:'가두리 운영 현황',title:'Sea Cage Ops',sub:'Live dashboard',icon:lineIcon("M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z")},
+    {action:'hr',hue:'#6366F1',ko:'인사 및 근태 관리',title:'Workforce & HR',sub:'Live dashboard',icon:lineIcon("M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z")},
+    {action:'stockcheck',hue:'#F97316',ko:'재고 관리 현황',title:'Farm Stock Check',sub:'Critical items & reorder list',icon:lineIcon("M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01")},
+    {action:'nightguard',hue:'#7C3AED',ko:'야간 경비 현황',title:'Night Guard',sub:'Shifts, patrols & incidents',icon:lineIcon("M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.745 3.745 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z")}
+];
+const ACTION_FNS={stockcheck:()=>openStockCheckView(),wq:()=>openWaterQuality(),spawn:()=>openSpawning(),purchase:()=>openPurchasing(),processing:()=>openProcessingView(),hr:()=>openHRView(),seacage:()=>openSeaCageManagerView(),landfarm:()=>openLandFarmManagerView(),nightguard:()=>openNightGuardManagerView(),maintenance:()=>openMaintenanceManagerView()};
         function renderMgrList(){const el=document.getElementById('mgr-list');if(!el)return;const tempBadge=(typeof scGetCachedTempBadge==='function')?scGetCachedTempBadge():null;el.innerHTML=MGR_VIEWS.map(v=>{const onclick=v.action?`(ACTION_FNS['${v.action}']||function(){})()`:` openManagerReport('${v.appKey}','${v.tab}')`;const sub=v.sub?`<div class="text-xs" style="color:var(--text-mut);margin-top:1px;">${v.sub}</div>`:'';const tempRow=(v.action==='seacage'&&tempBadge)?`<div class="text-xs" style="color:var(--${tempBadge.freshness});margin-top:2px;font-weight:600;">🌡 ${tempBadge.temp.toFixed(1)}°C · ${tempBadge.agoText}</div>`:'';return`<button onclick="${onclick}" class="mgr-row"><div class="flex items-center gap-3.5"><span class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:color-mix(in srgb,${v.hue} 12%,transparent);color:${v.hue};border:1px solid color-mix(in srgb,${v.hue} 24%,transparent);"><span style="width:22px;height:22px;display:inline-flex">${v.icon}</span></span><div><div class="eyebrow ko" style="color:${v.hue};">${v.ko}</div><div class="text-base font-semibold tracking-tight" style="margin-top:1px;">${v.title}</div>${sub}${tempRow}</div></div>${chevR}</button>`;}).join('');}
 
         /* ── View manager ────────────────────────────────────── */
-        const ALL_VIEWS=['wq-data-view','spawn-data-view','purchase-data-view','proc-data-view','hr-data-view','seacage-data-view','stock-data-view','landfarm-data-view','nightguard-data-view','manager-report-frame'];
+        const ALL_VIEWS=['wq-data-view','spawn-data-view','purchase-data-view','proc-data-view','hr-data-view','seacage-data-view','stock-data-view','landfarm-data-view','nightguard-data-view','maintenance-data-view','manager-report-frame'];
         function showView(id){document.getElementById('manager-menu-grid').classList.add('hidden');ALL_VIEWS.forEach(v=>document.getElementById(v).classList.add('hidden'));document.getElementById(id).classList.remove('hidden');}
         function closeView(){rumbleDevice(40);ALL_VIEWS.forEach(v=>document.getElementById(v).classList.add('hidden'));if(typeof _mgrViewOrigin!=='undefined'&&_mgrViewOrigin==='landfarm'){_mgrViewOrigin='menu';openLandFarmManagerView();}else{document.getElementById('manager-menu-grid').classList.remove('hidden');}}
         function openFullTab(which){const m={wq:()=>{const u=getGasUrl('daily-water-quality');return`https://jamesaaa0203.github.io/daily-water-quality/?targetTab=manager&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');},spawn:()=>{const u=getGasUrl('Abalone-Spawning-and-Purchasing-Log');return`https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/?targetTab=spawning&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');},purchase:()=>{const u=getGasUrl('Abalone-Spawning-and-Purchasing-Log');return`https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/?targetTab=purchasing&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');}};const fn=m[which];if(fn)window.open(fn(),'_blank','noopener,noreferrer');}
@@ -5171,6 +5189,65 @@ async function submitSeaweedHarvest(){
   rumbleDevice(45);
   const ok=await maintPost('Seaweed_Harvest',{Batch_ID:batchId,Harvest_Date:date,Harvest_Weight:weight});
   if(ok) renderSeaweedMenu();
+}
+
+/* ═══════════════════════════════════════════════════════
+   MANAGER DASHBOARD — status overview for every scheduled
+   check. Pulls one summary call (?summary=1) instead of
+   fetching all 13 sheets separately.
+   ═══════════════════════════════════════════════════════ */
+function openMaintenanceManagerView(){
+  rumbleDevice(45);
+  showView('maintenance-data-view');
+  fetchMaintenanceSummary();
+}
+function fetchMaintenanceSummary(){
+  const body=document.getElementById('maintenance-mgr-body'), ic=document.getElementById('maint-mgr-refresh-ic');
+  ic&&ic.classList.add('spin');
+  const url=getGasUrl('maintenance');
+  if(!url){
+    body.innerHTML=msgCard(`<p class="text-sm font-semibold">Maintenance not linked</p><p class="text-xs mt-1" style="color:var(--text-mut);">Add the /exec URL in Module GAS connections.</p>`);
+    ic&&ic.classList.remove('spin');
+    return;
+  }
+  body.innerHTML=msgCard(`<p class="text-sm" style="color:var(--text-mut);">Loading…</p>`);
+  window.handleMaintSummary=function(res){
+    ic&&ic.classList.remove('spin');
+    if(!res||res.status!=='success'){ body.innerHTML=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Couldn't load status.</p>`); return; }
+    renderMaintenanceDashboard(res.data||[]);
+  };
+  const s=document.createElement('script');
+  s.src=`${url}${url.includes('?')?'&':'?'}summary=1&callback=handleMaintSummary&_=${Date.now()}`;
+  s.onerror=()=>{ic&&ic.classList.remove('spin');body.innerHTML=msgCard(`<p class="text-sm font-semibold" style="color:var(--attention);">Couldn't fetch data</p>`);};
+  document.body.appendChild(s);
+  s.onload=function(){s.remove();};
+}
+function maintStatusMeta(status){
+  if(status==='ok') return {color:'var(--ok)',label:'OK'};
+  if(status==='issue') return {color:'var(--attention)',label:'Issue Reported'};
+  if(status==='overdue') return {color:'var(--alert)',label:'Overdue'};
+  return {color:'var(--alert)',label:'Never Checked'};
+}
+function renderMaintenanceDashboard(items){
+  const order={never:0,overdue:1,issue:2,ok:3};
+  const sorted=[...items].sort((a,b)=>(order[a.status]??9)-(order[b.status]??9));
+  const problemCount=sorted.filter(it=>it.status!=='ok').length;
+  const summaryLine=problemCount===0
+    ? `<div class="flex items-center gap-2 mb-1 px-1"><span class="dot ok"></span><span class="text-xs font-semibold" style="color:var(--text-mut);">All ${sorted.length} items checked and normal</span></div>`
+    : `<div class="flex items-center gap-2 mb-1 px-1"><span class="text-xs font-semibold" style="color:var(--alert);">⚠ ${problemCount} of ${sorted.length} item(s) need attention</span></div>`;
+  const cards=sorted.map(it=>{
+    const m=maintStatusMeta(it.status);
+    const dateStr=it.lastDate?fmtCleanDate(it.lastDate.split('T')[0]):null;
+    const ago=dateStr?(dateStr+(it.lastWorker?' · '+it.lastWorker:'')):'No record yet';
+    return `<div class="kpi" style="--kpi-hue:${m.color};text-align:left;">
+      <div class="flex items-start justify-between gap-2">
+        <div class="kpi-label" style="line-height:1.3;">${it.label}</div>
+        <span class="pill" style="background:color-mix(in srgb,${m.color} 16%,transparent);color:${m.color};white-space:nowrap;">${m.label}</span>
+      </div>
+      <div class="kpi-hint" style="margin-top:10px;">${ago}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('maintenance-mgr-body').innerHTML=`${summaryLine}<div class="grid grid-cols-1 gap-3 mt-2">${cards}</div>`;
 }
     </script>
  <div id="farmSpecsOverlay" class="fixed inset-0 z-50 hidden">
