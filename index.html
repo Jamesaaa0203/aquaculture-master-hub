@@ -4927,24 +4927,30 @@ async function submitForkliftRefuel(){
   const ok=await maintPost('Forklift_Refuel',{Worker:worker,Fuel_Amount_L:amount});
   if(ok) renderForkliftMenu();
 }
+const FORKLIFT_PARTS=['Engine Oil','Hydraulic Oil','Filter','Tires','Battery','Forks','Brakes'];
 function renderForkliftMaintenanceForm(){
   const workerOpts=MAINT_WORKER_NAMES.map(n=>`<option value="${n}">${n}</option>`).join('');
+  const checkboxes=FORKLIFT_PARTS.map(p=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);padding:8px 0;"><input type="checkbox" class="maint-fm-part-cb" value="${p}" style="width:18px;height:18px;accent-color:#F59E0B;">${p}</label>`).join('');
   document.getElementById('maintenance-worker-body').innerHTML=`${FORK_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
     <div style="font-size:13px;font-weight:700;color:#F59E0B;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">🛠️ Penyelenggaraan Forklift</div>
     <label class="eyebrow" style="display:block;margin-bottom:6px;">Nama Pekerja</label>
     <select id="maint-fm-worker" class="gas-input" style="margin-bottom:16px;"><option value="">Pilih nama...</option>${workerOpts}</select>
-    <label class="eyebrow" style="display:block;margin-bottom:6px;">Apa Yang Diservis</label>
-    <textarea id="maint-fm-note" rows="2" class="gas-input" placeholder="Contoh: Tukar minyak hidraulik, tukar tayar..." style="margin-bottom:20px;resize:vertical;"></textarea>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Bahagian Diservis (boleh pilih lebih dari satu)</label>
+    <div style="border:1px solid var(--border);border-radius:12px;padding:4px 14px;margin-bottom:10px;">${checkboxes}</div>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Nota Tambahan (pilihan)</label>
+    <textarea id="maint-fm-note" rows="2" class="gas-input" placeholder="Butiran lanjut jika perlu..." style="margin-bottom:20px;resize:vertical;"></textarea>
     <button onclick="submitForkliftMaintenance()" style="width:100%;padding:15px;background:#F59E0B;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar Rekod →</button>
   </div>`;
 }
 async function submitForkliftMaintenance(){
   const worker=document.getElementById('maint-fm-worker')?.value;
   if(!worker){alert('Sila pilih nama pekerja.');return;}
-  const note=document.getElementById('maint-fm-note')?.value||'';
-  if(!note){alert('Sila isi apa yang diservis.');return;}
+  const checked=[...document.querySelectorAll('.maint-fm-part-cb:checked')].map(cb=>cb.value);
+  const note=document.getElementById('maint-fm-note')?.value?.trim();
+  if(!checked.length){alert('Sila pilih sekurang-kurangnya satu bahagian.');return;}
+  const serviceNote=checked.join(', ')+(note?' — '+note:'');
   rumbleDevice(45);
-  const ok=await maintPost('Forklift_Maintenance',{Worker:worker,Service_Note:note});
+  const ok=await maintPost('Forklift_Maintenance',{Worker:worker,Service_Note:serviceNote});
   if(ok) renderForkliftMenu();
 }
 
@@ -5010,14 +5016,18 @@ async function submitBoatRepair(){
   const ok=await maintPost('Boat_Repair_Log',{Boat:boat,Broken_Part:part,Repair_Date:date,Price:price});
   if(ok) renderBoatMenu();
 }
+const BIG_BOAT_PARTS=['Engine Oil','Filter','Hull','Battery','Propeller','Spark Plug','Belt/Hose'];
 function renderBigBoatMaintenanceForm(){
   const today=new Date().toISOString().split('T')[0];
+  const checkboxes=BIG_BOAT_PARTS.map(p=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);padding:8px 0;"><input type="checkbox" class="maint-bb-part-cb" value="${p}" style="width:18px;height:18px;accent-color:#0EA5E9;">${p}</label>`).join('');
   document.getElementById('maintenance-worker-body').innerHTML=`${BOAT_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
     <div style="font-size:13px;font-weight:700;color:#0EA5E9;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">⚙️ Penyelenggaraan Bot Besar</div>
     <label class="eyebrow" style="display:block;margin-bottom:6px;">Tarikh Penyelenggaraan</label>
     <input type="date" id="maint-bb-date" value="${today}" class="gas-input" style="margin-bottom:14px;">
-    <label class="eyebrow" style="display:block;margin-bottom:6px;">Bahagian Diservis</label>
-    <select id="maint-bb-part" class="gas-input" style="margin-bottom:14px;"><option value="Engine Oil">Minyak Enjin (Engine Oil)</option><option value="Filter">Penapis (Filter)</option><option value="Hull">Badan Bot (Hull)</option><option value="Other">Lain-lain (Other)</option></select>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Bahagian Diservis (boleh pilih lebih dari satu)</label>
+    <div style="border:1px solid var(--border);border-radius:12px;padding:4px 14px;margin-bottom:10px;">${checkboxes}</div>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Lain-lain (pilihan)</label>
+    <input type="text" id="maint-bb-other" placeholder="Contoh: kemudi, tangki minyak..." class="gas-input" style="margin-bottom:14px;">
     <label class="eyebrow" style="display:block;margin-bottom:6px;">Kos (RM)</label>
     <input type="number" step="0.01" inputmode="decimal" id="maint-bb-cost" placeholder="Ex: 350" class="gas-input" style="margin-bottom:20px;">
     <button onclick="submitBigBoatMaintenance()" style="width:100%;padding:15px;background:#0EA5E9;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar Rekod →</button>
@@ -5025,10 +5035,13 @@ function renderBigBoatMaintenanceForm(){
 }
 async function submitBigBoatMaintenance(){
   const date=document.getElementById('maint-bb-date')?.value||'';
-  const part=document.getElementById('maint-bb-part').value;
+  const checked=[...document.querySelectorAll('.maint-bb-part-cb:checked')].map(cb=>cb.value);
+  const other=document.getElementById('maint-bb-other')?.value?.trim();
+  if(other) checked.push(other);
   const cost=document.getElementById('maint-bb-cost')?.value||'';
+  if(!checked.length){alert('Sila pilih sekurang-kurangnya satu bahagian.');return;}
   rumbleDevice(45);
-  const ok=await maintPost('Big_Boat_Maintenance',{Maintenance_Date:date,Part_Maintained:part,Cost:cost});
+  const ok=await maintPost('Big_Boat_Maintenance',{Maintenance_Date:date,Part_Maintained:checked.join(', '),Cost:cost});
   if(ok) renderBoatMenu();
 }
 
