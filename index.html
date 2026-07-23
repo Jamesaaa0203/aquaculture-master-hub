@@ -4285,6 +4285,26 @@ async function maintConfigAction(action,dataObj,btn){
   return ok;
 }
 
+/* Reads a Maintenance sheet back via JSONP (same GET pattern as your
+   other modules' data fetches). Used where a form needs to show data
+   that was entered earlier — e.g. Company Cars needs the list of
+   plate numbers you've already added. */
+function maintFetchSheet(sheetName,onData,onError){
+  const url=getGasUrl('maintenance');
+  if(!url){ if(onError)onError(); return; }
+  const cbName='maintCb_'+sheetName.replace(/[^a-zA-Z0-9]/g,'')+'_'+Date.now();
+  window[cbName]=function(res){
+    delete window[cbName];
+    if(res&&res.status==='success') onData(res.data||[]);
+    else if(onError) onError();
+  };
+  const s=document.createElement('script');
+  s.src=`${url}${url.includes('?')?'&':'?'}sheet=${encodeURIComponent(sheetName)}&callback=${cbName}&_=${Date.now()}`;
+  s.onerror=()=>{ delete window[cbName]; if(onError) onError(); };
+  document.body.appendChild(s);
+  s.onload=function(){ s.remove(); };
+}
+
 function openMaintenanceWorkerView(){
   rumbleDevice(45);
   document.getElementById('dashboard-view').classList.add('hidden');
@@ -4310,6 +4330,8 @@ function showMaintWorkerHome(){
     <button class="module" onclick="showMaintTab('breeding')" style="--hue:#EC4899"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🧪</span><div class="min-w-0"><div class="module-bm">Bilik Pembiakan</div><div class="module-title">Breeding Room</div><div class="module-desc">Tangki, pam &amp; mikroskop (2x/bulan)</div></div></div>${chevR}</button>
     <button class="module" onclick="showMaintTab('pumproom')" style="--hue:#F97316"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🔧</span><div class="min-w-0"><div class="module-bm">Bilik Pam</div><div class="module-title">Pump Room</div><div class="module-desc">Semakan mingguan &amp; pembersihan bulanan</div></div></div>${chevR}</button>
     <button class="module" onclick="showMaintTab('generator')" style="--hue:#DC2626"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">⚡</span><div class="min-w-0"><div class="module-bm">Generator Set</div><div class="module-title">Generator</div><div class="module-desc">Bahan api, jam operasi &amp; penyelenggaraan</div></div></div>${chevR}</button>
+    <button class="module" onclick="showMaintTab('cars')" style="--hue:#3B82F6"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🚗</span><div class="min-w-0"><div class="module-bm">Kereta Syarikat</div><div class="module-title">Company Cars</div><div class="module-desc">Log perjalanan &amp; nombor plat</div></div></div>${chevR}</button>
+    <button class="module" onclick="showMaintTab('forklift')" style="--hue:#F59E0B"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🏗️</span><div class="min-w-0"><div class="module-bm">Forklift</div><div class="module-title">Forklift</div><div class="module-desc">Isi minyak &amp; penyelenggaraan</div></div></div>${chevR}</button>
     <div class="text-xs px-1" style="color:var(--text-dim);">More Maintenance items coming soon.</div>
   </div>`;
 }
@@ -4324,6 +4346,8 @@ function showMaintTab(tab){
   if(tab==='breeding') renderBreedingRoomForm();
   if(tab==='pumproom') renderPumpRoomMenu();
   if(tab==='generator') renderGeneratorMenu();
+  if(tab==='cars') renderCarMenu();
+  if(tab==='forklift') renderForkliftMenu();
 }
 
 /* ── Container Check — Exception-based pattern (this same shape
@@ -4785,6 +4809,138 @@ async function submitGeneratorMaintenance(){
     await maintConfigAction('updateGeneratorConfig',{Maintenance_Interval_Hours:interval,Last_Maintenance_Hour_Reading:hours,Last_Maintenance_Date:today});
     renderGeneratorMenu();
   }
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMPANY CARS — trip log (plate number, driver, purpose,
+   mileage) + a simple screen to add new plate numbers
+   ═══════════════════════════════════════════════════════ */
+const CAR_BACK_BTN=`<button onclick="renderCarMenu()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:#3B82F6;"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"/></svg>Company Cars</button>`;
+
+function renderCarMenu(){
+  document.getElementById('maintenance-worker-body').innerHTML=`${MAINT_BACK_BTN}<div class="space-y-3" style="margin-top:12px;">
+    <button class="module" onclick="renderCarLogForm()" style="--hue:#3B82F6"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🚗</span><div class="min-w-0"><div class="module-bm">Log Perjalanan</div><div class="module-title">Log a Trip</div><div class="module-desc">Pemandu, tujuan &amp; jarak</div></div></div>${chevR}</button>
+    <button class="module" onclick="renderCarAddForm()" style="--hue:#3B82F6"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">➕</span><div class="min-w-0"><div class="module-bm">Tambah Kereta</div><div class="module-title">Add Car Plate</div><div class="module-desc">Daftar nombor plat baru</div></div></div>${chevR}</button>
+  </div>`;
+}
+
+function renderCarAddForm(){
+  document.getElementById('maintenance-worker-body').innerHTML=`${CAR_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+    <div style="font-size:13px;font-weight:700;color:#3B82F6;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">➕ Tambah Kereta Syarikat</div>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Nombor Plat</label>
+    <input type="text" id="maint-caradd-plate" placeholder="Ex: SAB1234A" class="gas-input" style="margin-bottom:12px;text-transform:uppercase;">
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Nama Ringkas (pilihan)</label>
+    <input type="text" id="maint-caradd-nick" placeholder="Ex: Kereta A" class="gas-input" style="margin-bottom:20px;">
+    <button onclick="submitCarAdd()" style="width:100%;padding:15px;background:#3B82F6;color:white;font-weight:700;border-radius:12px;font-size:14px;">Daftar Kereta →</button>
+  </div>`;
+}
+async function submitCarAdd(){
+  const plate=(document.getElementById('maint-caradd-plate')?.value||'').trim().toUpperCase();
+  const nick=document.getElementById('maint-caradd-nick')?.value||'';
+  if(!plate){alert('Sila isi nombor plat.');return;}
+  rumbleDevice(45);
+  const ok=await maintConfigAction('addCar',{Plate_Number:plate,Nickname:nick},null);
+  if(ok){ alert('Berjaya disimpan! ✓'); renderCarMenu(); }
+}
+
+function renderCarLogForm(){
+  document.getElementById('maintenance-worker-body').innerHTML=`${CAR_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;"><p style="font-size:12px;color:var(--text-mut);">Memuatkan senarai kereta...</p></div>`;
+  maintFetchSheet('Company_Car_Config',
+    (rows)=>{
+      if(!rows.length){
+        document.getElementById('maintenance-worker-body').innerHTML=`${CAR_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+          <p style="font-size:13px;font-weight:600;margin-bottom:10px;">Tiada kereta didaftarkan lagi.</p>
+          <button onclick="renderCarAddForm()" style="width:100%;padding:14px;background:#3B82F6;color:white;font-weight:700;border-radius:12px;font-size:13px;">➕ Tambah Kereta Dahulu</button>
+        </div>`;
+        return;
+      }
+      const plateOpts=rows.map(r=>`<option value="${r.Plate_Number}">${r.Plate_Number}${r.Nickname?' — '+r.Nickname:''}</option>`).join('');
+      const workerOpts=MAINT_WORKER_NAMES.map(n=>`<option value="${n}">${n}</option>`).join('');
+      document.getElementById('maintenance-worker-body').innerHTML=`${CAR_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+        <div style="font-size:13px;font-weight:700;color:#3B82F6;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">🚗 Log Perjalanan</div>
+        <label class="eyebrow" style="display:block;margin-bottom:6px;">Kereta</label>
+        <select id="maint-cl-plate" class="gas-input" style="margin-bottom:14px;">${plateOpts}</select>
+        <label class="eyebrow" style="display:block;margin-bottom:6px;">Nama Pemandu</label>
+        <select id="maint-cl-driver" class="gas-input" style="margin-bottom:14px;"><option value="">Pilih nama...</option>${workerOpts}</select>
+        <label class="eyebrow" style="display:block;margin-bottom:6px;">Tujuan</label>
+        <input type="text" id="maint-cl-purpose" placeholder="Ex: Beli barang, hantar dokumen..." class="gas-input" style="margin-bottom:14px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+          <div><label class="eyebrow" style="display:block;margin-bottom:6px;">Mileage Mula</label>
+          <input type="number" inputmode="numeric" id="maint-cl-start" placeholder="Ex: 40120" class="gas-input"></div>
+          <div><label class="eyebrow" style="display:block;margin-bottom:6px;">Mileage Akhir</label>
+          <input type="number" inputmode="numeric" id="maint-cl-end" placeholder="Ex: 40165" class="gas-input"></div>
+        </div>
+        <button onclick="submitCarLog()" style="width:100%;padding:15px;background:#3B82F6;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar Log →</button>
+      </div>`;
+    },
+    ()=>{ document.getElementById('maintenance-worker-body').innerHTML=`${CAR_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;"><p style="font-size:13px;color:var(--alert);">Gagal muatkan senarai kereta. Cuba lagi.</p></div>`; }
+  );
+}
+async function submitCarLog(){
+  const plate=document.getElementById('maint-cl-plate')?.value;
+  const driver=document.getElementById('maint-cl-driver')?.value;
+  const purpose=document.getElementById('maint-cl-purpose')?.value||'';
+  const start=parseFloat(document.getElementById('maint-cl-start')?.value||'');
+  const end=parseFloat(document.getElementById('maint-cl-end')?.value||'');
+  if(!plate){alert('Sila pilih kereta.');return;}
+  if(!driver){alert('Sila pilih nama pemandu.');return;}
+  if(isNaN(start)||isNaN(end)){alert('Sila isi mileage mula & akhir.');return;}
+  const distance=end-start;
+  rumbleDevice(45);
+  const ok=await maintPost('Company_Car_Log',{Plate_Number:plate,Driver:driver,Purpose:purpose,Start_Mileage:start,End_Mileage:end,Distance:distance});
+  if(ok) renderCarMenu();
+}
+
+/* ═══════════════════════════════════════════════════════
+   FORKLIFT — refuel log + maintenance log
+   ═══════════════════════════════════════════════════════ */
+const FORK_BACK_BTN=`<button onclick="renderForkliftMenu()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:#F59E0B;"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"/></svg>Forklift</button>`;
+
+function renderForkliftMenu(){
+  document.getElementById('maintenance-worker-body').innerHTML=`${MAINT_BACK_BTN}<div class="space-y-3" style="margin-top:12px;">
+    <button class="module" onclick="renderForkliftRefuelForm()" style="--hue:#F59E0B"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">⛽</span><div class="min-w-0"><div class="module-bm">Isi Minyak</div><div class="module-title">Refuel</div><div class="module-desc">Rekod jumlah minyak diisi</div></div></div>${chevR}</button>
+    <button class="module" onclick="renderForkliftMaintenanceForm()" style="--hue:#F59E0B"><div class="flex items-center gap-3.5 min-w-0"><span class="module-ic">🛠️</span><div class="min-w-0"><div class="module-bm">Penyelenggaraan</div><div class="module-title">Maintenance</div><div class="module-desc">Rekod apa yang diservis</div></div></div>${chevR}</button>
+  </div>`;
+}
+function renderForkliftRefuelForm(){
+  const workerOpts=MAINT_WORKER_NAMES.map(n=>`<option value="${n}">${n}</option>`).join('');
+  document.getElementById('maintenance-worker-body').innerHTML=`${FORK_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+    <div style="font-size:13px;font-weight:700;color:#F59E0B;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">⛽ Isi Minyak Forklift</div>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Nama Pekerja</label>
+    <select id="maint-fr-worker" class="gas-input" style="margin-bottom:16px;"><option value="">Pilih nama...</option>${workerOpts}</select>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Jumlah Minyak (L)</label>
+    <input type="number" step="0.1" inputmode="decimal" id="maint-fr-amount" placeholder="Ex: 20" class="gas-input" style="margin-bottom:20px;">
+    <button onclick="submitForkliftRefuel()" style="width:100%;padding:15px;background:#F59E0B;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar Rekod →</button>
+  </div>`;
+}
+async function submitForkliftRefuel(){
+  const worker=document.getElementById('maint-fr-worker')?.value;
+  if(!worker){alert('Sila pilih nama pekerja.');return;}
+  const amount=document.getElementById('maint-fr-amount')?.value||'';
+  if(!amount){alert('Sila isi jumlah minyak.');return;}
+  rumbleDevice(45);
+  const ok=await maintPost('Forklift_Refuel',{Worker:worker,Fuel_Amount_L:amount});
+  if(ok) renderForkliftMenu();
+}
+function renderForkliftMaintenanceForm(){
+  const workerOpts=MAINT_WORKER_NAMES.map(n=>`<option value="${n}">${n}</option>`).join('');
+  document.getElementById('maintenance-worker-body').innerHTML=`${FORK_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
+    <div style="font-size:13px;font-weight:700;color:#F59E0B;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">🛠️ Penyelenggaraan Forklift</div>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Nama Pekerja</label>
+    <select id="maint-fm-worker" class="gas-input" style="margin-bottom:16px;"><option value="">Pilih nama...</option>${workerOpts}</select>
+    <label class="eyebrow" style="display:block;margin-bottom:6px;">Apa Yang Diservis</label>
+    <textarea id="maint-fm-note" rows="2" class="gas-input" placeholder="Contoh: Tukar minyak hidraulik, tukar tayar..." style="margin-bottom:20px;resize:vertical;"></textarea>
+    <button onclick="submitForkliftMaintenance()" style="width:100%;padding:15px;background:#F59E0B;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar Rekod →</button>
+  </div>`;
+}
+async function submitForkliftMaintenance(){
+  const worker=document.getElementById('maint-fm-worker')?.value;
+  if(!worker){alert('Sila pilih nama pekerja.');return;}
+  const note=document.getElementById('maint-fm-note')?.value||'';
+  if(!note){alert('Sila isi apa yang diservis.');return;}
+  rumbleDevice(45);
+  const ok=await maintPost('Forklift_Maintenance',{Worker:worker,Service_Note:note});
+  if(ok) renderForkliftMenu();
 }
     </script>
  <div id="farmSpecsOverlay" class="fixed inset-0 z-50 hidden">
