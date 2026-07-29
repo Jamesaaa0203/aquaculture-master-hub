@@ -4155,6 +4155,10 @@ const NG_ROUND_GAP_ALERT_MIN = 150;      // flag if no round logged in 2.5h
 
 function fmtNGTime(iso){ const d=new Date(iso); if(isNaN(d))return '—'; return d.toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit',hour12:true}); }
 function fmtNGDuration(mins){ if(mins==null||isNaN(mins))return '—'; const h=Math.floor(mins/60), m=Math.round(mins%60); return h>0?`${h}j ${m}m`:`${m}m`; }
+// Date+time together — needed once shifts can span multiple calendar
+// days (e.g. Saturday afternoon through Monday morning), where time
+// alone is ambiguous about which day an entry actually happened.
+function fmtNGDateTime(iso){ if(!iso) return '—'; return fmtCleanDate(iso)+', '+fmtNGTime(iso); }
 
 // Pairs sequential shift_start/shift_end events per guard into shift
 // records. A start with no matching end yet is returned with open:true
@@ -4221,7 +4225,7 @@ function renderNGManagerView(){
     <div class="card" style="padding:16px;border:1.5px solid color-mix(in srgb,${status.gapAlert?'var(--alert)':'#7C3AED'} 30%,transparent);">
       <div class="flex items-center gap-2 mb-2">${status.gapAlert?'<span class="dot" style="background:var(--alert);box-shadow:0 0 0 3px color-mix(in srgb,var(--alert) 22%,transparent);"></span>':'<span class="dot ok"></span>'}<span class="text-xs font-semibold" style="color:var(--text-mut);">ON DUTY · <span class="ko">근무 중</span></span></div>
       <div class="text-lg font-semibold">${status.guard}</div>
-      <div class="text-xs mt-1" style="color:var(--text-dim);">Started: ${fmtNGTime(status.startTime)} · ${status.roundsCount} round${status.roundsCount===1?'':'s'} tonight</div>
+      <div class="text-xs mt-1" style="color:var(--text-dim);">Started: ${fmtNGDateTime(status.startTime)} · ${status.roundsCount} round${status.roundsCount===1?'':'s'} so far</div>
       <div class="text-xs mt-1" style="color:${status.gapAlert?'var(--alert)':'var(--text-mut)'};font-weight:${status.gapAlert?700:400};">
         ${status.lastRound?`Last round: ${fmtNGDuration(status.minutesSinceLastRound)} ago`:'No rounds logged yet'}${status.gapAlert?' ⚠️ Check on guard':''}
       </div>
@@ -4266,8 +4270,9 @@ function renderNGManagerView(){
     const flagged=netBad||suspiciousBad||lightingBad;
     return `<div style="padding:10px 0;border-bottom:1px solid var(--border);${flagged?'border-left:3px solid var(--alert);padding-left:8px;margin-left:-8px;':''}">
       <div class="flex items-center justify-between flex-wrap gap-1">
-        <span class="text-sm font-semibold">${fmtNGTime(r.timestamp)} · ${zoneLbl}</span>
+        <span class="text-sm font-semibold">${fmtNGDateTime(r.timestamp)}</span>
         <div style="display:flex;gap:4px;flex-wrap:wrap;">
+          <span class="pill" style="background:color-mix(in srgb,#7C3AED 12%,transparent);color:#7C3AED;">${zoneLbl}</span>
           ${netBad?`<span class="pill" style="background:color-mix(in srgb,var(--alert) 14%,transparent);color:var(--alert);">Net Damaged</span>`:''}
           ${suspiciousBad?`<span class="pill" style="background:color-mix(in srgb,var(--alert) 14%,transparent);color:var(--alert);">Suspicious</span>`:''}
           ${lightingBad?`<span class="pill" style="background:color-mix(in srgb,var(--attention) 14%,transparent);color:var(--attention);">Lighting Off</span>`:''}
@@ -4283,11 +4288,11 @@ function renderNGManagerView(){
 
   const shifts=ngPairShifts().slice(0,10);
   const shiftRows=shifts.map(s=>{
-    const startT=s.start?fmtNGTime(s.start.timestamp):'—';
-    const endT=s.end?fmtNGTime(s.end.timestamp):(s.open?'On duty':'—');
-    return `<tr><td>${fmtCleanDate(s.date)}</td><td>${s.guard}</td><td>${startT}</td><td>${endT}</td></tr>`;
+    const startDT=s.start?fmtNGDateTime(s.start.timestamp):'—';
+    const endDT=s.end?fmtNGDateTime(s.end.timestamp):(s.open?'On duty':'—');
+    return `<tr><td>${s.guard}</td><td>${startDT}</td><td>${endDT}</td></tr>`;
   }).join('');
-  const shiftTable = shifts.length ? `<table class="data-table"><thead><tr><th>Date</th><th>Guard</th><th>Start</th><th>End</th></tr></thead><tbody>${shiftRows}</tbody></table>` : `<div class="text-xs py-3" style="color:var(--text-dim);">No shift records yet.</div>`;
+  const shiftTable = shifts.length ? `<table class="data-table"><thead><tr><th>Guard</th><th>Start</th><th>End</th></tr></thead><tbody>${shiftRows}</tbody></table>` : `<div class="text-xs py-3" style="color:var(--text-dim);">No shift records yet.</div>`;
 
   document.getElementById('nightguard-body').innerHTML = `
     ${statusCard}
