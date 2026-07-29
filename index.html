@@ -544,6 +544,12 @@ const ACTION_FNS={stockcheck:()=>openStockCheckView(),wq:()=>openWaterQuality(),
           // mangled by a phone keyboard's autocorrect.
           return String(v||'').replace(/[\s\u00A0\u200B\u200C\u200D\uFEFF]+/g,'');
         }
+        // ES5-safe replacement for the `??` (nullish coalescing) operator,
+        // which older iOS Safari versions can fail to parse. Returns `a`
+        // unless it's null/undefined, in which case returns `b` — same
+        // semantics as `a??b`, deliberately NOT the same as `a||b` (which
+        // would incorrectly treat 0, '', or false as "missing").
+        function nvl(a,b){ return (a===null||a===undefined)?b:a; }
         function getGasUrl(k){const key=GAS_KEYS[k];if(!key)return null;const raw=store.get(key);return raw?cleanGasUrl(raw):null;}
 
         /* ── Shared safe-submit utility ──────────────────────────────────
@@ -567,6 +573,22 @@ const ACTION_FNS={stockcheck:()=>openStockCheckView(),wq:()=>openWaterQuality(),
 
         function generateClientId(prefix){
           return (prefix||'sub')+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
+        }
+
+        // Returns today's date as YYYY-MM-DD using the browser's LOCAL
+        // calendar date — NOT toISOString(), which always converts to
+        // UTC. Malaysia is UTC+8, so toISOString().split('T')[0] rolls
+        // back to "yesterday" for any local time before 8:00am (and can
+        // misfire further if a submission sits in the offline queue for
+        // a while before it's actually sent). getFullYear/getMonth/
+        // getDate are local-timezone methods, so this is always correct
+        // regardless of time of day or UTC offset direction.
+        function localDateStr(d){
+          d = d || new Date();
+          const y = d.getFullYear();
+          const m = String(d.getMonth()+1).padStart(2,'0');
+          const day = String(d.getDate()).padStart(2,'0');
+          return `${y}-${m}-${day}`;
         }
 
         const OFFLINE_QUEUE_KEY='app_offline_submit_queue';
@@ -702,7 +724,7 @@ function loadSavedGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning
         function renderWQ(rows){
             wqSessions=groupSessions(rows);const latest=wqSessions[0],logTime=fmtLogTime(latest.time);
             const order={Front:0,Middle:1,Back:2};
-            const secRows=[...latest.sections].sort((a,b)=>(order[a.section]??9)-(order[b.section]??9)).map(r=>`<tr><td>${r.section}</td><td>${rnd(num(r.do),2)}</td><td>${rnd(num(r.temp),1)}</td><td>${rnd(num(r.salinity),0)}</td><td>${rnd(num(r.ph),1)}</td></tr>`).join('');
+            const secRows=[...latest.sections].sort((a,b)=>(nvl(order[a.section],9))-(nvl(order[b.section],9))).map(r=>`<tr><td>${r.section}</td><td>${rnd(num(r.do),2)}</td><td>${rnd(num(r.temp),1)}</td><td>${rnd(num(r.salinity),0)}</td><td>${rnd(num(r.ph),1)}</td></tr>`).join('');
             const hist=wqSessions.slice(0,10).map(s=>{const t=fmtLogTime(s.time);return`<tr><td>${fmtCleanDate(s.date)}${t?'<br><span style="color:var(--text-dim);font-size:10px;">'+t+' '+s.shift+'</span>':''}</td><td>${rnd(s.do,2)}</td><td>${rnd(s.temp,1)}</td><td>${rnd(s.salinity,0)}</td><td>${rnd(s.ph,1)}</td></tr>`;}).join('');
             document.getElementById('wq-body').innerHTML=`<div class="flex items-center gap-2 mb-1 px-1"><span class="dot ok"></span><span class="text-xs font-semibold" style="color:var(--text-mut);">Last logging: ${fmtCleanDate(latest.date)}${logTime?' at '+logTime:''} · ${latest.shift} shift</span></div><p class="text-xs px-1 mb-3" style="color:var(--text-dim);">Tap any tile to view trend chart.</p><div class="grid grid-cols-2 gap-3">${wqKpiTile('do',latest.do)}${wqKpiTile('temp',latest.temp)}${wqKpiTile('salinity',latest.salinity)}${wqKpiTile('ph',latest.ph)}</div><div class="mt-3 space-y-3"><div class="card" style="padding:14px;"><div class="eyebrow mb-2">Latest logging · by section</div><table class="data-table"><thead><tr><th>Section</th><th>DO</th><th>Temp</th><th>Sal</th><th>pH</th></tr></thead><tbody>${secRows}</tbody></table></div><div class="card" style="padding:14px;"><div class="eyebrow mb-2">Recent loggings · site average</div><table class="data-table"><thead><tr><th>Date · Time</th><th>DO</th><th>Temp</th><th>Sal</th><th>pH</th></tr></thead><tbody>${hist}</tbody></table></div></div><p class="text-xs mt-3 px-1" style="color:var(--text-dim);">"Review" flags use reference ranges in the code — adjust WQ_RANGES to your real targets.</p>`;
         }
@@ -1095,7 +1117,7 @@ function loadSavedGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning
                 return s+f+m;
             },0);
             const totalWeightKg=monthLogs.reduce((s,r)=>s+(num(r.totalBatchWeightKg||r.totalBatchWeight)||0),0);
-            const mortValues=monthLogs.map(r=>{const v=num(r.mortality??r['mortality%']);return v!=null?(v>0&&v<1?v*100:v):null;}).filter(v=>v!=null);
+            const mortValues=monthLogs.map(r=>{const v=num(nvl(r.mortality,r['mortality%']));return v!=null?(v>0&&v<1?v*100:v):null;}).filter(v=>v!=null);
             const avgMort=mortValues.length?mortValues.reduce((a,b)=>a+b,0)/mortValues.length:null;
             const mortCol=avgMort!=null?mortalityColor(avgMort):'var(--text-dim)';
 
@@ -1104,7 +1126,7 @@ function loadSavedGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning
             const prevDate=new Date(cy,cm-2,1);
             const prevMonth=`${prevDate.getFullYear()}-${String(prevDate.getMonth()+1).padStart(2,'0')}`;
             const prevLogs=logs.filter(r=>isMonthMatch(r.date,prevMonth));
-            const prevMortVals=prevLogs.map(r=>{const v=num(r.mortality??r['mortality%']);return v!=null?(v>0&&v<1?v*100:v):null;}).filter(v=>v!=null);
+            const prevMortVals=prevLogs.map(r=>{const v=num(nvl(r.mortality,r['mortality%']));return v!=null?(v>0&&v<1?v*100:v):null;}).filter(v=>v!=null);
             const prevAvgMort=prevMortVals.length?prevMortVals.reduce((a,b)=>a+b,0)/prevMortVals.length:null;
             const prevWeight=prevLogs.reduce((s,r)=>s+(num(r.totalBatchWeightKg||r.totalBatchWeight)||0),0);
             const hasPrev=prevLogs.length>0;
@@ -1150,7 +1172,7 @@ function loadSavedGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning
 
             // ── Latest batch KPI tiles (tap for broodstock breakdown) ──
             const latest=monthLogs[0];
-            const mortRaw=num(latest.mortality??latest['mortality%']);const mort=mortRaw!=null?(mortRaw>0&&mortRaw<1?mortRaw*100:mortRaw):null;
+            const mortRaw=num(nvl(latest.mortality,latest['mortality%']));const mort=mortRaw!=null?(mortRaw>0&&mortRaw<1?mortRaw*100:mortRaw):null;
             const mortColLatest=mortalityColor(mort);
             const totalKg=num(latest.totalBatchWeightKg||latest.totalBatchWeight);
             const femPcs=parseInt(latest.totalFemalesPcs)||0;
@@ -1178,7 +1200,7 @@ function loadSavedGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning
             </div></div>`;
 
             // ── Batch table (collapsed) ────────────────────────────────
-            const batchRows=monthLogs.map((l,i)=>{const mRaw=num(l.mortality??l['mortality%']);const m=mRaw!=null?(mRaw>0&&mRaw<1?mRaw*100:mRaw):null;const bkg=num(l.totalBatchWeightKg||l.totalBatchWeight);const fp=parseInt(l.totalFemalesPcs)||0,mp=parseInt(l.totalMalesPcs)||0;return`<tr onclick="openBroodstockDetail(${i})" style="cursor:pointer;"><td>${fmtCleanDate(l.date)}<br><span style="color:var(--text-dim);font-size:10px;">${l.supplierCategory||l.supplierCat||'—'}</span></td><td>${bkg!=null?bkg.toFixed(1):'—'} kg</td><td style="color:${mortalityColor(m)};">${m!=null?m.toFixed(1)+'%':'—'}</td><td>${fp+mp>0?(fp+mp).toLocaleString():'—'}</td></tr>`;}).join('');
+            const batchRows=monthLogs.map((l,i)=>{const mRaw=num(nvl(l.mortality,l['mortality%']));const m=mRaw!=null?(mRaw>0&&mRaw<1?mRaw*100:mRaw):null;const bkg=num(l.totalBatchWeightKg||l.totalBatchWeight);const fp=parseInt(l.totalFemalesPcs)||0,mp=parseInt(l.totalMalesPcs)||0;return`<tr onclick="openBroodstockDetail(${i})" style="cursor:pointer;"><td>${fmtCleanDate(l.date)}<br><span style="color:var(--text-dim);font-size:10px;">${l.supplierCategory||l.supplierCat||'—'}</span></td><td>${bkg!=null?bkg.toFixed(1):'—'} kg</td><td style="color:${mortalityColor(m)};">${m!=null?m.toFixed(1)+'%':'—'}</td><td>${fp+mp>0?(fp+mp).toLocaleString():'—'}</td></tr>`;}).join('');
             const batchTable=`<div class="card" style="padding:14px;">
                 <button onclick="const b=this.nextElementSibling;b.classList.toggle('hidden');this.textContent=b.classList.contains('hidden')?'View all batches ▾':'Hide batches ▴';" style="width:100%;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);">View all batches ▾</button>
                 <div class="hidden mt-3"><table class="data-table"><thead><tr><th>Date · Supplier</th><th>Weight</th><th>Mortality</th><th>Broodstock</th></tr></thead><tbody>${batchRows}</tbody></table>
@@ -1483,7 +1505,7 @@ const wExtraHols=wOT.filter(r=>r.compRule==='Extra Holiday').length;
             const cfgHi=cfg.max!=null&&cfg.max<50?cfg.max:null;
             const baseLo=cfgLo!=null?Math.min(cfgLo,mn):mn,baseHi=cfgHi!=null?Math.max(cfgHi,mx):mx;
             const span=(baseHi-baseLo)||1,lo=baseLo-span*.05,hi=baseHi+span*.05,rng=hi-lo;
-            const dp=cfg.dp??1,color=cfg.color||'var(--accent)';
+            const dp=nvl(cfg.dp,1),color=cfg.color||'var(--accent)';
             const xp=i=>PL+(i/(n-1||1))*plotW,yp=v=>PT+(1-(v-lo)/rng)*plotH;
             let grids='',yLabels='';
             for(let g=0;g<=3;g++){const gv=lo+(rng/3)*g,gy=yp(gv);grids+=`<line x1="${PL}" y1="${gy.toFixed(1)}" x2="${W-PR}" y2="${gy.toFixed(1)}" stroke="var(--border)" stroke-width="1"/>`;yLabels+=`<text x="${PL-4}" y="${(gy+4).toFixed(1)}" text-anchor="end" font-size="9" fill="var(--text-dim)" font-family="Space Grotesk,sans-serif">${gv.toFixed(dp)}${cfg.unit||''}</text>`;}
@@ -1613,9 +1635,9 @@ let scMgrSubTab        = 'overview';
 let scMgrWeek          = 0;
 let scMortRptOffset    = 0;
  
-let scTfDate = new Date().toISOString().split('T')[0],scTfUnit='',scTfPetak='1',scTfSize='0.5 - 0.8',scTfQty='';
+let scTfDate = localDateStr(),scTfUnit='',scTfPetak='1',scTfSize='0.5 - 0.8',scTfQty='';
 let scMortType='harian',scMortUnit='',scMortPetak='1',scMortQty='',scMortBatch='';
-let scGrUnit='',scGrPetak='1',scSamples=[],scGrDate=new Date().toISOString().split('T')[0];
+let scGrUnit='',scGrPetak='1',scSamples=[],scGrDate=localDateStr();
  
 /* ── Biomass: Weight-at-Length calibration (shared across all phones,
    synced via the Land Farm GAS backend — same list feeds both the
@@ -1641,11 +1663,11 @@ function scSaveBioClasses(c){ try{localStorage.setItem(SC_BIO_CLASSES_KEY,JSON.s
  
 /* ── Metric helpers ──────────────────────────────────────────────── */
 function scCalcMetrics(unitId,petak){
-  const cfg=scData.setup?.find(s=>+s.unitId===+unitId&&String(s.petak)===String(petak));
+  const cfg=(scData.setup||[]).find(s=>+s.unitId===+unitId&&String(s.petak)===String(petak));
   let init=cfg?+(cfg.initialQty||0):0,tIn=0,dead=0;
-  scData.transfers?.filter(t=>+t.unitId===+unitId&&String(t.petak)===String(petak))
+  (scData.transfers||[]).filter(t=>+t.unitId===+unitId&&String(t.petak)===String(petak))
     .forEach(t=>{tIn+=+(t.qty||0);dead+=+(t.postDead||0);});
-  scData.mortality?.filter(m=>+m.unitId===+unitId&&String(m.petak)===String(petak))
+  (scData.mortality||[]).filter(m=>+m.unitId===+unitId&&String(m.petak)===String(petak))
     .forEach(m=>{dead+=+(m.qty||0);});
   const total=init+tIn,live=Math.max(0,total-dead);
   return{totalEntered:total,dead,currentLive:live,
@@ -1653,16 +1675,16 @@ function scCalcMetrics(unitId,petak){
 }
 function scGetGlobal(){
   let tIn=0,tDead=0;
-  scData.setup?.forEach(s=>tIn+=+(s.initialQty||0));
-  scData.transfers?.forEach(t=>{tIn+=+(t.qty||0);tDead+=+(t.postDead||0);});
-  scData.mortality?.forEach(m=>tDead+=+(m.qty||0));
+  (scData.setup||[]).forEach(s=>tIn+=+(s.initialQty||0));
+  (scData.transfers||[]).forEach(t=>{tIn+=+(t.qty||0);tDead+=+(t.postDead||0);});
+  (scData.mortality||[]).forEach(m=>tDead+=+(m.qty||0));
   const live=Math.max(0,tIn-tDead);
   return{totalInput:tIn,totalDead:tDead,live,
          survival:tIn>0?((live/tIn)*100).toFixed(1):'100.0'};
 }
 function scGetAvgGrowth(uId,petak){
-  const logs=scData.growth?.filter(g=>+g.unitId===+uId&&String(g.petak)===String(petak));
-  if(!logs?.length)return'—';
+  const logs=(scData.growth||[]).filter(g=>+g.unitId===+uId&&String(g.petak)===String(petak));
+  if(!(logs||[]).length)return'—';
   return(logs.reduce((s,l)=>s+parseFloat(l.length||0),0)/logs.length).toFixed(2)+' mm/d';
 }
 function scElapsedDays(){return Math.floor((new Date()-SC_EPOCH)/86400000);}
@@ -1768,7 +1790,7 @@ function _renderSCMortalityReportOverlay(){
   openDetailOverlay(headHtml,bodyHtml);
 }
 function scStatusOf(uId){
-  const m=scData.maintenance?.find(m=>+m.unitId===+uId);
+  const m=(scData.maintenance||[]).find(m=>+m.unitId===+uId);
   if(m)return{status:m.status,issue:m.issue||''};
   if(uId>=13&&uId<=24)return{status:'Construction',issue:'Tapak Belum Siap'};
   return{status:'Active',issue:''};
@@ -1776,9 +1798,9 @@ function scStatusOf(uId){
  
 /* ── Temperature helpers ─────────────────────────────────────────── */
 function scParseTemp(r){
-  let temp=parseFloat(r.avgTemp??r['Avg Temp']??r.temperature??r.Temperature??r.temp??r.Temp??null);
-  let date=r.date??r.Date??r.DATE??'';
-  const doV=parseFloat(r.avgDO??r['Avg DO']??r.do??r.DO??null);
+  let temp=parseFloat(nvl(r.avgTemp,nvl(r['Avg Temp'],nvl(r.temperature,nvl(r.Temperature,nvl(r.temp,nvl(r.Temp,null)))))));
+  let date=nvl(r.date,nvl(r.Date,nvl(r.DATE,'')));
+  const doV=parseFloat(nvl(r.avgDO,nvl(r['Avg DO'],nvl(r.do,nvl(r.DO,null)))));
   if(!isFinite(temp)){
     for(const k in r){ if(k.toLowerCase().includes('temp')){ const v=parseFloat(r[k]); if(isFinite(v)){temp=v;break;} } }
   }
@@ -1986,8 +2008,8 @@ function openSCMgrUnitDetail(uId){
      </div>`);
 }
 async function submitSCMgrStatus(uId){
-  const status=document.getElementById('sc-det-status')?.value;
-  const issue=document.getElementById('sc-det-issue')?.value||'';
+  const status=(document.getElementById('sc-det-status')||{}).value;
+  const issue=(document.getElementById('sc-det-issue')||{}).value||'';
   if(!status)return;
   rumbleDevice(45);
   await scPost({action:'update_maintenance',unitId:uId,status,issue});
@@ -2040,7 +2062,7 @@ function renderSCTransferForm(){
   </div>`;
 }
 async function submitSCTransfer(){
-  const unit=parseInt(document.getElementById('sc-tf-unit')?.value||scTfUnit),qty=parseInt(document.getElementById('sc-tf-qty')?.value||scTfQty),date=document.getElementById('sc-tf-date')?.value||scTfDate;
+  const unit=parseInt((document.getElementById('sc-tf-unit')||{}).value||scTfUnit),qty=parseInt((document.getElementById('sc-tf-qty')||{}).value||scTfQty),date=(document.getElementById('sc-tf-date')||{}).value||scTfDate;
   if(!unit||unit<1||unit>24||!qty){alert('Sila isi Unit (1–24) dan Kuantiti.');return;}
   rumbleDevice(45);await scPost({action:'pemindahan',batchId:'B-'+Date.now(),date,unitId:unit,petak:scTfPetak,size:scTfSize,qty});
   scTfUnit='';scTfQty='';renderSCTransferForm();
@@ -2051,7 +2073,7 @@ function renderSCMortalityForm(){
   const c=document.getElementById('sc-content-mortality');if(!c)return;
   const tog=(v,l)=>`<button onclick="scMortType='${v}';renderSCMortalityForm()" style="flex:1;padding:9px;border-radius:10px;font-size:11px;font-weight:700;background:${scMortType===v?'var(--alert)':'transparent'};color:${scMortType===v?'white':'var(--text-mut)'};transition:all .2s;">${l}</button>`;
   const pet=p=>`<button onclick="scMortPetak='${p}';renderSCMortalityForm()" style="flex:1;padding:10px;border-radius:11px;font-weight:700;font-size:13px;border:1.5px solid ${scMortPetak===p?'var(--alert)':'var(--border-2)'};background:${scMortPetak===p?'var(--alert)':'var(--surface)'};color:${scMortPetak===p?'white':'var(--text)'};transition:all .2s;">Petak ${p}</button>`;
-  const batches=scData.transfers?.slice(0,30).map(t=>`<option value="${t.batchId||t.id||''}">Unit ${t.unitId} (P${t.petak}) — ${t.qty} pcs [${scFmtBatchDateTime(t.date)}]</option>`).join('')||'';
+  const batches=(scData.transfers||[]).slice(0,30).map(t=>`<option value="${t.batchId||t.id||''}">Unit ${t.unitId} (P${t.petak}) — ${t.qty} pcs [${scFmtBatchDateTime(t.date)}]</option>`).join('')||'';
   c.innerHTML=`<div class="card" style="padding:24px;">
     <div style="font-size:13px;font-weight:700;color:var(--alert);letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">💀 Rekod Kematian</div>
     <div style="display:flex;gap:5px;margin-bottom:20px;padding:5px;background:var(--surface-2);border-radius:13px;border:1px solid var(--border);">
@@ -2073,13 +2095,13 @@ function renderSCMortalityForm(){
   </div>`;
 }
 async function submitSCMortality(){
-  const unit=parseInt(document.getElementById('sc-md-unit')?.value||scMortUnit),qty=parseInt(document.getElementById('sc-md-qty')?.value||scMortQty);
+  const unit=parseInt((document.getElementById('sc-md-unit')||{}).value||scMortUnit),qty=parseInt((document.getElementById('sc-md-qty')||{}).value||scMortQty);
   if(!unit||!qty){alert('Sila isi Unit dan Kuantiti.');return;}
-  rumbleDevice(45);await scPost({action:'kematian',date:new Date().toISOString().split('T')[0],unitId:unit,petak:scMortPetak,qty});
+  rumbleDevice(45);await scPost({action:'kematian',date:localDateStr(),unitId:unit,petak:scMortPetak,qty});
   scMortUnit='';scMortQty='';renderSCMortalityForm();
 }
 async function submitSCPostMortality(){
-  const batch=document.getElementById('sc-md-batch')?.value||scMortBatch,qty=parseInt(document.getElementById('sc-md-qty-p')?.value||scMortQty);
+  const batch=(document.getElementById('sc-md-batch')||{}).value||scMortBatch,qty=parseInt((document.getElementById('sc-md-qty-p')||{}).value||scMortQty);
   if(!batch){alert('Sila pilih batch.');return;}if(!qty){alert('Sila isi kuantiti.');return;}
   rumbleDevice(45);await scPost({action:'update_post_dead',batchId:batch,qty});
   scMortBatch='';scMortQty='';renderSCMortalityForm();
@@ -2111,9 +2133,9 @@ function renderSCGrowthForm(){
   </div>`;
 }
 async function submitSCGrowth(){
-  const unit=parseInt(document.getElementById('sc-gr-unit')?.value||scGrUnit);
-  const date=document.getElementById('sc-gr-date')?.value||scGrDate;
-  const avg=parseFloat(document.getElementById('sc-gr-avg')?.value);
+  const unit=parseInt((document.getElementById('sc-gr-unit')||{}).value||scGrUnit);
+  const date=(document.getElementById('sc-gr-date')||{}).value||scGrDate;
+  const avg=parseFloat((document.getElementById('sc-gr-avg')||{}).value);
   if(!unit){alert('Sila isi Unit.');return;}
   if(!avg){alert('Sila isi purata kadar pertumbuhan.');return;}
   rumbleDevice(45);
@@ -2660,13 +2682,13 @@ function sendStockOrderMessage(){
         let lfActiveWorkerTab = 'tankcheck';
         let lfMgrSubTab = null; // null = showing the Land Farm sub-menu
 
-        let lfGrDate = new Date().toISOString().split('T')[0];
+        let lfGrDate = localDateStr();
         let lfTcTank='', lfTcQty='';
         let lfTfSource='', lfTfDest='', lfTfQty='', lfTfLength='';
         let lfOutSource='', lfOutDest='', lfOutQty='', lfOutLength='';
-        let lfSkDate=new Date().toISOString().split('T')[0], lfSkQty='', lfSkNotes='';
+        let lfSkDate=localDateStr(), lfSkQty='', lfSkNotes='';
         let lfSkSamples=[]; // {kg, pcs} — matches the paper form's 5-sample average weight section         
-        let lfFpDate=new Date().toISOString().split('T')[0]; // finished-product entry date         
+        let lfFpDate=localDateStr(); // finished-product entry date         
         let lfSpawnScope=currentMonthStr(); // 'ALL' or 'YYYY-MM' — spawning card/detail scope
         function lfTankLabel(n){ return 'T'+String(n).padStart(2,'0'); }
         function lfTankType(n){
@@ -2841,8 +2863,8 @@ function sendStockOrderMessage(){
           </div>`;
         }
         function lfSkAddSample(){
-          const kg=parseFloat(document.getElementById('lf-sk-sample-kg')?.value);
-          const pcs=parseInt(document.getElementById('lf-sk-sample-pcs')?.value);
+          const kg=parseFloat((document.getElementById('lf-sk-sample-kg')||{}).value);
+          const pcs=parseInt((document.getElementById('lf-sk-sample-pcs')||{}).value);
           if(!kg||kg<=0||!pcs||pcs<=0){alert('Sila isi berat dan bilangan keping yang sah.');return;}
           rumbleDevice(30);
           lfSkSamples=[...lfSkSamples,{kg,pcs}];
@@ -2854,13 +2876,13 @@ function sendStockOrderMessage(){
           renderLFSankinaTransportForm();
         }
         async function submitLFSankinaTransport(){
-          const qty=parseFloat(document.getElementById('lf-sk-qty')?.value);
-          const date=document.getElementById('lf-sk-date')?.value||lfSkDate;
-          const notes=document.getElementById('lf-sk-notes')?.value||'';
-          const tDep=document.getElementById('lf-sk-tdep')?.value||'';
-          const tArr=document.getElementById('lf-sk-tarr')?.value||'';
-          const driver=document.getElementById('lf-sk-driver')?.value||'';
-          const plate=document.getElementById('lf-sk-plate')?.value||'';
+          const qty=parseFloat((document.getElementById('lf-sk-qty')||{}).value);
+          const date=(document.getElementById('lf-sk-date')||{}).value||lfSkDate;
+          const notes=(document.getElementById('lf-sk-notes')||{}).value||'';
+          const tDep=(document.getElementById('lf-sk-tdep')||{}).value||'';
+          const tArr=(document.getElementById('lf-sk-tarr')||{}).value||'';
+          const driver=(document.getElementById('lf-sk-driver')||{}).value||'';
+          const plate=(document.getElementById('lf-sk-plate')||{}).value||'';
           if(!qty||qty<=0){alert('Sila isi kuantiti yang sah.');return;}
           const totKg=lfSkSamples.reduce((s,x)=>s+x.kg,0), totPcs=lfSkSamples.reduce((s,x)=>s+x.pcs,0);
           const avgWt=totPcs>0?(totKg*1000/totPcs):'';
@@ -2888,8 +2910,8 @@ function sendStockOrderMessage(){
           </div>`;
         }
         async function submitLFGrowth(){
-          const avgRate=parseFloat(document.getElementById('lf-gr-avglen')?.value);
-          const date=document.getElementById('lf-gr-date')?.value||lfGrDate;
+          const avgRate=parseFloat((document.getElementById('lf-gr-avglen')||{}).value);
+          const date=(document.getElementById('lf-gr-date')||{}).value||lfGrDate;
           if(!avgRate){alert('Sila isi purata kadar pertumbuhan.');return;}
           rumbleDevice(45);
           const ok=await lfPost('growth',{date,avg_length_cm:avgRate});
@@ -2911,13 +2933,13 @@ function sendStockOrderMessage(){
           </div>`;
         }
         async function submitLFTankCheck(){
-          const tankNum=parseInt(document.getElementById('lf-tc-tank')?.value||lfTcTank);
-          const qtyRaw=document.getElementById('lf-tc-qty')?.value??lfTcQty;
+          const tankNum=parseInt((document.getElementById('lf-tc-tank')||{}).value||lfTcTank);
+          const qtyRaw=nvl((document.getElementById('lf-tc-qty')||{}).value,lfTcQty);
           const qty=qtyRaw===''?0:parseInt(qtyRaw);
-          const notes=document.getElementById('lf-tc-notes')?.value||'';
+          const notes=(document.getElementById('lf-tc-notes')||{}).value||'';
           if(!tankNum){alert('Sila isi nombor Tangki.');return;}
           rumbleDevice(45);
-          const ok=await lfPost('mortality',{date:new Date().toISOString().split('T')[0],tank_id:lfTankLabel(tankNum),dead_count:qty,notes});
+          const ok=await lfPost('mortality',{date:localDateStr(),tank_id:lfTankLabel(tankNum),dead_count:qty,notes});
           if(ok){lfTcTank='';lfTcQty='';renderLFTankCheckForm();}
         }
 
@@ -2939,13 +2961,13 @@ function sendStockOrderMessage(){
           </div>`;
         }
         async function submitLFTransfer(){
-          const source=parseInt(document.getElementById('lf-tf-source')?.value||lfTfSource);
-          const dest=parseInt(document.getElementById('lf-tf-dest')?.value||lfTfDest);
-          const qty=parseInt(document.getElementById('lf-tf-qty')?.value||lfTfQty);
-          const len=parseFloat(document.getElementById('lf-tf-length')?.value||lfTfLength)||'';
+          const source=parseInt((document.getElementById('lf-tf-source')||{}).value||lfTfSource);
+          const dest=parseInt((document.getElementById('lf-tf-dest')||{}).value||lfTfDest);
+          const qty=parseInt((document.getElementById('lf-tf-qty')||{}).value||lfTfQty);
+          const len=parseFloat((document.getElementById('lf-tf-length')||{}).value||lfTfLength)||'';
           if(!source||!dest||!qty){alert('Sila isi Tangki Sumber, Destinasi & Kuantiti.');return;}
           rumbleDevice(45);
-          const ok=await lfPost('transfer',{date:new Date().toISOString().split('T')[0],source_tank:lfTankLabel(source),dest_tank:lfTankLabel(dest),quantity:qty,shell_length:len});
+          const ok=await lfPost('transfer',{date:localDateStr(),source_tank:lfTankLabel(source),dest_tank:lfTankLabel(dest),quantity:qty,shell_length:len});
           if(ok){lfTfSource='';lfTfDest='';lfTfQty='';lfTfLength='';renderLFTransferForm();}
         }
 
@@ -2981,13 +3003,13 @@ function sendStockOrderMessage(){
           </div>`;
         }
         async function submitLFOutToSeaCage(){
-          const source=parseInt(document.getElementById('lf-out-source')?.value||lfOutSource);
-          const dest=document.getElementById('lf-out-dest')?.value||lfOutDest;
-          const qty=parseInt(document.getElementById('lf-out-qty')?.value||lfOutQty);
-          const len=parseFloat(document.getElementById('lf-out-length')?.value||lfOutLength)||'';
+          const source=parseInt((document.getElementById('lf-out-source')||{}).value||lfOutSource);
+          const dest=(document.getElementById('lf-out-dest')||{}).value||lfOutDest;
+          const qty=parseInt((document.getElementById('lf-out-qty')||{}).value||lfOutQty);
+          const len=parseFloat((document.getElementById('lf-out-length')||{}).value||lfOutLength)||'';
           if(!source||!qty){alert('Sila isi Tangki Sumber & Kuantiti.');return;}
           rumbleDevice(45);
-          const ok=await lfPost('seacage_transfer',{date:new Date().toISOString().split('T')[0],source_tank:lfTankLabel(source),dest_cage:dest,quantity:qty,shell_length:len});
+          const ok=await lfPost('seacage_transfer',{date:localDateStr(),source_tank:lfTankLabel(source),dest_cage:dest,quantity:qty,shell_length:len});
           if(ok){lfOutSource='';lfOutDest='';lfOutQty='';lfOutLength='';renderLFOutToSeaCageForm();}
         }
 
@@ -2999,7 +3021,7 @@ function sendStockOrderMessage(){
            written by a separate app; it tries several common key names
            and falls back gracefully instead of breaking the dashboard. */
         function lfGetTank(o){ return o&&(o.tank||o.tankId||o.tank_id||o.id||o.name||null); }
-        function lfGetQty(o){ const v=o&&(o.qty??o.count??o.pcs??o.quantity??o.larvae??o.larvae_count??null); const n=parseFloat(v); return isFinite(n)?n:null; }
+        function lfGetQty(o){ const v=o&&nvl(o.qty,nvl(o.count,nvl(o.pcs,nvl(o.quantity,nvl(o.larvae,nvl(o.larvae_count,null)))))); const n=parseFloat(v); return isFinite(n)?n:null; }
         function lfParseTrialTanks(trial){
           let assignments=[],counts=[];
           try{ const raw=trial.tankAssignments; assignments=raw?JSON.parse(raw):[]; if(!Array.isArray(assignments))assignments=[]; }catch(e){ assignments=[]; }
@@ -3067,7 +3089,7 @@ function sendStockOrderMessage(){
           if(countStr===null)return; // cancelled
           const count=parseInt(countStr);
           if(!isFinite(count)||count<0){alert('Please enter a valid whole number ≥ 0.');return;}
-          const ok=await lfPost('tank_baseline',{date:new Date().toISOString().split('T')[0],tank_id:tankId,live_count:count});
+          const ok=await lfPost('tank_baseline',{date:localDateStr(),tank_id:tankId,live_count:count});
           if(ok){rumbleDevice([40,30,70]);openLFTankDetail(n);}
         }
         function lfLastMortCheck(tankId){
@@ -3122,7 +3144,7 @@ function sendStockOrderMessage(){
           if(valStr===null)return; // cancelled
           const val=parseFloat(valStr);
           if(!isFinite(val)||val<=0){alert('Please enter a valid length in cm.');return;}
-          const ok=await lfPost('length_baseline',{date:new Date().toISOString().split('T')[0],avg_length_cm:val});
+          const ok=await lfPost('length_baseline',{date:localDateStr(),avg_length_cm:val});
           if(ok){rumbleDevice([40,30,70]);openLFBiomassDetail();}
         }
         function scEstimateCurrentBiomassKg(){
@@ -3152,7 +3174,7 @@ function sendStockOrderMessage(){
           if(kgStr===null)return; // cancelled
           const kg=parseFloat(kgStr);
           if(!isFinite(kg)||kg<0){alert('Please enter a valid number ≥ 0.');return;}
-          const ok=await lfPost('processed_baseline',{date:new Date().toISOString().split('T')[0],kg});
+          const ok=await lfPost('processed_baseline',{date:localDateStr(),kg});
           if(ok){rumbleDevice([40,30,70]);renderLFMgrOverview();}
         }
         function lfProcessedThisYearKg(){
@@ -3226,13 +3248,13 @@ function sendStockOrderMessage(){
           if(finishedStr===null)return;
           const rawLand=parseFloat(rawLandStr),rawSankina=parseFloat(rawSankinaStr),finished=parseFloat(finishedStr);
           if(![rawLand,rawSankina,finished].every(v=>isFinite(v)&&v>=0)){alert('Please enter valid numbers ≥ 0.');return;}
-          const ok=await lfPost('sankina_baseline',{date:new Date().toISOString().split('T')[0],raw_land_kg:rawLand,raw_sankina_kg:rawSankina,finished_sankina_kg:finished});
+          const ok=await lfPost('sankina_baseline',{date:localDateStr(),raw_land_kg:rawLand,raw_sankina_kg:rawSankina,finished_sankina_kg:finished});
           if(ok){rumbleDevice([40,30,70]);showLFMgrTab('sankina');}
         }
         async function submitLFFinishedProduct(){
-          const date=document.getElementById('lf-fp-date')?.value||lfFpDate;
-          const raw=parseFloat(document.getElementById('lf-fp-raw')?.value);
-          const yieldKg=parseFloat(document.getElementById('lf-fp-yield')?.value);
+          const date=(document.getElementById('lf-fp-date')||{}).value||lfFpDate;
+          const raw=parseFloat((document.getElementById('lf-fp-raw')||{}).value);
+          const yieldKg=parseFloat((document.getElementById('lf-fp-yield')||{}).value);
           if(!isFinite(yieldKg)||yieldKg<=0){alert('Please enter a valid Yield / Finished weight (kg).');return;}
           rumbleDevice(45);
           const ok=await lfPost('finished_product',{date,raw_kg:isFinite(raw)?raw:'',yield_kg:yieldKg});
@@ -4008,7 +4030,7 @@ async function submitNGShift(isEnd){
   localStorage.setItem(NG_LAST_GUARD_KEY,guardName); // remembered for next time on this device
   const weather=ngFormState['shift_weather']||'';
   const notes=document.getElementById('ng-shift-notes').value.trim();
-  const date=new Date().toISOString().split('T')[0];
+  const date=localDateStr();
   await ngPost(isEnd?'shift_end':'shift_start',{date,guard_name:guardName,weather,notes});
 }
 
@@ -4059,7 +4081,7 @@ async function submitNGPatrol(){
   if(!zone){alert('Sila pilih zon.');return;}
   const spatCrawlDetail=ngSpatRows.filter(r=>r.cage&&r.count!=='').map(r=>`Sangkar ${r.cage}: ${r.count}`).join('; ');
   const payload={
-    date:new Date().toISOString().split('T')[0],
+    date:localDateStr(),
     guard_name:guardName,
     zone,
     net_intact:ngFormState['net_intact']||'',
@@ -4107,7 +4129,7 @@ async function submitNGIncident(){
   if(!incidentType){alert('Sila pilih jenis insiden.');return;}
   const now=new Date();
   const payload={
-    date:now.toISOString().split('T')[0],
+    date:localDateStr(now),
     guard_name:guardName,
     incident_type:incidentType,
     location:document.getElementById('ng-incident-location').value.trim(),
@@ -4394,9 +4416,9 @@ function toggleContainerIssueForm(){
   document.getElementById('maint-cont-issue-block').classList.toggle('hidden');
 }
 async function submitContainerCheck(status){
-  const worker=document.getElementById('maint-cont-worker')?.value;
+  const worker=(document.getElementById('maint-cont-worker')||{}).value;
   if(!worker){alert('Sila pilih nama pekerja.');return;}
-  const issueNote=status==='Issue'?(document.getElementById('maint-cont-issue-note')?.value||''):'';
+  const issueNote=status==='Issue'?((document.getElementById('maint-cont-issue-note')||{}).value||''):'';
   if(status==='Issue'&&!issueNote){alert('Sila isi butiran masalah.');return;}
   rumbleDevice(45);
   const ok=await maintPost('Container_Check',{Status:status,Issue_Note:issueNote,Worker:worker});
@@ -4423,9 +4445,9 @@ function toggleOfficeIssueForm(){
   document.getElementById('maint-off-issue-block').classList.toggle('hidden');
 }
 async function submitOfficeCheck(status){
-  const worker=document.getElementById('maint-off-worker')?.value;
+  const worker=(document.getElementById('maint-off-worker')||{}).value;
   if(!worker){alert('Sila pilih nama pekerja.');return;}
-  const issueNote=status==='Issue'?(document.getElementById('maint-off-issue-note')?.value||''):'';
+  const issueNote=status==='Issue'?((document.getElementById('maint-off-issue-note')||{}).value||''):'';
   if(status==='Issue'&&!issueNote){alert('Sila isi butiran masalah.');return;}
   rumbleDevice(45);
   const ok=await maintPost('Office_Check',{Status:status,Issue_Note:issueNote,Worker:worker});
@@ -4480,13 +4502,13 @@ function toggleTankDailyIssueForm(){
   document.getElementById('maint-tank-daily-issue-block').classList.toggle('hidden');
 }
 async function submitTankDailyCheck(group,status){
-  const worker=document.getElementById('maint-tank-daily-worker')?.value;
+  const worker=(document.getElementById('maint-tank-daily-worker')||{}).value;
   if(!worker){alert('Sila pilih nama pekerja.');return;}
   maintTankLastWorker=worker;
   let tankNo='',issueType='';
   if(status==='Issue Found'){
-    tankNo=document.getElementById('maint-tank-daily-tankno')?.value||'';
-    issueType=document.getElementById('maint-tank-daily-issuetype')?.value||'';
+    tankNo=(document.getElementById('maint-tank-daily-tankno')||{}).value||'';
+    issueType=(document.getElementById('maint-tank-daily-issuetype')||{}).value||'';
     if(!tankNo){alert('Sila isi nombor tangki.');return;}
   }
   rumbleDevice(45);
@@ -4528,14 +4550,14 @@ function toggleTank3DayIssueForm(){
   document.getElementById('maint-tank-3d-issue-block').classList.toggle('hidden');
 }
 async function submitTank3DayCheck(status){
-  const worker=document.getElementById('maint-tank-3d-worker')?.value;
+  const worker=(document.getElementById('maint-tank-3d-worker')||{}).value;
   if(!worker){alert('Sila pilih nama pekerja.');return;}
   maintTankLastWorker=worker;
   let tankNo='',issueType='',note='';
   if(status==='Issue Found'){
-    tankNo=document.getElementById('maint-tank-3d-tankno')?.value||'';
-    issueType=document.getElementById('maint-tank-3d-issuetype')?.value||'';
-    note=document.getElementById('maint-tank-3d-note')?.value||'';
+    tankNo=(document.getElementById('maint-tank-3d-tankno')||{}).value||'';
+    issueType=(document.getElementById('maint-tank-3d-issuetype')||{}).value||'';
+    note=(document.getElementById('maint-tank-3d-note')||{}).value||'';
     if(!tankNo){alert('Sila isi nombor tangki.');return;}
   }
   rumbleDevice(45);
@@ -4566,7 +4588,7 @@ function renderReservoirCheckForm(){
   </div>`;
 }
 async function submitReservoirCheck(){
-  const worker=document.getElementById('maint-res-worker')?.value;
+  const worker=(document.getElementById('maint-res-worker')||{}).value;
   if(!worker){alert('Sila pilih nama pekerja.');return;}
   const condition=document.getElementById('maint-res-condition').value;
   const leaking=document.getElementById('maint-res-leaking').value;
@@ -4598,13 +4620,13 @@ function renderSandFilterCheckForm(){
   </div>`;
 }
 async function submitSandFilterCheck(){
-  const worker=document.getElementById('maint-sf-worker')?.value;
+  const worker=(document.getElementById('maint-sf-worker')||{}).value;
   if(!worker){alert('Sila pilih nama pekerja.');return;}
   const session=document.getElementById('maint-sf-session').value;
   const data={Session:session,Worker:worker};
   for(let i=1;i<=4;i++){
-    data[`Filter_${i}_PSI`]=document.getElementById(`maint-sf-${i}-psi`)?.value||'';
-    data[`Filter_${i}_Condition`]=document.getElementById(`maint-sf-${i}-cond`)?.value||'Normal';
+    data[`Filter_${i}_PSI`]=(document.getElementById(`maint-sf-${i}-psi`)||{}).value||'';
+    data[`Filter_${i}_Condition`]=(document.getElementById(`maint-sf-${i}-cond`)||{}).value||'Normal';
   }
   rumbleDevice(45);
   const ok=await maintPost('Sand_Filter_Check',data);
@@ -4626,7 +4648,7 @@ function renderBlowerCheckForm(){
   </div>`;
 }
 async function submitBlowerCheck(){
-  const worker=document.getElementById('maint-bl-worker')?.value;
+  const worker=(document.getElementById('maint-bl-worker')||{}).value;
   if(!worker){alert('Sila pilih nama pekerja.');return;}
   const status=document.getElementById('maint-bl-status').value;
   rumbleDevice(45);
@@ -4669,10 +4691,10 @@ function toggleBreedingTankNo(){
   document.getElementById('maint-br-tankno-block').classList.toggle('hidden',val!=='Issue Found');
 }
 async function submitBreedingRoomCheck(){
-  const worker=document.getElementById('maint-br-worker')?.value;
+  const worker=(document.getElementById('maint-br-worker')||{}).value;
   if(!worker){alert('Sila pilih nama pekerja.');return;}
   const spawnStatus=document.getElementById('maint-br-spawn-status').value;
-  const tankNo=spawnStatus==='Issue Found'?(document.getElementById('maint-br-tankno')?.value||''):'';
+  const tankNo=spawnStatus==='Issue Found'?((document.getElementById('maint-br-tankno')||{}).value||''):'';
   if(spawnStatus==='Issue Found'&&!tankNo){alert('Sila isi nombor tangki.');return;}
   const uv=document.getElementById('maint-br-uv').value;
   const cool=document.getElementById('maint-br-cool').value;
@@ -4710,7 +4732,7 @@ function renderPumpRoomCheckForm(){
   </div>`;
 }
 async function submitPumpRoomCheck(){
-  const worker=document.getElementById('maint-pr-worker')?.value;
+  const worker=(document.getElementById('maint-pr-worker')||{}).value;
   if(!worker){alert('Sila pilih nama pekerja.');return;}
   const big=document.getElementById('maint-pr-big').value;
   const small=document.getElementById('maint-pr-small').value;
@@ -4720,7 +4742,7 @@ async function submitPumpRoomCheck(){
 }
 function renderPumpRoomCleaningForm(){
   const workerOpts=MAINT_WORKER_NAMES.map(n=>`<option value="${n}">${n}</option>`).join('');
-  const today=new Date().toISOString().split('T')[0];
+  const today=localDateStr();
   document.getElementById('maintenance-worker-body').innerHTML=`${PUMP_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
     <div style="font-size:13px;font-weight:700;color:#F97316;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">🧹 Log Pembersihan Bilik Pam</div>
     <label class="eyebrow" style="display:block;margin-bottom:6px;">Nama Pekerja</label>
@@ -4731,9 +4753,9 @@ function renderPumpRoomCleaningForm(){
   </div>`;
 }
 async function submitPumpRoomCleaning(){
-  const worker=document.getElementById('maint-prc-worker')?.value;
+  const worker=(document.getElementById('maint-prc-worker')||{}).value;
   if(!worker){alert('Sila pilih nama pekerja.');return;}
-  const cleaningDate=document.getElementById('maint-prc-date')?.value||'';
+  const cleaningDate=(document.getElementById('maint-prc-date')||{}).value||'';
   if(!cleaningDate){alert('Sila isi tarikh pembersihan.');return;}
   rumbleDevice(45);
   const ok=await maintPost('Pump_Room_Cleaning',{Cleaning_Date:cleaningDate,Worker:worker});
@@ -4774,11 +4796,11 @@ function renderGeneratorWeeklyForm(){
   </div>`;
 }
 async function submitGeneratorWeekly(){
-  const worker=document.getElementById('maint-gw-worker')?.value;
+  const worker=(document.getElementById('maint-gw-worker')||{}).value;
   if(!worker){alert('Sila pilih nama pekerja.');return;}
-  const fuelLevel=document.getElementById('maint-gw-fuellevel')?.value||'';
-  const stock=document.getElementById('maint-gw-stock')?.value||'';
-  const hours=document.getElementById('maint-gw-hours')?.value||'';
+  const fuelLevel=(document.getElementById('maint-gw-fuellevel')||{}).value||'';
+  const stock=(document.getElementById('maint-gw-stock')||{}).value||'';
+  const hours=(document.getElementById('maint-gw-hours')||{}).value||'';
   rumbleDevice(45);
   const ok=await maintPost('Generator_Log',{Entry_Type:'Weekly Check',Fuel_Level_Shown:fuelLevel,Remaining_Fuel_Stock_L:stock,Run_Time_Hours:hours,Worker:worker});
   if(ok) renderGeneratorMenu();
@@ -4796,9 +4818,9 @@ function renderGeneratorRefuelForm(){
   </div>`;
 }
 async function submitGeneratorRefuel(){
-  const worker=document.getElementById('maint-gr-worker')?.value;
+  const worker=(document.getElementById('maint-gr-worker')||{}).value;
   if(!worker){alert('Sila pilih nama pekerja.');return;}
-  const amount=document.getElementById('maint-gr-amount')?.value||'';
+  const amount=(document.getElementById('maint-gr-amount')||{}).value||'';
   if(!amount){alert('Sila isi jumlah minyak.');return;}
   rumbleDevice(45);
   const ok=await maintPost('Generator_Log',{Entry_Type:'Refuel',Refuel_Amount_L:amount,Worker:worker});
@@ -4820,15 +4842,15 @@ function renderGeneratorMaintenanceForm(){
   </div>`;
 }
 async function submitGeneratorMaintenance(){
-  const worker=document.getElementById('maint-gm-worker')?.value;
+  const worker=(document.getElementById('maint-gm-worker')||{}).value;
   if(!worker){alert('Sila pilih nama pekerja.');return;}
-  const hours=document.getElementById('maint-gm-hours')?.value||'';
-  const interval=document.getElementById('maint-gm-interval')?.value||500;
+  const hours=(document.getElementById('maint-gm-hours')||{}).value||'';
+  const interval=(document.getElementById('maint-gm-interval')||{}).value||500;
   if(!hours){alert('Sila isi jam operasi semasa servis.');return;}
   rumbleDevice(45);
   const logOk=await maintPost('Generator_Log',{Entry_Type:'Maintenance Done',Run_Time_Hours:hours,Worker:worker});
   if(logOk){
-    const today=new Date().toISOString().split('T')[0];
+    const today=localDateStr();
     await maintConfigAction('updateGeneratorConfig',{Maintenance_Interval_Hours:interval,Last_Maintenance_Hour_Reading:hours,Last_Maintenance_Date:today});
     renderGeneratorMenu();
   }
@@ -4858,8 +4880,8 @@ function renderCarAddForm(){
   </div>`;
 }
 async function submitCarAdd(){
-  const plate=(document.getElementById('maint-caradd-plate')?.value||'').trim().toUpperCase();
-  const nick=document.getElementById('maint-caradd-nick')?.value||'';
+  const plate=((document.getElementById('maint-caradd-plate')||{}).value||'').trim().toUpperCase();
+  const nick=(document.getElementById('maint-caradd-nick')||{}).value||'';
   if(!plate){alert('Sila isi nombor plat.');return;}
   rumbleDevice(45);
   const ok=await maintConfigAction('addCar',{Plate_Number:plate,Nickname:nick},null);
@@ -4900,11 +4922,11 @@ function renderCarLogForm(){
   );
 }
 async function submitCarLog(){
-  const plate=document.getElementById('maint-cl-plate')?.value;
-  const driver=document.getElementById('maint-cl-driver')?.value;
-  const purpose=document.getElementById('maint-cl-purpose')?.value||'';
-  const start=parseFloat(document.getElementById('maint-cl-start')?.value||'');
-  const end=parseFloat(document.getElementById('maint-cl-end')?.value||'');
+  const plate=(document.getElementById('maint-cl-plate')||{}).value;
+  const driver=(document.getElementById('maint-cl-driver')||{}).value;
+  const purpose=(document.getElementById('maint-cl-purpose')||{}).value||'';
+  const start=parseFloat((document.getElementById('maint-cl-start')||{}).value||'');
+  const end=parseFloat((document.getElementById('maint-cl-end')||{}).value||'');
   if(!plate){alert('Sila pilih kereta.');return;}
   if(!driver){alert('Sila pilih nama pemandu.');return;}
   if(isNaN(start)||isNaN(end)){alert('Sila isi mileage mula & akhir.');return;}
@@ -4937,9 +4959,9 @@ function renderForkliftRefuelForm(){
   </div>`;
 }
 async function submitForkliftRefuel(){
-  const worker=document.getElementById('maint-fr-worker')?.value;
+  const worker=(document.getElementById('maint-fr-worker')||{}).value;
   if(!worker){alert('Sila pilih nama pekerja.');return;}
-  const amount=document.getElementById('maint-fr-amount')?.value||'';
+  const amount=(document.getElementById('maint-fr-amount')||{}).value||'';
   if(!amount){alert('Sila isi jumlah minyak.');return;}
   rumbleDevice(45);
   const ok=await maintPost('Forklift_Refuel',{Worker:worker,Fuel_Amount_L:amount});
@@ -4961,10 +4983,10 @@ function renderForkliftMaintenanceForm(){
   </div>`;
 }
 async function submitForkliftMaintenance(){
-  const worker=document.getElementById('maint-fm-worker')?.value;
+  const worker=(document.getElementById('maint-fm-worker')||{}).value;
   if(!worker){alert('Sila pilih nama pekerja.');return;}
   const checked=[...document.querySelectorAll('.maint-fm-part-cb:checked')].map(cb=>cb.value);
-  const note=document.getElementById('maint-fm-note')?.value?.trim();
+  const note=((document.getElementById('maint-fm-note')||{}).value||'').trim();
   if(!checked.length){alert('Sila pilih sekurang-kurangnya satu bahagian.');return;}
   const serviceNote=checked.join(', ')+(note?' — '+note:'');
   rumbleDevice(45);
@@ -4989,10 +5011,10 @@ function renderJettyForm(){
   </div>`;
 }
 async function submitJettyCheck(){
-  const worker=document.getElementById('maint-jt-worker')?.value;
+  const worker=(document.getElementById('maint-jt-worker')||{}).value;
   if(!worker){alert('Sila pilih nama pekerja.');return;}
   const condition=document.getElementById('maint-jt-condition').value;
-  const note=document.getElementById('maint-jt-note')?.value||'';
+  const note=(document.getElementById('maint-jt-note')||{}).value||'';
   rumbleDevice(45);
   const ok=await maintPost('Jetty_Check',{Condition:condition,Note:note,Worker:worker});
   if(ok) showMaintWorkerHome();
@@ -5010,7 +5032,7 @@ function renderBoatMenu(){
   </div>`;
 }
 function renderBoatRepairForm(){
-  const today=new Date().toISOString().split('T')[0];
+  const today=localDateStr();
   document.getElementById('maintenance-worker-body').innerHTML=`${BOAT_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
     <div style="font-size:13px;font-weight:700;color:#0EA5E9;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">🔩 Baik Pulih Bot Kecil/Sederhana</div>
     <label class="eyebrow" style="display:block;margin-bottom:6px;">Bot</label>
@@ -5026,9 +5048,9 @@ function renderBoatRepairForm(){
 }
 async function submitBoatRepair(){
   const boat=document.getElementById('maint-bt-boat').value;
-  const part=document.getElementById('maint-bt-part')?.value||'';
-  const date=document.getElementById('maint-bt-date')?.value||'';
-  const price=document.getElementById('maint-bt-price')?.value||'';
+  const part=(document.getElementById('maint-bt-part')||{}).value||'';
+  const date=(document.getElementById('maint-bt-date')||{}).value||'';
+  const price=(document.getElementById('maint-bt-price')||{}).value||'';
   if(!part){alert('Sila isi bahagian rosak.');return;}
   rumbleDevice(45);
   const ok=await maintPost('Boat_Repair_Log',{Boat:boat,Broken_Part:part,Repair_Date:date,Price:price});
@@ -5036,7 +5058,7 @@ async function submitBoatRepair(){
 }
 const BIG_BOAT_PARTS=['Engine Oil','Filter','Hull','Battery','Propeller','Spark Plug','Belt/Hose'];
 function renderBigBoatMaintenanceForm(){
-  const today=new Date().toISOString().split('T')[0];
+  const today=localDateStr();
   const checkboxes=BIG_BOAT_PARTS.map(p=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);padding:8px 0;"><input type="checkbox" class="maint-bb-part-cb" value="${p}" style="width:18px;height:18px;accent-color:#0EA5E9;">${p}</label>`).join('');
   document.getElementById('maintenance-worker-body').innerHTML=`${BOAT_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
     <div style="font-size:13px;font-weight:700;color:#0EA5E9;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">⚙️ Penyelenggaraan Bot Besar</div>
@@ -5052,11 +5074,11 @@ function renderBigBoatMaintenanceForm(){
   </div>`;
 }
 async function submitBigBoatMaintenance(){
-  const date=document.getElementById('maint-bb-date')?.value||'';
+  const date=(document.getElementById('maint-bb-date')||{}).value||'';
   const checked=[...document.querySelectorAll('.maint-bb-part-cb:checked')].map(cb=>cb.value);
-  const other=document.getElementById('maint-bb-other')?.value?.trim();
+  const other=((document.getElementById('maint-bb-other')||{}).value||'').trim();
   if(other) checked.push(other);
-  const cost=document.getElementById('maint-bb-cost')?.value||'';
+  const cost=(document.getElementById('maint-bb-cost')||{}).value||'';
   if(!checked.length){alert('Sila pilih sekurang-kurangnya satu bahagian.');return;}
   rumbleDevice(45);
   const ok=await maintPost('Big_Boat_Maintenance',{Maintenance_Date:date,Part_Maintained:checked.join(', '),Cost:cost});
@@ -5082,7 +5104,7 @@ function renderSeaweedMenu(){
    batches (via <datalist>), so the list grows naturally without
    needing to predefine species anywhere. ─────────────────────── */
 function renderSeaweedNewBatchForm(){
-  const today=new Date().toISOString().split('T')[0];
+  const today=localDateStr();
   document.getElementById('maintenance-worker-body').innerHTML=`${SEAWEED_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
     <div style="font-size:13px;font-weight:700;color:#059669;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">🌱 Batch Rumpai Laut Baru</div>
     <label class="eyebrow" style="display:block;margin-bottom:6px;">Spesies</label>
@@ -5104,10 +5126,10 @@ function renderSeaweedNewBatchForm(){
   },()=>{});
 }
 async function submitSeaweedNewBatch(){
-  const species=document.getElementById('maint-swn-species')?.value||'';
-  const location=document.getElementById('maint-swn-location')?.value||'';
-  const date=document.getElementById('maint-swn-date')?.value||'';
-  const weight=document.getElementById('maint-swn-weight')?.value||'';
+  const species=(document.getElementById('maint-swn-species')||{}).value||'';
+  const location=(document.getElementById('maint-swn-location')||{}).value||'';
+  const date=(document.getElementById('maint-swn-date')||{}).value||'';
+  const weight=(document.getElementById('maint-swn-weight')||{}).value||'';
   if(!species){alert('Sila isi spesies.');return;}
   if(!location){alert('Sila isi lokasi sangkar.');return;}
   rumbleDevice(45);
@@ -5145,8 +5167,8 @@ function renderSeaweedWeeklyForm(){
   );
 }
 async function submitSeaweedWeekly(){
-  const batchId=document.getElementById('maint-sww-batch')?.value;
-  const length=document.getElementById('maint-sww-length')?.value||'';
+  const batchId=(document.getElementById('maint-sww-batch')||{}).value;
+  const length=(document.getElementById('maint-sww-length')||{}).value||'';
   if(!batchId){alert('Sila pilih batch.');return;}
   if(!length){alert('Sila isi panjang.');return;}
   rumbleDevice(45);
@@ -5165,7 +5187,7 @@ function renderSeaweedHarvestForm(){
         </div>`;
         return;
       }
-      const today=new Date().toISOString().split('T')[0];
+      const today=localDateStr();
       document.getElementById('maintenance-worker-body').innerHTML=`${SEAWEED_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
         <div style="font-size:13px;font-weight:700;color:#059669;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">🎋 Rekod Tuaian</div>
         <label class="eyebrow" style="display:block;margin-bottom:6px;">Batch</label>
@@ -5181,9 +5203,9 @@ function renderSeaweedHarvestForm(){
   );
 }
 async function submitSeaweedHarvest(){
-  const batchId=document.getElementById('maint-swh-batch')?.value;
-  const date=document.getElementById('maint-swh-date')?.value||'';
-  const weight=document.getElementById('maint-swh-weight')?.value||'';
+  const batchId=(document.getElementById('maint-swh-batch')||{}).value;
+  const date=(document.getElementById('maint-swh-date')||{}).value||'';
+  const weight=(document.getElementById('maint-swh-weight')||{}).value||'';
   if(!batchId){alert('Sila pilih batch.');return;}
   if(!weight){alert('Sila isi berat tuaian.');return;}
   rumbleDevice(45);
@@ -5236,7 +5258,7 @@ let maintExpandedKeys=new Set(); // which cards are currently expanded
 
 function renderMaintenanceDashboard(items){
   const order={never:0,overdue:1,issue:2,ok:3};
-  const sorted=[...items].sort((a,b)=>(order[a.status]??9)-(order[b.status]??9));
+  const sorted=[...items].sort((a,b)=>(nvl(order[a.status],9))-(nvl(order[b.status],9)));
   maintDashboardItems={};
   sorted.forEach(it=>{ maintDashboardItems[it.key]=it; });
 
