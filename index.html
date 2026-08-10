@@ -1107,6 +1107,21 @@ function loadSavedGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning
                 </div>
             </div>`:`<div class="card" style="padding:14px;"><div class="eyebrow mb-2">Outcome</div><p class="text-xs" style="color:var(--text-dim);">${rawOutcome} — this trial predates the Trial ID field, so its outcome can't be corrected from here.</p></div>`;
 
+            // Spat tracking status + Discard control — only relevant once
+            // the trial actually entered the post-spawning lifecycle
+            // (spatStatus set and not N/A).
+            const spatStatus=r.spatStatus||'';
+            const spatInactive=['','N/A','Discarded'].includes(spatStatus);
+            const spatCard=(trialId&&!spatInactive)?`<div class="card mt-3" style="padding:14px;">
+                <div class="eyebrow mb-2">Spat Tracking</div>
+                <div class="text-sm font-semibold">${spatStatus}</div>
+                <p class="text-xs mt-1 mb-3" style="color:var(--text-dim);">If this batch's result isn't good, discard it — it stops generating tasks but stays here in full detail.</p>
+                <button onclick="discardSpawningTrial('${trialId}',${logIdx})" class="text-xs font-semibold py-2 px-3 rounded-lg" style="background:color-mix(in srgb,var(--alert) 10%,transparent);color:var(--alert);border:1px solid color-mix(in srgb,var(--alert) 26%,transparent);">🗑 Discard Trial</button>
+            </div>`:(trialId&&spatStatus==='Discarded'?`<div class="card mt-3" style="padding:14px;">
+                <div class="eyebrow mb-2">Spat Tracking</div>
+                <div class="text-sm font-semibold" style="color:var(--text-dim);">Discarded</div>
+            </div>`:'');
+
             const females=[[r.f1Mat,r.f1Pcs],[r.f2Mat,r.f2Pcs],[r.f3Mat,r.f3Pcs],[r.f4Mat,r.f4Pcs]].filter(([mat,pcs])=>mat||parseInt(pcs));
             const totalFem=females.reduce((s,[,p])=>s+(parseInt(p)||0),0);
             const malePcs=parseInt(r.malePcs)||0;
@@ -1114,8 +1129,25 @@ function loadSavedGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning
             const femRows=females.map(([mat,pcs],i)=>{const p=parseInt(pcs)||0;const pct=total?Math.round(p/total*100):0;return`<div class="grade-row"><div><div class="text-sm font-semibold">Female ${i+1} · ${mat||'—'}</div><div class="text-xs" style="color:var(--text-dim);">${pct}% of total broodstock</div></div><div class="num font-semibold text-sm" style="color:${mc};">${p} pcs</div></div>`;}).join('');
             const malePct=total?Math.round(malePcs/total*100):0;
             const maleRow=`<div class="grade-row"><div><div class="text-sm font-semibold">Male · ${r.maleMat||'—'}</div><div class="text-xs" style="color:var(--text-dim);">${malePct}% of total broodstock</div></div><div class="num font-semibold text-sm">${malePcs} pcs</div></div>`;
-            const bodyHtml=`${outcomeCard}<div class="card mt-3" style="padding:14px;"><div class="eyebrow mb-2">Female broodstock</div>${femRows}</div><div class="card mt-3" style="padding:14px;"><div class="eyebrow mb-2">Male broodstock</div>${maleRow}</div><div class="card mt-3" style="padding:12px 14px;"><div class="flex justify-between items-center"><span class="text-sm font-semibold">Total spawners</span><span class="num text-lg font-bold" style="color:${mc};">${total}</span></div></div>`;
+            const bodyHtml=`${outcomeCard}${spatCard}<div class="card mt-3" style="padding:14px;"><div class="eyebrow mb-2">Female broodstock</div>${femRows}</div><div class="card mt-3" style="padding:14px;"><div class="eyebrow mb-2">Male broodstock</div>${maleRow}</div><div class="card mt-3" style="padding:12px 14px;"><div class="flex justify-between items-center"><span class="text-sm font-semibold">Total spawners</span><span class="num text-lg font-bold" style="color:${mc};">${total}</span></div></div>`;
             openDetailOverlay(headHtml,bodyHtml);
+        }
+        async function discardSpawningTrial(trialId,logIdx){
+            if(!trialId)return;
+            if(!confirm('Discard this trial?\n\nIt stops generating any further spat-tracking tasks. Nothing is deleted — full detail stays here and in the Spawning app history.'))return;
+            rumbleDevice(35);
+            const url=getGasUrl('Abalone-Spawning-and-Purchasing-Log');
+            if(!url){alert('Spawning GAS URL not configured.\nSet it in Module GAS Connections.');return;}
+            try{
+                await fetch(url,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'discardTrial',trialId})});
+                rumbleDevice([40,30,70]);
+                await loadSpawnPurchase();
+                loadSpawnTasks();
+                const newIdx=spawnLogs.findIndex(x=>String(x.trialId)===String(trialId));
+                if(newIdx!==-1)openSpawnerDetail(newIdx);
+            }catch(e){
+                alert('Could not save — check your connection and try again.');
+            }
         }
 
         let _purchSummaryCopyText='';
