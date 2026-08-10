@@ -2715,6 +2715,7 @@ function sendStockOrderMessage(){
         let lfTcTank='', lfTcQty='';
         let lfTfSource='', lfTfDest='', lfTfQty='', lfTfLength='';
         let lfOutSource='', lfOutDest='', lfOutQty='', lfOutLength='';
+        let lfOutDate=localDateStr(), lfOutSize='0.5 - 0.8', lfOutBatch=[], lfOutRowTank='', lfOutRowQty='';
         let lfSkDate=localDateStr(), lfSkQty='', lfSkNotes='';
         let lfSkSamples=[]; // {kg, pcs} — matches the paper form's 5-sample average weight section         
         let lfFpDate=localDateStr(); // finished-product entry date         
@@ -3007,39 +3008,87 @@ function sendStockOrderMessage(){
            deducts it from that tank's live count and the farm total
            automatically, the same way a normal transfer's source side
            does. ─────────────────────────────────────────────────────── */
+        /* Batch mode: date / size / destination are set once for the whole
+           session; worker adds tank+qty rows one at a time into lfOutBatch,
+           then "Hantar Semua" fires one lfPost('seacage_transfer',...) per
+           row sequentially. Each row still deducts from its own source tank
+           exactly like before — this is purely a frontend convenience, no
+           backend/GAS schema change. size replaces the old free numeric
+           shell_length field (same column, now holds the size-bucket label
+           to match Sea Cage's own transfer form). */
+        function lfOutSizeBtn(sz,l){
+          return `<button onclick="lfOutSize='${sz}';renderLFOutToSeaCageForm()" style="flex:1;padding:9px 4px;border-radius:11px;font-weight:700;font-size:11px;border:1.5px solid ${lfOutSize===sz?'#0EA5E9':'var(--border-2)'};background:${lfOutSize===sz?'#0EA5E9':'var(--surface)'};color:${lfOutSize===sz?'white':'var(--text)'};transition:all .2s;">${l}</button>`;
+        }
         function renderLFOutToSeaCageForm(){
           const recent=[...(lfData.seacage_transfer||[])].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
           const recentHtml=recent.length?recent.map(r=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:11.5px;">
               <span style="color:var(--text-mut);">${fmtCleanDate(r.date)} · ${r.source_tank}${r.dest_cage?' → '+r.dest_cage:''}</span>
               <span class="num" style="font-weight:700;">${(parseInt(r.quantity)||0).toLocaleString()}</span>
             </div>`).join(''):'<p class="text-xs" style="color:var(--text-dim);padding:6px 0;">Tiada rekod baru-baru ini.</p>';
+          const batchTotal=lfOutBatch.reduce((s,r)=>s+(parseInt(r.qty)||0),0);
+          const batchRowsHtml=lfOutBatch.length?lfOutBatch.map((r,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--surface-2);border-radius:10px;border:1px solid var(--border);margin-bottom:6px;">
+              <span style="font-size:13px;font-weight:600;">Tangki ${r.tank} — <span class="num">${(parseInt(r.qty)||0).toLocaleString()}</span> pcs</span>
+              <button onclick="lfOutRemoveRow(${i})" style="color:var(--alert);font-weight:700;font-size:13px;padding:2px 8px;">✕</button>
+            </div>`).join(''):'<p class="text-xs" style="color:var(--text-dim);padding:4px 0 8px;">Belum ada tangki ditambah.</p>';
           document.getElementById('landfarm-worker-body').innerHTML=`${LF_BACK_BTN}<div class="card" style="padding:24px;margin-top:12px;">
             <div style="font-size:13px;font-weight:700;color:#0EA5E9;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">🚛 Penghantaran ke Sangkar Laut</div>
-            <p style="font-size:11px;color:var(--text-dim);margin-bottom:16px;">Rekod spat yang dipindah keluar dari tangki ladang ke sangkar laut. Ini akan menolak kiraan tangki secara automatik.</p>
-            <label class="eyebrow" style="display:block;margin-bottom:6px;">Dari Tangki</label>
-            <input type="number" inputmode="numeric" id="lf-out-source" placeholder="Ex: 14" value="${lfOutSource}" oninput="lfOutSource=this.value" class="gas-input" style="margin-bottom:16px;">
+            <p style="font-size:11px;color:var(--text-dim);margin-bottom:16px;">Tambah setiap tangki satu-satu, kemudian hantar semua sekali. Ini akan menolak kiraan setiap tangki secara automatik.</p>
+            <label class="eyebrow" style="display:block;margin-bottom:6px;">Tarikh</label>
+            <input type="date" id="lf-out-date" value="${lfOutDate}" oninput="lfOutDate=this.value" class="gas-input" style="margin-bottom:16px;">
+            <label class="eyebrow" style="display:block;margin-bottom:8px;">Julat Saiz</label>
+            <div style="display:flex;gap:8px;margin-bottom:16px;">${lfOutSizeBtn('0.5 - 0.8','0.5 – 0.8 cm')}${lfOutSizeBtn('0.9 ke atas','0.9 cm ke atas')}</div>
             <label class="eyebrow" style="display:block;margin-bottom:6px;">Sangkar / Unit Destinasi (pilihan)</label>
-            <input type="text" id="lf-out-dest" placeholder="Contoh: Unit 4, Petak B" value="${lfOutDest}" oninput="lfOutDest=this.value" class="gas-input" style="margin-bottom:16px;">
-            <label class="eyebrow" style="display:block;margin-bottom:6px;">Kuantiti Dihantar</label>
-            <input type="number" inputmode="numeric" id="lf-out-qty" placeholder="Contoh: 2000" value="${lfOutQty}" oninput="lfOutQty=this.value" class="gas-input" style="margin-bottom:16px;">
-            <label class="eyebrow" style="display:block;margin-bottom:6px;">Panjang Cangkerang (cm, pilihan)</label>
-            <input type="number" step="0.1" inputmode="decimal" id="lf-out-length" placeholder="0.5" value="${lfOutLength}" oninput="lfOutLength=this.value" class="gas-input" style="margin-bottom:20px;">
-            <button onclick="submitLFOutToSeaCage()" style="width:100%;padding:15px;background:#0EA5E9;color:white;font-weight:700;border-radius:12px;font-size:14px;">Hantar Rekod Penghantaran →</button>
+            <input type="text" id="lf-out-dest" placeholder="Contoh: Unit 4, Petak B" value="${lfOutDest}" oninput="lfOutDest=this.value" class="gas-input" style="margin-bottom:20px;">
+
+            <div style="height:1px;background:var(--border);margin-bottom:18px;"></div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:10px;">
+              <div><label class="eyebrow" style="display:block;margin-bottom:6px;">Nombor Tangki</label>
+              <input type="number" inputmode="numeric" id="lf-out-row-tank" placeholder="Ex: 14" value="${lfOutRowTank}" oninput="lfOutRowTank=this.value" class="gas-input"></div>
+              <div><label class="eyebrow" style="display:block;margin-bottom:6px;">Kuantiti</label>
+              <input type="number" inputmode="numeric" id="lf-out-row-qty" placeholder="Contoh: 2000" value="${lfOutRowQty}" oninput="lfOutRowQty=this.value" class="gas-input"></div>
+            </div>
+            <button onclick="lfOutAddRow()" style="width:100%;padding:12px;background:var(--surface-2);border:1.5px dashed var(--border-2);color:#0EA5E9;font-weight:700;border-radius:12px;font-size:13px;margin-bottom:18px;">+ Tambah Tangki</button>
+
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <div class="eyebrow">Senarai Tangki (${lfOutBatch.length})</div>
+              ${lfOutBatch.length?`<div style="font-size:12px;font-weight:700;color:#0EA5E9;">Jumlah: ${batchTotal.toLocaleString()} pcs</div>`:''}
+            </div>
+            ${batchRowsHtml}
+
+            <button onclick="submitLFOutToSeaCageBatch()" style="width:100%;padding:15px;background:#0EA5E9;color:white;font-weight:700;border-radius:12px;font-size:14px;margin-top:10px;" ${lfOutBatch.length?'':'disabled'}>Hantar Semua (${lfOutBatch.length}) →</button>
           </div>
           <div class="card mt-3" style="padding:14px;">
             <div class="eyebrow mb-2">Penghantaran Terkini</div>
             ${recentHtml}
           </div>`;
         }
-        async function submitLFOutToSeaCage(){
-          const source=parseInt((document.getElementById('lf-out-source')||{}).value||lfOutSource);
+        function lfOutAddRow(){
+          const tank=parseInt((document.getElementById('lf-out-row-tank')||{}).value||lfOutRowTank);
+          const qty=parseInt((document.getElementById('lf-out-row-qty')||{}).value||lfOutRowQty);
+          if(!tank||!qty){alert('Sila isi Nombor Tangki & Kuantiti.');return;}
+          lfOutBatch.push({tank,qty});
+          lfOutRowTank='';lfOutRowQty='';
+          rumbleDevice(30);
+          renderLFOutToSeaCageForm();
+        }
+        function lfOutRemoveRow(i){
+          lfOutBatch.splice(i,1);
+          rumbleDevice(20);
+          renderLFOutToSeaCageForm();
+        }
+        async function submitLFOutToSeaCageBatch(){
+          if(!lfOutBatch.length)return;
+          const date=(document.getElementById('lf-out-date')||{}).value||lfOutDate;
           const dest=(document.getElementById('lf-out-dest')||{}).value||lfOutDest;
-          const qty=parseInt((document.getElementById('lf-out-qty')||{}).value||lfOutQty);
-          const len=parseFloat((document.getElementById('lf-out-length')||{}).value||lfOutLength)||'';
-          if(!source||!qty){alert('Sila isi Tangki Sumber & Kuantiti.');return;}
           rumbleDevice(45);
-          const ok=await lfPost('seacage_transfer',{date:localDateStr(),source_tank:lfTankLabel(source),dest_cage:dest,quantity:qty,shell_length:len});
-          if(ok){lfOutSource='';lfOutDest='';lfOutQty='';lfOutLength='';renderLFOutToSeaCageForm();}
+          let okAll=true;
+          for(const row of lfOutBatch){
+            const ok=await lfPost('seacage_transfer',{date,source_tank:lfTankLabel(row.tank),dest_cage:dest,quantity:row.qty,shell_length:lfOutSize});
+            if(!ok)okAll=false;
+          }
+          if(okAll){lfOutBatch=[];lfOutDest='';renderLFOutToSeaCageForm();}
+          else{alert('Sebahagian rekod mungkin tidak dihantar. Sila semak Senarai Tangki dan cuba lagi jika perlu.');renderLFOutToSeaCageForm();}
         }
 
         /* ── Spawning Trials cross-reference (tank stocking source) ────
