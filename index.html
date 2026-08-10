@@ -3402,6 +3402,17 @@ function sendStockOrderMessage(){
               </div>
             </div>
 
+            <button onclick="openLFSeaCageTransferDetail()" class="card" style="padding:18px;border-left:4px solid #0EA5E9;text-align:left;width:100%;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div>
+                  <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#0EA5E9;">Transferred to Sea Cage · <span class="ko">양식장 이송</span></div>
+                  <div class="num" style="font-size:32px;font-weight:900;color:#0EA5E9;letter-spacing:-.02em;margin-top:6px;">${lfSeaCageTransferTotal().toLocaleString()}</div>
+                  <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">total pcs · all-time</div>
+                </div>
+                <span style="font-size:11px;color:var(--text-dim);">Tap ›</span>
+              </div>
+            </button>
+
             <div style="padding:16px 18px;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
                 <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);">Processed Abalone · <span class="ko">가공 전복</span></div>
@@ -3469,6 +3480,22 @@ function sendStockOrderMessage(){
           rumbleDevice(20);
           openLFSpawningDetail();
           try{ if(lfMgrSubTab==='overview'&&document.getElementById('lf-mgr-content'))renderLFMgrOverview(); }catch(e){}
+        }
+        function lfSeaCageTransferTotal(){
+          return (lfData.seacage_transfer||[]).reduce((s,r)=>s+(parseInt(r.quantity)||0),0);
+        }
+        function openLFSeaCageTransferDetail(){
+          rumbleDevice(30);
+          const rows=[...(lfData.seacage_transfer||[])].sort((a,b)=>(parseAnyDate(b.date)||0)-(parseAnyDate(a.date)||0));
+          const total=lfSeaCageTransferTotal();
+          const head=`<div style="font-size:22px;font-weight:700;">Transferred to Sea Cage</div>
+            <div style="font-size:13px;color:var(--text-mut);">양식장 이송 · All-time</div>
+            <div class="flex items-baseline gap-2 mt-3"><span class="num" style="font-size:36px;font-weight:900;color:#0EA5E9;">${total.toLocaleString()}</span><span style="font-size:13px;color:var(--text-dim);">total pcs</span></div>`;
+          const rowsHtml=rows.length?rows.map(r=>{
+            const qty=parseInt(r.quantity)||0;
+            return `<div class="grade-row"><div><div class="text-sm font-semibold">${fmtCleanDate(r.date)} · ${r.source_tank}${r.dest_cage?' → '+r.dest_cage:''}</div><div class="text-xs" style="color:var(--text-dim);">${r.shell_length||'—'}</div></div><div class="num text-sm font-semibold" style="color:#0EA5E9;">${qty.toLocaleString()}</div></div>`;
+          }).join(''):'<p class="text-xs" style="color:var(--text-dim);padding:8px 0;">Tiada rekod lagi.</p>';
+          openDetailOverlay(head,`<div class="card" style="padding:14px;">${rowsHtml}</div>`);
         }
         function openLFSpawningDetail(){
           rumbleDevice(30);
