@@ -3552,6 +3552,17 @@ function sendStockOrderMessage(){
               </div>
             </button>
 
+            <button onclick="openLFSpatProductionDetail()" class="card" style="padding:18px;border-left:4px solid #F59E0B;text-align:left;width:100%;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div>
+                  <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#F59E0B;">Spat Production · <span class="ko">종자 생산량</span></div>
+                  <div class="num" style="font-size:32px;font-weight:900;color:#F59E0B;letter-spacing:-.02em;margin-top:6px;">${lfSpatProductionForMonth(lfSpatScope).confirmed.toLocaleString()}</div>
+                  <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">confirmed spat · ${monthLabel(lfSpatScope)}</div>
+                </div>
+                <span style="font-size:11px;color:var(--text-dim);">Tap ›</span>
+              </div>
+            </button>
+
             ${lfLinkedModulesCard()}`;
         }
 
@@ -3642,6 +3653,70 @@ function sendStockOrderMessage(){
           (spawnLogs||[]).forEach(r=>{const d=parseAnyDate(r.date);if(d)set.add(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);});
           if(!set.has(currentMonthStr()))set.add(currentMonthStr());
           return[...set].sort().reverse();
+        }
+
+        let lfSpatScope=currentMonthStr();
+        function lfTrialTotalSettled(trial){
+          return lfParseTrialTanks(trial).reduce((s,t)=>s+(t.settled||0),0);
+        }
+        function lfMonthKeyOf(dateVal){
+          const d=parseAnyDate(dateVal); if(!d) return null;
+          return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+        }
+        function lfMonthKeyPlus(monthKey,delta){
+          const parts=monthKey.split('-').map(Number);
+          const d=new Date(parts[0],parts[1]-1+delta,1);
+          return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+        }
+        function lfSpatReportMonth(trial){
+          const fertMonth=lfMonthKeyOf(trial.fertilisationTime||trial.date);
+          if(!fertMonth) return null;
+          return normalizeMoon(trial.moonCycle)==='New Moon'?lfMonthKeyPlus(fertMonth,1):fertMonth;
+        }
+        function lfSpatProductionForMonth(monthKey){
+          let confirmed=0,pending=0;
+          const rows=[];
+          (spawnLogs||[]).forEach(trial=>{
+            if(trial.spatStatus==='N/A'||trial.spatStatus==='Discarded')return;
+            if(lfSpatReportMonth(trial)!==monthKey)return;
+            if(trial.spatStatus==='Confirmed'){
+              const total=lfTrialTotalSettled(trial);
+              confirmed+=total;
+              rows.push({trialId:trial.trialId,moon:normalizeMoon(trial.moonCycle),fertTime:trial.fertilisationTime||trial.date,total});
+            }else{
+              pending++;
+            }
+          });
+          return{confirmed,pending,rows};
+        }
+        function lfSpatMonthsAvailable(){
+          const set=new Set();
+          (spawnLogs||[]).forEach(r=>{const mk=lfSpatReportMonth(r);if(mk)set.add(mk);});
+          if(!set.has(currentMonthStr()))set.add(currentMonthStr());
+          return[...set].sort().reverse();
+        }
+        function setLFSpatScope(scope){
+          lfSpatScope=scope;
+          rumbleDevice(20);
+          openLFSpatProductionDetail();
+          try{ if(lfMgrSubTab==='overview'&&document.getElementById('lf-mgr-content'))renderLFMgrOverview(); }catch(e){}
+        }
+        function openLFSpatProductionDetail(){
+          rumbleDevice(30);
+          const p=lfSpatProductionForMonth(lfSpatScope);
+          const months=lfSpatMonthsAvailable();
+          const opts=months.map(m=>`<option value="${m}"${m===lfSpatScope?' selected':''}>${monthLabel(m)}</option>`).join('');
+          const picker=`<div style="margin-top:12px;"><select onchange="setLFSpatScope(this.value)" style="width:100%;background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:600;outline:none;">${opts}</select></div>`;
+          const head=`<div style="font-size:22px;font-weight:700;">Spat Production</div>
+            <div style="font-size:13px;color:var(--text-mut);">종자 생산량 · ${monthLabel(lfSpatScope)}</div>
+            <div class="flex items-baseline gap-2 mt-3"><span class="num" style="font-size:36px;font-weight:900;color:#F59E0B;">${p.confirmed>0?p.confirmed.toLocaleString():'—'}</span><span style="font-size:13px;color:var(--text-dim);">confirmed spat</span></div>
+            <p style="font-size:11px;color:var(--text-dim);margin-top:6px;">This month's Full Moon result + last month's New Moon result.${p.pending?` ${p.pending} trial${p.pending!==1?'s':''} for this period still awaiting confirmation.`:''}</p>
+            ${picker}`;
+          const rows=[...p.rows].sort((a,b)=>(parseAnyDate(b.fertTime)||0)-(parseAnyDate(a.fertTime)||0)).map(r=>{
+            const col=MOON_COLOR[r.moon]||'#F59E0B',emoji=MOON_EMOJI[r.moon]||'🌙';
+            return`<div class="grade-row"><div><div class="text-sm font-semibold">${emoji} ${r.trialId||'—'}</div><div class="text-xs" style="color:var(--text-dim);">${r.fertTime?fmtCleanDate(r.fertTime):'—'} · ${r.moon}</div></div><div class="num text-sm font-semibold" style="color:${col};">${r.total.toLocaleString()}</div></div>`;
+          }).join('')||'<p class="text-xs" style="color:var(--text-dim);padding:8px 0;">No confirmed spat counts for this period yet.</p>';
+          openDetailOverlay(head,`<div class="card" style="padding:14px;">${rows}</div>`);
         }
         function openLFBiomassDetail(){
           rumbleDevice(30);
