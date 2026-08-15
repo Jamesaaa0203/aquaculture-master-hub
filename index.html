@@ -2524,21 +2524,21 @@ function renderSCMgrBiomass(){
  
   // Render size class rows
   const clsRows=cls.map((cl,i)=>{
-    const w=scEstimateWeight(cl.length,wl);
-    const total=(cl.count>0)?(cl.count*w/1000).toFixed(3):null;
+    const w=scEstimateWeight(scBioNum(cl.length),wl);
+    const total=(scBioNum(cl.count)>0&&scBioNum(cl.length)>0)?(scBioNum(cl.count)*w/1000).toFixed(3):null;
     return`<div style="display:flex;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
       <input type="number" step="0.1" inputmode="decimal" placeholder="cm" value="${cl.length||''}" oninput="scBioUpdateClass(${i},'length',this.value)"
         style="width:70px;padding:8px;border:1.5px solid var(--border-2);border-radius:10px;background:var(--surface-2);color:var(--text);font-size:13px;font-weight:700;text-align:center;outline:none;">
       <span style="font-size:12px;color:var(--text-dim);">cm ×</span>
       <input type="number" inputmode="numeric" placeholder="spats" value="${cl.count||''}" oninput="scBioUpdateClass(${i},'count',this.value)"
         style="flex:1;padding:8px;border:1.5px solid var(--border-2);border-radius:10px;background:var(--surface-2);color:var(--text);font-size:13px;outline:none;">
-      <span style="font-size:11px;color:var(--text-dim);min-width:54px;text-align:right;">${total?'~'+total+' kg':'—'}</span>
+      <span id="sc-bio-row-est-${i}" style="font-size:11px;color:var(--text-dim);min-width:54px;text-align:right;">${total?'~'+total+' kg':'—'}</span>
       ${cls.length>1?`<button onclick="scBioRemoveClass(${i})" style="font-size:12px;background:rgba(239,68,68,.1);color:var(--alert);padding:4px 8px;border-radius:8px;font-weight:700;">✕</button>`:''}
     </div>`;}).join('');
  
   // Compute totals
-  const totalKg=cls.reduce((s,cl)=>{if(!cl.length||!cl.count)return s;return s+(cl.count*scEstimateWeight(cl.length,wl)/1000);},0);
-  const totalSpats=cls.reduce((s,cl)=>s+(+cl.count||0),0);
+  const totalKg=cls.reduce((s,cl)=>{const l=scBioNum(cl.length),ct=scBioNum(cl.count);if(!l||!ct)return s;return s+(ct*scEstimateWeight(l,wl)/1000);},0);
+  const totalSpats=cls.reduce((s,cl)=>s+scBioNum(cl.count),0);
   const avgG=totalSpats>0?(totalKg*1000/totalSpats).toFixed(3):null;
  
   document.getElementById('sc-mgr-content').innerHTML=`
@@ -2573,23 +2573,54 @@ function renderSCMgrBiomass(){
  
     <!-- Result -->
     ${totalKg>0?`
-    <div style="padding:22px;background:rgba(16,185,129,.08);border:1.5px solid rgba(16,185,129,.25);border-radius:18px;">
+    <div id="sc-bio-result" style="padding:22px;background:rgba(16,185,129,.08);border:1.5px solid rgba(16,185,129,.25);border-radius:18px;">
       <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#10B981;opacity:.9;margin-bottom:10px;">Estimated Total Biomass</div>
-      <div class="num" style="font-size:42px;font-weight:900;color:#10B981;letter-spacing:-.02em;">${totalKg.toFixed(2)} <span style="font-size:20px;">kg</span></div>
+      <div class="num" style="font-size:42px;font-weight:900;color:#10B981;letter-spacing:-.02em;"><span id="sc-bio-total-kg">${totalKg.toFixed(2)}</span> <span style="font-size:20px;">kg</span></div>
       <div style="display:flex;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(16,185,129,.2);">
         <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);">Total Spats</div>
-          <div class="num" style="font-size:16px;font-weight:700;margin-top:2px;">${totalSpats.toLocaleString()}</div></div>
+          <div class="num" id="sc-bio-total-spats" style="font-size:16px;font-weight:700;margin-top:2px;">${totalSpats.toLocaleString()}</div></div>
         <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);">Avg per Spat</div>
-          <div class="num" style="font-size:16px;font-weight:700;margin-top:2px;">${avgG} g</div></div>
+          <div class="num" id="sc-bio-total-avg" style="font-size:16px;font-weight:700;margin-top:2px;">${avgG} g</div></div>
       </div>
     </div>`:''}`;
 }
  
 /* Biomass helpers */
+function scBioNum(v){const n=parseFloat(v);return isNaN(n)?0:n;}
 function scBioUpdateClass(i,field,val){
   const cls=scLoadBioClasses();
-  cls[i][field]=parseFloat(val)||0;
-  scSaveBioClasses(cls);renderSCMgrBiomass();
+  cls[i][field]=val; // keep exactly what was typed (e.g. "1.") — only coerced to a number via scBioNum() when computing, so the decimal point isn't stripped mid-type
+  scSaveBioClasses(cls);
+  scBioPatchRow(i,cls);
+}
+// Patches just the derived numbers for one row + the totals, without rebuilding
+// the inputs — rebuilding on every keystroke was killing input focus (and on
+// mobile, closing the keyboard, which looked like the form "submitted itself").
+function scBioPatchRow(i,cls){
+  const wl=scLoadWLTable();
+  const cl=cls[i];
+  const l=scBioNum(cl.length),ct=scBioNum(cl.count);
+  const w=scEstimateWeight(l,wl);
+  const rowTotal=(l>0&&ct>0)?(ct*w/1000).toFixed(3):null;
+  const rowEl=document.getElementById('sc-bio-row-est-'+i);
+  if(rowEl) rowEl.textContent=rowTotal?('~'+rowTotal+' kg'):'—';
+
+  const totalKg=cls.reduce((s,c)=>{const cl2=scBioNum(c.length),ct2=scBioNum(c.count);if(!cl2||!ct2)return s;return s+(ct2*scEstimateWeight(cl2,wl)/1000);},0);
+  const totalSpats=cls.reduce((s,c)=>s+scBioNum(c.count),0);
+  const avgG=totalSpats>0?(totalKg*1000/totalSpats).toFixed(3):null;
+  const resultWrap=document.getElementById('sc-bio-result');
+
+  if(totalKg>0){
+    if(resultWrap){
+      const kgEl=document.getElementById('sc-bio-total-kg');if(kgEl)kgEl.textContent=totalKg.toFixed(2);
+      const spatsEl=document.getElementById('sc-bio-total-spats');if(spatsEl)spatsEl.textContent=totalSpats.toLocaleString();
+      const avgEl=document.getElementById('sc-bio-total-avg');if(avgEl)avgEl.textContent=avgG+' g';
+    }else{
+      renderSCMgrBiomass(); // result card doesn't exist yet — needs a full render to create it (rare: only the first time total crosses above 0)
+    }
+  }else if(resultWrap){
+    renderSCMgrBiomass(); // total dropped back to 0 — needs a full render to remove the result card
+  }
 }
 function scBioAddClass(){
   const cls=scLoadBioClasses();cls.push({length:0,count:0});scSaveBioClasses(cls);renderSCMgrBiomass();
@@ -3310,7 +3341,7 @@ function sendStockOrderMessage(){
         function scEstimateCurrentBiomassKg(){
           try{
             const wl=scLoadWLTable(),cls=scLoadBioClasses();
-            return cls.reduce((s,cl)=>{if(!cl.length||!cl.count)return s;return s+(cl.count*scEstimateWeight(cl.length,wl)/1000);},0);
+            return cls.reduce((s,cl)=>{const l=scBioNum(cl.length),ct=scBioNum(cl.count);if(!l||!ct)return s;return s+(ct*scEstimateWeight(l,wl)/1000);},0);
           }catch(e){return 0;}
         }
         /* ── Processed Abalone — manual baseline + running total ────────
