@@ -234,13 +234,33 @@
                     <div><label class="eyebrow block mb-1.5">Spawning &amp; Purchasing</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-spawning-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
                     <div><label class="eyebrow block mb-1.5">Processing Log</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-processing-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
                     <div><label class="eyebrow block mb-1.5">Sea Cage Ops</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-sc-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div><div><label class="eyebrow block mb-1.5">Hatchery HR Suite</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-hr-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div> <div><label class="eyebrow block mb-1.5">Farm Stock Check</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-stockcheck-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
-                    <div><label class="eyebrow block mb-1.5">Land Farm</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-landfarm-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div><div><label class="eyebrow block mb-1.5">Night Guard</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-ng-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div><div><label class="eyebrow block mb-1.5">Maintenance</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-maint-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
+                    <div><label class="eyebrow block mb-1.5">Land Farm</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-landfarm-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div><div><label class="eyebrow block mb-1.5">Night Guard</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-ng-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div><div><label class="eyebrow block mb-1.5">Maintenance</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-maint-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div><div><label class="eyebrow block mb-1.5">Documents</label><input type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" id="gas-documents-url" placeholder="/exec URL" onchange="saveGasUrls()" class="gas-input"></div>
                     <button onclick="saveGasUrls()" class="w-full py-2.5 rounded-xl text-sm font-semibold text-white" style="background:var(--accent);">Save all URLs</button>
                     <p id="gas-save-confirm" class="hidden text-xs font-semibold text-center" style="color:var(--ok);">✓ Saved</p>
                 </div>
             </div>
             <div class="px-1 pt-1"><span class="eyebrow">Log Views</span></div>
             <div id="mgr-list" class="grid grid-cols-1 gap-3"></div>
+            <div class="px-1 pt-1"><span class="eyebrow" style="color:var(--accent);">Resources</span></div>
+            <div id="resources-list" class="grid grid-cols-1 gap-3"></div>
+        </div>
+
+        <!-- DOCUMENTS VIEW -->
+        <div id="documents-data-view" class="hidden flex-1 p-4 space-y-4 pb-28 max-w-md mx-auto w-full overflow-y-auto">
+          <div class="flex items-center justify-between gap-2">
+            <button onclick="closeView()" class="flex items-center gap-1.5 text-sm font-semibold" style="color:var(--accent);">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"/></svg>
+              <span class="ko">뒤로</span> Menu
+            </button>
+            <button onclick="docFetch(true)" class="icon-btn">
+              <svg id="doc-refresh-ic" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356M3.985 19.644V14.65h4.992m-4.969-3.65a8.25 8.25 0 0113.803-3.7L21 8.25m-18 7.5l3.181 3.182a8.25 8.25 0 0013.803-3.7"/></svg>
+            </button>
+          </div>
+          <div>
+            <span class="eyebrow ko" style="color:#334155;">문서 보관함 · Documents</span>
+            <h3 class="text-2xl font-semibold tracking-tight" style="margin-top:1px;">Documents</h3>
+          </div>
+          <div id="doc-mgr-content"></div>
         </div>
 
         <!-- WATER QUALITY VIEW -->
@@ -550,17 +570,19 @@ function buildLeaveSummaryText(monthLeave,balances,monthLabelText){
     {action:'stockcheck',hue:'#F97316',ko:'재고 관리 현황',title:'Farm Stock Check',sub:'Critical items & reorder list',icon:lineIcon("M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01")},
     {action:'nightguard',hue:'#7C3AED',ko:'야간 경비 현황',title:'Night Guard',sub:'Shifts, patrols & incidents',icon:lineIcon("M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.745 3.745 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z")}
 ];
-const ACTION_FNS={stockcheck:()=>openStockCheckView(),wq:()=>openWaterQuality(),spawn:()=>openSpawning(),purchase:()=>openPurchasing(),processing:()=>openProcessingView(),hr:()=>openHRView(),seacage:()=>openSeaCageManagerView(),landfarm:()=>openLandFarmManagerView(),nightguard:()=>openNightGuardManagerView(),maintenance:()=>openMaintenanceManagerView()};
+const ACTION_FNS={stockcheck:()=>openStockCheckView(),wq:()=>openWaterQuality(),spawn:()=>openSpawning(),purchase:()=>openPurchasing(),processing:()=>openProcessingView(),hr:()=>openHRView(),seacage:()=>openSeaCageManagerView(),landfarm:()=>openLandFarmManagerView(),nightguard:()=>openNightGuardManagerView(),maintenance:()=>openMaintenanceManagerView(),documents:()=>openDocumentsManagerView()};
+const RESOURCE_VIEWS=[{action:'documents',hue:'#334155',ko:'문서 보관함',title:'Documents',sub:'Manuals, papers & HR files',icon:lineIcon("M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 015.25 3.75h4.5a2.25 2.25 0 011.591.659l1.5 1.5A2.25 2.25 0 0014.25 6h4.5A2.25 2.25 0 0121 8.25v1.526")}];
+        function renderResourcesList(){const el=document.getElementById('resources-list');if(!el)return;el.innerHTML=RESOURCE_VIEWS.map(v=>{const onclick=`(ACTION_FNS['${v.action}']||function(){})()`;return`<button onclick="${onclick}" class="mgr-row"><div class="flex items-center gap-3.5"><span class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:color-mix(in srgb,${v.hue} 12%,transparent);color:${v.hue};border:1px solid color-mix(in srgb,${v.hue} 24%,transparent);"><span style="width:22px;height:22px;display:inline-flex">${v.icon}</span></span><div><div class="eyebrow ko" style="color:${v.hue};">${v.ko}</div><div class="text-base font-semibold tracking-tight" style="margin-top:1px;">${v.title}</div><div class="text-xs" style="color:var(--text-mut);margin-top:1px;">${v.sub}</div></div></div>${chevR}</button>`;}).join('');}
         function renderMgrList(){const el=document.getElementById('mgr-list');if(!el)return;const tempBadge=(typeof scGetCachedTempBadge==='function')?scGetCachedTempBadge():null;el.innerHTML=MGR_VIEWS.map(v=>{const onclick=v.action?`(ACTION_FNS['${v.action}']||function(){})()`:` openManagerReport('${v.appKey}','${v.tab}')`;const sub=v.sub?`<div class="text-xs" style="color:var(--text-mut);margin-top:1px;">${v.sub}</div>`:'';const tempRow=(v.action==='seacage'&&tempBadge)?`<div class="text-xs" style="color:var(--${tempBadge.freshness});margin-top:2px;font-weight:600;">🌡 ${tempBadge.temp.toFixed(1)}°C · ${tempBadge.agoText}</div>`:'';return`<button onclick="${onclick}" class="mgr-row"><div class="flex items-center gap-3.5"><span class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:color-mix(in srgb,${v.hue} 12%,transparent);color:${v.hue};border:1px solid color-mix(in srgb,${v.hue} 24%,transparent);"><span style="width:22px;height:22px;display:inline-flex">${v.icon}</span></span><div><div class="eyebrow ko" style="color:${v.hue};">${v.ko}</div><div class="text-base font-semibold tracking-tight" style="margin-top:1px;">${v.title}</div>${sub}${tempRow}</div></div>${chevR}</button>`;}).join('');}
 
         /* ── View manager ────────────────────────────────────── */
-        const ALL_VIEWS=['wq-data-view','spawn-data-view','purchase-data-view','proc-data-view','hr-data-view','seacage-data-view','stock-data-view','landfarm-data-view','nightguard-data-view','maintenance-data-view','manager-report-frame'];
+        const ALL_VIEWS=['wq-data-view','spawn-data-view','purchase-data-view','proc-data-view','hr-data-view','seacage-data-view','stock-data-view','landfarm-data-view','nightguard-data-view','maintenance-data-view','documents-data-view','manager-report-frame'];
         function showView(id){document.getElementById('manager-menu-grid').classList.add('hidden');ALL_VIEWS.forEach(v=>document.getElementById(v).classList.add('hidden'));document.getElementById(id).classList.remove('hidden');}
         function closeView(){rumbleDevice(40);ALL_VIEWS.forEach(v=>document.getElementById(v).classList.add('hidden'));if(typeof _mgrViewOrigin!=='undefined'&&_mgrViewOrigin==='landfarm'){_mgrViewOrigin='menu';openLandFarmManagerView();}else{document.getElementById('manager-menu-grid').classList.remove('hidden');}}
         function openFullTab(which){const m={wq:()=>{const u=getGasUrl('daily-water-quality');return`https://jamesaaa0203.github.io/daily-water-quality/?targetTab=manager&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');},spawn:()=>{const u=getGasUrl('Abalone-Spawning-and-Purchasing-Log');return`https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/?targetTab=spawning&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');},purchase:()=>{const u=getGasUrl('Abalone-Spawning-and-Purchasing-Log');return`https://jamesaaa0203.github.io/Abalone-Spawning-and-Purchasing-Log/?targetTab=purchasing&pin=${MASTER_PIN}`+(u?`&gasUrl=${encodeURIComponent(u)}`:'');}};const fn=m[which];if(fn)window.open(fn(),'_blank','noopener,noreferrer');}
 
         /* ── GAS URL settings ────────────────────────────────── */
-        const GAS_KEYS={'Abalone-Spawning-and-Purchasing-Log':'mgr_spawning_gas_url','Abalone-Processing-Log':'mgr_processing_gas_url','hatchery-hr':'mgr_hr_gas_url','daily-water-quality':'mgr_wq_gas_url','sea-cage':'mgr_seacage_gas_url','farm-stock-check': 'mgr_stockcheck_gas_url','land-farm':'mgr_landfarm_gas_url','night-guard':'mgr_nightguard_gas_url','maintenance':'mgr_maintenance_gas_url',};
+        const GAS_KEYS={'Abalone-Spawning-and-Purchasing-Log':'mgr_spawning_gas_url','Abalone-Processing-Log':'mgr_processing_gas_url','hatchery-hr':'mgr_hr_gas_url','daily-water-quality':'mgr_wq_gas_url','sea-cage':'mgr_seacage_gas_url','farm-stock-check': 'mgr_stockcheck_gas_url','land-farm':'mgr_landfarm_gas_url','night-guard':'mgr_nightguard_gas_url','maintenance':'mgr_maintenance_gas_url','documents':'mgr_documents_gas_url',};
         function cleanGasUrl(v){
           // Strips ALL whitespace-like characters anywhere in the string —
           // not just leading/trailing (.trim() misses these): regular
@@ -715,8 +737,8 @@ const ACTION_FNS={stockcheck:()=>openStockCheckView(),wq:()=>openWaterQuality(),
           }
         }
         function toggleGasSettings(){const d=document.getElementById('gas-settings-drawer'),s=document.getElementById('gas-settings-status');d.classList.toggle('hidden');s.textContent=d.classList.contains('hidden')?'Configure ▾':'Close ▴';}
-        function saveGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url','gas-sc-url':'mgr_seacage_gas_url','gas-stockcheck-url':'mgr_stockcheck_gas_url','gas-landfarm-url':'mgr_landfarm_gas_url','gas-ng-url':'mgr_nightguard_gas_url','gas-maint-url':'mgr_maintenance_gas_url'};for(const[id,k]of Object.entries(m)){const v=cleanGasUrl(document.getElementById(id).value);if(v)store.set(k,v);}const c=document.getElementById('gas-save-confirm');c.classList.remove('hidden');setTimeout(()=>c.classList.add('hidden'),2500);}
-function loadSavedGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url','gas-sc-url':'mgr_seacage_gas_url','gas-stockcheck-url':'mgr_stockcheck_gas_url','gas-landfarm-url':'mgr_landfarm_gas_url','gas-ng-url':'mgr_nightguard_gas_url','gas-maint-url':'mgr_maintenance_gas_url'};for(const[id,k]of Object.entries(m)){const v=store.get(k);if(v)document.getElementById(id).value=v;}}
+        function saveGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url','gas-sc-url':'mgr_seacage_gas_url','gas-stockcheck-url':'mgr_stockcheck_gas_url','gas-landfarm-url':'mgr_landfarm_gas_url','gas-ng-url':'mgr_nightguard_gas_url','gas-maint-url':'mgr_maintenance_gas_url','gas-documents-url':'mgr_documents_gas_url'};for(const[id,k]of Object.entries(m)){const v=cleanGasUrl(document.getElementById(id).value);if(v)store.set(k,v);}const c=document.getElementById('gas-save-confirm');c.classList.remove('hidden');setTimeout(()=>c.classList.add('hidden'),2500);}
+function loadSavedGasUrls(){const m={'gas-wq-url':'mgr_wq_gas_url','gas-spawning-url':'mgr_spawning_gas_url','gas-processing-url':'mgr_processing_gas_url','gas-hr-url':'mgr_hr_gas_url','gas-sc-url':'mgr_seacage_gas_url','gas-stockcheck-url':'mgr_stockcheck_gas_url','gas-landfarm-url':'mgr_landfarm_gas_url','gas-ng-url':'mgr_nightguard_gas_url','gas-maint-url':'mgr_maintenance_gas_url','gas-documents-url':'mgr_documents_gas_url'};for(const[id,k]of Object.entries(m)){const v=store.get(k);if(v)document.getElementById(id).value=v;}}
 
         /* ── Overlay helpers ─────────────────────────────────── */
         function closeOverlay(id,e){if(e&&e.target!==document.getElementById(id))return;document.getElementById(id).classList.remove('open');}
@@ -1670,7 +1692,7 @@ function changePurchaseMonth(val){ rumbleDevice(25); purchaseMonth=val; renderPu
 
         /* ── Init ────────────────────────────────────────────── */
         if(store.sget('mgr_auth')==='1')isManagerAuthenticated=true;
-        applyTheme();applyContrast();renderModules();renderMgrList();loadSavedGasUrls();
+        applyTheme();applyContrast();renderModules();renderMgrList();renderResourcesList();loadSavedGasUrls();
         document.getElementById('live-clock').textContent=fmtTime(new Date());populateMonthSelector();
         initIOSInstallBanner();         initSetupCard();
        /* ── Constants ───────────────────────────────────────────────────── */
@@ -4593,6 +4615,92 @@ function maintFetchSheet(sheetName,onData,onError){
   document.body.appendChild(s);
   s.onload=function(){ s.remove(); };
 }
+
+/* ── DOCUMENTS MODULE ───────────────────────────────────── */
+let DOC_ROWS=[];
+let DOC_ACTIVE_CATEGORY=null;
+const DOC_CATEGORY_HUES=['#0D9488','#6366F1','#D97706','#0EA5E9','#DC2626','#7C3AED'];
+function docHtmlEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function docCategoryHue(cat){let h=0;for(let i=0;i<cat.length;i++)h=(h*31+cat.charCodeAt(i))>>>0;return DOC_CATEGORY_HUES[h%DOC_CATEGORY_HUES.length];}
+function docFileIcon(mime){
+  if(!mime)return lineIcon("M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z");
+  if(mime.includes('pdf'))return lineIcon("M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z");
+  if(mime.includes('spreadsheet')||mime.includes('excel'))return lineIcon("M3 10h18M3 14h18M3 6a2 2 0 012-2h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6z");
+  if(mime.includes('image'))return lineIcon("M3.75 6A2.25 2.25 0 016 3.75h12A2.25 2.25 0 0120.25 6v12A2.25 2.25 0 0118 20.25H6A2.25 2.25 0 013.75 18V6zM3.75 16.5l4.5-4.5a2 2 0 012.828 0L15 15.75m0 0l1.5-1.5a2 2 0 012.828 0l1.922 1.922M15 15.75l-2.25 2.25M9 9.75a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z");
+  return lineIcon("M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z");
+}
+function openDocumentsManagerView(){
+  rumbleDevice(45); showView('documents-data-view');
+  DOC_ACTIVE_CATEGORY=null;
+  docFetch(false);
+}
+function docFetch(forceRefresh){
+  const url=getGasUrl('documents');
+  const body=document.getElementById('doc-mgr-content');
+  const ic=document.getElementById('doc-refresh-ic'); ic&&ic.classList.add('spin');
+  if(!url){body.innerHTML=msgCard(`<p class="text-sm font-semibold">Documents not linked</p><p class="text-xs mt-1" style="color:var(--text-mut);">Add the /exec URL in Module GAS connections.</p>`);ic&&ic.classList.remove('spin');return;}
+  if(!forceRefresh)body.innerHTML=msgCard(`<p class="text-sm" style="color:var(--text-mut);">Loading…</p>`);
+  const cbName='docCb_'+Date.now();
+  window[cbName]=function(res){
+    delete window[cbName]; ic&&ic.classList.remove('spin');
+    if(res&&res.status==='success'){DOC_ROWS=res.data||[];renderDocCategories();}
+    else body.innerHTML=msgCard(`<p class="text-sm font-semibold">Couldn't load documents</p><p class="text-xs mt-1" style="color:var(--text-mut);">${docHtmlEsc(res&&res.message||'Check the GAS URL and try again.')}</p>`);
+  };
+  const s=document.createElement('script');
+  s.src=`${url}${url.includes('?')?'&':'?'}action=list&callback=${cbName}&_=${Date.now()}`;
+  s.onerror=()=>{ delete window[cbName]; ic&&ic.classList.remove('spin'); body.innerHTML=msgCard(`<p class="text-sm font-semibold">Couldn't reach Documents</p>`);};
+  document.body.appendChild(s);
+  s.onload=function(){ s.remove(); };
+}
+function renderDocCategories(){
+  const body=document.getElementById('doc-mgr-content');
+  if(!DOC_ROWS.length){body.innerHTML=msgCard(`<p class="text-sm font-semibold">No documents yet</p><p class="text-xs mt-1" style="color:var(--text-mut);">Drop files into the category folders in Drive — they'll show up here after the next sync.</p>`);return;}
+  const byCat={};
+  DOC_ROWS.forEach(r=>{(byCat[r.category]=byCat[r.category]||[]).push(r);});
+  const cats=Object.keys(byCat).sort();
+  const recent=[...DOC_ROWS].sort((a,b)=>new Date(b.dateAdded)-new Date(a.dateAdded)).slice(0,4);
+  const recentHtml=`<div class="mb-1"><div class="eyebrow" style="color:var(--text-dim);margin-bottom:8px;">Recently added</div>
+    <div class="flex gap-2 overflow-x-auto pb-1" style="scrollbar-width:none;">
+    ${recent.map(r=>`<button onclick="docOpenFile('${r.fileId}')" class="text-left" style="flex:0 0 auto;width:128px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px;">
+      <span style="width:18px;height:18px;display:inline-flex;color:${docCategoryHue(r.category)};">${docFileIcon(r.mimeType)}</span>
+      <div class="text-xs font-semibold" style="margin-top:6px;line-height:1.3;color:var(--text);">${docHtmlEsc(r.name)}</div>
+      <div class="text-[10px] mt-1" style="color:var(--text-dim);">${fmtCleanDate(r.dateAdded)}</div>
+    </button>`).join('')}
+    </div></div>`;
+  const catsHtml=`<div><div class="eyebrow" style="color:var(--text-dim);margin:14px 0 8px;">Categories</div>
+    <div class="grid grid-cols-2 gap-2.5">
+    ${cats.map(c=>{const hue=docCategoryHue(c);return`<button onclick="renderDocFileList('${docHtmlEsc(c).replace(/'/g,"\\'")}')" class="card text-left" style="padding:14px;">
+      <span class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:color-mix(in srgb,${hue} 12%,transparent);color:${hue};"><span style="width:18px;height:18px;display:inline-flex">${lineIcon("M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 015.25 3.75h4.5a2.25 2.25 0 011.591.659l1.5 1.5A2.25 2.25 0 0014.25 6h4.5A2.25 2.25 0 0121 8.25v1.526")}</span></span>
+      <div class="text-sm font-semibold" style="margin-top:10px;">${docHtmlEsc(c)}</div>
+      <div class="text-xs" style="color:var(--text-mut);margin-top:2px;">${byCat[c].length} file${byCat[c].length===1?'':'s'}</div>
+    </button>`;}).join('')}
+    </div></div>`;
+  body.innerHTML=recentHtml+catsHtml;
+}
+function renderDocFileList(category,isSearchUpdate){
+  DOC_ACTIVE_CATEGORY=category;
+  const body=document.getElementById('doc-mgr-content');
+  const render=()=>{
+    const q=(document.getElementById('doc-search')?.value||'').toLowerCase();
+    const rows=DOC_ROWS.filter(r=>r.category===category&&(!q||r.name.toLowerCase().includes(q)));
+    const hue=docCategoryHue(category);
+    const listHtml=rows.length?rows.map(r=>`<button onclick="docOpenFile('${r.fileId}')" class="mgr-row" style="padding:12px 14px;">
+      <div class="flex items-center gap-3 min-w-0"><span class="w-9 h-9 rounded-lg flex items-center justify-center flex-none" style="background:color-mix(in srgb,${hue} 12%,transparent);color:${hue};"><span style="width:16px;height:16px;display:inline-flex">${docFileIcon(r.mimeType)}</span></span>
+      <div class="min-w-0"><div class="text-sm font-semibold truncate">${docHtmlEsc(r.name)}</div><div class="text-xs" style="color:var(--text-dim);margin-top:1px;">${fmtCleanDate(r.dateAdded)}</div></div></div>${chevR}
+    </button>`).join(''):msgCard(`<p class="text-sm" style="color:var(--text-mut);">No files match.</p>`);
+    document.getElementById('doc-file-list').innerHTML=listHtml;
+  };
+  if(isSearchUpdate){render();return;}
+  body.innerHTML=`
+    <button onclick="renderDocCategories()" class="flex items-center gap-1.5 text-xs font-semibold mb-1" style="color:var(--text-mut);">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"/></svg>Categories
+    </button>
+    <div class="flex items-center justify-between"><h4 class="text-lg font-semibold tracking-tight">${docHtmlEsc(category)}</h4></div>
+    <input id="doc-search" type="text" placeholder="Search in this category" oninput="renderDocFileList('${docHtmlEsc(category).replace(/'/g,"\\'")}',true)" class="gas-input" style="margin:10px 0;">
+    <div id="doc-file-list" class="space-y-2"></div>`;
+  render();
+}
+function docOpenFile(fileId){window.open(`https://drive.google.com/file/d/${fileId}/view`,'_blank');}
 
 function openMaintenanceWorkerView(){
   rumbleDevice(45);
