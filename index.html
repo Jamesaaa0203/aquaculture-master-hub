@@ -252,7 +252,7 @@
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"/></svg>
               <span class="ko">뒤로</span> Menu
             </button>
-            <button onclick="docFetch(true)" class="icon-btn">
+            <button onclick="docSync()" class="icon-btn" title="Sync now">
               <svg id="doc-refresh-ic" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992V4.356M3.985 19.644V14.65h4.992m-4.969-3.65a8.25 8.25 0 0113.803-3.7L21 8.25m-18 7.5l3.181 3.182a8.25 8.25 0 0013.803-3.7"/></svg>
             </button>
           </div>
@@ -4620,6 +4620,9 @@ function maintFetchSheet(sheetName,onData,onError){
 let DOC_ROWS=[];
 let DOC_ACTIVE_CATEGORY=null;
 const DOC_CATEGORY_HUES=['#0D9488','#6366F1','#D97706','#0EA5E9','#DC2626','#7C3AED'];
+const DOC_EQUIPMENT_TAGS=['Generator','Company Cars','Forklift','Boats'];
+let DOC_LINK_SELECTED=[];
+let DOC_LINK_ACTIVE_FILE=null;
 function docHtmlEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function docCategoryHue(cat){let h=0;for(let i=0;i<cat.length;i++)h=(h*31+cat.charCodeAt(i))>>>0;return DOC_CATEGORY_HUES[h%DOC_CATEGORY_HUES.length];}
 function docFileIcon(mime){
@@ -4633,6 +4636,22 @@ function openDocumentsManagerView(){
   rumbleDevice(45); showView('documents-data-view');
   DOC_ACTIVE_CATEGORY=null;
   docFetch(false);
+}
+function docSync(){
+  const url=getGasUrl('documents');
+  const ic=document.getElementById('doc-refresh-ic');
+  if(!url){docFetch(true);return;}
+  ic&&ic.classList.add('spin');
+  const cbName='docSyncCb_'+Date.now();
+  window[cbName]=function(res){
+    delete window[cbName];
+    docFetch(true); // reload the list either way — sync errors still show via docFetch's own error handling
+  };
+  const s=document.createElement('script');
+  s.src=`${url}${url.includes('?')?'&':'?'}action=sync&callback=${cbName}&_=${Date.now()}`;
+  s.onerror=()=>{ delete window[cbName]; ic&&ic.classList.remove('spin'); docFetch(true); };
+  document.body.appendChild(s);
+  s.onload=function(){ s.remove(); };
 }
 function docFetch(forceRefresh){
   const url=getGasUrl('documents');
@@ -4694,12 +4713,84 @@ function docFilterResults(){
     </div></div>`;
   results.innerHTML=recentHtml+catsHtml;
 }
+function docTagsOf(row){return (row.linkedTo||'').split(',').map(s=>s.trim()).filter(Boolean);}
+function docChipHtml(label){
+  const active=DOC_LINK_SELECTED.includes(label);
+  return `<button onclick="docToggleLinkTag('${label.replace(/'/g,"\\'")}')" class="pill" style="margin:3px;background:${active?'var(--accent)':'color-mix(in srgb,var(--text-dim) 12%,transparent)'};color:${active?'#fff':'var(--text-mut)'};border:1px solid ${active?'var(--accent)':'var(--border)'};cursor:pointer;">${active?'✓ ':''}${docHtmlEsc(label)}</button>`;
+}
+function docOpenLinkPicker(fileId){
+  const row=DOC_ROWS.find(r=>r.fileId===fileId);
+  if(!row)return;
+  DOC_LINK_ACTIVE_FILE=fileId;
+  DOC_LINK_SELECTED=docTagsOf(row);
+  if(!hrData.balances.length) fetchHRData().then(()=>docRenderLinkPicker(row));
+  else docRenderLinkPicker(row);
+}
+function docRenderLinkPicker(row){
+  openDetailOverlay(
+    `<div class="text-lg font-semibold tracking-tight">Link document</div><div class="text-xs mt-1" style="color:var(--text-mut);">${docHtmlEsc(row.name)}</div>`,
+    `<div class="eyebrow mb-2" style="color:var(--text-dim);">Equipment</div>
+     <div id="doc-link-equip" class="flex flex-wrap">${DOC_EQUIPMENT_TAGS.map(docChipHtml).join('')}</div>
+     <div class="eyebrow mt-4 mb-2" style="color:var(--text-dim);">HR — link to a person</div>
+     <input id="doc-link-worker-search" type="text" placeholder="Search worker name" oninput="docFilterLinkWorkers()" class="gas-input mb-2">
+     <div id="doc-link-worker-list" class="flex flex-wrap" style="max-height:160px;overflow-y:auto;"></div>
+     <button onclick="docSaveLinkPicker()" class="w-full py-2.5 rounded-xl text-sm font-semibold text-white mt-4" style="background:var(--accent);">Save</button>`
+  );
+  docFilterLinkWorkers();
+}
+function docFilterLinkWorkers(){
+  const q=(document.getElementById('doc-link-worker-search')?.value||'').toLowerCase();
+  const names=[...new Set(hrData.balances.map(b=>b.name))].filter(n=>n.toLowerCase().includes(q)).sort();
+  const el=document.getElementById('doc-link-worker-list');
+  if(el)el.innerHTML=names.length?names.map(docChipHtml).join(''):`<p class="text-xs" style="color:var(--text-dim);padding:6px 2px;">No workers found — check HR is linked.</p>`;
+}
+function docToggleLinkTag(label){
+  const i=DOC_LINK_SELECTED.indexOf(label);
+  if(i>=0)DOC_LINK_SELECTED.splice(i,1); else DOC_LINK_SELECTED.push(label);
+  const eq=document.getElementById('doc-link-equip'); if(eq)eq.innerHTML=DOC_EQUIPMENT_TAGS.map(docChipHtml).join('');
+  docFilterLinkWorkers();
+}
+function docSaveLinkPicker(){ docSetLink(DOC_LINK_ACTIVE_FILE, DOC_LINK_SELECTED.join(',')); }
+function docSetLink(fileId,tagsStr){
+  const url=getGasUrl('documents');
+  if(!url)return;
+  const cbName='docLinkCb_'+Date.now();
+  window[cbName]=function(res){
+    delete window[cbName];
+    if(res&&res.status==='success'){
+      const row=DOC_ROWS.find(r=>r.fileId===fileId);
+      if(row)row.linkedTo=tagsStr;
+      closeOverlay('detail-overlay');
+      if(DOC_ACTIVE_CATEGORY)renderDocFileList(DOC_ACTIVE_CATEGORY); else renderDocCategories();
+    }
+  };
+  const s=document.createElement('script');
+  s.src=`${url}${url.includes('?')?'&':'?'}action=setLink&fileId=${encodeURIComponent(fileId)}&tags=${encodeURIComponent(tagsStr)}&callback=${cbName}&_=${Date.now()}`;
+  document.body.appendChild(s);
+  s.onload=function(){s.remove();};
+}
+/* Reusable anywhere in the app — drop into a module's view to show its linked files. */
+function docRelatedDocsHtml(tag){
+  const rows=DOC_ROWS.filter(r=>docTagsOf(r).includes(tag));
+  if(!rows.length)return'';
+  return `<div class="eyebrow mt-3 mb-1.5" style="color:var(--text-dim);">Related documents</div>
+    <div class="space-y-1.5">${rows.map(r=>`<button onclick="docOpenFile('${r.fileId}')" class="flex items-center gap-2 w-full text-left" style="padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:10px;">
+      <span style="width:15px;height:15px;display:inline-flex;color:${docCategoryHue(r.category)};flex:none;">${docFileIcon(r.mimeType)}</span>
+      <span class="text-xs font-semibold flex-1 truncate">${docHtmlEsc(r.name)}</span>
+    </button>`).join('')}</div>`;
+}
 function docFileRowsHtml(rows,label){
-  const listHtml=rows.length?rows.map(r=>{const hue=docCategoryHue(r.category);return`<button onclick="docOpenFile('${r.fileId}')" class="mgr-row" style="padding:12px 14px;">
-      <div class="flex items-center gap-3 min-w-0"><span class="w-9 h-9 rounded-lg flex items-center justify-center flex-none" style="background:color-mix(in srgb,${hue} 12%,transparent);color:${hue};"><span style="width:16px;height:16px;display:inline-flex">${docFileIcon(r.mimeType)}</span></span>
-      <div class="min-w-0 flex-1"><div class="text-sm font-semibold line-clamp-2" style="word-break:break-word;">${docHtmlEsc(r.name)}</div><div class="text-xs" style="color:var(--text-dim);margin-top:2px;">${docHtmlEsc(r.category)} · ${fmtCleanDate(r.dateAdded)}</div></div></div>
-      <span class="flex-none">${chevR}</span>
-    </button>`;}).join(''):msgCard(`<p class="text-sm" style="color:var(--text-mut);">No files match.</p>`);
+  const listHtml=rows.length?rows.map(r=>{const hue=docCategoryHue(r.category);const tags=docTagsOf(r);
+    const tagsHtml=tags.length?`<div class="flex flex-wrap gap-1" style="margin-top:3px;">${tags.map(t=>`<span class="pill" style="font-size:10px;padding:2px 7px;background:color-mix(in srgb,${hue} 12%,transparent);color:${hue};">🔗 ${docHtmlEsc(t)}</span>`).join('')}</div>`:'';
+    return`<div class="mgr-row" style="padding:12px 14px;">
+      <button onclick="docOpenFile('${r.fileId}')" class="flex items-center gap-3 min-w-0 flex-1 text-left" style="background:none;border:none;">
+        <span class="w-9 h-9 rounded-lg flex items-center justify-center flex-none" style="background:color-mix(in srgb,${hue} 12%,transparent);color:${hue};"><span style="width:16px;height:16px;display:inline-flex">${docFileIcon(r.mimeType)}</span></span>
+        <div class="min-w-0 flex-1"><div class="text-sm font-semibold line-clamp-2" style="word-break:break-word;">${docHtmlEsc(r.name)}</div><div class="text-xs" style="color:var(--text-dim);margin-top:2px;">${docHtmlEsc(r.category)} · ${fmtCleanDate(r.dateAdded)}</div>${tagsHtml}</div>
+      </button>
+      <button onclick="docOpenLinkPicker('${r.fileId}')" class="icon-btn flex-none" title="Link to a module or person" style="margin-left:6px;">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
+      </button>
+    </div>`;}).join(''):msgCard(`<p class="text-sm" style="color:var(--text-mut);">No files match.</p>`);
   return `${label?`<div class="eyebrow" style="color:var(--text-dim);margin-bottom:8px;">${label}</div>`:''}<div class="space-y-2">${listHtml}</div>`;
 }
 function renderDocFileList(category,isSearchUpdate){
