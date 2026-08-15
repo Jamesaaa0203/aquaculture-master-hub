@@ -4655,15 +4655,32 @@ function docFetch(forceRefresh){
 function renderDocCategories(){
   const body=document.getElementById('doc-mgr-content');
   if(!DOC_ROWS.length){body.innerHTML=msgCard(`<p class="text-sm font-semibold">No documents yet</p><p class="text-xs mt-1" style="color:var(--text-mut);">Drop files into the category folders in Drive — they'll show up here after the next sync.</p>`);return;}
+  body.innerHTML=`
+    <div class="flex items-center gap-2" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:9px 12px;">
+      <svg class="w-4 h-4 flex-none" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" style="color:var(--text-dim);"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+      <input id="doc-global-search" type="text" placeholder="Search all documents" oninput="docFilterResults()" class="text-sm bg-transparent outline-none flex-1" style="color:var(--text);min-width:0;">
+    </div>
+    <div id="doc-results" class="mt-4"></div>`;
+  docFilterResults();
+}
+function docFilterResults(){
+  const q=(document.getElementById('doc-global-search')?.value||'').trim().toLowerCase();
+  const results=document.getElementById('doc-results');
+  if(!results)return;
+  if(q){
+    const rows=DOC_ROWS.filter(r=>r.name.toLowerCase().includes(q));
+    results.innerHTML=docFileRowsHtml(rows,`${rows.length} result${rows.length===1?'':'s'}`);
+    return;
+  }
   const byCat={};
   DOC_ROWS.forEach(r=>{(byCat[r.category]=byCat[r.category]||[]).push(r);});
   const cats=Object.keys(byCat).sort();
   const recent=[...DOC_ROWS].sort((a,b)=>new Date(b.dateAdded)-new Date(a.dateAdded)).slice(0,4);
   const recentHtml=`<div class="mb-1"><div class="eyebrow" style="color:var(--text-dim);margin-bottom:8px;">Recently added</div>
     <div class="flex gap-2 overflow-x-auto pb-1" style="scrollbar-width:none;">
-    ${recent.map(r=>`<button onclick="docOpenFile('${r.fileId}')" class="text-left" style="flex:0 0 auto;width:128px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px;">
+    ${recent.map(r=>`<button onclick="docOpenFile('${r.fileId}')" class="text-left" style="flex:0 0 auto;width:136px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px;">
       <span style="width:18px;height:18px;display:inline-flex;color:${docCategoryHue(r.category)};">${docFileIcon(r.mimeType)}</span>
-      <div class="text-xs font-semibold" style="margin-top:6px;line-height:1.3;color:var(--text);">${docHtmlEsc(r.name)}</div>
+      <div class="text-xs font-semibold line-clamp-2" style="margin-top:6px;line-height:1.3;color:var(--text);word-break:break-word;">${docHtmlEsc(r.name)}</div>
       <div class="text-[10px] mt-1" style="color:var(--text-dim);">${fmtCleanDate(r.dateAdded)}</div>
     </button>`).join('')}
     </div></div>`;
@@ -4671,11 +4688,19 @@ function renderDocCategories(){
     <div class="grid grid-cols-2 gap-2.5">
     ${cats.map(c=>{const hue=docCategoryHue(c);return`<button onclick="renderDocFileList('${docHtmlEsc(c).replace(/'/g,"\\'")}')" class="card text-left" style="padding:14px;">
       <span class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:color-mix(in srgb,${hue} 12%,transparent);color:${hue};"><span style="width:18px;height:18px;display:inline-flex">${lineIcon("M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 015.25 3.75h4.5a2.25 2.25 0 011.591.659l1.5 1.5A2.25 2.25 0 0014.25 6h4.5A2.25 2.25 0 0121 8.25v1.526")}</span></span>
-      <div class="text-sm font-semibold" style="margin-top:10px;">${docHtmlEsc(c)}</div>
+      <div class="text-sm font-semibold line-clamp-2" style="margin-top:10px;word-break:break-word;">${docHtmlEsc(c)}</div>
       <div class="text-xs" style="color:var(--text-mut);margin-top:2px;">${byCat[c].length} file${byCat[c].length===1?'':'s'}</div>
     </button>`;}).join('')}
     </div></div>`;
-  body.innerHTML=recentHtml+catsHtml;
+  results.innerHTML=recentHtml+catsHtml;
+}
+function docFileRowsHtml(rows,label){
+  const listHtml=rows.length?rows.map(r=>{const hue=docCategoryHue(r.category);return`<button onclick="docOpenFile('${r.fileId}')" class="mgr-row" style="padding:12px 14px;">
+      <div class="flex items-center gap-3 min-w-0"><span class="w-9 h-9 rounded-lg flex items-center justify-center flex-none" style="background:color-mix(in srgb,${hue} 12%,transparent);color:${hue};"><span style="width:16px;height:16px;display:inline-flex">${docFileIcon(r.mimeType)}</span></span>
+      <div class="min-w-0 flex-1"><div class="text-sm font-semibold line-clamp-2" style="word-break:break-word;">${docHtmlEsc(r.name)}</div><div class="text-xs" style="color:var(--text-dim);margin-top:2px;">${docHtmlEsc(r.category)} · ${fmtCleanDate(r.dateAdded)}</div></div></div>
+      <span class="flex-none">${chevR}</span>
+    </button>`;}).join(''):msgCard(`<p class="text-sm" style="color:var(--text-mut);">No files match.</p>`);
+  return `${label?`<div class="eyebrow" style="color:var(--text-dim);margin-bottom:8px;">${label}</div>`:''}<div class="space-y-2">${listHtml}</div>`;
 }
 function renderDocFileList(category,isSearchUpdate){
   DOC_ACTIVE_CATEGORY=category;
@@ -4683,12 +4708,7 @@ function renderDocFileList(category,isSearchUpdate){
   const render=()=>{
     const q=(document.getElementById('doc-search')?.value||'').toLowerCase();
     const rows=DOC_ROWS.filter(r=>r.category===category&&(!q||r.name.toLowerCase().includes(q)));
-    const hue=docCategoryHue(category);
-    const listHtml=rows.length?rows.map(r=>`<button onclick="docOpenFile('${r.fileId}')" class="mgr-row" style="padding:12px 14px;">
-      <div class="flex items-center gap-3 min-w-0"><span class="w-9 h-9 rounded-lg flex items-center justify-center flex-none" style="background:color-mix(in srgb,${hue} 12%,transparent);color:${hue};"><span style="width:16px;height:16px;display:inline-flex">${docFileIcon(r.mimeType)}</span></span>
-      <div class="min-w-0"><div class="text-sm font-semibold truncate">${docHtmlEsc(r.name)}</div><div class="text-xs" style="color:var(--text-dim);margin-top:1px;">${fmtCleanDate(r.dateAdded)}</div></div></div>${chevR}
-    </button>`).join(''):msgCard(`<p class="text-sm" style="color:var(--text-mut);">No files match.</p>`);
-    document.getElementById('doc-file-list').innerHTML=listHtml;
+    document.getElementById('doc-file-list').innerHTML=docFileRowsHtml(rows,null);
   };
   if(isSearchUpdate){render();return;}
   body.innerHTML=`
@@ -4696,7 +4716,10 @@ function renderDocFileList(category,isSearchUpdate){
       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.75-7.5"/></svg>Categories
     </button>
     <div class="flex items-center justify-between"><h4 class="text-lg font-semibold tracking-tight">${docHtmlEsc(category)}</h4></div>
-    <input id="doc-search" type="text" placeholder="Search in this category" oninput="renderDocFileList('${docHtmlEsc(category).replace(/'/g,"\\'")}',true)" class="gas-input" style="margin:10px 0;">
+    <div class="flex items-center gap-2" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:9px 12px;margin:10px 0;">
+      <svg class="w-4 h-4 flex-none" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" style="color:var(--text-dim);"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+      <input id="doc-search" type="text" placeholder="Search in this category" oninput="renderDocFileList('${docHtmlEsc(category).replace(/'/g,"\\'")}',true)" class="text-sm bg-transparent outline-none flex-1" style="color:var(--text);min-width:0;">
+    </div>
     <div id="doc-file-list" class="space-y-2"></div>`;
   render();
 }
