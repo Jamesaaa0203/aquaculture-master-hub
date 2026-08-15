@@ -1741,7 +1741,7 @@ async function scSaveWLTable(t){
   await lfPost('wl_calibration',{table_json:JSON.stringify(t)});
 }
 function scLoadBioClasses() {
-  if (_scBioClassesLive) return _scBioClassesLive;
+  if (_scBioClassesLive && _scBioClassesDirty) return _scBioClassesLive; // unsaved edits in progress — don't clobber them
   const rows=lfData.bio_classes||[];
   if(rows.length){
     try{
@@ -1749,14 +1749,17 @@ function scLoadBioClasses() {
       if(Array.isArray(parsed)&&parsed.length){ _scBioClassesLive=parsed; return _scBioClassesLive; }
     }catch(e){}
   }
-  _scBioClassesLive=[{length:0.5,count:0}];
+  if(!_scBioClassesLive) _scBioClassesLive=[{length:0.5,count:0}];
   return _scBioClassesLive;
 }
-let _scBioClassesLive=null, _scBioClassesSaveTimer=null;
+let _scBioClassesLive=null, _scBioClassesSaveTimer=null, _scBioClassesDirty=false;
 function scSaveBioClasses(c){
   _scBioClassesLive=c;
+  _scBioClassesDirty=true;
   clearTimeout(_scBioClassesSaveTimer);
-  _scBioClassesSaveTimer=setTimeout(()=>{ lfPost('bio_classes',{classes_json:JSON.stringify(c)}); },1000);
+  _scBioClassesSaveTimer=setTimeout(()=>{
+    lfPost('bio_classes',{classes_json:JSON.stringify(c)}).then(()=>{ _scBioClassesDirty=false; });
+  },1000);
 }
  
 /* ── Metric helpers ──────────────────────────────────────────────── */
