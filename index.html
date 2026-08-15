@@ -1717,10 +1717,23 @@ async function scSaveWLTable(t){
   await lfPost('wl_calibration',{table_json:JSON.stringify(t)});
 }
 function scLoadBioClasses() {
-  try { const r=localStorage.getItem(SC_BIO_CLASSES_KEY); if(r) return JSON.parse(r); } catch(e){}
-  return [{length:0.5,count:0}];
+  if (_scBioClassesLive) return _scBioClassesLive;
+  const rows=lfData.bio_classes||[];
+  if(rows.length){
+    try{
+      const parsed=JSON.parse(rows[rows.length-1].classes_json);
+      if(Array.isArray(parsed)&&parsed.length){ _scBioClassesLive=parsed; return _scBioClassesLive; }
+    }catch(e){}
+  }
+  _scBioClassesLive=[{length:0.5,count:0}];
+  return _scBioClassesLive;
 }
-function scSaveBioClasses(c){ try{localStorage.setItem(SC_BIO_CLASSES_KEY,JSON.stringify(c));}catch(e){} }
+let _scBioClassesLive=null, _scBioClassesSaveTimer=null;
+function scSaveBioClasses(c){
+  _scBioClassesLive=c;
+  clearTimeout(_scBioClassesSaveTimer);
+  _scBioClassesSaveTimer=setTimeout(()=>{ lfPost('bio_classes',{classes_json:JSON.stringify(c)}); },1000);
+}
  
 /* ── Metric helpers ──────────────────────────────────────────────── */
 function scCalcMetrics(unitId,petak){
@@ -2244,10 +2257,11 @@ function showSCMgrTab(tab){
     if(b){b.style.background=t===tab?'var(--accent)':'';b.style.color=t===tab?'white':'var(--text-mut)';}
   });
   if(tab==='biomass'){
-    // Weight-at-length calibration is shared/synced via the Land Farm
-    // backend and can change from any other phone at any time — so
-    // always pull a fresh copy here rather than relying on whatever
-    // was cached at page load.
+    // Weight-at-length calibration AND size-class counts are both shared/
+    // synced via the Land Farm backend and can change from any other phone
+    // at any time — so always pull a fresh copy here rather than relying
+    // on whatever was cached at page load or entered on another device.
+    _scBioClassesLive=null;
     fetchLFData(false).then(()=>{ if(scMgrSubTab==='biomass') _scMgrRender(); });
   }
   _scMgrRender();
@@ -2738,7 +2752,7 @@ function sendStockOrderMessage(){
         const LF_TARGET_BIOMASS_KG = 3000;   // 3 ton land + sea cage combined
         const LF_TARGET_PROCESSED_KG = 1500; // 1.5 ton annual
 
-        let lfData = {growth:[],mortality:[],transfer:[],cleaning:[],sankina_transport:[],sankina_baseline:[],processed_baseline:[],tank_baseline:[],finished_product:[],length_baseline:[],wl_calibration:[],seacage_transfer:[]};
+        let lfData = {growth:[],mortality:[],transfer:[],cleaning:[],sankina_transport:[],sankina_baseline:[],processed_baseline:[],tank_baseline:[],finished_product:[],length_baseline:[],wl_calibration:[],seacage_transfer:[],bio_classes:[]};
         let _lfDataLoaded = false; // set true once fetchLFData completes at least once — lets other modules (e.g. Sea Cage Biomass tab) know it's safe to read lfData
         let lfActiveWorkerTab = 'tankcheck';
         let lfMgrSubTab = null; // null = showing the Land Farm sub-menu
@@ -2773,7 +2787,8 @@ function sendStockOrderMessage(){
                       transfer:data.transfer||[],cleaning:data.cleaning||[],
                       sankina_transport:data.sankina_transport||[],sankina_baseline:data.sankina_baseline||[],
                       processed_baseline:data.processed_baseline||[],tank_baseline:data.tank_baseline||[],                       finished_product:data.finished_product||[],length_baseline:data.length_baseline||[],
-                      wl_calibration:data.wl_calibration||[],seacage_transfer:data.seacage_transfer||[]};
+                      wl_calibration:data.wl_calibration||[],seacage_transfer:data.seacage_transfer||[],
+                      bio_classes:data.bio_classes||[]};
               _lfDataLoaded=true;
               if(ic)ic.classList.remove('spin');
               renderLFWorkerTab(lfActiveWorkerTab);
