@@ -2571,9 +2571,9 @@ function renderSCMgrBiomass(){
       <button onclick="scBioAddClass()" style="width:100%;padding:10px;border:1.5px dashed var(--border-2);border-radius:10px;font-size:12px;font-weight:700;color:var(--text-mut);margin-top:10px;">+ Add Size Class</button>
     </div>
  
-    <!-- Result -->
-    ${totalKg>0?`
-    <div id="sc-bio-result" style="padding:22px;background:rgba(16,185,129,.08);border:1.5px solid rgba(16,185,129,.25);border-radius:18px;">
+    <!-- Result: always in the DOM (just hidden at 0kg) so typing never has to
+         create/destroy this card, which would rebuild the inputs above it -->
+    <div id="sc-bio-result" style="display:${totalKg>0?'block':'none'};padding:22px;background:rgba(16,185,129,.08);border:1.5px solid rgba(16,185,129,.25);border-radius:18px;">
       <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#10B981;opacity:.9;margin-bottom:10px;">Estimated Total Biomass</div>
       <div class="num" style="font-size:42px;font-weight:900;color:#10B981;letter-spacing:-.02em;"><span id="sc-bio-total-kg">${totalKg.toFixed(2)}</span> <span style="font-size:20px;">kg</span></div>
       <div style="display:flex;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(16,185,129,.2);">
@@ -2582,7 +2582,7 @@ function renderSCMgrBiomass(){
         <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);">Avg per Spat</div>
           <div class="num" id="sc-bio-total-avg" style="font-size:16px;font-weight:700;margin-top:2px;">${avgG} g</div></div>
       </div>
-    </div>`:''}`;
+    </div>`;
 }
  
 /* Biomass helpers */
@@ -2608,19 +2608,15 @@ function scBioPatchRow(i,cls){
   const totalKg=cls.reduce((s,c)=>{const cl2=scBioNum(c.length),ct2=scBioNum(c.count);if(!cl2||!ct2)return s;return s+(ct2*scEstimateWeight(cl2,wl)/1000);},0);
   const totalSpats=cls.reduce((s,c)=>s+scBioNum(c.count),0);
   const avgG=totalSpats>0?(totalKg*1000/totalSpats).toFixed(3):null;
-  const resultWrap=document.getElementById('sc-bio-result');
 
-  if(totalKg>0){
-    if(resultWrap){
-      const kgEl=document.getElementById('sc-bio-total-kg');if(kgEl)kgEl.textContent=totalKg.toFixed(2);
-      const spatsEl=document.getElementById('sc-bio-total-spats');if(spatsEl)spatsEl.textContent=totalSpats.toLocaleString();
-      const avgEl=document.getElementById('sc-bio-total-avg');if(avgEl)avgEl.textContent=avgG+' g';
-    }else{
-      renderSCMgrBiomass(); // result card doesn't exist yet — needs a full render to create it (rare: only the first time total crosses above 0)
-    }
-  }else if(resultWrap){
-    renderSCMgrBiomass(); // total dropped back to 0 — needs a full render to remove the result card
-  }
+  // The result card is always in the DOM (see renderSCMgrBiomass) — just
+  // toggle its visibility and text, never rebuild it, so crossing the 0kg
+  // boundary mid-type doesn't touch the inputs at all.
+  const resultWrap=document.getElementById('sc-bio-result');
+  if(resultWrap) resultWrap.style.display=totalKg>0?'block':'none';
+  const kgEl=document.getElementById('sc-bio-total-kg');if(kgEl)kgEl.textContent=totalKg.toFixed(2);
+  const spatsEl=document.getElementById('sc-bio-total-spats');if(spatsEl)spatsEl.textContent=totalSpats.toLocaleString();
+  const avgEl=document.getElementById('sc-bio-total-avg');if(avgEl)avgEl.textContent=(avgG||'0.000')+' g';
 }
 function scBioAddClass(){
   const cls=scLoadBioClasses();cls.push({length:0,count:0});scSaveBioClasses(cls);renderSCMgrBiomass();
