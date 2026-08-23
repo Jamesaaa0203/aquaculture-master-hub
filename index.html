@@ -1627,6 +1627,18 @@ window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{
         /* ── PIN ─────────────────────────────────────────────── */
         function pressKey(n){if(inputPin.length>=4)return;rumbleDevice(40);inputPin+=n;renderPinDots();if(inputPin.length===4)setTimeout(verifyPin,150);}
         function clearPin(){rumbleDevice(60);inputPin="";renderPinDots();}
+        function backspacePin(){if(inputPin.length===0)return;rumbleDevice(30);inputPin=inputPin.slice(0,-1);renderPinDots();}
+        /* Physical keyboard / numpad support for the Manager PIN screen.
+           e.key reports the same digit string whether it comes from the
+           top-row number keys or the numeric keypad, so this covers both. */
+        document.addEventListener('keydown', function(e){
+            const authView = document.getElementById('manager-auth-view');
+            if(!authView || authView.classList.contains('hidden')) return;
+            if(e.key >= '0' && e.key <= '9'){ e.preventDefault(); pressKey(e.key); }
+            else if(e.key === 'Backspace'){ e.preventDefault(); backspacePin(); }
+            else if(e.key === 'Escape' || e.key === 'Delete'){ e.preventDefault(); clearPin(); }
+            else if(e.key === 'Enter' && inputPin.length===4){ e.preventDefault(); verifyPin(); }
+        });
         function renderPinDots(){const dots=document.getElementById('pin-dots').children;for(let i=0;i<4;i++){const on=i<inputPin.length;dots[i].className="w-3.5 h-3.5 rounded-full"+(on?" pin-on":"");dots[i].style.border=on?"2px solid var(--accent)":"2px solid var(--border-2)";}}
         function verifyPin(){if(inputPin===MASTER_PIN){inputPin="";renderPinDots();completeManagerAuth();}else{rumbleDevice([300,100,300]);inputPin="";renderPinDots();const d=document.getElementById('pin-dots');d.animate([{transform:'translateX(0)'},{transform:'translateX(-8px)'},{transform:'translateX(8px)'},{transform:'translateX(0)'}],{duration:360});}}
         function lockManagerView(){rumbleDevice(100);isManagerAuthenticated=false;store.srem('mgr_auth');if(typeof _mgrViewOrigin!=='undefined')_mgrViewOrigin='menu';closeManagerReport();switchTab('ops');}
