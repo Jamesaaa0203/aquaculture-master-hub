@@ -17,15 +17,28 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Activate: drop old caches.
+// Activate: drop old caches, take control of open tabs.
+//
+// NOTE: this used to also force every open window to navigate(client.url)
+// right here — i.e. hard-reload any open copy of the app the instant a new
+// version took over, with no regard for what that tab was doing. That's a
+// real problem for a farm-ops app people are actively entering data into:
+// if someone was mid-submission (especially anything that takes more than
+// an instant, like the batched tank-check flow, which fires several
+// sequential save requests in a row) and a new deploy happened to activate
+// in the background at that exact moment, their in-progress page got torn
+// out from under them and reloaded mid-flight — which is what produced the
+// garbled, unstyled "wall of raw text" page.
+//
+// Removing the forced navigate() doesn't break updates — self.clients.claim()
+// below still means the NEXT navigation (next time someone opens/reopens
+// the app) picks up the new version immediately. Updates just no longer
+// interrupt someone who's actively using it right now.
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(keys.filter((k) => k !== CACHE_VERSION).map((k) => caches.delete(k)))
     ).then(() => self.clients.claim())
-    .then(() => self.clients.matchAll({type:'window'}).then(clients => {
-      clients.forEach(client => client.navigate(client.url));
-    }))
   );
 });
 
@@ -41,8 +54,15 @@ self.addEventListener('fetch', (event) => {
   if (req.mode === 'navigate') {
     event.respondWith(
       fetch(req).then((res) => {
-        const copy = res.clone();
-        caches.open(CACHE_VERSION).then((c) => c.put('./index.html', copy));
+        // Only cache a genuinely good response. Caching whatever comes
+        // back unconditionally (including a mid-deploy hiccup, a 404, or
+        // anything else non-200) would poison the offline fallback with
+        // a broken page that then keeps getting served every time the
+        // network fails afterwards.
+        if (res && res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE_VERSION).then((c) => c.put('./index.html', copy));
+        }
         return res;
       }).catch(() => caches.match('./index.html'))
     );
