@@ -4542,7 +4542,7 @@ function sendStockOrderMessage(){
           return (d&&!isNaN(d))?d:null;
         }
         function lfCensusRowsFor(tankId){
-          return (lfData.census||[]).filter(r=>String(r.Tank)===tankId);
+          return (lfData.census||[]).filter(r=>lfNormTankId(r.Tank)===tankId);
         }
                 function lfLatestCensusFor(tankId){
           const rows=lfCensusRowsFor(tankId).filter(r=>r.Spat_Count!==''&&r.Spat_Count!=null&&isFinite(parseFloat(r.Spat_Count)));
