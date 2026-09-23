@@ -4004,14 +4004,22 @@ function sendStockOrderMessage(){
           if(!rows.length) return null;
           return[...rows].sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
         }
-        function lfEstimateBiomassKg(){
+          function lfEstimateBiomassKg(){
           let wl;try{wl=scLoadWLTable();}catch(e){wl=[{length:0.5,weight:0.0833}];}
           const baseline=lfGetLengthBaseline();
-          const avgLen=baseline?parseFloat(baseline.avg_length_cm):null;
-          if(!avgLen)return 0;
-          let totalLive=0;
-          for(let n=1;n<=LF_TANK_TOTAL;n++)totalLive+=lfTankMetrics(lfTankLabel(n)).live;
-          try{return(totalLive*scEstimateWeight(avgLen,wl))/1000;}catch(e){return 0;}
+          const farmLen=baseline?parseFloat(baseline.avg_length_cm):null;
+          let kg=0;
+          for(let n=1;n<=LF_TANK_TOTAL;n++){
+            const tankId=lfTankLabel(n);
+            const live=lfTankMetrics(tankId).live;
+            if(!live) continue;
+            const c=lfLatestCensusFor(tankId);
+            const cLen=(c&&c.Avg_Length_cm!==''&&isFinite(parseFloat(c.Avg_Length_cm)))?parseFloat(c.Avg_Length_cm):null;
+            const len=cLen||farmLen;
+            if(!len) continue;
+            try{kg+=live*scEstimateWeight(len,wl)/1000;}catch(e){}
+          }
+          return kg;
         }
         async function lfSetLengthBaseline(){
           rumbleDevice(35);
