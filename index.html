@@ -3925,11 +3925,21 @@ function sendStockOrderMessage(){
           const latestConfirmed=confirmedRows.length?[...confirmedRows].sort((a,b)=>new Date(b.confirmedAt)-new Date(a.confirmedAt))[0]:null;
           const baselineDateObj=baseline?new Date(baseline.date):null;
           const confirmedDateObj=latestConfirmed?new Date(latestConfirmed.confirmedAt):null;
+                    const census=lfLatestCensusFor(tankId);
+          const censusDateObj=census?lfCensusCutoff(census.Month):null;
           let sourceType='estimate',cutoffDate=null,floor=0,sourceTrialId=null;
-          if(baselineDateObj&&(!confirmedDateObj||baselineDateObj>=confirmedDateObj)){
+          const cands=[];
+          if(baselineDateObj) cands.push({t:'manual_baseline',d:baselineDateObj});
+          if(confirmedDateObj) cands.push({t:'confirmed_trial',d:confirmedDateObj});
+          if(censusDateObj) cands.push({t:'census',d:censusDateObj});
+          cands.sort((a,b)=>b.d-a.d);
+          const pick=cands[0];
+          if(pick&&pick.t==='manual_baseline'){
             sourceType='manual_baseline';cutoffDate=baselineDateObj;floor=baseline.live_count||0;
-          }else if(confirmedDateObj){
+          }else if(pick&&pick.t==='confirmed_trial'){
             sourceType='confirmed_trial';cutoffDate=confirmedDateObj;floor=latestConfirmed.settled||0;sourceTrialId=latestConfirmed.trialId;
+          }else if(pick&&pick.t==='census'){
+            sourceType='census';cutoffDate=censusDateObj;floor=parseInt(census.Spat_Count)||0;
           }
           if(cutoffDate){
             const tIn=(lfData.transfer||[]).filter(t=>t.dest_tank===tankId&&new Date(t.date)>cutoffDate).reduce((s,t)=>s+(parseInt(t.quantity)||0),0);
@@ -4534,6 +4544,15 @@ function sendStockOrderMessage(){
         function lfCensusRowsFor(tankId){
           return (lfData.census||[]).filter(r=>String(r.Tank)===tankId);
         }
+                function lfLatestCensusFor(tankId){
+          const rows=lfCensusRowsFor(tankId).filter(r=>r.Spat_Count!==''&&r.Spat_Count!=null&&isFinite(parseFloat(r.Spat_Count)));
+          if(!rows.length) return null;
+          return rows.sort((a,b)=>String(b.Month).localeCompare(String(a.Month)))[0];
+        }
+        function lfCensusCutoff(monthKey){
+          const p=String(monthKey).split('-').map(Number);
+          return new Date(p[0],p[1],1);
+        }
         async function lfStartCensusDraft(btn){
           rumbleDevice(35);
           const input=prompt('Census month (YYYY-MM):', currentMonthStr());
@@ -4622,7 +4641,9 @@ function sendStockOrderMessage(){
           const trialRowHtml=t=>`<div class="grade-row"><div><div class="text-sm font-semibold">${t.trialId||'—'}</div><div class="text-xs" style="color:var(--text-dim);">${t.fertTime?fmtCleanDate(t.fertTime):'—'} · ${t.spatStatus||''}</div></div><div class="num text-sm font-semibold" style="color:#10B981;">${t.larvae?t.larvae.toLocaleString():'—'}${t.settled!=null?' → '+t.settled.toLocaleString():''}</div></div>`;
           const currentRowsHtml=currentTrials.length?currentTrials.map(trialRowHtml).join(''):'<p class="text-xs" style="color:var(--text-dim);padding:8px 0;">No spawning trial recorded for this tank yet.</p>';
           const historyRowsHtml=historyTrials.length?historyTrials.map(trialRowHtml).join(''):'';
-          const baselineNote=m.sourceType==='manual_baseline'
+                    const baselineNote=m.sourceType==='census'
+            ?`<div style="padding:10px 12px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:10px;font-size:11px;color:#0f766e;margin-bottom:10px;">✓ Monthly census (${monthLabel(String(lfLatestCensusFor(tankId).Month))}) — live count above is your confirmed count, adjusted for anything logged since.</div>`
+            :m.sourceType==='manual_baseline'
             ?`<div style="padding:10px 12px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:10px;font-size:11px;color:#0f766e;margin-bottom:10px;">✓ Manual count set ${fmtCleanDate(m.baselineDate)} — live count above is this count, adjusted for anything logged since.</div>`
             :m.sourceType==='confirmed_trial'
             ?`<div style="padding:10px 12px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:10px;font-size:11px;color:#0f766e;margin-bottom:10px;">✓ Confirmed spat count from ${m.sourceTrialId} (${fmtCleanDate(m.cutoffDate)}) — live count above is this confirmed number, adjusted for anything logged since.</div>`
@@ -4640,7 +4661,7 @@ function sendStockOrderMessage(){
             <div class="card" style="padding:14px;">${currentRowsHtml}</div>
             ${historyTrials.length?`<div class="eyebrow mt-3 mb-2">History · <span class="ko">이전 배치</span></div><div class="card" style="padding:14px;opacity:.65;">${historyRowsHtml}</div>`:''}
             <div class="card mt-3" style="padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">
-              <span class="text-sm font-semibold">${m.sourceType==='manual_baseline'?'Manual count':m.sourceType==='confirmed_trial'?'Confirmed spat count':'Total stocked (estimate)'}</span>
+              <span class="text-sm font-semibold">${m.sourceType==='census'?'Census count':m.sourceType==='manual_baseline'?'Manual count':m.sourceType==='confirmed_trial'?'Confirmed spat count':'Total stocked (estimate)'}</span>
               <span class="num" style="font-size:18px;font-weight:800;">${m.stocked.toLocaleString()}</span>
             </div>`;
           openDetailOverlay(headHtml,bodyHtml);
