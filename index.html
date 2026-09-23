@@ -3989,7 +3989,9 @@ function sendStockOrderMessage(){
         function lfFarmGrowthSeries(){
           return[...(lfData.growth||[])].map(g=>({date:parseAnyDate(g.date),rate:parseFloat(g.avg_length_cm)})).filter(g=>g.date&&isFinite(g.rate)).sort((a,b)=>a.date-b.date);
         }
-        function lfCurrentGrowthRate(){
+          function lfCurrentGrowthRate(){
+          const cg=lfCensusGrowth();
+          if(cg) return cg.rate;
           const s=lfFarmGrowthSeries();
           if(!s.length)return null;
           return s[s.length-1].rate; // latest logged reading, mm/day
@@ -4560,6 +4562,27 @@ function sendStockOrderMessage(){
         function lfCensusCutoff(monthKey){
           const p=String(monthKey).split('-').map(Number);
           return new Date(p[0],p[1],1);
+        }
+                function lfCensusGrowth(){
+          const all=lfData.census||[];
+          const months=[...new Set(all.map(r=>String(r.Month)))].sort();
+          if(months.length<2) return null;
+          const m2=months[months.length-1], m1=months[months.length-2];
+          const days=(lfCensusCutoff(m2)-lfCensusCutoff(m1))/86400000;
+          if(days<=0) return null;
+          const rowOf=(m,t)=>all.find(x=>String(x.Month)===m&&lfNormTankId(x.Tank)===t);
+          const lenOf=r=>{const v=r?parseFloat(r.Avg_Length_cm):NaN;return isFinite(v)?v:null;};
+          const rates=[];
+          for(let n=1;n<=LF_TANK_TOTAL;n++){
+            const t=lfTankLabel(n);
+            const r1=rowOf(m1,t), r2=rowOf(m2,t);
+            const a=lenOf(r1), b=lenOf(r2);
+            if(a==null||b==null) continue;
+            if(String(r1.Anchor_Date||'')!==String(r2.Anchor_Date||'')) continue;
+            rates.push((b-a)*10/days);
+          }
+          if(!rates.length) return null;
+          return {rate:rates.reduce((s,v)=>s+v,0)/rates.length,tanks:rates.length,from:m1,to:m2};
         }
         async function lfStartCensusDraft(btn){
           rumbleDevice(35);
