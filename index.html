@@ -2058,7 +2058,7 @@ const SC_BIO_WL_KEY      = 'sc_bio_wl_v1';
 const SC_BIO_CLASSES_KEY = 'sc_bio_cls_v1';
  
 /* ── State ───────────────────────────────────────────────────────── */
-let scData = {setup:[],transfers:[],mortality:[],growth:[],maintenance:[],temperature:[]};
+let scData = {setup:[],transfers:[],mortality:[],growth:[],maintenance:[],temperature:[],census:[]};
 let scActiveWorkerTab = 'list';
 let scMgrSubTab        = 'overview';
 let scMgrWeek          = 0;
@@ -2127,6 +2127,7 @@ function scGroupIds(site){
   // Korea has no fixed roster — it's meant to grow past 30 sets over time —
   // so it's derived from whatever setup rows actually exist...
   (scData.setup||[]).forEach(s=>{ if(scSiteOf(s)===site) ids.add(+s.unitId); });
+  (scData.census||[]).forEach(r=>{ if(String(r.Site||'MY').toUpperCase()===site&&r.Unit!==''&&r.Unit!=null) ids.add(+r.Unit); });
   // ...plus any set that already has transfers/mortality/growth logged
   // against it even though no Konfigurasi_Awal baseline row exists yet
   // for it. Without this, such a set's stock silently vanished from every
@@ -2168,10 +2169,101 @@ function scCalcMetrics(unitId,petak,site){
   const mortMatch = site==='KR'
     ? m=>+m.unitId===+unitId&&scSiteOf(m)===site
     : m=>+m.unitId===+unitId&&String(m.petak)===String(petak)&&scSiteOf(m)===site;
-  (scData.mortality||[]).filter(mortMatch).forEach(m=>{dead+=+(m.qty||0);});
-  const total=init+tIn,live=Math.max(0,total-dead);
-  return{totalEntered:total,dead,currentLive:live,
-         survivalRate:total>0?((live/total)*100).toFixed(1):'100.0'};
+    (scData.mortality||[]).filter(mortMatch).forEach(m=>{dead+=+(m.qty||0);});
+  const total=init+tIn;
+  let live=Math.max(0,total-dead);
+  const census=scLatestCensus(site,unitId,petak);
+  if(census){
+    const cut=lfCensusCutoff(census.Month);
+    const after=d=>{const x=parseAnyDate(d);return !!x&&x>=cut;};
+    let adj=parseInt(census.Spat_Count)||0;
+    (scData.transfers||[]).filter(t=>+t.unitId===+unitId&&String(t.petak)===String(petak)&&scSiteOf(t)===site&&after(t.date)).forEach(t=>{adj+=(+(t.qty||0))-(+(t.postDead||0));});
+    (scData.mortality||[]).filter(mortMatch).forEach(m=>{if(after(m.date))adj-=+(m.qty||0);});
+    live=Math.max(0,adj);
+  }
+  return{totalEntered:total,dead:Math.max(0,total-live),currentLive:live,
+         survivalRate:total>0?Math.min(100,(live/total)*100).toFixed(1):'100.0',census};
+}
+function scCensusRowsFor(site,uId,petak){
+  return (scData.census||[]).filter(r=>String(r.Site||'MY').toUpperCase()===site&&+r.Unit===+uId&&String((r.Petak===''||r.Petak==null)?'1':r.Petak)===String(petak));
+}
+function scLatestCensus(site,uId,petak){
+  const rows=scCensusRowsFor(site,uId,petak).filter(r=>r.Spat_Count!==''&&r.Spat_Count!=null&&isFinite(parseFloat(r.Spat_Count)));
+  if(!rows.length) return null;
+  return rows.sort((a,b)=>String(b.Month).localeCompare(String(a.Month)))[0];
+}
+function scCensusGrowth(site,uId,petak,toMonth){
+  const all=(scData.census||[]).filter(r=>String(r.Site||'MY').toUpperCase()===site);
+  const months=[...new Set(all.map(r=>String(r.Month)))].sort();
+  const i=toMonth?months.indexOf(toMonth):months.length-1;
+  if(i<1) return null;
+  const m2=months[i], m1=months[i-1];
+  const days=(lfCensusCutoff(m2)-lfCensusCutoff(m1))/86400000;
+  if(days<=0) return null;
+  const pk=r=>String((r.Petak===''||r.Petak==null)?'1':r.Petak);
+  const rates=[];
+  all.filter(r=>String(r.Month)===m2).forEach(r2=>{
+    if(uId!=null&&(+r2.Unit!==+uId||pk(r2)!==String(petak))) return;
+    const r1=all.find(x=>String(x.Month)===m1&&+x.Unit===+r2.Unit&&pk(x)===pk(r2));
+    if(!r1) return;
+    const a=parseFloat(r1.Avg_Length_cm), b=parseFloat(r2.Avg_Length_cm);
+    if(!isFinite(a)||!isFinite(b)) return;
+    if(String(r1.Anchor_Date||'')!==String(r2.Anchor_Date||'')) return;
+    rates.push((b-a)*10/days);
+  });
+  if(!rates.length) return null;
+  return rates.reduce((s,v)=>s+v,0)/rates.length;
+}
+function scObservedPetaks(uId){
+  const s=new Set();
+  (scData.setup||[]).forEach(r=>{ if(scSiteOf(r)==='MY'&&+r.unitId===+uId&&+(r.initialQty||0)>0) s.add(String(r.petak)); });
+  (scData.transfers||[]).forEach(r=>{ if(scSiteOf(r)==='MY'&&+r.unitId===+uId) s.add(String(r.petak)); });
+  (scData.census||[]).forEach(r=>{ if(String(r.Site||'MY').toUpperCase()==='MY'&&+r.Unit===+uId) s.add(String((r.Petak===''||r.Petak==null)?'1':r.Petak)); });
+  return [...s].filter(p=>p==='1'||p==='2').sort();
+}
+function scFirstStockDate(site,uId,petak){
+  const ds=[];
+  const cfg=(scData.setup||[]).find(s=>+s.unitId===+uId&&String(s.petak)===String(petak)&&scSiteOf(s)===site);
+  if(cfg&&cfg.stockDate){ const d=lfLocalDateOf(cfg.stockDate); if(d) ds.push(d); }
+  (scData.transfers||[]).forEach(t=>{
+    if(+t.unitId===+uId&&scSiteOf(t)===site&&(site==='KR'||String(t.petak)===String(petak))){ const d=parseAnyDate(t.date); if(d) ds.push(d); }
+  });
+  return ds.length?new Date(Math.min(...ds.map(d=>d.getTime()))):null;
+}
+async function scStartCensusDraft(btn){
+  rumbleDevice(35);
+  const input=prompt('Sea cage census month (YYYY-MM):', currentMonthStr());
+  if(input===null) return;
+  const m=input.trim();
+  if(!/^\d{4}-\d{2}$/.test(m)){alert('Please use the format YYYY-MM, e.g. 2026-09.');return;}
+  await fetchSCData(false);
+  if((scData.census||[]).some(r=>String(r.Month)===m)){
+    alert('A census for '+monthLabel(m)+' already exists.\nEdit it directly in the SC_Census tab.');return;
+  }
+  const rows=[];
+  const addRow=(site,uId,petak)=>{
+    const prev=scCensusRowsFor(site,uId,petak).sort((a,b)=>String(b.Month).localeCompare(String(a.Month)))[0];
+    const prevAnchor=prev?lfLocalDateOf(prev.Anchor_Date):null;
+    const anchor=prevAnchor||scFirstStockDate(site,uId,petak);
+    rows.push({
+      site, unit:uId, petak:String(petak),
+      anchor_date:anchor?localDateStr(anchor):'',
+      spat_count:scCalcMetrics(uId,petak,site).currentLive,
+      avg_length:(prev&&prev.Avg_Length_cm!=='')?prev.Avg_Length_cm:''
+    });
+  };
+  scGroupIds('MY').forEach(id=>scObservedPetaks(id).forEach(p=>addRow('MY',id,p)));
+  scGroupIds('KR').forEach(id=>addRow('KR',id,'1'));
+  if(!rows.length){alert('No stocked cages found.');return;}
+  const myN=rows.filter(r=>r.site==='MY').length, krN=rows.length-myN;
+  if(!confirm('Create the '+monthLabel(m)+' sea cage census draft?\n\nMalaysia: '+myN+' petak rows\nKorea: '+krN+' set rows\n\nIt will be written to the SC_Census tab for you to check and correct.')) return;
+  const ok=await submitFormSafely(getGasUrl('sea-cage'),{action:'census_draft',month:m,rows},{
+    btn, prefix:'sccensus',
+    notConfiguredMsg:'Sea Cage GAS URL not configured.',
+    successMsg:'Draft sent ✓\nOpen the SC_Census tab to check the '+rows.length+' rows.',
+    queuedMsg:'No connection. The draft is saved and will send automatically when online.'
+  });
+  if(ok) await fetchSCData(false);
 }
 function scGetGlobal(site){
   site=site||'MY';
@@ -2179,12 +2271,14 @@ function scGetGlobal(site){
   (scData.setup||[]).forEach(s=>{ if(scSiteOf(s)===site) tIn+=+(s.initialQty||0); });
   (scData.transfers||[]).forEach(t=>{ if(scSiteOf(t)===site){tIn+=+(t.qty||0);tDead+=+(t.postDead||0);} });
   (scData.mortality||[]).forEach(m=>{ if(scSiteOf(m)===site) tDead+=+(m.qty||0); });
-  const live=Math.max(0,tIn-tDead);
+  const live=scGroupIds(site).reduce((s,id)=>s+scGroupLive({site,unitId:id}),0);
   return{totalInput:tIn,totalDead:tDead,live,
          survival:tIn>0?((live/tIn)*100).toFixed(1):'100.0'};
 }
 function scGetAvgGrowth(uId,petak,site){
   site=site||'MY';
+  const cg=scCensusGrowth(site,uId,petak);
+  if(cg!=null) return cg.toFixed(2)+' mm/d';
   const logs=(scData.growth||[]).filter(g=>+g.unitId===+uId&&String(g.petak)===String(petak)&&scSiteOf(g)===site);
   if(!(logs||[]).length)return'—';
   return(logs.reduce((s,l)=>s+parseFloat(l.length||0),0)/logs.length).toFixed(2)+' mm/d';
@@ -2372,7 +2466,7 @@ function fetchSCData(showSpin){
     window.handleSeaCageData=function(data){
       clearTimeout(_timeout);
       scData={setup:data.setup||[],transfers:data.transfers||[],mortality:data.mortality||[],
-              growth:data.growth||[],maintenance:data.maintenance||[],temperature:data.temperature||[]};
+              growth:data.growth||[],maintenance:data.maintenance||[],temperature:data.temperature||[],census:data.census||[]};
       scCacheLastTemp();
       if(ic)ic.classList.remove('spin');
       if(scActiveWorkerTab==='list')    renderSCList();
@@ -2449,6 +2543,8 @@ function scGroupSurvival(g){const t=scGroupEntered(g),l=scGroupLive(g);return t>
 // before. Leaving the sheet cell blank keeps the old derived behavior.
 function scGroupStockDate(g){
   const petaks=scGroupPetaks(g);
+  const censusDates=petaks.map(p=>{const c=scLatestCensus(g.site,g.unitId,p);return c?lfLocalDateOf(c.Anchor_Date):null;}).filter(Boolean);
+  if(censusDates.length) return censusDates.reduce((a,b)=>a<b?a:b);
   const explicitDates=petaks.map(p=>{
     const cfg=(scData.setup||[]).find(s=>+s.unitId===+g.unitId&&String(s.petak)===String(p)&&scSiteOf(s)===g.site);
     return cfg&&cfg.stockDate?parseAnyDate(cfg.stockDate):null;
@@ -2520,7 +2616,7 @@ function scOpenGroupDetail(site,uId){
       <div class="info-key" style="color:${cfg.col};">${lbl}</div>
       <div class="info-val" style="font-size:22px;color:${cfg.col};">${m.currentLive.toLocaleString()}</div>
       <div style="font-size:11px;color:var(--text-dim);margin-top:6px;line-height:1.7;">
-        In: ${m.totalEntered.toLocaleString()}<br>Dead: ${m.dead}<br>Survival: ${m.survivalRate}%<br>Avg: ${scGetAvgGrowth(uId,p,site)}
+        In: ${m.totalEntered.toLocaleString()}<br>Dead: ${m.dead}<br>Survival: ${m.survivalRate}%<br>Growth: ${scGetAvgGrowth(uId,p,site)}<br>Length: ${(m.census&&isFinite(parseFloat(m.census.Avg_Length_cm)))?parseFloat(m.census.Avg_Length_cm).toFixed(2)+' cm':'—'}
       </div></div>`;
   }).join('');
   const combined=petaks.length>1?`<div class="card mt-3" style="padding:14px;display:flex;justify-content:space-between;align-items:center;">
@@ -2903,11 +2999,15 @@ function scSiteOverviewStats(site){
   const elapsedVals=groups.map(g=>scGroupElapsedDays(g)).filter(d=>d!=null);
   const avgElapsed=elapsedVals.length?Math.round(elapsedVals.reduce((a,b)=>a+b,0)/elapsedVals.length):null;
   const growthLogs=(scData.growth||[]).filter(g=>scSiteOf(g)===site);
-  const avgGrowth=growthLogs.length?(growthLogs.reduce((s,l)=>s+parseFloat(l.length||0),0)/growthLogs.length).toFixed(2):null;
+  const censusG=scCensusGrowth(site,null,null);
+  const avgGrowth=censusG!=null?censusG.toFixed(2):(growthLogs.length?(growthLogs.reduce((s,l)=>s+parseFloat(l.length||0),0)/growthLogs.length).toFixed(2):null);
+  let lenW=0,lenN=0;
+  groups.forEach(g=>scGroupPetaks(g).forEach(p=>{const c=scLatestCensus(site,g.unitId,p);const L=c?parseFloat(c.Avg_Length_cm):NaN;const n=scCalcMetrics(g.unitId,p,site).currentLive;if(isFinite(L)&&n>0){lenW+=L*n;lenN+=n;}}));
+  const avgLen=lenN?(lenW/lenN).toFixed(2):null;
   const checked3d=groups.filter(g=>{const d=scLastChecked(g.unitId,g.site);return d!=null&&d<=3;}).length;
   const statusCounts={};
   groups.forEach(g=>{const{status}=scStatusOf(g.unitId,g.site);if(status!=='Active')statusCounts[status]=(statusCounts[status]||0)+1;});
-  return{count,spats,live,survival,avgElapsed,avgGrowth,checked3d,statusCounts};
+  return{count,spats,live,survival,avgElapsed,avgGrowth,avgLen,checked3d,statusCounts};
 }
 function _scOverviewTile(lbl,val){
   return`<div style="background:var(--surface-2);border:1px solid var(--border);border-radius:11px;padding:9px 10px;">
@@ -2936,6 +3036,7 @@ function _scSiteOverviewCard(site,label,tag,color){
         ${_scOverviewTile('Elapsed',s.avgElapsed!=null?s.avgElapsed+'d avg':'—')}
         ${_scOverviewTile('Growth',s.avgGrowth!=null?s.avgGrowth+' mm/d':'—')}
         ${_scOverviewTile('Checked (3d)',s.checked3d+'/'+s.count)}
+        ${_scOverviewTile('Avg Length',s.avgLen!=null?s.avgLen+' cm':'—')}
       </div>
       ${statusBadges?`<div style="margin-top:10px;">${statusBadges}</div>`:''}
     </button>
@@ -2943,7 +3044,8 @@ function _scSiteOverviewCard(site,label,tag,color){
   </div>`;
 }
 function renderSCMgrOverview(){
-  document.getElementById('sc-mgr-content').innerHTML=
+    document.getElementById('sc-mgr-content').innerHTML=
+    `<button onclick="scStartCensusDraft(this)" style="width:100%;padding:12px;background:#0EA5E9;color:white;font-weight:700;border-radius:12px;font-size:13px;margin-bottom:12px;">📋 Start Monthly Census</button>`+
     _scSiteOverviewCard('MY','Malaysia','🇲🇾','#2563EB')+
     _scSiteOverviewCard('KR','Korea','🇰🇷','#7C3AED')+
     `<p style="font-size:10.5px;color:var(--text-dim);margin-top:2px;line-height:1.6;">Tap a site card to jump into List, pre-filtered to that site.</p>`;
@@ -3047,6 +3149,11 @@ function scTrendValueAt(metric,site,periodStart,periodEnd){
     return stocked>0?+((Math.max(0,stocked-dead)/stocked)*100).toFixed(1):null;
   }
   if(metric==='growth'){
+    if(scTrendGran==='monthly'){
+      const mk=periodStart.getFullYear()+'-'+String(periodStart.getMonth()+1).padStart(2,'0');
+      const cg=scCensusGrowth(site,null,null,mk);
+      if(cg!=null) return +cg.toFixed(3);
+    }
     const logs=(scData.growth||[]).filter(g=>scSiteOf(g)===site).filter(g=>{const d=parseAnyDate(g.date);return d&&d>=periodStart&&d<=periodEnd;});
     if(!logs.length)return null;
     return+(logs.reduce((s,l)=>s+parseFloat(l.length||0),0)/logs.length).toFixed(3);
@@ -6803,7 +6910,6 @@ function toggleMaintCard(key){
       <button onclick="showSCWorkerTab('list')" id="sc-tab-list" style="flex:1;min-width:60px;padding:8px 2px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.04em;background:var(--accent);color:white;transition:all .2s;">List</button>
       <button onclick="showSCWorkerTab('transfer')" id="sc-tab-transfer" style="flex:1;min-width:60px;padding:8px 2px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.04em;color:var(--text-mut);transition:all .2s;">Transfer</button>
       <button onclick="showSCWorkerTab('mortality')" id="sc-tab-mortality" style="flex:1;min-width:60px;padding:8px 2px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.04em;color:var(--text-mut);transition:all .2s;">Kematian</button>
-      <button onclick="showSCWorkerTab('growth')" id="sc-tab-growth" style="flex:1;min-width:60px;padding:8px 2px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.04em;color:var(--text-mut);transition:all .2s;">Tumbuh</button>
     </div>
     <div id="sc-content-list"></div>
     <div id="sc-content-transfer" class="hidden"></div>
