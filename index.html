@@ -4630,8 +4630,11 @@ function sendStockOrderMessage(){
           const lastMort=lfLastMortCheck(tankId),daysMort=lfDaysSince(lastMort);
           const lastClean=lfLastCleaning(tankId),daysClean=lfDaysSince(lastClean);
          const trials=m.trialRows||[];
+          const tankCensus=lfLatestCensusFor(tankId);
+          const censusAnchor=tankCensus?lfLocalDateOf(tankCensus.Anchor_Date):null;
           const earliestFert=trials.map(t=>parseAnyDate(t.fertTime)).filter(Boolean).sort((a,b)=>a-b)[0];
-          const stockedSinceDays=earliestFert?lfDaysSince(earliestFert):null;
+          const stockedSinceDays=censusAnchor?lfDaysSince(censusAnchor):(earliestFert?lfDaysSince(earliestFert):null);
+          const censusLen=(tankCensus&&tankCensus.Avg_Length_cm!==''&&isFinite(parseFloat(tankCensus.Avg_Length_cm)))?parseFloat(tankCensus.Avg_Length_cm):null;
           const headHtml=`<div style="font-size:22px;font-weight:700;">${tankId}</div>
             <div style="font-size:13px;color:var(--text-mut);">${type} tank · 육상 탱크 상세</div>`;
           const currentTrials=m.sourceType==='confirmed_trial'?trials.filter(t=>t.trialId===m.sourceTrialId)
@@ -4650,7 +4653,8 @@ function sendStockOrderMessage(){
             :`<div style="padding:10px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;font-size:11px;color:var(--text-dim);margin-bottom:10px;">Estimated from larvae assignment — no confirmed spat count or physical count set for this tank yet.</div>`;
           const bodyHtml=`<div class="info-grid mb-3">
               <div class="info-item"><div class="info-key">Live Count</div><div class="info-val" style="color:#10B981;font-size:20px;">${m.live.toLocaleString()}</div></div>
-              <div class="info-item"><div class="info-key">Stocked Since</div><div class="info-val">${stockedSinceDays!=null?stockedSinceDays+'d ago':'—'}</div></div>
+              <div class="info-item"><div class="info-key">Elapsed</div><div class="info-val">${stockedSinceDays!=null?stockedSinceDays+' days':'—'}</div></div>
+              <div class="info-item"><div class="info-key">Avg Length</div><div class="info-val">${censusLen!=null?censusLen.toFixed(2)+' cm':'—'}</div></div>
               <div class="info-item"><div class="info-key" style="color:${(daysMort==null||daysMort>7)?'var(--alert)':'var(--text-dim)'};">Last Checked</div><div class="info-val" style="color:${(daysMort==null||daysMort>7)?'var(--alert)':'var(--text)'};">${daysMort!=null?daysMort+'d ago':'Never'}</div></div>
               <div class="info-item"><div class="info-key">Last Cleaned</div><div class="info-val">${daysClean!=null?daysClean+'d ago':'Never'}</div></div>
               <div class="info-item"><div class="info-key" style="color:#0EA5E9;">Sent to Sea Cage</div><div class="info-val" style="color:#0EA5E9;">${m.toSeaCage?m.toSeaCage.toLocaleString():'—'}</div></div>
