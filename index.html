@@ -3985,7 +3985,7 @@ function sendStockOrderMessage(){
            written by a separate app; it tries several common key names
            and falls back gracefully instead of breaking the dashboard. */
         function lfGetTank(o){ return o&&(o.tank||o.tankId||o.tank_id||o.id||o.name||null); }
-        function lfGetQty(o){ const v=o&&nvl(o.qty,nvl(o.count,nvl(o.pcs,nvl(o.quantity,nvl(o.larvae,nvl(o.larvae_count,null)))))); const n=parseFloat(v); return isFinite(n)?n:null; }
+        function lfGetQty(o){ const v=o&&nvl(o.veligers,nvl(o.qty,nvl(o.count,nvl(o.pcs,nvl(o.quantity,nvl(o.larvae,nvl(o.larvae_count,null))))))); const n=parseFloat(v); return isFinite(n)?n:null; }
         function lfParseTrialTanks(trial){
           let assignments=[],counts=[];
           try{ const raw=trial.tankAssignments; assignments=raw?JSON.parse(raw):[]; if(!Array.isArray(assignments))assignments=[]; }catch(e){ assignments=[]; }
@@ -4055,13 +4055,13 @@ function sendStockOrderMessage(){
             const live=Math.max(0,floor+tIn-tOut-toSeaCage-dead);
             return{stocked:floor,tIn,tOut,toSeaCage,dead,live,trialRows,hasBaseline:sourceType==='manual_baseline',baselineDate:sourceType==='manual_baseline'?baseline.date:null,sourceType,cutoffDate,sourceTrialId};
           }
-          const stocked=trialRows.filter(r=>!r.isDiscarded).reduce((s,r)=>s+(r.larvae||0),0);
+          const stocked=0; // veligers aren't spat — live count waits for the 1-month confirmed count
           const tIn=(lfData.transfer||[]).filter(t=>t.dest_tank===tankId).reduce((s,t)=>s+(parseInt(t.quantity)||0),0);
           const tOut=(lfData.transfer||[]).filter(t=>t.source_tank===tankId).reduce((s,t)=>s+(parseInt(t.quantity)||0),0);
           const toSeaCage=(lfData.seacage_transfer||[]).filter(t=>t.source_tank===tankId).reduce((s,t)=>s+(parseInt(t.quantity)||0),0);
           const dead=(lfData.mortality||[]).filter(m=>m.tank_id===tankId).reduce((s,m)=>s+(parseInt(m.dead_count)||0),0);
           const live=Math.max(0,stocked+tIn-tOut-toSeaCage-dead);
-          return{stocked,tIn,tOut,toSeaCage,dead,live,trialRows,hasBaseline:false,baselineDate:null,sourceType:'estimate',cutoffDate:null,sourceTrialId:null};
+          return{stocked,tIn,tOut,toSeaCage,dead,live,trialRows,hasBaseline:false,baselineDate:null,sourceType:'estimate',cutoffDate:null,sourceTrialId:null,pending:trialRows.some(r=>!r.isDiscarded&&!r.isConfirmed)};
         }
         async function lfSetTankBaseline(n){
           rumbleDevice(35);
@@ -4545,7 +4545,7 @@ function sendStockOrderMessage(){
         function lfSpatReportMonth(trial){
           const fertMonth=lfMonthKeyOf(trial.fertilisationTime||trial.date);
           if(!fertMonth) return null;
-          return normalizeMoon(trial.moonCycle)==='New Moon'?lfMonthKeyPlus(fertMonth,1):fertMonth;
+          return normalizeMoon(trial.moonCycle)==='Full Moon'?lfMonthKeyPlus(fertMonth,1):fertMonth;
         }
         function lfSpatProductionForMonth(monthKey){
           let confirmed=0,pending=0;
@@ -4584,7 +4584,7 @@ function sendStockOrderMessage(){
           const head=`<div style="font-size:22px;font-weight:700;">Spat Production</div>
             <div style="font-size:13px;color:var(--text-mut);">종자 생산량 · ${monthLabel(lfSpatScope)}</div>
             <div class="flex items-baseline gap-2 mt-3"><span class="num" style="font-size:36px;font-weight:900;color:#F59E0B;">${p.confirmed>0?p.confirmed.toLocaleString():'—'}</span><span style="font-size:13px;color:var(--text-dim);">confirmed spat</span></div>
-            <p style="font-size:11px;color:var(--text-dim);margin-top:6px;">This month's Full Moon result + last month's New Moon result.${p.pending?` ${p.pending} trial${p.pending!==1?'s':''} for this period still awaiting confirmation.`:''}</p>
+            <p style="font-size:11px;color:var(--text-dim);margin-top:6px;">Last month's Full Moon result + this month's New Moon result.${p.pending?` ${p.pending} trial${p.pending!==1?'s':''} for this period still awaiting confirmation.`:''}</p>
             ${picker}`;
           const rows=[...p.rows].sort((a,b)=>(parseAnyDate(b.fertTime)||0)-(parseAnyDate(a.fertTime)||0)).map(r=>{
             const col=MOON_COLOR[r.moon]||'#F59E0B',emoji=MOON_EMOJI[r.moon]||'🌙';
@@ -4638,7 +4638,7 @@ function sendStockOrderMessage(){
         const LF_TYPE_TAG={Broodstock:'BS',Diatom:'DI',Incubation:'IN',Spat:''};
         function _lfFloorTankRow(n){
           const tankId=lfTankLabel(n),type=lfTankType(n),m=lfTankMetrics(tankId);
-          const active=m.stocked>0||m.live>0;
+          const active=m.stocked>0||m.live>0||!!m.pending;
           const col=active?'#10B981':'#64748B';
           const bg=active?'rgba(16,185,129,.10)':'rgba(100,116,139,.06)';
           const tag=LF_TYPE_TAG[type];
@@ -4647,7 +4647,7 @@ function sendStockOrderMessage(){
               <span style="font-size:10.5px;font-weight:800;color:${col};font-family:'Space Grotesk',sans-serif;">${tankId}</span>
               ${tag?`<span style="font-size:6.5px;font-weight:700;padding:1px 4px;border-radius:4px;background:${col}22;color:${col};letter-spacing:.03em;">${tag}</span>`:''}
             </div>
-            <span class="num" style="font-size:13px;font-weight:800;color:${active?col:'var(--text-dim)'};">${active?m.live.toLocaleString():'—'}</span>
+            <span class="num" style="font-size:13px;font-weight:800;color:${active?col:'var(--text-dim)'};">${m.pending&&!m.live?'<span style="font-size:10px;">Pending</span>':(active?m.live.toLocaleString():'—')}</span>
           </button>`;
         }
                 /* ── Monthly census draft ─────────────────────────────────────── */
@@ -4787,9 +4787,9 @@ function sendStockOrderMessage(){
             ?`<div style="padding:10px 12px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:10px;font-size:11px;color:#0f766e;margin-bottom:10px;">✓ Manual count set ${fmtCleanDate(m.baselineDate)} — live count above is this count, adjusted for anything logged since.</div>`
             :m.sourceType==='confirmed_trial'
             ?`<div style="padding:10px 12px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:10px;font-size:11px;color:#0f766e;margin-bottom:10px;">✓ Confirmed spat count from ${m.sourceTrialId} (${fmtCleanDate(m.cutoffDate)}) — live count above is this confirmed number, adjusted for anything logged since.</div>`
-            :`<div style="padding:10px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;font-size:11px;color:var(--text-dim);margin-bottom:10px;">Estimated from larvae assignment — no confirmed spat count or physical count set for this tank yet.</div>`;
+            :`<div style="padding:10px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;font-size:11px;color:var(--text-dim);margin-bottom:10px;">Waiting for the 1-month confirmed spat count. Veligers are not counted as live spat.</div>`;
           const bodyHtml=`<div class="info-grid mb-3">
-              <div class="info-item"><div class="info-key">Live Count</div><div class="info-val" style="color:#10B981;font-size:20px;">${m.live.toLocaleString()}</div></div>
+              <div class="info-item"><div class="info-key">Live Count</div><div class="info-val" style="color:#10B981;font-size:20px;">${m.pending&&!m.live?'Pending count':m.live.toLocaleString()}</div></div>
               <div class="info-item"><div class="info-key">Elapsed</div><div class="info-val">${stockedSinceDays!=null?stockedSinceDays+' days':'—'}</div></div>
               <div class="info-item"><div class="info-key">Avg Length</div><div class="info-val">${censusLen!=null?censusLen.toFixed(2)+' cm':'—'}</div></div>
               <div class="info-item"><div class="info-key" style="color:${(daysMort==null||daysMort>7)?'var(--alert)':'var(--text-dim)'};">Last Checked</div><div class="info-val" style="color:${(daysMort==null||daysMort>7)?'var(--alert)':'var(--text)'};">${daysMort!=null?daysMort+'d ago':'Never'}</div></div>
@@ -4803,7 +4803,7 @@ function sendStockOrderMessage(){
             ${historyTrials.length?`<div class="eyebrow mt-3 mb-2">History · <span class="ko">이전 배치</span></div><div class="card" style="padding:14px;opacity:.65;">${historyRowsHtml}</div>`:''}
             <div class="card mt-3" style="padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">
               <span class="text-sm font-semibold">${m.sourceType==='census'?'Census count':m.sourceType==='manual_baseline'?'Manual count':m.sourceType==='confirmed_trial'?'Confirmed spat count':'Total stocked (estimate)'}</span>
-              <span class="num" style="font-size:18px;font-weight:800;">${m.stocked.toLocaleString()}</span>
+              <span class="num" style="font-size:18px;font-weight:800;">${m.sourceType==='estimate'?'—':m.stocked.toLocaleString()}</span>
             </div>`;
           openDetailOverlay(headHtml,bodyHtml);
         }
@@ -4838,7 +4838,7 @@ function sendStockOrderMessage(){
             const settleRate=(r.settled!=null&&r.larvae>0)?(r.settled/r.larvae*100):null;
             const daysSince=lfDaysSince(r.fertTime);
             const m=lfTankMetrics(lfNormTankId(r.tank));
-            const survival=r.larvae>0?Math.min(100,(m.live/r.larvae*100)):null;
+            const survival=r.settled>0?Math.min(100,(m.live/r.settled*100)):null;
             const survCol=survival==null?'var(--text-dim)':survival>=70?'var(--ok)':survival>=40?'var(--attention)':'var(--alert)';
             return`<div style="padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:14px;">
               <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
@@ -4847,7 +4847,7 @@ function sendStockOrderMessage(){
                 <span class="pill" style="background:color-mix(in srgb,${survCol} 14%,transparent);color:${survCol};">${survival!=null?survival.toFixed(0)+'% survival':'—'}</span>
               </div>
               <div style="display:flex;gap:16px;padding-top:10px;border-top:1px solid var(--border);">
-                <div><div style="font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);">Assigned</div>
+                <div><div style="font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);">Veligers</div>
                 <div class="num" style="font-size:16px;font-weight:800;margin-top:2px;">${r.larvae?r.larvae.toLocaleString():'—'}</div></div>
                 <div><div style="font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);">Spat Count</div>
                 <div class="num" style="font-size:16px;font-weight:800;margin-top:2px;color:${r.settled!=null?'#10B981':'var(--text-dim)'};">${r.settled!=null?r.settled.toLocaleString():'Pending'}</div></div>
