@@ -3602,7 +3602,7 @@ function sendStockOrderMessage(){
         function lfTankType(n){
           if(n===2) return 'Incubation';
           if(n===5||n===7||n===9) return 'Broodstock';
-          if(n>=60&&n<=80&&n%2===0) return 'Diatom';
+          if(n>=62&&n<=80&&n%2===0) return 'Diatom';
           return 'Spat';
         }
 
@@ -4349,7 +4349,7 @@ function sendStockOrderMessage(){
                 Total Live Spats · <span class="ko">총 생존 개체</span>
               </div>
               <div class="num" style="font-size:44px;font-weight:900;color:#10B981;letter-spacing:-.03em;line-height:1;">${liveTotal.toLocaleString()}</div>
-              <div style="font-size:12px;color:var(--text-dim);margin-top:8px;">Across ${LF_TANK_TOTAL} land tanks (1 incubation · 3 broodstock · 11 diatom · 65 spat)</div>
+              <div style="font-size:12px;color:var(--text-dim);margin-top:8px;">Across ${LF_TANK_TOTAL} land tanks (1 incubation · 3 broodstock · 10 diatom · 66 spat)</div>
             </div>
 
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
@@ -4638,16 +4638,18 @@ function sendStockOrderMessage(){
         const LF_TYPE_TAG={Broodstock:'BS',Diatom:'DI',Incubation:'IN',Spat:''};
         function _lfFloorTankRow(n){
           const tankId=lfTankLabel(n),type=lfTankType(n),m=lfTankMetrics(tankId);
-          const active=m.stocked>0||m.live>0||!!m.pending;
-          const col=active?'#10B981':'#64748B';
-          const bg=active?'rgba(16,185,129,.10)':'rgba(100,116,139,.06)';
-          const tag=LF_TYPE_TAG[type];
+          const active=m.stocked>0||m.live>0;
+          const lc=lfLatestCensusFor(tankId);
+          const isBreeding=!!(lc&&/breeding/i.test(String(lc.Notes||'')));
+          const col=isBreeding?'#94A3B8':(active?'#10B981':'#64748B');
+          const bg=isBreeding?'rgba(148,163,184,.06)':(active?'rgba(16,185,129,.10)':'rgba(100,116,139,.06)');
+          const tag=isBreeding?'BR':LF_TYPE_TAG[type];
           return`<button onclick="openLFTankDetail(${n})" style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:${bg};border:1.5px solid ${col}44;border-radius:10px;width:100%;transition:transform .1s;" ontouchstart="this.style.transform='scale(.96)'" ontouchend="this.style.transform=''">
             <div style="display:flex;align-items:center;gap:5px;">
               <span style="font-size:10.5px;font-weight:800;color:${col};font-family:'Space Grotesk',sans-serif;">${tankId}</span>
               ${tag?`<span style="font-size:6.5px;font-weight:700;padding:1px 4px;border-radius:4px;background:${col}22;color:${col};letter-spacing:.03em;">${tag}</span>`:''}
             </div>
-            <span class="num" style="font-size:13px;font-weight:800;color:${active?col:'var(--text-dim)'};">${m.pending&&!m.live?'<span style="font-size:10px;">Pending</span>':(active?m.live.toLocaleString():'—')}</span>
+          <span class="num" style="font-size:${isBreeding?'10px':'13px'};font-weight:${isBreeding?'600':'800'};color:${isBreeding?'var(--text-dim)':(active?col:'var(--text-dim)')};">${isBreeding?'Breeding':(active?m.live.toLocaleString():'—')}</span>
           </button>`;
         }
                 /* ── Monthly census draft ─────────────────────────────────────── */
@@ -4758,7 +4760,7 @@ function sendStockOrderMessage(){
             <div style="display:flex;flex-wrap:wrap;gap:12px;padding:6px 2px;">
               <span style="font-size:9px;font-weight:600;color:#10B981;">● Stocked</span>
               <span style="font-size:9px;font-weight:600;color:#64748B;">● Empty / no logs</span>
-              <span style="font-size:9px;font-weight:600;color:var(--text-dim);">BS · Broodstock &nbsp; DI · Diatom &nbsp; IN · Incubation</span>
+              <span style="font-size:9px;font-weight:600;color:var(--text-dim);">BS · Broodstock &nbsp; DI · Diatom &nbsp; IN · Incubation &nbsp; BR · Breeding</span>
             </div>`;
         }
         function openLFTankDetail(n){
