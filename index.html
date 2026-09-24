@@ -4061,7 +4061,7 @@ function sendStockOrderMessage(){
           const toSeaCage=(lfData.seacage_transfer||[]).filter(t=>t.source_tank===tankId).reduce((s,t)=>s+(parseInt(t.quantity)||0),0);
           const dead=(lfData.mortality||[]).filter(m=>m.tank_id===tankId).reduce((s,m)=>s+(parseInt(m.dead_count)||0),0);
           const live=Math.max(0,stocked+tIn-tOut-toSeaCage-dead);
-          return{stocked,tIn,tOut,toSeaCage,dead,live,trialRows,hasBaseline:false,baselineDate:null,sourceType:'estimate',cutoffDate:null,sourceTrialId:null,pending:trialRows.some(r=>!r.isDiscarded&&!r.isConfirmed)};
+          return{stocked,tIn,tOut,toSeaCage,dead,live,trialRows,hasBaseline:false,baselineDate:null,sourceType:'estimate',cutoffDate:null,sourceTrialId:null,pending:trialRows.some(r=>!r.isDiscarded&&!r.isConfirmed&&r.spatStatus!=='Skipped')};
         }
         async function lfSetTankBaseline(n){
           rumbleDevice(35);
@@ -4551,7 +4551,7 @@ function sendStockOrderMessage(){
           let confirmed=0,pending=0;
           const rows=[];
           (spawnLogs||[]).forEach(trial=>{
-            if(trial.spatStatus==='N/A'||trial.spatStatus==='Discarded')return;
+            if(trial.spatStatus==='N/A'||trial.spatStatus==='Discarded'||trial.spatStatus==='Skipped')return;
             if(lfSpatReportMonth(trial)!==monthKey)return;
             if(trial.spatStatus==='Confirmed'){
               const total=lfTrialTotalSettled(trial);
