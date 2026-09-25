@@ -2166,7 +2166,8 @@ function scCalcMetrics(unitId,petak,site){
   // the optional per-cage set check. The set's official total must
   // include every cage, so for KR sum mortality across ALL petak/cage
   // tags for this unit+site rather than requiring an exact match.
-  const mortMatch = site==='KR'
+  const krPerCage=site==='KR'&&scKRCensusCages(unitId).length>0;
+  const mortMatch = (site==='KR'&&!krPerCage)
     ? m=>+m.unitId===+unitId&&scSiteOf(m)===site
     : m=>+m.unitId===+unitId&&String(m.petak)===String(petak)&&scSiteOf(m)===site;
     (scData.mortality||[]).filter(mortMatch).forEach(m=>{dead+=+(m.qty||0);});
@@ -2181,8 +2182,10 @@ function scCalcMetrics(unitId,petak,site){
     (scData.mortality||[]).filter(mortMatch).forEach(m=>{if(after(m.date))adj-=+(m.qty||0);});
     live=Math.max(0,adj);
   }
-  return{totalEntered:total,dead:Math.max(0,total-live),currentLive:live,
-         survivalRate:total>0?Math.min(100,(live/total)*100).toFixed(1):'100.0',census};
+  const stk=census?parseFloat(census.Stocked):NaN;
+  const tot=(isFinite(stk)&&stk>0)?stk:total;
+  return{totalEntered:tot,dead:Math.max(0,tot-live),currentLive:live,
+         survivalRate:tot>0?Math.min(100,(live/tot)*100).toFixed(1):'100.0',census};
 }
 function scCensusRowsFor(site,uId,petak){
   return (scData.census||[]).filter(r=>String(r.Site||'MY').toUpperCase()===site&&+r.Unit===+uId&&String((r.Petak===''||r.Petak==null)?'1':r.Petak)===String(petak));
@@ -2249,11 +2252,12 @@ async function scStartCensusDraft(btn){
       site, unit:uId, petak:String(petak),
       anchor_date:anchor?localDateStr(anchor):'',
       spat_count:scCalcMetrics(uId,petak,site).currentLive,
+      stocked:(prev&&prev.Stocked!==''&&prev.Stocked!=null)?prev.Stocked:'',
       avg_length:(prev&&prev.Avg_Length_cm!=='')?prev.Avg_Length_cm:''
     });
   };
   scGroupIds('MY').forEach(id=>scObservedPetaks(id).forEach(p=>addRow('MY',id,p)));
-  scGroupIds('KR').forEach(id=>addRow('KR',id,'1'));
+  scGroupIds('KR').forEach(id=>scGroupPetaks({site:'KR',unitId:id}).forEach(p=>addRow('KR',id,p)));
   if(!rows.length){alert('No stocked cages found.');return;}
   const myN=rows.filter(r=>r.site==='MY').length, krN=rows.length-myN;
   if(!confirm('Create the '+monthLabel(m)+' sea cage census draft?\n\nMalaysia: '+myN+' petak rows\nKorea: '+krN+' set rows\n\nIt will be written to the SC_Census tab for you to check and correct.')) return;
@@ -2532,7 +2536,16 @@ function scAllGroups(){
          ...scGroupIds('KR').map(id=>({site:'KR',unitId:id}))];
 }
 function scGroupLabel(g){return g.site==='MY'?('Unit '+g.unitId):('Set '+g.unitId);}
-function scGroupPetaks(g){return g.site==='MY'?['1','2']:['1'];}
+function scKRCensusCages(setId){
+  const s=new Set();
+  (scData.census||[]).forEach(r=>{ if(String(r.Site||'MY').toUpperCase()==='KR'&&+r.Unit===+setId) s.add(String((r.Petak===''||r.Petak==null)?'1':r.Petak)); });
+  return [...s].sort((a,b)=>+a-+b);
+}
+function scGroupPetaks(g){
+  if(g.site==='MY') return ['1','2'];
+  const cages=scKRCensusCages(g.unitId);
+  return cages.length?cages:['1'];
+}
 function scGroupLive(g){return scGroupPetaks(g).reduce((s,p)=>s+scCalcMetrics(g.unitId,p,g.site).currentLive,0);}
 function scGroupEntered(g){return scGroupPetaks(g).reduce((s,p)=>s+scCalcMetrics(g.unitId,p,g.site).totalEntered,0);}
 function scGroupSurvival(g){const t=scGroupEntered(g),l=scGroupLive(g);return t>0?((l/t)*100).toFixed(1):'100.0';}
@@ -2611,7 +2624,7 @@ function scOpenGroupDetail(site,uId){
   const badge=status!=='Active'?`<div style="display:inline-block;padding:5px 12px;border-radius:999px;background:${cfg.bg};color:${cfg.col};font-size:11px;font-weight:700;margin-bottom:14px;">${cfg.em||''} ${status}${issue?' — '+issue:''}</div>`:'';
   const petakHtml=petaks.map(p=>{
     const m=scCalcMetrics(uId,p,site);
-    const lbl=site==='MY'?('Petak '+p):'Population';
+    const lbl=site==='MY'?('Petak '+p):(petaks.length>1?('Cage '+p):'Population');
     return`<div class="info-item">
       <div class="info-key" style="color:${cfg.col};">${lbl}</div>
       <div class="info-val" style="font-size:22px;color:${cfg.col};">${m.currentLive.toLocaleString()}</div>
