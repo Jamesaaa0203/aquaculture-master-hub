@@ -2269,6 +2269,22 @@ async function scStartCensusDraft(btn){
   });
   if(ok) await fetchSCData(false);
 }
+function scPetakBiomassKg(uId,petak,site){
+  const m=scCalcMetrics(uId,petak,site);
+  const L=m.census?parseFloat(m.census.Avg_Length_cm):NaN;
+  if(!isFinite(L)||L<=0||!m.currentLive) return null;
+  try{ return m.currentLive*scEstimateWeight(L,scLoadWLTable())/1000; }catch(e){ return null; }
+}
+function scSiteBiomassKg(site){
+  let kg=0,missing=0;
+  scAllGroups().filter(g=>g.site===site).forEach(g=>scGroupPetaks(g).forEach(p=>{
+    const live=scCalcMetrics(g.unitId,p,site).currentLive;
+    if(!live) return;
+    const b=scPetakBiomassKg(g.unitId,p,site);
+    if(b==null) missing++; else kg+=b;
+  }));
+  return {kg,missing};
+}
 function scGetGlobal(site){
   site=site||'MY';
   let tIn=0,tDead=0;
@@ -2505,7 +2521,7 @@ function openSeaCageWorkerView(){
   scDetailIsManager=false;
   document.getElementById('dashboard-view').classList.add('hidden');
   document.getElementById('seacage-worker-view').classList.remove('hidden');
-  fetchSCData(false);showSCWorkerTab('list');
+  fetchSCData(false);lfEnsureDataLoaded();showSCWorkerTab('list');
 }
 function closeSeaCageWorkerView(){
   rumbleDevice(40);
@@ -2629,11 +2645,11 @@ function scOpenGroupDetail(site,uId){
       <div class="info-key" style="color:${cfg.col};">${lbl}</div>
       <div class="info-val" style="font-size:22px;color:${cfg.col};">${m.currentLive.toLocaleString()}</div>
       <div style="font-size:11px;color:var(--text-dim);margin-top:6px;line-height:1.7;">
-        In: ${m.totalEntered.toLocaleString()}<br>Dead: ${m.dead}<br>Survival: ${m.survivalRate}%<br>Growth: ${scGetAvgGrowth(uId,p,site)}<br>Length: ${(m.census&&isFinite(parseFloat(m.census.Avg_Length_cm)))?parseFloat(m.census.Avg_Length_cm).toFixed(2)+' cm':'—'}
+        In: ${m.totalEntered.toLocaleString()}<br>Dead: ${m.dead}<br>Survival: ${m.survivalRate}%<br>Growth: ${scGetAvgGrowth(uId,p,site)}<br>Length: ${(m.census&&isFinite(parseFloat(m.census.Avg_Length_cm)))?parseFloat(m.census.Avg_Length_cm).toFixed(2)+' cm':'—'}<br>Biomass: ${(()=>{const b=scPetakBiomassKg(uId,p,site);return b!=null?b.toFixed(2)+' kg':'—';})()}
       </div></div>`;
   }).join('');
   const combined=petaks.length>1?`<div class="card mt-3" style="padding:14px;display:flex;justify-content:space-between;align-items:center;">
-    <span class="text-sm font-semibold">Combined Live</span>
+<span class="text-sm font-semibold">Combined Live<br><span style="font-size:11px;font-weight:600;color:var(--text-dim);">${(()=>{let t=0,any=false;petaks.forEach(pp=>{const b=scPetakBiomassKg(uId,pp,site);if(b!=null){t+=b;any=true;}});return any?t.toFixed(1)+' kg biomass':'';})()}</span></span>
     <span class="num" style="font-size:26px;font-weight:800;color:${cfg.col};">${scGroupLive({site,unitId:uId}).toLocaleString()}</span>
   </div>`:'';
   const mgrPanel=scDetailIsManager?`<div style="margin-top:14px;padding:16px;background:var(--surface-2);border-radius:14px;border:1px solid var(--border);">
@@ -2949,6 +2965,7 @@ async function openSeaCageManagerView(){
   _scMgrShell();
   document.getElementById('sc-mgr-content').innerHTML=msgCard(`<p class="text-sm" style="color:var(--text-mut);">Loading…</p>`);
   await fetchSCData(false);
+  await lfEnsureDataLoaded();
   if(!scMgrWeek)scMgrWeek=scCurrentWeek();
   _scMgrRender();
 }
@@ -3020,7 +3037,7 @@ function scSiteOverviewStats(site){
   const checked3d=groups.filter(g=>{const d=scLastChecked(g.unitId,g.site);return d!=null&&d<=3;}).length;
   const statusCounts={};
   groups.forEach(g=>{const{status}=scStatusOf(g.unitId,g.site);if(status!=='Active')statusCounts[status]=(statusCounts[status]||0)+1;});
-  return{count,spats,live,survival,avgElapsed,avgGrowth,avgLen,checked3d,statusCounts};
+  return{count,spats,live,survival,avgElapsed,avgGrowth,avgLen,bio:scSiteBiomassKg(site),checked3d,statusCounts};
 }
 function _scOverviewTile(lbl,val){
   return`<div style="background:var(--surface-2);border:1px solid var(--border);border-radius:11px;padding:9px 10px;">
@@ -3050,6 +3067,7 @@ function _scSiteOverviewCard(site,label,tag,color){
         ${_scOverviewTile('Growth',s.avgGrowth!=null?s.avgGrowth+' mm/d':'—')}
         ${_scOverviewTile('Checked (3d)',s.checked3d+'/'+s.count)}
         ${_scOverviewTile('Avg Length',s.avgLen!=null?s.avgLen+' cm':'—')}
+        ${_scOverviewTile('Biomass',s.bio.kg>0?s.bio.kg.toFixed(1)+' kg':'—')}
       </div>
       ${statusBadges?`<div style="margin-top:10px;">${statusBadges}</div>`:''}
     </button>
