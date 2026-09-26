@@ -2199,6 +2199,11 @@ function scCensusGrowth(site,uId,petak,toMonth){
   const all=(scData.census||[]).filter(r=>String(r.Site||'MY').toUpperCase()===site);
   const months=[...new Set(all.map(r=>String(r.Month)))].sort();
   const i=toMonth?months.indexOf(toMonth):months.length-1;
+  if(i>=0){
+    const mm=months[i];
+    const mv=all.filter(r=>String(r.Month)===mm&&(uId==null||(+r.Unit===+uId&&String((r.Petak===''||r.Petak==null)?'1':r.Petak)===String(petak)))).map(r=>parseFloat(r.Growth_mm_day)).filter(v=>isFinite(v));
+    if(mv.length) return mv.reduce((s,v)=>s+v,0)/mv.length;
+  }
   if(i<1) return null;
   const m2=months[i], m1=months[i-1];
   const days=(lfCensusCutoff(m2)-lfCensusCutoff(m1))/86400000;
@@ -4702,8 +4707,14 @@ function sendStockOrderMessage(){
           const p=String(monthKey).split('-').map(Number);
           return new Date(p[0],p[1],1);
         }
-                function lfCensusGrowth(){
+        function lfCensusGrowth(){
           const all=lfData.census||[];
+          const mAll=[...new Set(all.map(r=>String(r.Month)))].sort();
+          if(mAll.length){
+            const lm=mAll[mAll.length-1];
+            const mv=all.filter(r=>String(r.Month)===lm).map(r=>parseFloat(r.Growth_mm_day)).filter(v=>isFinite(v));
+            if(mv.length) return {rate:mv.reduce((s,v)=>s+v,0)/mv.length,tanks:mv.length,from:lm,to:lm,manual:true};
+          }
           const months=[...new Set(all.map(r=>String(r.Month)))].sort();
           if(months.length<2) return null;
           const m2=months[months.length-1], m1=months[months.length-2];
