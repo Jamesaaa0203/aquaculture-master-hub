@@ -4146,30 +4146,17 @@ function sendStockOrderMessage(){
           if(!s.length)return null;
           return s[s.length-1].rate; // latest logged reading, mm/day
         }
-        function lfAvgSettlement(){
-          const rows=lfAllTrialTankRows().filter(r=>r.settled!=null);
-          if(!rows.length)return null;
-          return rows.reduce((s,r)=>s+r.settled,0)/rows.length;
-        }
-        function lfGetLengthBaseline(){
-          const rows=(lfData.length_baseline||[]).filter(r=>r.date);
-          if(!rows.length) return null;
-          return[...rows].sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
-        }
-          function lfEstimateBiomassKg(){
+        function lfEstimateBiomassKg(){
           let wl;try{wl=scLoadWLTable();}catch(e){wl=[{length:0.5,weight:0.0833}];}
-          const baseline=lfGetLengthBaseline();
-          const farmLen=baseline?parseFloat(baseline.avg_length_cm):null;
           let kg=0;
           for(let n=1;n<=LF_TANK_TOTAL;n++){
             const tankId=lfTankLabel(n);
             const live=lfTankMetrics(tankId).live;
             if(!live) continue;
             const c=lfLatestCensusFor(tankId);
-            const cLen=(c&&c.Avg_Length_cm!==''&&isFinite(parseFloat(c.Avg_Length_cm)))?parseFloat(c.Avg_Length_cm):null;
-            const len=cLen||farmLen;
-            if(!len) continue;
-            try{kg+=live*scEstimateWeight(len,wl)/1000;}catch(e){}
+            const L=c?parseFloat(c.Avg_Length_cm):NaN;
+            if(!isFinite(L)||L<=0) continue;
+            try{kg+=live*scEstimateWeight(scBioLen(L),wl)/1000;}catch(e){}
           }
           return kg;
         }
@@ -4636,42 +4623,65 @@ function sendStockOrderMessage(){
           }).join('')||'<p class="text-xs" style="color:var(--text-dim);padding:8px 0;">No confirmed spat counts for this period yet.</p>';
           openDetailOverlay(head,`<div class="card" style="padding:14px;">${rows}</div>`);
         }
-        function openLFBiomassDetail(){
+        async function openLFBiomassDetail(){
           rumbleDevice(30);
+          openDetailOverlay(`<div style="font-size:22px;font-weight:700;">Land Biomass</div>`,
+            msgCard('<p class="text-sm" style="color:var(--text-mut);">Loading latest census…</p>'));
+          await fetchLFData(false);
+          if(!document.getElementById('detail-overlay').classList.contains('open')) return;
+
           let wl;try{wl=scLoadWLTable();}catch(e){wl=[{length:0.5,weight:0.0833}];}
-          const baseline=lfGetLengthBaseline();
-          const avgLen=baseline?parseFloat(baseline.avg_length_cm):null;
-          const daysSince=baseline?lfDaysSince(baseline.date):null;
-          const stale=daysSince==null||daysSince>14;
-          const totalLive=lfGetGlobalLive();
-          const biomass=lfEstimateBiomassKg();
-          const avgWtPer=avgLen!=null?scEstimateWeight(avgLen,wl):null;
-          const fmtW=w=>w==null?'—':w.toFixed(3)+' g';
+          const grid=(cols,inner,hdr)=>`<div style="display:grid;grid-template-columns:${cols};gap:6px;padding:${hdr?'6px':'8px'} 0;border-bottom:1px solid var(--border);font-size:${hdr?'9px':'12px'};${hdr?'font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);':''}">${inner}</div>`;
+          let kg=0,live=0,missing=0,tankRows='',censusMonth=null;
+          const bySize={};
+          for(let n=1;n<=LF_TANK_TOTAL;n++){
+            const tankId=lfTankLabel(n);
+            const lv=lfTankMetrics(tankId).live;
+            if(!lv) continue;
+            const c=lfLatestCensusFor(tankId);
+            if(c&&(!censusMonth||String(c.Month)>censusMonth)) censusMonth=String(c.Month);
+            const L=c?parseFloat(c.Avg_Length_cm):NaN;
+            const bl=(isFinite(L)&&L>0)?scBioLen(L):null;
+            const k=bl!=null?lv*scEstimateWeight(bl,wl)/1000:null;
+            live+=lv;
+            if(k!=null){
+              kg+=k;
+              const key=bl.toFixed(1);
+              if(!bySize[key]) bySize[key]={pcs:0,kg:0};
+              bySize[key].pcs+=lv; bySize[key].kg+=k;
+            } else missing++;
+            tankRows+=grid('1fr 1.1fr .6fr .8fr',
+              `<span style="font-weight:600;">${tankId}</span>
+               <span class="num" style="text-align:right;">${lv.toLocaleString()}</span>
+               <span class="num" style="text-align:right;">${bl!=null?bl.toFixed(1):'—'}</span>
+               <span class="num" style="text-align:right;font-weight:700;color:${k!=null?'#10B981':'var(--text-dim)'};">${k!=null?k.toFixed(1):'—'}</span>`);
+          }
+
+          const sizeCols='.8fr 1.2fr .9fr .8fr';
+          const sizeKeys=Object.keys(bySize).sort((x,y)=>parseFloat(x)-parseFloat(y));
+          const sizeTable=sizeKeys.length
+            ? grid(sizeCols,'<span>Size</span><span style="text-align:right;">Pcs</span><span style="text-align:right;">g/pc</span><span style="text-align:right;">kg</span>',true)
+              + sizeKeys.map(s=>{const v=bySize[s];return grid(sizeCols,
+                `<span style="font-weight:700;">${s} cm</span>
+                 <span class="num" style="text-align:right;">${v.pcs.toLocaleString()}</span>
+                 <span class="num" style="text-align:right;color:var(--text-mut);">${scEstimateWeight(parseFloat(s),wl).toFixed(2)}</span>
+                 <span class="num" style="text-align:right;font-weight:700;color:#10B981;">${v.kg.toFixed(1)}</span>`);}).join('')
+            : '<p style="font-size:11px;color:var(--text-dim);padding:8px 0;">No census lengths yet.</p>';
+
           const head=`<div style="font-size:22px;font-weight:700;">Land Biomass</div>
-            <div style="font-size:13px;color:var(--text-mut);">육상 생물량 · Average weight by size</div>
-            <div class="flex items-baseline gap-2 mt-3"><span class="num" style="font-size:34px;font-weight:900;color:#10B981;">${biomass.toFixed(1)}</span><span style="font-size:14px;color:var(--text-dim);">kg total</span></div>`;
-          const staleNote=baseline
-            ?`<div style="padding:10px 12px;background:${stale?'rgba(217,119,6,.1)':'rgba(16,185,129,.08)'};border:1px solid ${stale?'rgba(217,119,6,.3)':'rgba(16,185,129,.25)'};border-radius:10px;font-size:11px;color:${stale?'var(--attention)':'#0f766e'};margin-bottom:10px;">${stale?'⚠️':'✓'} Last measured ${fmtCleanDate(baseline.date)} (${daysSince}d ago)${stale?' — due for a re-check (biweekly)':''}.</div>`
-            :`<div style="padding:10px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;font-size:11px;color:var(--text-dim);margin-bottom:10px;">No avg shell length recorded yet — biomass will show 0 until set.</div>`;
-          const sizes=[];for(let L=0.5;L<=3.001;L+=0.25)sizes.push(Math.round(L*100)/100);
-          const rows=sizes.map(L=>{
-            const w=scEstimateWeight(L,wl);
-            const isCur=avgLen!=null&&Math.abs(L-avgLen)<0.125;
-            return`<div class="grade-row" style="${isCur?'background:color-mix(in srgb,#10B981 8%,transparent);border-radius:8px;padding-left:8px;padding-right:8px;':''}"><div><div class="text-sm font-semibold">${L.toFixed(2)} cm${isCur?' <span style="font-size:10px;color:#10B981;font-weight:700;">← farm avg</span>':''}</div></div><div class="num text-sm font-semibold" style="color:#10B981;">${fmtW(w)}</div></div>`;
-          }).join('');
-          openDetailOverlay(head,`${staleNote}
-            <button onclick="lfSetLengthBaseline()" style="width:100%;padding:11px;background:#10B981;color:white;font-weight:700;border-radius:10px;font-size:13px;margin-bottom:14px;">📏 Update Avg Shell Length</button>
-            <div class="info-grid mb-3">
-              <div class="info-item"><div class="info-key">Farm Avg Length</div><div class="info-val" style="color:#10B981;">${avgLen!=null?avgLen.toFixed(2)+' cm':'—'}</div></div>
-              <div class="info-item"><div class="info-key">Avg Weight / pc</div><div class="info-val" style="color:#10B981;">${fmtW(avgWtPer)}</div></div>
-              <div class="info-item"><div class="info-key">Total Live</div><div class="info-val">${totalLive.toLocaleString()}</div></div>
-              <div class="info-item"><div class="info-key">Total Biomass</div><div class="info-val" style="color:#10B981;">${biomass.toFixed(1)} kg</div></div>
-            </div>
-            <div class="eyebrow mb-2">Weight at Length · <span class="ko">크기별 평균 무게</span></div>
-            <div class="card" style="padding:14px;">${rows}</div>
-            <p class="text-xs mt-3 px-1" style="color:var(--text-dim);">Estimated from the shared weight-at-length curve (calibrated with Sea Cage field data). Add or edit calibration points in Sea Cage → Biomass.</p>`);
+            <div style="font-size:13px;color:var(--text-mut);">육상 생물량 · ${censusMonth?'Census '+monthLabel(censusMonth):'No census yet'}</div>
+            <div class="flex items-baseline gap-2 mt-3"><span class="num" style="font-size:34px;font-weight:900;color:#10B981;">${kg.toFixed(1)}</span><span style="font-size:14px;color:var(--text-dim);">kg total</span></div>
+            <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">${live.toLocaleString()} live${missing?` · ${missing} tank(s) without census length`:''}</div>`;
+
+          const body=`<div class="card" style="padding:14px;">${sizeTable}</div>
+            <details class="card mt-3" style="padding:14px;"><summary style="font-size:11px;font-weight:700;color:var(--text-mut);cursor:pointer;">Breakdown by tank</summary>
+              ${tankRows?grid('1fr 1.1fr .6fr .8fr','<span>Tank</span><span style="text-align:right;">Live</span><span style="text-align:right;">cm</span><span style="text-align:right;">kg</span>',true)+tankRows:'<p style="font-size:11px;color:var(--text-dim);padding:8px 0;">No stocked tanks.</p>'}
+            </details>
+            <p class="text-xs mt-3 px-1" style="color:var(--text-dim);">Read-only. Calculated from the latest LF_Census count and Avg_Length_cm, adjusted for anything logged since. Length is cut to one decimal (1.74 → 1.7). Weight curve is shared with Sea Cage → Biomass.</p>`;
+
+          openDetailOverlay(head,body);
+          try{ if(lfMgrSubTab==='overview'&&document.getElementById('lf-mgr-content'))renderLFMgrOverview(); }catch(e){}
         }
-        
         /* ── Manager: TANKS — physical floor-plan layout ─────────────────
            Two columns matching the real room: odd tanks (T1,T3,T5…T79)
            on the left, even tanks (T2,T4…T80) on the right, a walkway
