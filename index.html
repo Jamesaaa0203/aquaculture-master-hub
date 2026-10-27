@@ -2274,11 +2274,12 @@ async function scStartCensusDraft(btn){
   });
   if(ok) await fetchSCData(false);
 }
+function scBioLen(L){ return Math.floor(L*10+1e-9)/10; } // 1.74 → 1.7, 2.53 → 2.5
 function scPetakBiomassKg(uId,petak,site){
   const m=scCalcMetrics(uId,petak,site);
   const L=m.census?parseFloat(m.census.Avg_Length_cm):NaN;
   if(!isFinite(L)||L<=0||!m.currentLive) return null;
-  try{ return m.currentLive*scEstimateWeight(L,scLoadWLTable())/1000; }catch(e){ return null; }
+  try{ return m.currentLive*scEstimateWeight(scBioLen(L),scLoadWLTable())/1000; }catch(e){ return null; }
 }
 function scSiteBiomassKg(site){
   let kg=0,missing=0;
@@ -3004,8 +3005,7 @@ function showSCMgrTab(tab){
     // synced via the Land Farm backend and can change from any other phone
     // at any time — so always pull a fresh copy here rather than relying
     // on whatever was cached at page load or entered on another device.
-    _scBioClassesLive=null;
-    fetchLFData(false).then(()=>{ if(scMgrSubTab==='biomass') _scMgrRender(); });
+    Promise.all([fetchSCData(false),fetchLFData(false)]).then(()=>{ if(scMgrSubTab==='biomass') _scMgrRender(); });
   }
   _scMgrRender();
 }
@@ -3321,11 +3321,9 @@ function renderSCMgrBatches(){
  
 /* ── Manager: BIOMASS ────────────────────────────────────────────── */
 function renderSCMgrBiomass(){
-  let wl=scLoadWLTable(),cls=scLoadBioClasses();
+  const wl=scLoadWLTable();
   const{a,b}=scFitAllometric(wl);
   const formulaLabel=wl.length===1?`W = ${a.toFixed(4)} × L³  (assumed b = 3)`:`W = ${a.toFixed(4)} × L^${b.toFixed(2)}  (fitted, n=${wl.length})`;
- 
-  // Render WL table rows
   const wlRows=wl.map((p,i)=>`
     <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
       <div><span class="num" style="font-size:14px;font-weight:700;">${p.length} cm</span>
@@ -3335,70 +3333,80 @@ function renderSCMgrBiomass(){
         ${wl.length>1?`<button onclick="scBioRemoveWL(${i})" style="font-size:10px;background:rgba(239,68,68,.1);color:var(--alert);padding:3px 7px;border-radius:7px;font-weight:700;">✕</button>`:''}
       </div>
     </div>`).join('');
- 
-  // Render size class rows
-  const clsRows=cls.map((cl,i)=>{
-    const w=scEstimateWeight(scBioNum(cl.length),wl);
-    const total=(scBioNum(cl.count)>0&&scBioNum(cl.length)>0)?(scBioNum(cl.count)*w/1000).toFixed(3):null;
-    return`<div style="display:flex;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
-      <input type="number" step="0.1" inputmode="decimal" placeholder="cm" value="${cl.length||''}" oninput="scBioUpdateClass(${i},'length',this.value)"
-        style="width:70px;padding:8px;border:1.5px solid var(--border-2);border-radius:10px;background:var(--surface-2);color:var(--text);font-size:13px;font-weight:700;text-align:center;outline:none;">
-      <span style="font-size:12px;color:var(--text-dim);">cm ×</span>
-      <input type="number" inputmode="numeric" placeholder="spats" value="${cl.count||''}" oninput="scBioUpdateClass(${i},'count',this.value)"
-        style="flex:1;padding:8px;border:1.5px solid var(--border-2);border-radius:10px;background:var(--surface-2);color:var(--text);font-size:13px;outline:none;">
-      <span id="sc-bio-row-est-${i}" style="font-size:11px;color:var(--text-dim);min-width:54px;text-align:right;">${total?'~'+total+' kg':'—'}</span>
-      ${cls.length>1?`<button onclick="scBioRemoveClass(${i})" style="font-size:12px;background:rgba(239,68,68,.1);color:var(--alert);padding:4px 8px;border-radius:8px;font-weight:700;">✕</button>`:''}
-    </div>`;}).join('');
- 
-  // Compute totals
-  const totalKg=cls.reduce((s,cl)=>{const l=scBioNum(cl.length),ct=scBioNum(cl.count);if(!l||!ct)return s;return s+(ct*scEstimateWeight(l,wl)/1000);},0);
-  const totalSpats=cls.reduce((s,cl)=>s+scBioNum(cl.count),0);
-  const avgG=totalSpats>0?(totalKg*1000/totalSpats).toFixed(3):null;
- 
+
+  const grid4=(cols,inner,hdr)=>`<div style="display:grid;grid-template-columns:${cols};gap:6px;padding:${hdr?'6px':'8px'} 0;border-bottom:1px solid var(--border);font-size:${hdr?'9px':'12px'};${hdr?'font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);':''}">${inner}</div>`;
+
+  const siteBlock=(site,label,tag,color)=>{
+    let cageRows='',kg=0,live=0,missing=0;
+    const bySize={};
+    scAllGroups().filter(g=>g.site===site).forEach(g=>{
+      const petaks=scGroupPetaks(g);
+      petaks.forEach(p=>{
+        const m=scCalcMetrics(g.unitId,p,site);
+        if(!m.currentLive) return;
+        const L=m.census?parseFloat(m.census.Avg_Length_cm):NaN;
+        const bl=(isFinite(L)&&L>0)?scBioLen(L):null;
+        const k=bl!=null?m.currentLive*scEstimateWeight(bl,wl)/1000:null;
+        live+=m.currentLive;
+        if(k!=null){
+          kg+=k;
+          const key=bl.toFixed(1);
+          if(!bySize[key]) bySize[key]={pcs:0,kg:0};
+          bySize[key].pcs+=m.currentLive;
+          bySize[key].kg+=k;
+        } else missing++;
+        const lbl=site==='MY'?`Unit ${g.unitId} · P${p}`:(petaks.length>1?`Set ${g.unitId} · C${p}`:`Set ${g.unitId}`);
+        cageRows+=grid4('1.5fr 1fr .6fr .8fr',
+          `<span style="font-weight:600;">${lbl}</span>
+           <span class="num" style="text-align:right;">${m.currentLive.toLocaleString()}</span>
+           <span class="num" style="text-align:right;">${bl!=null?bl.toFixed(1):'—'}</span>
+           <span class="num" style="text-align:right;font-weight:700;color:${k!=null?color:'var(--text-dim)'};">${k!=null?k.toFixed(1):'—'}</span>`);
+      });
+    });
+
+    const sizeKeys=Object.keys(bySize).sort((x,y)=>parseFloat(x)-parseFloat(y));
+    const sizeCols='.8fr 1.2fr .9fr .8fr';
+    const sizeTable=sizeKeys.length
+      ? grid4(sizeCols,'<span>Size</span><span style="text-align:right;">Pcs</span><span style="text-align:right;">g/pc</span><span style="text-align:right;">kg</span>',true)
+        + sizeKeys.map(s=>{const v=bySize[s];return grid4(sizeCols,
+          `<span style="font-weight:700;">${s} cm</span>
+           <span class="num" style="text-align:right;">${v.pcs.toLocaleString()}</span>
+           <span class="num" style="text-align:right;color:var(--text-mut);">${scEstimateWeight(parseFloat(s),wl).toFixed(2)}</span>
+           <span class="num" style="text-align:right;font-weight:700;color:${color};">${v.kg.toFixed(1)}</span>`);}).join('')
+      : '<p style="font-size:11px;color:var(--text-dim);padding:8px 0;">No census lengths yet.</p>';
+
+    const cageHead=grid4('1.5fr 1fr .6fr .8fr','<span>Cage</span><span style="text-align:right;">Live</span><span style="text-align:right;">cm</span><span style="text-align:right;">kg</span>',true);
+
+    return`<div class="card" style="padding:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;">
+        <div style="font-size:13px;font-weight:800;color:${color};">${tag} ${label}</div>
+        <div class="num" style="font-size:24px;font-weight:900;color:${color};">${kg.toFixed(1)} <span style="font-size:12px;">kg</span></div>
+      </div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">${live.toLocaleString()} live${missing?` · ${missing} cage(s) without census length`:''}</div>
+      <div style="margin-top:12px;">${sizeTable}</div>
+      <details style="margin-top:10px;"><summary style="font-size:11px;font-weight:700;color:var(--text-mut);cursor:pointer;">Breakdown by cage</summary>
+        ${cageRows?cageHead+cageRows:'<p style="font-size:11px;color:var(--text-dim);padding:8px 0;">No stocked cages.</p>'}
+      </details>
+    </div>`;
+  };
+
   document.getElementById('sc-mgr-content').innerHTML=`
-    <!-- Formula card -->
+    ${siteBlock('MY','Malaysia','🇲🇾','#2563EB')}
+    ${siteBlock('KR','Korea','🇰🇷','#7C3AED')}
+    <p style="font-size:10.5px;color:var(--text-dim);line-height:1.6;">Read-only. Calculated from the latest census count and Avg_Length_cm, adjusted for transfers and mortality logged since. Length is cut to one decimal (1.74 → 1.7). Update SC_Census, then reopen this tab.</p>
     <div style="padding:14px 16px;background:rgba(14,165,233,.07);border:1px solid rgba(14,165,233,.2);border-radius:14px;">
       <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#0EA5E9;margin-bottom:4px;">Active Formula</div>
       <div class="num" style="font-size:13px;font-weight:600;">${formulaLabel}</div>
     </div>
- 
-    <!-- WL reference table -->
     <div class="card" style="padding:18px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
         <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);">Weight-at-Length Reference</div>
         <button onclick="scBioAddWLPrompt()" style="font-size:11px;padding:5px 10px;background:rgba(14,165,233,.1);color:#0EA5E9;border-radius:8px;font-weight:700;">+ Add Point</button>
       </div>
-      <p style="font-size:10px;color:var(--text-dim);margin-bottom:8px;">🔄 Shared across all phones — edits here sync everywhere, including the Land Farm Biomass card.</p>
+      <p style="font-size:10px;color:var(--text-dim);margin-bottom:8px;">🔄 Shared across all phones, including the Land Farm Biomass card.</p>
       ${wlRows}
-    </div>
- 
-    <!-- Calculator -->
-    <div class="card" style="padding:18px;">
-      <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:12px;">Biomass Calculator</div>
-      <div style="display:grid;grid-template-columns:70px 1fr auto auto;gap:6px;margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid var(--border);">
-        <span style="font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);">Size</span>
-        <span style="font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);">Quantity</span>
-        <span style="font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);min-width:54px;text-align:right;">Est. kg</span>
-        <span></span>
-      </div>
-      ${clsRows}
-      <button onclick="scBioAddClass()" style="width:100%;padding:10px;border:1.5px dashed var(--border-2);border-radius:10px;font-size:12px;font-weight:700;color:var(--text-mut);margin-top:10px;">+ Add Size Class</button>
-    </div>
- 
-    <!-- Result: always in the DOM (just hidden at 0kg) so typing never has to
-         create/destroy this card, which would rebuild the inputs above it -->
-    <div id="sc-bio-result" style="display:${totalKg>0?'block':'none'};padding:22px;background:rgba(16,185,129,.08);border:1.5px solid rgba(16,185,129,.25);border-radius:18px;">
-      <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#10B981;opacity:.9;margin-bottom:10px;">Estimated Total Biomass</div>
-      <div class="num" style="font-size:42px;font-weight:900;color:#10B981;letter-spacing:-.02em;"><span id="sc-bio-total-kg">${totalKg.toFixed(2)}</span> <span style="font-size:20px;">kg</span></div>
-      <div style="display:flex;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(16,185,129,.2);">
-        <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);">Total Spats</div>
-          <div class="num" id="sc-bio-total-spats" style="font-size:16px;font-weight:700;margin-top:2px;">${totalSpats.toLocaleString()}</div></div>
-        <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);">Avg per Spat</div>
-          <div class="num" id="sc-bio-total-avg" style="font-size:16px;font-weight:700;margin-top:2px;">${avgG} g</div></div>
-      </div>
     </div>`;
 }
- 
 /* Biomass helpers */
 function scBioNum(v){const n=parseFloat(v);return isNaN(n)?0:n;}
 function scBioUpdateClass(i,field,val){
