@@ -2,7 +2,7 @@
    - setup (6-digit code), worker name, All Modules list
    - talks to the router (reads via JSONP, sends via the outbox)
    - loads each module file only when it is opened */
-const APP_VERSION = '2.0.9';
+const APP_VERSION = '2.1.0';
 const ROUTER_DEFAULT = 'https://script.google.com/macros/s/AKfycbwoUa5pXp58jSSN4xaBtHsiRe6FgG7BX3VXT_zKGoy7C7myxSvAmbDcqqukbUqfyQ7c/exec';
 
 const K = { cfg: 'bq_cfg', code: 'bq_code', worker: 'bq_worker' };
@@ -82,7 +82,11 @@ async function routerGet(params) {
 const api = {
   async get(action, params = {}) {
     const r = await routerGet({ action, ...params });
-    if (!r || !r.ok) throw new Error((r && r.error) || 'Failed');
+    if (!r || !r.ok) {
+      const msg = (r && r.error) || 'Failed';
+      if (/manager PIN/i.test(msg) && S.pin) forgetPin();
+      throw new Error(msg);
+    }
     return r;
   },
   dash(module) { return api.get('dash', { module, code: S.code }); },
@@ -111,10 +115,17 @@ const api = {
       method: 'POST', credentials: 'omit',
       body: JSON.stringify({ action, pin: S.pin, worker: S.worker, client_id: 'm' + Date.now() + Math.random().toString(36).slice(2), data })
     }).then(x => x.json());
-    if (!r.ok) throw new Error(r.error || 'Failed');
+    if (!r.ok) {
+      if (/manager PIN/i.test(r.error || '') && S.pin) forgetPin();
+      throw new Error(r.error || 'Failed');
+    }
     return r;
   }
 };
+function forgetPin() {
+  S.pin = ''; sessionStorage.removeItem('bq_pin');
+  if ((location.hash || '').startsWith('#/mgr')) setTimeout(() => screenManager((location.hash || '').slice(6)), 0);
+}
 
 /* ---------- outbox ---------- */
 async function flushNow() {
@@ -218,7 +229,7 @@ async function refreshConfig() {
     saveConfig(cfg, S.code);
     if (S.worker && !me()) { S.worker = ''; localStorage.removeItem(K.worker); route(); }
   } catch (e) {
-    if (/setup code/i.test(e.message)) S.codeChanged = true;
+    if (/setup code/i.test(e.message)) { S.codeChanged = true; if ((location.hash || '#/') === '#/') screenHome(); }
   }
 }
 
@@ -279,7 +290,7 @@ function screenHome() {
       <span class="chev">${ext ? I.ext : I.chev}</span>
     </a>`;
   view.innerHTML = `
-    ${S.codeChanged ? '<div class="banner warn">The setup code has changed. Ask James for the new code.</div>' : ''}
+    ${S.codeChanged ? '<button class="banner warn" id="reSetup" style="width:100%;text-align:left;border:0">The setup code has changed. <b>Tap here to enter the new code.</b></button>' : ''}
     <div class="section-title">Record</div>
     <div class="list">${rec.map(m => row(m, '', '#/m/' + m.id)).join('') || '<div class="row"><span class="tx muted">No modules for your name.</span></div>'}</div>
     ${apps.length ? `<div class="section-title">Other apps</div>
@@ -290,6 +301,8 @@ function screenHome() {
       ${links.documents_url ? row({ name: 'Documents', sub: 'Company Shared Drive', icon: I.folder }, 'ext', links.documents_url, true) : ''}
     </div>
     <div class="foot">v${APP_VERSION} · ${esc(S.worker)}</div>`;
+  const rs = $('#reSetup');
+  if (rs) rs.onclick = () => { S.code = ''; S.codeChanged = false; localStorage.removeItem(K.code); route(); };
 }
 
 async function screenModule(path) {
