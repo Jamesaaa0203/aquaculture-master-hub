@@ -83,7 +83,7 @@ function shiftSheet(isEnd) {
     resultToast(r, isEnd ? 'Tamat syif' : 'Mula syif');
     if (r.sent || r.queued) {
       if (isEnd) localStorage.removeItem(SK); else localStorage.setItem(SK, JSON.stringify({ date, at: Date.now() }));
-      home(document.getElementById('view'));
+      home(document.getElementById('modroot'));
     }
   };
 }
