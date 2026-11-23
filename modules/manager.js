@@ -268,28 +268,26 @@ function hrText(m) {
 function opsText(m) {
   const l = m.land, s = m.spawning, r = m.processing, d = m.seacage.dead, sk = r.sankinaStock;
   const L = [`Bon Aqua Farm · Operations update · ${mLabel(m.month)}`, '',
-    'Land farm',
-    `- Spat confirmed: ${n0(l.spatConfirmed)} pieces`,
-    `- Spat removed with plates: ${n0(l.spatRemoved)} pieces (still counted)`,
-    `- Tank mortality: ${n0(l.tankMortality)} pieces`,
-    `- Sent to sea cage: ${n0(l.toSeaCage)} pieces`,
-    `- Transport to Sankina: ${l.sankinaKg} kilograms`,
-    `- Finished product: ${l.finishedRawKg} kilograms raw, ${l.finishedYieldKg} kilograms yield (${l.finishedYieldPct}%)`, '',
-    'Sea cage',
+    '1. Spat produced',
+    `- Spat confirmed: ${n0(l.spatConfirmed)} pieces${l.spatRemoved ? ` (${n0(l.spatRemoved)} removed with plates)` : ''}`, '',
+    '2. Eggs',
+    `- Total eggs produced: ${n0(s.eggs)}`,
+    `- Spawning trials: ${s.trials} (${s.successful} successful)`, '',
+    '3. Sent to sea cage',
+    `- ${n0(l.toSeaCage)} pieces`, '',
+    '4. Broodstock purchases',
+    `- ${s.purchases} purchase${s.purchases === 1 ? '' : 's'}, ${s.purchaseKg} kilograms${s.purchaseCost ? ', RM ' + n0(s.purchaseCost) : ''}`, '',
+    '5. Sea cage',
     `- Mortality: Korean cage ${n0(d.KR)}, baby units (Malaysian cage) ${n0(d.MY)}, baby Korean cage ${n0(d.KRB)} pieces`];
   Object.entries(m.seacage.stockIn).forEach(([k, v]) => L.push(`- Stock in, ${k.toLowerCase()}: ${n0(v)} pieces`));
-  L.push('', 'Spawning',
-    `- Trials: ${s.trials} (${s.successful} successful)`,
-    `- Total eggs: ${n0(s.eggs)}`,
-    `- Broodstock purchases: ${s.purchases} (${s.purchaseKg} kilograms${s.purchaseCost ? ', RM ' + n0(s.purchaseCost) : ''})`, '',
-    'Processing',
-    `- Batches: ${r.batches}, ${r.liveKg} kilograms live, ${r.yieldKg} kilograms yield (${r.yieldPct}%)`,
-    `- Latest stock count at Sankina: ${sk ? `${sk.date}, raw ${sk.rawSankinaKg} kilograms, finished ${sk.finishedSankinaKg} kilograms` : 'not recorded'}`, '',
-    'Maintenance');
-  const pr = m.maintenance.problems;
-  if (!pr.length) L.push('- No problems reported');
-  pr.forEach(p => L.push(`- ${p.date}: ${p.item}, ${p.detail}${p.note ? ' (' + p.note + ')' : ''}`));
-  L.push(`- Generator fuel added: ${m.maintenance.generatorFuelL} litres`);
+  L.push('', '6. Processing',
+    `- ${r.batches} batch${r.batches === 1 ? '' : 'es'}, ${r.liveKg} kilograms live, ${r.yieldKg} kilograms yield (${r.yieldPct}%)`);
+  if (l.finishedRawKg) L.push(`- Finished product: ${l.finishedRawKg} kilograms raw, ${l.finishedYieldKg} kilograms yield (${l.finishedYieldPct}%)`);
+  if (l.sankinaKg || sk) {
+    L.push('', '7. Sankina');
+    if (l.sankinaKg) L.push(`- Transport to Sankina: ${l.sankinaKg} kilograms`);
+    if (sk) L.push(`- Latest stock count (${sk.date}): raw ${sk.rawSankinaKg} kilograms, finished ${sk.finishedSankinaKg} kilograms`);
+  }
   return L.join('\n');
 }
 async function copy(text) {
@@ -315,7 +313,7 @@ async function monthend(root, mk) {
   try {
     m = await C.api.get('monthend', { month: mk, pin: C.S.pin });
   } catch (e) { root.querySelector('#me').innerHTML = `<div class="banner bad">${C.esc(e.message)}</div>`; return; }
-  const l = m.land, pr = m.maintenance.problems;
+  const l = m.land;
   root.querySelector('#me').innerHTML = `
     <div class="section-title">HR · for the office</div>
     <div class="card" style="padding:6px 14px">
@@ -327,12 +325,12 @@ async function monthend(root, mk) {
     <div class="section-title">Operations · for Kevin</div>
     <div class="card">
       <div class="stats">
-        <div class="stat"><div class="n">${n0(l.spatConfirmed)}</div><div class="l">Spat confirmed</div></div>
+        <div class="stat"><div class="n">${n0(l.spatConfirmed)}</div><div class="l">Spat produced</div></div>
+        <div class="stat"><div class="n">${(m.spawning.eggs / 1e6).toFixed(1)}M</div><div class="l">Eggs</div></div>
         <div class="stat"><div class="n">${n0(l.toSeaCage)}</div><div class="l">To sea cage</div></div>
-        <div class="stat"><div class="n">${m.spawning.trials}</div><div class="l">Trials</div></div>
+        <div class="stat"><div class="n">${m.spawning.purchaseKg}</div><div class="l">Broodstock (kg)</div></div>
         <div class="stat"><div class="n">${n0((m.seacage.dead.KR || 0) + (m.seacage.dead.MY || 0) + (m.seacage.dead.KRB || 0))}</div><div class="l">Sea cage dead</div></div>
-        <div class="stat"><div class="n">${m.processing.batches}</div><div class="l">Processing</div></div>
-        <div class="stat"><div class="n">${pr.length}</div><div class="l">Problems</div></div>
+        <div class="stat"><div class="n">${m.processing.batches}</div><div class="l">Processing batches</div></div>
       </div>
     </div>
     <button class="btn secondary" id="cOps">Copy operations text</button>
