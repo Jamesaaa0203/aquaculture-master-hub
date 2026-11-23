@@ -6,14 +6,15 @@ const PAGES = [
   { id: 'spawning', name: 'Spawning', icon: 'egg' },
   { id: 'processing', name: 'Processing & Sankina stock', icon: 'box' },
   { id: 'maint', name: 'Maintenance', icon: 'wrench' },
-  { id: 'wq', name: 'Water quality', icon: 'drop' }
+  { id: 'wq', name: 'Water quality', icon: 'drop' },
+  { id: 'monthend', name: 'Month-end pack', icon: 'folder' }
 ];
 const OUTCOMES = ['Successful', 'Failed', 'Inconclusive'];
 
 let C;
 export async function render(root, ctx, sub) {
   C = ctx;
-  const p = { hr, spawning, processing, maint, wq }[sub];
+  const p = { hr, spawning, processing, maint, wq, monthend }[sub];
   return p ? p(root) : hub(root);
 }
 
@@ -49,6 +50,7 @@ async function hub(root) {
     put('maint', n ? `<b style="color:var(--bad)">${n} open problem${n > 1 ? 's' : ''}</b>` : 'No open problems');
   }).catch(() => put('maint', '—'));
   C.api.mgr('wq').then(w => { const l = w.latest[0]; put('wq', l ? `Latest ${C.esc(l.date)} ${C.esc(l.time)}` : 'No readings'); }).catch(() => put('wq', '—'));
+  put('monthend', 'HR for the office · operations for Kevin');
 }
 
 /* ---------- HR ---------- */
@@ -235,4 +237,118 @@ async function wq(root) {
         <div class="stat"><div class="n">${x.pH}</div><div class="l">pH</div></div>
       </div>
     </div>`).join('') : '<div class="card muted center">No readings.</div>';
+}
+
+/* ---------- Month-end pack ---------- */
+function months() {
+  const out = [], d = new Date();
+  for (let i = 1; i <= 7; i++) {
+    const x = new Date(d.getFullYear(), d.getMonth() - i + 1, 15);
+    out.push(x.toLocaleDateString('en-CA').slice(0, 7));
+  }
+  return out;   // this month first, then the 6 before it
+}
+const mLabel = mk => new Date(mk + '-15T00:00:00').toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+
+function hrText(m) {
+  const L = [`Bon Aqua Farm · HR summary · ${mLabel(m.month)}`, '', 'Leave taken (by start date):'];
+  const lv = m.hr.rows.filter(p => p.leaveTotal);
+  if (!lv.length) L.push('- None');
+  lv.forEach(p => {
+    const parts = [['Annual', p.annual], ['Emergency', p.emergency], ['Unpaid', p.unpaid], ['Extra holiday', p.extra], ['Other', p.other]]
+      .filter(x => x[1]).map(x => `${x[0]} ${x[1]}`);
+    L.push(`- ${p.name}: ${p.leaveTotal} day${p.leaveTotal === 1 ? '' : 's'} (${parts.join(', ')})`);
+  });
+  L.push('', 'Overtime:');
+  const ot = m.hr.rows.filter(p => p.otTotal);
+  if (!ot.length) L.push('- None');
+  ot.forEach(p => L.push(`- ${p.name}: ${p.otTotal} hours${p.otExtra ? ` (${p.otStd} standard pay, ${p.otExtra} extra holiday)` : ''}`));
+  return L.join('\n');
+}
+function opsText(m) {
+  const l = m.land, s = m.spawning, r = m.processing, d = m.seacage.dead, sk = r.sankinaStock;
+  const L = [`Bon Aqua Farm · Operations update · ${mLabel(m.month)}`, '',
+    'Land farm',
+    `- Spat confirmed: ${n0(l.spatConfirmed)} pieces`,
+    `- Spat removed with plates: ${n0(l.spatRemoved)} pieces (still counted)`,
+    `- Tank mortality: ${n0(l.tankMortality)} pieces`,
+    `- Sent to sea cage: ${n0(l.toSeaCage)} pieces`,
+    `- Transport to Sankina: ${l.sankinaKg} kilograms`,
+    `- Finished product: ${l.finishedRawKg} kilograms raw, ${l.finishedYieldKg} kilograms yield (${l.finishedYieldPct}%)`, '',
+    'Sea cage',
+    `- Mortality: Korean cage ${n0(d.KR)}, baby units (Malaysian cage) ${n0(d.MY)}, baby Korean cage ${n0(d.KRB)} pieces`];
+  Object.entries(m.seacage.stockIn).forEach(([k, v]) => L.push(`- Stock in, ${k.toLowerCase()}: ${n0(v)} pieces`));
+  L.push('', 'Spawning',
+    `- Trials: ${s.trials} (${s.successful} successful)`,
+    `- Total eggs: ${n0(s.eggs)}`,
+    `- Broodstock purchases: ${s.purchases} (${s.purchaseKg} kilograms${s.purchaseCost ? ', RM ' + n0(s.purchaseCost) : ''})`, '',
+    'Processing',
+    `- Batches: ${r.batches}, ${r.liveKg} kilograms live, ${r.yieldKg} kilograms yield (${r.yieldPct}%)`,
+    `- Latest stock count at Sankina: ${sk ? `${sk.date}, raw ${sk.rawSankinaKg} kilograms, finished ${sk.finishedSankinaKg} kilograms` : 'not recorded'}`, '',
+    'Maintenance');
+  const pr = m.maintenance.problems;
+  if (!pr.length) L.push('- No problems reported');
+  pr.forEach(p => L.push(`- ${p.date}: ${p.item}, ${p.detail}${p.note ? ' (' + p.note + ')' : ''}`));
+  L.push(`- Generator fuel added: ${m.maintenance.generatorFuelL} litres`);
+  return L.join('\n');
+}
+async function copy(text) {
+  try { await navigator.clipboard.writeText(text); C.toast('Copied', 'good'); }
+  catch (e) {
+    const t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select();
+    document.execCommand('copy'); t.remove(); C.toast('Copied', 'good');
+  }
+}
+
+async function monthend(root, mk) {
+  title('Month-end pack');
+  const list = months();
+  mk = mk || list[1];   // default: last month
+  root.innerHTML = `
+    <div class="card" style="padding:12px">
+      <label class="field" style="margin:0"><span>Month</span>
+        <select class="select" id="mk">${list.map(x => `<option value="${x}" ${x === mk ? 'selected' : ''}>${mLabel(x)}</option>`).join('')}</select></label>
+    </div>
+    <div id="me"><div class="loading">Adding up ${mLabel(mk)}…</div></div>`;
+  root.querySelector('#mk').onchange = e => monthend(root, e.target.value);
+  let m;
+  try {
+    m = await C.api.get('monthend', { month: mk, pin: C.S.pin });
+  } catch (e) { root.querySelector('#me').innerHTML = `<div class="banner bad">${C.esc(e.message)}</div>`; return; }
+  const l = m.land, pr = m.maintenance.problems;
+  root.querySelector('#me').innerHTML = `
+    <div class="section-title">HR · for the office</div>
+    <div class="card" style="padding:6px 14px">
+      <div class="spec-row" style="border:0"><span class="small"><b>Worker</b></span><b class="small">Leave days · OT hours</b></div>
+      ${m.hr.rows.filter(p => p.leaveTotal || p.otTotal).map(p => `<div class="spec-row"><span>${C.esc(p.name)}</span><b>${p.leaveTotal} · ${p.otTotal}</b></div>`).join('') || '<p class="muted center">No leave or OT.</p>'}
+    </div>
+    <button class="btn secondary" id="cHR">Copy HR text</button>
+
+    <div class="section-title">Operations · for Kevin</div>
+    <div class="card">
+      <div class="stats">
+        <div class="stat"><div class="n">${n0(l.spatConfirmed)}</div><div class="l">Spat confirmed</div></div>
+        <div class="stat"><div class="n">${n0(l.toSeaCage)}</div><div class="l">To sea cage</div></div>
+        <div class="stat"><div class="n">${m.spawning.trials}</div><div class="l">Trials</div></div>
+        <div class="stat"><div class="n">${n0((m.seacage.dead.KR || 0) + (m.seacage.dead.MY || 0) + (m.seacage.dead.KRB || 0))}</div><div class="l">Sea cage dead</div></div>
+        <div class="stat"><div class="n">${m.processing.batches}</div><div class="l">Processing</div></div>
+        <div class="stat"><div class="n">${pr.length}</div><div class="l">Problems</div></div>
+      </div>
+    </div>
+    <button class="btn secondary" id="cOps">Copy operations text</button>
+
+    <div class="section-title">Google Sheet</div>
+    <button class="btn" id="mkSheet">Create / update Sheet</button>
+    <p class="muted small center" id="sheetLink" style="margin-top:10px">Saved in Ops App Data › Month-end Packs</p>`;
+  root.querySelector('#cHR').onclick = () => copy(hrText(m));
+  root.querySelector('#cOps').onclick = () => copy(opsText(m));
+  root.querySelector('#mkSheet').onclick = async ev => {
+    ev.target.disabled = true; ev.target.textContent = 'Creating…';
+    try {
+      const r = await C.api.manager('monthend_sheet', { month: mk });
+      root.querySelector('#sheetLink').innerHTML = `<a href="${C.esc(r.url)}" target="_blank" rel="noopener">Open ${C.esc(r.name)}</a>`;
+      C.toast('Sheet ready', 'good');
+    } catch (e) { C.toast(e.message, 'bad'); }
+    ev.target.disabled = false; ev.target.textContent = 'Create / update Sheet';
+  };
 }
