@@ -274,3 +274,11 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 
 .pick-next .tile.sel { background: #7C3AED; color: #fff; border-color: transparent; outline: 0; }
 .pick-clean .tile.sel { background: var(--brand); color: #fff; border-color: transparent; outline: 0; }
+
+/* ---------- manager ---------- */
+.lv-h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.lv-h b { font-size: 17px; }
+.lv-h span { color: var(--ink-2); font-size: 14px; }
+.lv-r { margin-top: 6px; font-size: 15px; }
+.trial .select { flex: 1; min-width: 0; font-size: 15px; height: 48px; }
+.spec-row small { display: block; color: var(--ink-3); font-size: 12px; font-weight: 400; }

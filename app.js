@@ -2,7 +2,7 @@
    - setup (6-digit code), worker name, All Modules list
    - talks to the router (reads via JSONP, sends via the outbox)
    - loads each module file only when it is opened */
-const APP_VERSION = '2.0.6';
+const APP_VERSION = '2.0.7';
 const ROUTER_DEFAULT = 'https://script.google.com/macros/s/AKfycbwoUa5pXp58jSSN4xaBtHsiRe6FgG7BX3VXT_zKGoy7C7myxSvAmbDcqqukbUqfyQ7c/exec';
 
 const K = { cfg: 'bq_cfg', code: 'bq_code', worker: 'bq_worker' };
@@ -109,7 +109,7 @@ const api = {
   async manager(action, data) {
     const r = await fetch(routerUrl(), {
       method: 'POST', credentials: 'omit',
-      body: JSON.stringify({ action, pin: S.pin, client_id: 'm' + Date.now() + Math.random().toString(36).slice(2), data })
+      body: JSON.stringify({ action, pin: S.pin, worker: S.worker, client_id: 'm' + Date.now() + Math.random().toString(36).slice(2), data })
     }).then(x => x.json());
     if (!r.ok) throw new Error(r.error || 'Failed');
     return r;
@@ -306,7 +306,7 @@ async function screenModule(path) {
   }
 }
 
-function screenManager() {
+function screenManager(sub) {
   setTop('Manager', true);
   if (!S.pin) {
     view.innerHTML = `
@@ -324,7 +324,7 @@ function screenManager() {
       try {
         await api.mgr('wq');                    // light call, just to check the PIN
         sessionStorage.setItem('bq_pin', S.pin);
-        screenManager();
+        screenManager(sub);
       } catch (e) {
         S.pin = '';
         $('#err').textContent = e.message; $('#err').hidden = false;
@@ -334,7 +334,7 @@ function screenManager() {
     return;
   }
   import(`./modules/manager.js?v=${APP_VERSION}`)
-    .then(mod => mod.render(view, ctx()))
+    .then(mod => mod.render(view, ctx(), sub || ''))
     .catch(e => { view.innerHTML = `<div class="banner bad">${esc(e.message)}</div>`; });
 }
 
@@ -359,7 +359,7 @@ function route() {
   if (!S.cfg || !S.code) return screenSetup();
   if (!S.worker || h === '#/who') return screenWho();
   if (h.startsWith('#/m/')) return screenModule(h.slice(4));
-  if (h === '#/mgr') return screenManager();
+  if (h === '#/mgr' || h.startsWith('#/mgr/')) return screenManager(h.slice(6));
   return screenHome();
 }
 window.addEventListener('hashchange', route);
