@@ -2,12 +2,14 @@
    Actions: hr_leave, sp_outcome, sp_discard (manager PIN), lf_form stock counts (PIN). */
 
 const PAGES = [
-  { id: 'hr',         name: 'HR · Leave & OT',     eb: 'Sumber Manusia', icon: 'people', c: '#6366F1' },
-  { id: 'spawning',   name: 'Spawning',            eb: 'Pemijahan',      icon: 'egg',    c: '#EC4899' },
-  { id: 'processing', name: 'Processing & Sankina', eb: 'Pemprosesan',   icon: 'box',    c: '#F59E0B' },
-  { id: 'maint',      name: 'Maintenance',         eb: 'Penyelenggaraan', icon: 'wrench', c: '#F97316' },
-  { id: 'wq',         name: 'Water Quality',       eb: 'Kualiti Air',    icon: 'drop',   c: '#06B6D4' },
-  { id: 'monthend',   name: 'Month-end Pack',      eb: 'Laporan Bulanan', icon: 'folder', c: '#0D9488' }
+  { id: 'maint',      href: '#/mgr/maint',      ko: '유지보수 현황',     name: 'Maintenance',          sub: 'Status overview — all scheduled checks', icon: 'wrench', c: '#DC2626' },
+  { id: 'landfarm',   href: '#/m/landfarm',     ko: '육상 양식장 현황',   name: 'Land Farm',            sub: 'Tank map & this month',                  icon: 'flask',  c: '#10B981' },
+  { id: 'spawning',   href: '#/mgr/spawning',   ko: '산란 현황',         name: 'Spawning & Purchasing', sub: 'Trials, outcomes & purchases',          icon: 'egg',    c: '#EC4899' },
+  { id: 'processing', href: '#/mgr/processing', ko: '가공 현황',         name: 'Processing & Sankina', sub: 'Batches, yield & Sankina stock',         icon: 'box',    c: '#F59E0B' },
+  { id: 'wq',         href: '#/mgr/wq',         ko: '수질 현황',         name: 'Water Quality',        sub: 'Latest readings',                        icon: 'drop',   c: '#06B6D4' },
+  { id: 'seacage',    href: '#/m/seacage',      ko: '가두리 운영 현황',   name: 'Sea Cage Ops',         sub: 'Mortality & stock this month',           icon: 'grid',   c: '#0EA5E9' },
+  { id: 'hr',         href: '#/mgr/hr',         ko: '인사 및 근태 관리',  name: 'Workforce & HR',       sub: 'Leave approvals & balances',             icon: 'people', c: '#6366F1' },
+  { id: 'monthend',   href: '#/mgr/monthend',   ko: '월말 보고서',       name: 'Month-end Pack',       sub: 'HR for the office · operations for Kevin', icon: 'folder', c: '#0D9488' }
 ];
 const OUTCOMES = ['Successful', 'Failed', 'Inconclusive'];
 
@@ -30,68 +32,36 @@ async function act(btn, fn, okMsg) {
   catch (e) { C.toast(e.message, 'bad'); btn.disabled = false; return null; }
 }
 
-/* ---------- hub (v1 style: Home overview | All Modules) ---------- */
-let hubTab = 'home', hubCache = null, hubAt = 0;
+/* ---------- hub (v1 "Executive Terminal" · All Modules) ---------- */
 async function hub(root) {
   C.setTop('', false);
-  root.innerHTML = `
-    <div class="seg mseg"><button data-t="home" class="${hubTab === 'home' ? 'on' : ''}">Home</button><button data-t="all" class="${hubTab === 'all' ? 'on' : ''}">All Modules</button></div>
-    <div id="hubBody"></div>
-    <button class="btn secondary" id="lock" style="margin-top:18px">Lock manager pages</button>`;
-  root.querySelector('.mseg').onclick = e => {
-    const b = e.target.closest('button'); if (!b) return;
-    hubTab = b.dataset.t; hub(root);
-  };
-  root.querySelector('#lock').onclick = () => { sessionStorage.removeItem('bq_pin'); C.S.pin = ''; location.hash = '#/'; };
-  const body = root.querySelector('#hubBody');
-  if (hubTab === 'all') return allModules(body);
-  paintHome(body);
-  if (!hubCache || Date.now() - hubAt > 60000) {
-    const got = await Promise.allSettled([C.api.mgr('hr'), C.api.mgr('spawning'), C.api.mgr('processing'), C.api.dash('maint'), C.api.dash('landfarm'), C.api.dash('seacage')]);
-    const [hr, sp, pr, mt, lf, sc] = got.map(g => g.status === 'fulfilled' ? g.value : null);
-    hubCache = { hr, sp, pr, mt, lf, sc }; hubAt = Date.now();
-    if (document.body.contains(body)) paintHome(body);
-  }
-}
-function paintHome(body) {
-  const d = hubCache;
-  const dash = '<span class="dim">—</span>';
-  if (!d) { body.innerHTML = '<div class="loading">Loading…</div>'; return; }
-  const mtProblems = d.mt ? d.mt.items.filter(i => i.issues).length + d.mt.tankIssues.length : 0;
-  const lfs = (d.lf && d.lf.summary) || null;
-  const dead = d.sc && d.sc.deadMonth ? (d.sc.deadMonth.KR || 0) + (d.sc.deadMonth.MY || 0) + (d.sc.deadMonth.KRB || 0) : null;
-  const att = [];
-  if (d.hr && d.hr.pending.length) att.push({ c: 'var(--attention)', t: `${d.hr.pending.length} leave request${d.hr.pending.length > 1 ? 's' : ''} waiting`, s: 'Approve or deny', href: '#/mgr/hr' });
-  if (mtProblems) att.push({ c: 'var(--alert)', t: `${mtProblems} maintenance problem${mtProblems > 1 ? 's' : ''}`, s: 'Reported by workers', href: '#/mgr/maint' });
-  if (lfs && lfs.spatPending) att.push({ c: 'var(--attention)', t: `${lfs.spatPending} trial${lfs.spatPending > 1 ? 's' : ''} waiting for spat count`, s: 'Spat count not confirmed yet', href: '#/mgr/spawning' });
-  if (d.sp && d.sp.active.length > 6) att.push({ c: 'var(--attention)', t: `${d.sp.active.length} spawning trials still active`, s: 'Confirm or discard old trials', href: '#/mgr/spawning' });
-  const card = (c, label, href, stat, sub) => `
-    <a class="gcard" style="--c:${c}" href="${href}">
-      <span class="gt">${label}</span><span class="gn">${stat}</span><span class="gs">${sub}</span></a>`;
-  body.innerHTML = `
-    <div class="sec-h"><span>Needs your attention ${att.length ? `<i class="cnt">${att.length}</i>` : ''}</span></div>
-    ${att.length ? att.map(a => `
-      <a class="att" style="--c:${a.c}" href="${a.href}"><span class="tx"><b>${a.t}</b><small>${a.s}</small></span><span class="chev">${C.I.chev}</span></a>`).join('')
-      : '<div class="att ok"><span class="tx"><b>All clear</b><small>Nothing waiting for you</small></span></div>'}
-    <div class="sec-h" style="margin-top:20px"><span>Farm at a glance · this month</span></div>
-    <div class="glance">
-      ${card('#10B981', 'Land Farm', '#/m/landfarm', lfs ? n0(lfs.spatConfirmed) : dash, 'spat confirmed')}
-      ${card('#0EA5E9', 'Sea Cage', '#/m/seacage', dead == null ? dash : n0(dead), 'dead this month')}
-      ${card('#EC4899', 'Spawning', '#/mgr/spawning', d.sp ? d.sp.thisMonth.trials : dash, d.sp ? `trials · ${(d.sp.thisMonth.eggs / 1e6).toFixed(1)}M eggs` : 'trials')}
-      ${card('#F59E0B', 'Processing', '#/mgr/processing', d.pr ? d.pr.thisMonth.batches : dash, d.pr ? `batches · ${d.pr.thisMonth.yieldPct}% yield` : 'batches')}
-      ${card('#6366F1', 'HR', '#/mgr/hr', d.hr ? d.hr.pending.length : dash, 'leave waiting')}
-      ${card('#F97316', 'Maintenance', '#/mgr/maint', d.mt ? mtProblems : dash, 'open problems')}
-    </div>
-    <div class="foot">Updated ${new Date(hubAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>`;
-}
-function allModules(body) {
-  const sub = { hr: 'Leave approvals & balances', spawning: 'Trials, outcomes & purchases', processing: 'Batches, yield & Sankina stock',
-    maint: 'Open problems & last checks', wq: 'Latest readings', monthend: 'HR for the office · operations for Kevin' };
-  body.innerHTML = `<div class="sec-h"><span>Log views</span></div>` + PAGES.map(p => `
-    <a class="mcard" style="--c:${p.c}" href="#/mgr/${p.id}">
+  const docs = C.S.cfg && C.S.cfg.links && C.S.cfg.links.documents_url;
+  const row = p => `
+    <a class="mcard" style="--c:${p.c}" href="${p.href}" ${p.ext ? 'target="_blank" rel="noopener"' : ''}>
       <span class="mi">${C.I[p.icon] || C.I.folder}</span>
-      <span class="mt"><span class="eb">${p.eb}</span><span class="t">${p.name}</span><span class="s">${sub[p.id]}</span></span>
-      <span class="chev">${C.I.chev}</span></a>`).join('');
+      <span class="mt"><span class="eb ko">${p.ko}</span><span class="t">${p.name}</span><span class="s">${p.sub}</span><span class="st" id="hs-${p.id}"></span></span>
+      <span class="chev">${p.ext ? C.I.ext : C.I.chev}</span></a>`;
+  root.innerHTML = `
+    <div class="exec-h">
+      <div><div class="eb ko">최고 경영자 콘솔</div><h1>Executive Terminal</h1></div>
+      <button class="round-btn" id="refresh" aria-label="Refresh"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8M4 4v4h4M4 13a8 8 0 0 0 14.3 4.9L20 16M20 20v-4h-4"/></svg></button>
+      <button class="lock-btn" id="lock">${C.I.lock}<span>Lock</span></button>
+    </div>
+    <div class="sec-h"><span>Log views</span></div>
+    ${PAGES.map(row).join('')}
+    ${docs ? `<div class="sec-h" style="margin-top:18px"><span style="color:var(--accent)">Resources</span></div>
+      ${row({ id: 'docs', href: docs, ext: true, ko: '문서 보관함', name: 'Documents', sub: 'Manuals, papers & HR files', icon: 'folder', c: '#64748B' })}` : ''}`;
+  root.querySelector('#lock').onclick = () => { sessionStorage.removeItem('bq_pin'); C.S.pin = ''; location.hash = '#/'; };
+  root.querySelector('#refresh').onclick = () => hub(root);
+  const put = (id, html, cls) => { const el = root.querySelector('#hs-' + id); if (el) { el.innerHTML = html; el.className = 'st ' + (cls || ''); } };
+  C.api.mgr('hr').then(h => h.pending.length && put('hr', `${h.pending.length} leave waiting for approval`, 'warn')).catch(() => {});
+  C.api.mgr('spawning').then(s => put('spawning', `${s.thisMonth.trials} trials this month · ${s.active.length} still active`, s.active.length > 6 ? 'warn' : '')).catch(() => {});
+  C.api.mgr('processing').then(p => put('processing', `${p.thisMonth.batches} batches this month · ${p.thisMonth.yieldPct}% yield`)).catch(() => {});
+  C.api.dash('maint').then(m => {
+    const n = m.items.filter(i => i.issues).length + m.tankIssues.length;
+    put('maint', n ? `${n} open problem${n > 1 ? 's' : ''}` : 'All normal', n ? 'bad' : 'good');
+  }).catch(() => {});
+  C.api.mgr('wq').then(w => { const l = w.latest[0]; if (l) put('wq', `Latest ${C.esc(l.date)} ${C.esc(l.time)}`); }).catch(() => {});
 }
 
 /* ---------- HR ---------- */

@@ -23,7 +23,7 @@ html.dark {
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; background: var(--bg); color: var(--text); }
 body {
-  font: 16px/1.45 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font: 16px/1.45 'Inter', 'Noto Sans KR', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   min-height: 100vh;
   padding-bottom: calc(96px + var(--safe-bot));
 }
@@ -356,19 +356,15 @@ html.dark .st-stocked { background: #1E8A50; }
 html.dark .st-just { color: #4ADE80; border-color: #4ADE80; }
 html.dark .toast { background: #EAF1FA; color: #0B1B33; }
 
-/* ---------- manager home (v1) ---------- */
-.mseg { margin-bottom: 16px; }
-.sec-h .cnt { font-style: normal; background: var(--alert); color: #fff; font-size: 11px; font-weight: 800; padding: 1px 8px; border-radius: 999px; margin-left: 6px; letter-spacing: 0; }
-.att { --c: var(--attention); display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--c);
-  border-radius: 16px; padding: 14px 14px 14px 16px; margin-bottom: 10px; box-shadow: var(--shadow); text-decoration: none; color: var(--text); }
-.att .tx { flex: 1; display: flex; flex-direction: column; }
-.att small { color: var(--text-mut); font-size: 13px; margin-top: 1px; }
-.att.ok { --c: var(--accent); }
-.att .chev { color: var(--text-mut); }
-.glance { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.gcard { --c: var(--accent); display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
-  padding: 12px 14px 14px; box-shadow: var(--shadow); text-decoration: none; color: var(--text); border-top: 3px solid var(--c); }
-.gcard .gt { font-size: 13px; font-weight: 700; color: var(--c); }
-.gcard .gn { font-family: 'Space Grotesk', 'Inter', sans-serif; font-size: 28px; font-weight: 700; line-height: 1.15; margin-top: 4px; font-variant-numeric: tabular-nums; }
-.gcard .gs { font-size: 12px; color: var(--text-mut); margin-top: 2px; }
-.dim { color: var(--text-dim); }
+/* ---------- manager: Executive Terminal (v1) ---------- */
+.exec-h { display: flex; align-items: center; gap: 10px; margin: 4px 2px 18px; }
+.exec-h > div { flex: 1; min-width: 0; }
+.exec-h .eb { font-size: 13px; font-weight: 700; letter-spacing: .12em; color: var(--text-mut); }
+.exec-h h1 { font-family: 'Space Grotesk', 'Inter', sans-serif; font-size: 25px; white-space: nowrap; letter-spacing: -.02em; margin: 2px 0 0; line-height: 1.1; }
+.lock-btn { display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 14px; border-radius: 12px; font-weight: 600; font-size: 15px;
+  color: var(--alert); background: color-mix(in srgb, var(--alert) 10%, var(--surface)); border: 1px solid color-mix(in srgb, var(--alert) 35%, var(--border)); }
+.lock-btn svg { width: 17px; height: 17px; }
+.mcard .eb.ko { letter-spacing: .12em; font-weight: 700; }
+.mcard .st { display: block; font-size: 13px; font-weight: 600; color: var(--text-mut); margin-top: 3px; }
+.mcard .st:empty { display: none; }
+.mcard .st.warn { color: var(--attention); } .mcard .st.bad { color: var(--alert); } .mcard .st.good { color: var(--good); }
