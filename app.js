@@ -2,7 +2,7 @@
    - setup (6-digit code), worker name, All Modules list
    - talks to the router (reads via JSONP, sends via the outbox)
    - loads each module file only when it is opened */
-const APP_VERSION = '2.0.4';
+const APP_VERSION = '2.0.5';
 const ROUTER_DEFAULT = 'https://script.google.com/macros/s/AKfycbwoUa5pXp58jSSN4xaBtHsiRe6FgG7BX3VXT_zKGoy7C7myxSvAmbDcqqukbUqfyQ7c/exec';
 
 const K = { cfg: 'bq_cfg', code: 'bq_code', worker: 'bq_worker' };

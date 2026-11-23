@@ -243,24 +243,33 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 /* ---------- land farm tank map ---------- */
 .map-h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 0 4px 10px; flex-wrap: wrap; }
 .map-h b { font-size: 17px; }
-.tmap { display: flex; flex-direction: column; gap: 10px; }
-.tblock { display: flex; flex-direction: column; gap: 4px; padding-bottom: 10px; border-bottom: 1px dashed var(--line); }
-.tblock:last-child { border-bottom: 0; padding-bottom: 0; }
-.trow { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+.tmap { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; }
 .tile {
-  aspect-ratio: 1 / 1; border: 0; border-radius: 9px; font-size: 13px; font-weight: 750;
-  font-variant-numeric: tabular-nums; display: grid; place-items: center; padding: 0;
+  aspect-ratio: 1 / 1; border: 1.5px solid transparent; border-radius: 9px; font-size: 13px; font-weight: 750;
+  font-variant-numeric: tabular-nums; display: grid; place-items: center; padding: 0; transition: opacity .15s;
 }
 .tile.sel { outline: 3px solid var(--ink); outline-offset: 1px; }
-.tile.dis { opacity: .28; }
-.st-next { background: #E9DDFB; color: #5B2DA3; }
-.st-just { background: #BFEBCB; color: #155C2E; }
+.tile.dis { opacity: .25; }
+.tile.dim { opacity: .15; }
+/* the 4 cycle states */
 .st-stocked { background: #1F7A43; color: #fff; }
-.st-empty { background: #ECE8E1; color: #8A93A0; }
-.st-diatom { background: #D6E6FB; color: #1D4F91; }
-.st-brood { background: #F6E3C3; color: #8A5A12; }
-.legend { display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 12px 4px 0; font-size: 12px; color: var(--ink-2); }
-.legend span { display: inline-flex; align-items: center; gap: 5px; }
-.legend i { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
+.st-just { background: #fff; color: #1F7A43; border-color: #1F7A43; }
+.st-next { background: #7C3AED; color: #fff; }
+.st-empty { background: #fff; color: #9AA1AB; border-color: #E2DDD5; }
+/* not part of the cycle: faded */
+.st-diatom, .st-brood { background: repeating-linear-gradient(135deg, #EEF1F4 0 4px, #F7F8FA 4px 8px); color: #B4BAC2; font-weight: 600; }
+.tchips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+.tchips button {
+  display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 11px; border-radius: 999px;
+  border: 1.5px solid var(--line); background: #fff; font-size: 13px; font-weight: 600; color: var(--ink-2);
+}
+.tchips button b { color: var(--ink); }
+.tchips button.on { border-color: var(--ink); color: var(--ink); }
+.tchips i { width: 12px; height: 12px; border-radius: 4px; display: inline-block; border: 1.5px solid transparent; }
+.tchips i.st-just { border-color: #1F7A43; }
+.tchips i.st-empty { border-color: #C9C3BA; }
 .badge { font-size: 13px; font-weight: 700; padding: 3px 10px; border-radius: 999px; vertical-align: middle; margin-left: 6px; }
 .sheet-acts { display: flex; flex-direction: column; gap: 8px; }
+
+.pick-next .tile.sel { background: #7C3AED; color: #fff; border-color: transparent; outline: 0; }
+.pick-clean .tile.sel { background: var(--brand); color: #fff; border-color: transparent; outline: 0; }

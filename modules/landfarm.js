@@ -63,34 +63,35 @@ const getDate = (root, id = 'fDate') => { const v = root.querySelector('#' + id)
 const tankSelect = (list, sel, ph = 'Tangki…', f = 'tank') =>
   `<select class="select" data-f="${f}"><option value="">${ph}</option>${list.map(t => `<option value="${t.tank}" ${t.tank === sel ? 'selected' : ''}>${t.tank}${t.count ? ' · ' + n0(t.count) : ''}</option>`).join('')}</select>`;
 
-/* Tank map: blocks of 8 — odd tanks on top, the facing even tanks below. */
+/* Tank map: number order, 10 per row. Only the 4 cycle states get colour;
+   diatom / broodstock / incubation are faded so they don't compete. */
+const CYCLE = ['stocked', 'just', 'next', 'empty'];
 function mapHtml(opts = {}) {
-  const byNo = {};
-  tanks().forEach(t => { byNo[parseInt(t.tank.slice(1), 10)] = t; });
-  let html = '';
-  for (let b = 0; b < 5; b++) {
-    const odd = [], even = [];
-    for (let k = 0; k < 8; k++) { odd.push(b * 16 + k * 2 + 1); even.push(b * 16 + k * 2 + 2); }
-    const tile = n => {
-      const t = byNo[n] || { tank: 'T' + String(n).padStart(2, '0'), state: 'empty' };
-      const sel = opts.selected && opts.selected.has(t.tank);
-      const dis = opts.only && !opts.only(t);
-      return `<button class="tile ${(STATE[t.state] || STATE.empty)[1]} ${sel ? 'sel' : ''} ${dis ? 'dis' : ''}" data-t="${t.tank}" ${dis ? 'disabled' : ''}>${n}</button>`;
-    };
-    html += `<div class="tblock"><div class="trow">${odd.map(tile).join('')}</div><div class="trow">${even.map(tile).join('')}</div></div>`;
-  }
-  return `<div class="tmap">${html}</div>
-    <div class="legend">${['next', 'just', 'stocked', 'empty', 'diatom', 'broodstock'].map(s => `<span><i class="${STATE[s][1]}"></i>${s === 'broodstock' ? 'Induk / Inkubasi' : STATE[s][0]}</span>`).join('')}</div>`;
+  const list = tanks().slice().sort((a, b) => parseInt(a.tank.slice(1), 10) - parseInt(b.tank.slice(1), 10));
+  return `<div class="tmap">${list.map(t => {
+    const sel = opts.selected && opts.selected.has(t.tank);
+    const dis = opts.only && !opts.only(t);
+    const dim = opts.filter && (opts.filter === 'other' ? CYCLE.includes(t.state) : t.state !== opts.filter);
+    return `<button class="tile ${(STATE[t.state] || STATE.empty)[1]} ${sel ? 'sel' : ''} ${dis ? 'dis' : ''} ${dim ? 'dim' : ''}" data-t="${t.tank}" ${dis ? 'disabled' : ''}>${parseInt(t.tank.slice(1), 10)}</button>`;
+  }).join('')}</div>`;
+}
+/* Tappable counts that double as the legend */
+function chipsHtml(filter) {
+  const cnt = {}; tanks().forEach(t => { const k = CYCLE.includes(t.state) ? t.state : 'other'; cnt[k] = (cnt[k] || 0) + 1; });
+  const items = [['stocked', 'Ada stok'], ['just', 'Baru stok'], ['next', 'Next trial'], ['empty', 'Kosong'], ['other', 'Diatom & lain']];
+  return `<div class="tchips">${items.map(([k, t]) =>
+    `<button data-fk="${k}" class="${filter === k ? 'on' : ''}"><i class="${k === 'other' ? 'st-diatom' : STATE[k][1]}"></i>${t} <b>${cnt[k] || 0}</b></button>`).join('')}</div>`;
 }
 
 /* ---------- home ---------- */
-function home(root) {
+function home(root, filter) {
   C.setTop('Land Farm', true);
-  const c = (dash && dash.counts) || {}, s = (dash && dash.summary) || {};
+  const s = (dash && dash.summary) || {};
   root.innerHTML = `
     <div class="card" style="padding:14px 12px">
-      <div class="map-h"><b>Peta Tangki</b><span class="muted small">${c.stocked || 0} ada stok · ${c.just || 0} baru · ${c.next || 0} next · ${c.empty || 0} kosong</span></div>
-      ${mapHtml()}
+      <div class="map-h"><b>Peta Tangki</b><span class="muted small">Tekan tangki untuk butiran</span></div>
+      ${chipsHtml(filter)}
+      ${mapHtml({ filter })}
       ${!dash ? '<p class="muted small center">Peta penuh perlukan signal.</p>' : ''}
     </div>
     ${dash ? `
@@ -112,6 +113,10 @@ function home(root) {
         <span class="chev">${C.I.chev}</span>
       </a>`).join('')}</div>`;
   root.querySelector('.tmap').onclick = e => { const b = e.target.closest('.tile'); if (b) tankSheet(b.dataset.t); };
+  root.querySelector('.tchips').onclick = e => {
+    const b = e.target.closest('[data-fk]'); if (!b) return;
+    home(root, filter === b.dataset.fk ? '' : b.dataset.fk);
+  };
 }
 
 function tankSheet(id) {
@@ -151,12 +156,36 @@ function pickForm(kind) {
     const isNext = kind === 'next';
     C.setTop(isNext ? 'Tanda Next Trial' : 'Cuci Tangki', true);
     const sel = new Set();
-    const only = isNext ? (t => t.type === 'Spat' && t.state === 'empty') : (t => t.type !== 'Diatom' || true);
+    const only = isNext ? (t => t.type === 'Spat' && t.state === 'empty') : (() => true);
+    let skipped = [];
+    function fromText(txt) {
+      const want = new Set(); skipped = [];
+      txt.split(/[,\s]+/).filter(Boolean).forEach(part => {
+        const m = part.match(/^[Tt]?(\d{1,2})(?:-[Tt]?(\d{1,2}))?$/);
+        if (!m) return;
+        let a = +m[1], b = m[2] ? +m[2] : a; if (a > b) [a, b] = [b, a];
+        for (let n = a; n <= b && n <= 80; n++) want.add('T' + String(n).padStart(2, '0'));
+      });
+      sel.clear();
+      want.forEach(t => { const tk = tankOf(t); if (tk.tank && only(tk)) sel.add(t); else skipped.push(t); });
+    }
     function paint() {
+      const typed = root.querySelector('#typed') ? root.querySelector('#typed').value : '';
       root.innerHTML = `
-        <p class="muted small" style="margin:0 4px 10px">${isNext ? 'Tekan tangki kosong untuk trial seterusnya.' : 'Tekan semua tangki yang dicuci hari ini.'}</p>
-        <div class="card" style="padding:14px 12px">${mapHtml({ selected: sel, only })}</div>
+        <div class="card" style="padding:12px">
+          <label class="field" style="margin:0"><span>Taip nombor tangki</span>
+            <input class="input" id="typed" inputmode="text" placeholder="cth: 12, 14, 20-25" value="${C.esc(typed)}"></label>
+          ${skipped.length ? `<p class="small" style="color:var(--warn);margin:8px 2px 0">Dilangkau (${isNext ? 'bukan tangki kosong' : 'tidak wujud'}): ${skipped.join(', ')}</p>` : ''}
+          <p class="muted small" style="margin:8px 2px 0">Atau tekan tangki di peta.</p>
+        </div>
+        <div class="card ${isNext ? 'pick-next' : 'pick-clean'}" style="padding:14px 12px">${mapHtml({ selected: sel, only })}</div>
         <div class="sticky-bar"><button class="btn" id="pSend" ${sel.size ? '' : 'disabled'}>${sel.size ? `Hantar (${sel.size} tangki)` : 'Pilih tangki'}</button></div>`;
+      const inp = root.querySelector('#typed');
+      inp.oninput = () => {
+        fromText(inp.value);
+        const pos = inp.selectionStart; paint();
+        const ni = root.querySelector('#typed'); ni.focus(); ni.setSelectionRange(pos, pos);
+      };
       root.querySelector('.tmap').onclick = e => {
         const b = e.target.closest('.tile'); if (!b || b.disabled) return;
         sel.has(b.dataset.t) ? sel.delete(b.dataset.t) : sel.add(b.dataset.t); paint();
