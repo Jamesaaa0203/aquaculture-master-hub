@@ -1,14 +1,14 @@
 /* Manager pages (English, PIN). Router reads: mgr spawning|processing|hr|wq, dash maint.
    Actions: hr_leave, sp_outcome, sp_discard (manager PIN), lf_form stock counts (PIN). */
 
-const PAGES = [
-  { id: 'maint',      href: '#/mgr/maint',      ko: '유지보수 현황',     name: 'Maintenance',          sub: 'Status overview — all scheduled checks', icon: 'wrench', c: '#DC2626' },
-  { id: 'landfarm',   href: '#/m/landfarm',     ko: '육상 양식장 현황',   name: 'Land Farm',            sub: 'Tank map & this month',                  icon: 'flask',  c: '#10B981' },
-  { id: 'spawning',   href: '#/mgr/spawning',   ko: '산란 현황',         name: 'Spawning & Purchasing', sub: 'Trials, outcomes & purchases',          icon: 'egg',    c: '#EC4899' },
-  { id: 'processing', href: '#/mgr/processing', ko: '가공 현황',         name: 'Processing & Sankina', sub: 'Batches, yield & Sankina stock',         icon: 'box',    c: '#F59E0B' },
-  { id: 'wq',         href: '#/mgr/wq',         ko: '수질 현황',         name: 'Water Quality',        sub: 'Latest readings',                        icon: 'drop',   c: '#06B6D4' },
-  { id: 'seacage',    href: '#/m/seacage',      ko: '가두리 운영 현황',   name: 'Sea Cage Ops',         sub: 'Mortality & stock this month',           icon: 'grid',   c: '#0EA5E9' },
+const PAGES = [   // highest priority first: things waiting for you, then daily production, then reports
   { id: 'hr',         href: '#/mgr/hr',         ko: '인사 및 근태 관리',  name: 'Workforce & HR',       sub: 'Leave approvals & balances',             icon: 'people', c: '#6366F1' },
+  { id: 'maint',      href: '#/mgr/maint',      ko: '유지보수 현황',     name: 'Maintenance',          sub: 'Status overview — all scheduled checks', icon: 'wrench', c: '#DC2626' },
+  { id: 'spawning',   href: '#/mgr/spawning',   ko: '산란 현황',         name: 'Spawning & Purchasing', sub: 'Trials, outcomes & purchases',          icon: 'egg',    c: '#EC4899' },
+  { id: 'landfarm',   href: '#/m/landfarm',     ko: '육상 양식장 현황',   name: 'Land Farm',            sub: 'Tank map & this month',                  icon: 'flask',  c: '#10B981' },
+  { id: 'seacage',    href: '#/m/seacage',      ko: '가두리 운영 현황',   name: 'Sea Cage Ops',         sub: 'Mortality & stock this month',           icon: 'grid',   c: '#0EA5E9' },
+  { id: 'wq',         href: '#/mgr/wq',         ko: '수질 현황',         name: 'Water Quality',        sub: 'Latest readings',                        icon: 'drop',   c: '#06B6D4' },
+  { id: 'processing', href: '#/mgr/processing', ko: '가공 현황',         name: 'Processing & Sankina', sub: 'Batches, yield & Sankina stock',         icon: 'box',    c: '#F59E0B' },
   { id: 'monthend',   href: '#/mgr/monthend',   ko: '월말 보고서',       name: 'Month-end Pack',       sub: 'HR for the office · operations for Kevin', icon: 'folder', c: '#0D9488' }
 ];
 const OUTCOMES = ['Successful', 'Failed', 'Inconclusive'];
