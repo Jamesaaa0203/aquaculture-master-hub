@@ -2,10 +2,10 @@
    Actions: hr_leave, sp_outcome, sp_discard (manager PIN), lf_form stock counts (PIN). */
 
 const PAGES = [   // James's order: land farm group, sea cage, processing, HR, maintenance, month-end
-  { id: 'landfarm',   href: '#/m/landfarm',     ko: '육상 양식장 현황',   name: 'Land Farm',            sub: 'Tank map & this month',                  icon: 'flask',  c: '#10B981' },
+  { id: 'landfarm',   href: '#/mgr/landfarm',     ko: '육상 양식장 현황',   name: 'Land Farm',            sub: 'Tank map, stock & this month',                  icon: 'flask',  c: '#10B981' },
   { id: 'spawning',   href: '#/mgr/spawning',   ko: '산란 현황',         name: 'Spawning & Purchasing', sub: 'Trials, outcomes & purchases',          icon: 'egg',    c: '#EC4899' },
   { id: 'wq',         href: '#/mgr/wq',         ko: '수질 현황',         name: 'Water Quality',        sub: 'Latest readings',                        icon: 'drop',   c: '#06B6D4' },
-  { id: 'seacage',    href: '#/m/seacage',      ko: '가두리 운영 현황',   name: 'Sea Cage Ops',         sub: 'Mortality & stock this month',           icon: 'grid',   c: '#0EA5E9' },
+  { id: 'seacage',    href: '#/mgr/seacage',      ko: '가두리 운영 현황',   name: 'Sea Cage Ops',         sub: 'Mortality & stock movements',           icon: 'grid',   c: '#0EA5E9' },
   { id: 'processing', href: '#/mgr/processing', ko: '가공 현황',         name: 'Processing & Sankina', sub: 'Batches, yield & Sankina stock',         icon: 'box',    c: '#F59E0B' },
   { id: 'hr',         href: '#/mgr/hr',         ko: '인사 및 근태 관리',  name: 'Workforce & HR',       sub: 'Leave approvals & balances',             icon: 'people', c: '#6366F1' },
   { id: 'maint',      href: '#/mgr/maint',      ko: '유지보수 현황',     name: 'Maintenance',          sub: 'Status overview — all scheduled checks', icon: 'wrench', c: '#DC2626' },
@@ -16,7 +16,7 @@ const OUTCOMES = ['Successful', 'Failed', 'Inconclusive'];
 let C;
 export async function render(root, ctx, sub) {
   C = ctx;
-  const p = { hr, spawning, processing, maint, wq, monthend }[sub];
+  const p = { hr, spawning, processing, maint, wq, monthend, landfarm, seacage }[sub];
   return p ? p(root) : hub(root);
 }
 
@@ -62,6 +62,82 @@ async function hub(root) {
     put('maint', n ? `${n} open problem${n > 1 ? 's' : ''}` : 'All normal', n ? 'bad' : 'good');
   }).catch(() => {});
   C.api.mgr('wq').then(w => { const l = w.latest[0]; if (l) put('wq', `Latest ${C.esc(l.date)} ${C.esc(l.time)}`); }).catch(() => {});
+}
+
+/* ---------- Land Farm (manager, read-only) ---------- */
+const TSTATE = {
+  stocked: ['Stocked', 'st-stocked'], just: ['Just stocked', 'st-just'], next: ['Next trial', 'st-next'], empty: ['Empty', 'st-empty'],
+  diatom: ['Diatom', 'st-diatom'], broodstock: ['Broodstock', 'st-brood'], incubation: ['Incubation', 'st-brood']
+};
+async function landfarm(root) {
+  title('Land Farm');
+  loading(root);
+  let d; try { d = await C.api.dash('landfarm'); } catch (e) { return fail(root, e); }
+  const s = d.summary || {}, list = (d.tanks || []).slice().sort((a, b) => parseInt(a.tank.slice(1), 10) - parseInt(b.tank.slice(1), 10));
+  const cnt = {}; list.forEach(t => { const k = TSTATE[t.state] && !['broodstock', 'incubation'].includes(t.state) ? t.state : 'other'; cnt[k] = (cnt[k] || 0) + 1; });
+  const live = list.filter(t => ['stocked', 'just'].includes(t.state)).reduce((a, t) => a + (+t.count || 0), 0);
+  const top = list.filter(t => +t.count > 0).sort((a, b) => b.count - a.count);
+  root.innerHTML = `
+    <div class="card">
+      <h2>This month</h2>
+      <div class="stats">
+        <div class="stat"><div class="n">${n0(s.spatConfirmed)}</div><div class="l">Spat confirmed</div></div>
+        <div class="stat"><div class="n">${n0(s.seaCageTransfer)}</div><div class="l">Sent to sea cage</div></div>
+        <div class="stat"><div class="n">${n0(s.spatRemoved)}</div><div class="l">Removed with plates</div></div>
+        <div class="stat"><div class="n">${s.sankinaKg || 0}</div><div class="l">To Sankina (kg)</div></div>
+        <div class="stat"><div class="n">${s.finishedRawKg || 0}</div><div class="l">Finished raw (kg)</div></div>
+        <div class="stat"><div class="n">${s.finishedYieldKg || 0}</div><div class="l">Finished yield (kg)</div></div>
+      </div>
+    </div>
+    <div class="card" style="padding:14px 12px">
+      <div class="map-h"><b>Tank map</b><span class="muted small">${n0(live)} spat in tanks · tap a tank</span></div>
+      <div class="tchips static">${[['stocked'], ['just'], ['next'], ['empty'], ['diatom'], ['other']].map(([k]) =>
+        `<span><i class="${k === 'other' ? 'st-brood' : TSTATE[k][1]}"></i>${k === 'other' ? 'Broodstock / incubation' : TSTATE[k][0]} <b>${cnt[k] || 0}</b></span>`).join('')}</div>
+      <div class="tmap">${list.map(t => `<button class="tile ${(TSTATE[t.state] || TSTATE.empty)[1]}" data-t="${t.tank}">${parseInt(t.tank.slice(1), 10)}</button>`).join('')}</div>
+    </div>
+    ${top.length ? `<div class="section-title">Tanks with stock (${top.length})</div>
+    <div class="card" style="padding:6px 14px">${top.map(t => `<div class="spec-row"><span>${t.tank} <small class="muted">${(TSTATE[t.state] || TSTATE.empty)[0]}${t.since ? ' · since ' + fmtD(t.since) : ''}</small></span><b>${n0(t.count)}</b></div>`).join('')}</div>` : ''}`;
+  root.querySelector('.tmap').onclick = e => {
+    const b = e.target.closest('.tile'); if (!b) return;
+    const t = list.find(x => x.tank === b.dataset.t) || {}, st = TSTATE[t.state] || TSTATE.empty;
+    const rows = [];
+    if (t.since) rows.push(['Since', fmtD(t.since)]);
+    if (t.trial) rows.push(['Trial', C.esc(t.trial)]);
+    if (t.count) rows.push(['Spat count', n0(t.count) + (t.census ? ' (census)' : '')]);
+    if (t.removed !== undefined) rows.push(['Removed', n0(t.removed) + (t.to ? ' → ' + C.esc(t.to) : '')]);
+    rows.push(['Last cleaned', t.cleaned ? fmtD(t.cleaned) : '—']);
+    rows.push(['Last mortality', t.lastDead ? fmtD(t.lastDead.date) + ' · ' + t.lastDead.qty : '—']);
+    C.openSheet(`<h3>${t.tank} <span class="badge ${st[1]}">${st[0]}</span></h3>
+      <div class="card" style="padding:6px 14px">${rows.map(r => `<div class="spec-row"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('')}</div>`);
+  };
+}
+
+/* ---------- Sea Cage (manager, read-only) ---------- */
+async function seacage(root) {
+  title('Sea Cage Ops');
+  loading(root);
+  let d; try { d = await C.api.dash('seacage'); } catch (e) { return fail(root, e); }
+  const m = d.deadMonth || {}, total = (m.KR || 0) + (m.MY || 0) + (m.KRB || 0);
+  const site = { KR: 'Kolam Korea', MY: 'Baby (MY)', KRB: 'Baby KK' };
+  const uname = u => `${site[u.site] || u.site} ${u.unit}${u.site === 'MY' && u.petak ? '/' + u.petak : ''}`;
+  const recent = (d.units || []).filter(u => u.lastDead && u.lastDead.date).sort((a, b) => b.lastDead.date.localeCompare(a.lastDead.date)).slice(0, 12);
+  root.innerHTML = `
+    <div class="card">
+      <h2>This month</h2>
+      <div class="stats">
+        <div class="stat"><div class="n">${n0(total)}</div><div class="l">Dead · all sites</div></div>
+        <div class="stat"><div class="n">${n0(m.KR)}</div><div class="l">Dead · Kolam Korea</div></div>
+        <div class="stat"><div class="n">${n0(m.MY)}</div><div class="l">Dead · Baby (MY)</div></div>
+        <div class="stat"><div class="n">${n0(m.KRB)}</div><div class="l">Dead · Baby KK</div></div>
+        <div class="stat"><div class="n">${n0(d.stockInMonth)}</div><div class="l">Stock in</div></div>
+      </div>
+    </div>
+    ${recent.length ? `<div class="section-title">Latest mortality records</div>
+    <div class="card" style="padding:6px 14px">${recent.map(u => `<div class="spec-row"><span>${C.esc(uname(u))} <small class="muted">${fmtD(u.lastDead.date)}</small></span><b>${n0(u.lastDead.qty)}</b></div>`).join('')}</div>` : ''}
+    ${d.recentStock && d.recentStock.length ? `<div class="section-title">Latest stock movements</div>
+    <div class="card" style="padding:6px 14px">${d.recentStock.map(r => `<div class="spec-row"><span>${fmtD(r.date)} · ${C.esc(uname(r))}
+      <small class="muted">${C.esc(r.source)}${r.supplier ? ' · ' + C.esc(r.supplier) : ''}</small></span>
+      <b style="color:${r.qty < 0 ? 'var(--bad)' : 'var(--good)'}">${r.qty > 0 ? '+' : ''}${n0(r.qty)}</b></div>`).join('')}</div>` : ''}`;
 }
 
 /* ---------- HR ---------- */
