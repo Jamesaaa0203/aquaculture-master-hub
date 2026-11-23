@@ -2,7 +2,7 @@
    - setup (6-digit code), worker name, All Modules list
    - talks to the router (reads via JSONP, sends via the outbox)
    - loads each module file only when it is opened */
-const APP_VERSION = '2.0.0';
+const APP_VERSION = '2.0.1';
 const ROUTER_DEFAULT = 'https://script.google.com/macros/s/AKfycbwoUa5pXp58jSSN4xaBtHsiRe6FgG7BX3VXT_zKGoy7C7myxSvAmbDcqqukbUqfyQ7c/exec';
 
 const K = { cfg: 'bq_cfg', code: 'bq_code', worker: 'bq_worker' };
@@ -292,14 +292,15 @@ function screenHome() {
     <div class="foot">v${APP_VERSION} · ${esc(S.worker)}</div>`;
 }
 
-async function screenModule(id) {
+async function screenModule(path) {
+  const [id, sub] = path.split('/');
   const m = RECORD.find(x => x.id === id);
   if (!m || !canUse(m.perm)) { location.hash = '#/'; return; }
   setTop(m.name, true);
   view.innerHTML = '<div class="loading">Loading…</div>';
   try {
     const mod = await import(`./modules/${id}.js?v=${APP_VERSION}`);
-    await mod.render(view, ctx());
+    await mod.render(view, ctx(), sub || '');
   } catch (e) {
     view.innerHTML = `<div class="banner bad">Could not open ${esc(m.name)}. ${esc(e.message)}</div>`;
   }
