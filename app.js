@@ -2,7 +2,7 @@
    - setup (6-digit code), worker name, All Modules list
    - talks to the router (reads via JSONP, sends via the outbox)
    - loads each module file only when it is opened */
-const APP_VERSION = '2.2.6';
+const APP_VERSION = '2.3.0';
 const ROUTER_DEFAULT = 'https://script.google.com/macros/s/AKfycbwoUa5pXp58jSSN4xaBtHsiRe6FgG7BX3VXT_zKGoy7C7myxSvAmbDcqqukbUqfyQ7c/exec';
 
 const K = { cfg: 'bq_cfg', code: 'bq_code', worker: 'bq_worker' };
@@ -219,8 +219,14 @@ function setTop(title, back) {
   const top = $('.topbar');
   top.classList.toggle('inmod', !!back);
   $('#backBtn').hidden = !back;
-  if (back) { $('#topTitle').textContent = title; $('#topSub').textContent = 'Bon Aqua Ops'; }
+  if (back) { $('#topTitle').textContent = title; $('#topSub').textContent = S.tone ? S.tone.eb : 'Bon Aqua Ops'; }
   else { $('#topTitle').innerHTML = 'Bon Aqua <span class="sub">Ops</span>'; showTheme(); }
+  top.classList.toggle('toned', !!(back && S.tone));
+}
+/* module colour + eyebrow for every screen inside a module (header line, icons, active tabs) */
+function setTone(c, eb) {
+  S.tone = c ? { c, eb } : null;
+  document.documentElement.style.setProperty('--mc', c || 'var(--accent)');
 }
 
 /* ---------- theme: system / light / dark (like v1) ---------- */
@@ -305,6 +311,7 @@ function screenSetup() {
 }
 
 function screenHome() {
+  setTone(null);
   setTop('', false);
   const links = (S.cfg && S.cfg.links) || {};
   const card = (o, href, ext) => `
@@ -345,6 +352,7 @@ async function screenModule(path) {
   const [id, sub] = path.split('/');
   const m = RECORD.find(x => x.id === id);
   if (!m) { location.hash = '#/'; return; }
+  setTone(m.c, m.eb);
   setTop(m.name, true);
   view.innerHTML = nameBar(m.perm) + '<div id="modroot"><div class="loading">Loading…</div></div>';
   wireNameBar();
@@ -358,6 +366,7 @@ async function screenModule(path) {
 }
 
 function screenManager(sub) {
+  if (!sub) setTone(null);
   setTop(sub ? 'Manager' : '', !!sub);
   if (!S.pin) {
     let pin = '';
@@ -375,6 +384,18 @@ function screenManager(sub) {
       </div>`;
     const paint = () => { $('#dots').innerHTML = Array.from({ length: Math.max(4, pin.length) }, (_, i) => `<i class="${i < pin.length ? 'on' : ''}"></i>`).join(''); };
     paint();
+    /* laptop keyboard: digits, Backspace, Delete/Escape = clear, Enter = submit */
+    document.onkeydown = e => {
+      if (!document.getElementById('dots')) { document.onkeydown = null; return; }
+      let k = null;
+      if (/^[0-9]$/.test(e.key)) k = e.key;
+      else if (e.key === 'Enter') k = 'ok';
+      else if (e.key === 'Escape' || e.key === 'Delete') k = 'c';
+      else if (e.key === 'Backspace') { pin = pin.slice(0, -1); $('#err').textContent = ''; paint(); e.preventDefault(); return; }
+      if (k === null) return;
+      e.preventDefault();
+      const b = view.querySelector(`.keys [data-k="${k}"]`); if (b && !b.disabled) b.click();
+    };
     view.querySelector('.keys').onclick = async e => {
       const b = e.target.closest('button'); if (!b) return;
       const k = b.dataset.k;
@@ -406,7 +427,7 @@ function screenManager(sub) {
 
 /* What every module gets */
 function ctx() {
-  return { api, S, esc, toast, openSheet, closeSheet, today, I, refreshOutbox, setTop };
+  return { api, S, esc, toast, openSheet, closeSheet, today, I, refreshOutbox, setTop, setTone };
 }
 
 /* ---------- Farm Specs ---------- */
@@ -420,7 +441,8 @@ $('#specsBtn').onclick = async () => {
 /* ---------- navigation ---------- */
 function route() {
   closeSheet();
-  view.onclick = view.oninput = view.onchange = null;   // modules attach these; clear on every screen change
+  view.onclick = view.oninput = view.onchange = null;
+  document.onkeydown = null;   // modules attach these; clear on every screen change
   const h = location.hash || '#/';
   const top = h === '#/' || h === '#/mgr' || h === '#/who';
   document.body.classList.toggle('no-nav', !top || !S.cfg || !S.code);
