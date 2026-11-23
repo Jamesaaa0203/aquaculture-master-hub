@@ -2,12 +2,12 @@
    Actions: hr_leave, sp_outcome, sp_discard (manager PIN), lf_form stock counts (PIN). */
 
 const PAGES = [
-  { id: 'hr', name: 'HR · Leave & OT', icon: 'user' },
-  { id: 'spawning', name: 'Spawning', icon: 'egg' },
-  { id: 'processing', name: 'Processing & Sankina stock', icon: 'box' },
-  { id: 'maint', name: 'Maintenance', icon: 'wrench' },
-  { id: 'wq', name: 'Water quality', icon: 'drop' },
-  { id: 'monthend', name: 'Month-end pack', icon: 'folder' }
+  { id: 'hr',         name: 'HR · Leave & OT',     eb: 'Sumber Manusia', icon: 'people', c: '#6366F1' },
+  { id: 'spawning',   name: 'Spawning',            eb: 'Pemijahan',      icon: 'egg',    c: '#EC4899' },
+  { id: 'processing', name: 'Processing & Sankina', eb: 'Pemprosesan',   icon: 'box',    c: '#F59E0B' },
+  { id: 'maint',      name: 'Maintenance',         eb: 'Penyelenggaraan', icon: 'wrench', c: '#F97316' },
+  { id: 'wq',         name: 'Water Quality',       eb: 'Kualiti Air',    icon: 'drop',   c: '#06B6D4' },
+  { id: 'monthend',   name: 'Month-end Pack',      eb: 'Laporan Bulanan', icon: 'folder', c: '#0D9488' }
 ];
 const OUTCOMES = ['Successful', 'Failed', 'Inconclusive'];
 
@@ -30,27 +30,68 @@ async function act(btn, fn, okMsg) {
   catch (e) { C.toast(e.message, 'bad'); btn.disabled = false; return null; }
 }
 
-/* ---------- hub ---------- */
+/* ---------- hub (v1 style: Home overview | All Modules) ---------- */
+let hubTab = 'home', hubCache = null, hubAt = 0;
 async function hub(root) {
-  title('Manager');
-  root.innerHTML = `<div class="list">${PAGES.map(p => `
-    <a class="row mgr" href="#/mgr/${p.id}">
-      <span class="ic">${C.I[p.icon]}</span>
-      <span class="tx"><span class="t">${p.name}</span><span class="s" id="hs-${p.id}">…</span></span>
-      <span class="chev">${C.I.chev}</span>
-    </a>`).join('')}</div>
-    <button class="btn secondary" id="lock" style="margin-top:16px">Lock manager pages</button>`;
+  C.setTop('', false);
+  root.innerHTML = `
+    <div class="seg mseg"><button data-t="home" class="${hubTab === 'home' ? 'on' : ''}">Home</button><button data-t="all" class="${hubTab === 'all' ? 'on' : ''}">All Modules</button></div>
+    <div id="hubBody"></div>
+    <button class="btn secondary" id="lock" style="margin-top:18px">Lock manager pages</button>`;
+  root.querySelector('.mseg').onclick = e => {
+    const b = e.target.closest('button'); if (!b) return;
+    hubTab = b.dataset.t; hub(root);
+  };
   root.querySelector('#lock').onclick = () => { sessionStorage.removeItem('bq_pin'); C.S.pin = ''; location.hash = '#/'; };
-  const put = (id, html) => { const el = root.querySelector('#hs-' + id); if (el) el.innerHTML = html; };
-  C.api.mgr('hr').then(h => put('hr', h.pending.length ? `<b style="color:var(--warn)">${h.pending.length} leave waiting for approval</b>` : 'No leave waiting')).catch(() => put('hr', '—'));
-  C.api.mgr('spawning').then(s => put('spawning', `${s.active.length} active trials · ${s.thisMonth.trials} trials this month`)).catch(() => put('spawning', '—'));
-  C.api.mgr('processing').then(p => put('processing', `${p.thisMonth.batches} batches this month · ${p.thisMonth.yieldPct}% yield`)).catch(() => put('processing', '—'));
-  C.api.dash('maint').then(m => {
-    const n = m.items.filter(i => i.issues).length + m.tankIssues.length;
-    put('maint', n ? `<b style="color:var(--bad)">${n} open problem${n > 1 ? 's' : ''}</b>` : 'No open problems');
-  }).catch(() => put('maint', '—'));
-  C.api.mgr('wq').then(w => { const l = w.latest[0]; put('wq', l ? `Latest ${C.esc(l.date)} ${C.esc(l.time)}` : 'No readings'); }).catch(() => put('wq', '—'));
-  put('monthend', 'HR for the office · operations for Kevin');
+  const body = root.querySelector('#hubBody');
+  if (hubTab === 'all') return allModules(body);
+  paintHome(body);
+  if (!hubCache || Date.now() - hubAt > 60000) {
+    const got = await Promise.allSettled([C.api.mgr('hr'), C.api.mgr('spawning'), C.api.mgr('processing'), C.api.dash('maint'), C.api.dash('landfarm'), C.api.dash('seacage')]);
+    const [hr, sp, pr, mt, lf, sc] = got.map(g => g.status === 'fulfilled' ? g.value : null);
+    hubCache = { hr, sp, pr, mt, lf, sc }; hubAt = Date.now();
+    if (document.body.contains(body)) paintHome(body);
+  }
+}
+function paintHome(body) {
+  const d = hubCache;
+  const dash = '<span class="dim">—</span>';
+  if (!d) { body.innerHTML = '<div class="loading">Loading…</div>'; return; }
+  const mtProblems = d.mt ? d.mt.items.filter(i => i.issues).length + d.mt.tankIssues.length : 0;
+  const lfs = (d.lf && d.lf.summary) || null;
+  const dead = d.sc && d.sc.deadMonth ? (d.sc.deadMonth.KR || 0) + (d.sc.deadMonth.MY || 0) + (d.sc.deadMonth.KRB || 0) : null;
+  const att = [];
+  if (d.hr && d.hr.pending.length) att.push({ c: 'var(--attention)', t: `${d.hr.pending.length} leave request${d.hr.pending.length > 1 ? 's' : ''} waiting`, s: 'Approve or deny', href: '#/mgr/hr' });
+  if (mtProblems) att.push({ c: 'var(--alert)', t: `${mtProblems} maintenance problem${mtProblems > 1 ? 's' : ''}`, s: 'Reported by workers', href: '#/mgr/maint' });
+  if (lfs && lfs.spatPending) att.push({ c: 'var(--attention)', t: `${lfs.spatPending} trial${lfs.spatPending > 1 ? 's' : ''} waiting for spat count`, s: 'Spat count not confirmed yet', href: '#/mgr/spawning' });
+  if (d.sp && d.sp.active.length > 6) att.push({ c: 'var(--attention)', t: `${d.sp.active.length} spawning trials still active`, s: 'Confirm or discard old trials', href: '#/mgr/spawning' });
+  const card = (c, label, href, stat, sub) => `
+    <a class="gcard" style="--c:${c}" href="${href}">
+      <span class="gt">${label}</span><span class="gn">${stat}</span><span class="gs">${sub}</span></a>`;
+  body.innerHTML = `
+    <div class="sec-h"><span>Needs your attention ${att.length ? `<i class="cnt">${att.length}</i>` : ''}</span></div>
+    ${att.length ? att.map(a => `
+      <a class="att" style="--c:${a.c}" href="${a.href}"><span class="tx"><b>${a.t}</b><small>${a.s}</small></span><span class="chev">${C.I.chev}</span></a>`).join('')
+      : '<div class="att ok"><span class="tx"><b>All clear</b><small>Nothing waiting for you</small></span></div>'}
+    <div class="sec-h" style="margin-top:20px"><span>Farm at a glance · this month</span></div>
+    <div class="glance">
+      ${card('#10B981', 'Land Farm', '#/m/landfarm', lfs ? n0(lfs.spatConfirmed) : dash, 'spat confirmed')}
+      ${card('#0EA5E9', 'Sea Cage', '#/m/seacage', dead == null ? dash : n0(dead), 'dead this month')}
+      ${card('#EC4899', 'Spawning', '#/mgr/spawning', d.sp ? d.sp.thisMonth.trials : dash, d.sp ? `trials · ${(d.sp.thisMonth.eggs / 1e6).toFixed(1)}M eggs` : 'trials')}
+      ${card('#F59E0B', 'Processing', '#/mgr/processing', d.pr ? d.pr.thisMonth.batches : dash, d.pr ? `batches · ${d.pr.thisMonth.yieldPct}% yield` : 'batches')}
+      ${card('#6366F1', 'HR', '#/mgr/hr', d.hr ? d.hr.pending.length : dash, 'leave waiting')}
+      ${card('#F97316', 'Maintenance', '#/mgr/maint', d.mt ? mtProblems : dash, 'open problems')}
+    </div>
+    <div class="foot">Updated ${new Date(hubAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>`;
+}
+function allModules(body) {
+  const sub = { hr: 'Leave approvals & balances', spawning: 'Trials, outcomes & purchases', processing: 'Batches, yield & Sankina stock',
+    maint: 'Open problems & last checks', wq: 'Latest readings', monthend: 'HR for the office · operations for Kevin' };
+  body.innerHTML = `<div class="sec-h"><span>Log views</span></div>` + PAGES.map(p => `
+    <a class="mcard" style="--c:${p.c}" href="#/mgr/${p.id}">
+      <span class="mi">${C.I[p.icon] || C.I.folder}</span>
+      <span class="mt"><span class="eb">${p.eb}</span><span class="t">${p.name}</span><span class="s">${sub[p.id]}</span></span>
+      <span class="chev">${C.I.chev}</span></a>`).join('');
 }
 
 /* ---------- HR ---------- */

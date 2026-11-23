@@ -2,7 +2,7 @@
    - setup (6-digit code), worker name, All Modules list
    - talks to the router (reads via JSONP, sends via the outbox)
    - loads each module file only when it is opened */
-const APP_VERSION = '2.2.0';
+const APP_VERSION = '2.2.1';
 const ROUTER_DEFAULT = 'https://script.google.com/macros/s/AKfycbwoUa5pXp58jSSN4xaBtHsiRe6FgG7BX3VXT_zKGoy7C7myxSvAmbDcqqukbUqfyQ7c/exec';
 
 const K = { cfg: 'bq_cfg', code: 'bq_code', worker: 'bq_worker' };
@@ -369,7 +369,7 @@ function screenManager(sub) {
         <div class="dots" id="dots"></div>
         <div class="keys">
           ${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button data-k="${n}">${n}</button>`).join('')}
-          <button class="clr" data-k="c">Clear</button><button data-k="0">0</button><button class="ok" data-k="ok">Masuk</button>
+          <button class="clr" data-k="c">Clear</button><button data-k="0">0</button><button class="ok" data-k="ok">Enter</button>
         </div>
         <div class="err" id="err"></div>
       </div>`;
@@ -392,7 +392,7 @@ function screenManager(sub) {
         } catch (err) {
           S.pin = ''; pin = '';
           $('#err').textContent = /manager PIN/i.test(err.message) ? 'Wrong PIN' : err.message;
-          b.disabled = false; b.textContent = 'Masuk';
+          b.disabled = false; b.textContent = 'Enter';
         }
       }
       paint();
