@@ -91,12 +91,20 @@ async function landfarm(root) {
     </div>
     <div class="card" style="padding:14px 12px">
       <div class="map-h"><b>Tank map</b><span class="muted small">${n0(live)} spat in tanks · tap a tank</span></div>
-      <div class="tchips static">${[['stocked'], ['just'], ['next'], ['empty'], ['diatom'], ['other']].map(([k]) =>
-        `<span><i class="${k === 'other' ? 'st-brood' : TSTATE[k][1]}"></i>${k === 'other' ? 'Broodstock / incubation' : TSTATE[k][0]} <b>${cnt[k] || 0}</b></span>`).join('')}</div>
-      <div class="tmap">${list.map(t => `<button class="tile ${(TSTATE[t.state] || TSTATE.empty)[1]}" data-t="${t.tank}">${parseInt(t.tank.slice(1), 10)}</button>`).join('')}</div>
+      <div class="tchips">${['stocked', 'just', 'next', 'empty', 'diatom', 'other'].map(k =>
+        `<button data-fk="${k}"><i class="${k === 'other' ? 'st-brood' : TSTATE[k][1]}"></i>${k === 'other' ? 'Broodstock / incubation' : TSTATE[k][0]} <b>${cnt[k] || 0}</b></button>`).join('')}</div>
+      <div class="tmap">${list.map(t => `<button class="tile ${(TSTATE[t.state] || TSTATE.empty)[1]}" data-t="${t.tank}" data-g="${TSTATE[t.state] && !['broodstock', 'incubation'].includes(t.state) ? t.state : 'other'}">${parseInt(t.tank.slice(1), 10)}</button>`).join('')}</div>
     </div>
     ${top.length ? `<div class="section-title">Tanks with stock (${top.length})</div>
     <div class="card" style="padding:6px 14px">${top.map(t => `<div class="spec-row"><span>${t.tank} <small class="muted">${(TSTATE[t.state] || TSTATE.empty)[0]}${t.since ? ' · since ' + fmtD(t.since) : ''}</small></span><b>${n0(t.count)}</b></div>`).join('')}</div>` : ''}`;
+  /* tap a status to highlight only those tanks; tap again to show all */
+  let filter = '';
+  root.querySelector('.tchips').onclick = e => {
+    const b = e.target.closest('[data-fk]'); if (!b) return;
+    filter = filter === b.dataset.fk ? '' : b.dataset.fk;
+    root.querySelectorAll('.tchips [data-fk]').forEach(x => x.classList.toggle('on', x.dataset.fk === filter));
+    root.querySelectorAll('.tmap .tile').forEach(x => x.classList.toggle('dim', !!filter && x.dataset.g !== filter));
+  };
   root.querySelector('.tmap').onclick = e => {
     const b = e.target.closest('.tile'); if (!b) return;
     const t = list.find(x => x.tank === b.dataset.t) || {}, st = TSTATE[t.state] || TSTATE.empty;

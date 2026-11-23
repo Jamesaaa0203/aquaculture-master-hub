@@ -2,7 +2,7 @@
    - setup (6-digit code), worker name, All Modules list
    - talks to the router (reads via JSONP, sends via the outbox)
    - loads each module file only when it is opened */
-const APP_VERSION = '2.2.6';
+const APP_VERSION = '2.2.7';
 const ROUTER_DEFAULT = 'https://script.google.com/macros/s/AKfycbwoUa5pXp58jSSN4xaBtHsiRe6FgG7BX3VXT_zKGoy7C7myxSvAmbDcqqukbUqfyQ7c/exec';
 
 const K = { cfg: 'bq_cfg', code: 'bq_code', worker: 'bq_worker' };
@@ -375,6 +375,18 @@ function screenManager(sub) {
       </div>`;
     const paint = () => { $('#dots').innerHTML = Array.from({ length: Math.max(4, pin.length) }, (_, i) => `<i class="${i < pin.length ? 'on' : ''}"></i>`).join(''); };
     paint();
+    /* laptop keyboard: digits, Backspace, Delete/Escape = clear, Enter = submit */
+    document.onkeydown = e => {
+      if (!document.getElementById('dots')) { document.onkeydown = null; return; }
+      let k = null;
+      if (/^[0-9]$/.test(e.key)) k = e.key;
+      else if (e.key === 'Enter') k = 'ok';
+      else if (e.key === 'Escape' || e.key === 'Delete') k = 'c';
+      else if (e.key === 'Backspace') { pin = pin.slice(0, -1); $('#err').textContent = ''; paint(); e.preventDefault(); return; }
+      if (k === null) return;
+      e.preventDefault();
+      const b = view.querySelector(`.keys [data-k="${k}"]`); if (b && !b.disabled) b.click();
+    };
     view.querySelector('.keys').onclick = async e => {
       const b = e.target.closest('button'); if (!b) return;
       const k = b.dataset.k;
@@ -420,7 +432,8 @@ $('#specsBtn').onclick = async () => {
 /* ---------- navigation ---------- */
 function route() {
   closeSheet();
-  view.onclick = view.oninput = view.onchange = null;   // modules attach these; clear on every screen change
+  view.onclick = view.oninput = view.onchange = null;
+  document.onkeydown = null;   // modules attach these; clear on every screen change
   const h = location.hash || '#/';
   const top = h === '#/' || h === '#/mgr' || h === '#/who';
   document.body.classList.toggle('no-nav', !top || !S.cfg || !S.code);
