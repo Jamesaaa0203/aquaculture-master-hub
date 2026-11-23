@@ -269,7 +269,8 @@ function opsText(m) {
   const l = m.land, s = m.spawning, r = m.processing, d = m.seacage.dead, sk = r.sankinaStock;
   const L = [`Bon Aqua Farm · Operations update · ${mLabel(m.month)}`, '',
     '1. Spat produced',
-    `- Spat confirmed: ${n0(l.spatConfirmed)} pieces${l.spatRemoved ? ` (${n0(l.spatRemoved)} removed with plates)` : ''}`, '',
+    `- Spat confirmed: ${n0(l.spatConfirmed)} pieces${l.spatRemoved ? ` (${n0(l.spatRemoved)} removed with plates)` : ''}`,
+    ...(l.spatPending ? [`- Trials still waiting for spat count: ${l.spatPending}`] : []), '',
     '2. Eggs',
     `- Total eggs produced: ${n0(s.eggs)}`,
     `- Spawning trials: ${s.trials} (${s.successful} successful)`, '',
