@@ -1,44 +1,36 @@
-/* Bon Aqua Ops — service worker
-   Bump CACHE_VERSION whenever you deploy changes so phones pull the new shell. */
-const CACHE_VERSION = 'bonaqua-v2';
+/* Bon Aqua Ops — service worker (v2)
+   Bump CACHE_VERSION whenever the shell changes so phones pull the new files.
+   - App files: network first, cached copy when offline.
+   - Router calls (script.google…): never cached.
+   - Outbox: sent in the background on Android (Background Sync). */
+importScripts('./queue.js');
+
+const CACHE_VERSION = 'bonaqua-v3';
 const SHELL = [
   './',
   './index.html',
+  './app.css?v=2.0.0',
+  './app.js?v=2.0.0',
+  './queue.js?v=2.0.0',
   './manifest.webmanifest',
   './icon-192.png',
   './icon-512.png',
   './icon-maskable-512.png'
 ];
 
-// Install: pre-cache the local app shell.
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_VERSION).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting())
+    caches.open(CACHE_VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())
   );
 });
 
-// Activate: drop old caches, take control of open tabs.
-//
-// NOTE: this used to also force every open window to navigate(client.url)
-// right here — i.e. hard-reload any open copy of the app the instant a new
-// version took over, with no regard for what that tab was doing. That's a
-// real problem for a farm-ops app people are actively entering data into:
-// if someone was mid-submission (especially anything that takes more than
-// an instant, like the batched tank-check flow, which fires several
-// sequential save requests in a row) and a new deploy happened to activate
-// in the background at that exact moment, their in-progress page got torn
-// out from under them and reloaded mid-flight — which is what produced the
-// garbled, unstyled "wall of raw text" page.
-//
-// Removing the forced navigate() doesn't break updates — self.clients.claim()
-// below still means the NEXT navigation (next time someone opens/reopens
-// the app) picks up the new version immediately. Updates just no longer
-// interrupt someone who's actively using it right now.
+// No forced reload of open tabs: someone may be mid-entry.
+// The next open of the app picks up the new version.
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_VERSION).map((k) => caches.delete(k)))
-    ).then(() => self.clients.claim())
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE_VERSION).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
 });
 
@@ -46,40 +38,31 @@ self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-
-  // Never cache the Google Apps Script data calls — always go to network.
   if (url.hostname.includes('script.google') || url.hostname.includes('googleusercontent')) return;
+  if (url.origin !== location.origin) return;
 
-  // Navigations: network-first, fall back to cached shell when offline.
-  if (req.mode === 'navigate') {
-    event.respondWith(
-      fetch(req).then((res) => {
-        // Only cache a genuinely good response. Caching whatever comes
-        // back unconditionally (including a mid-deploy hiccup, a 404, or
-        // anything else non-200) would poison the offline fallback with
-        // a broken page that then keeps getting served every time the
-        // network fails afterwards.
-        if (res && res.ok) {
-          const copy = res.clone();
-          caches.open(CACHE_VERSION).then((c) => c.put('./index.html', copy));
-        }
-        return res;
-      }).catch(() => caches.match('./index.html'))
-    );
-    return;
-  }
-
-  // CDN (Tailwind, fonts) + everything else: stale-while-revalidate.
+  // Same-origin: network first (always fresh when online), cache as fallback.
   event.respondWith(
-    caches.match(req).then((cached) => {
-      const network = fetch(req).then((res) => {
-        if (res && res.status === 200 && (url.origin === location.origin || url.hostname.includes('jsdelivr') || url.hostname.includes('gstatic') || url.hostname.includes('googleapis'))) {
-          const copy = res.clone();
-          caches.open(CACHE_VERSION).then((c) => c.put(req, copy));
-        }
-        return res;
-      }).catch(() => cached);
-      return cached || network;
-    })
+    fetch(req).then((res) => {
+      if (res && res.ok) {
+        const copy = res.clone();
+        caches.open(CACHE_VERSION).then((c) => c.put(req.mode === 'navigate' ? './index.html' : req, copy));
+      }
+      return res;
+    }).catch(() =>
+      caches.match(req.mode === 'navigate' ? './index.html' : req, { ignoreSearch: req.mode === 'navigate' })
+    )
+  );
+});
+
+// Android: send waiting records even if the app is closed.
+self.addEventListener('sync', (event) => {
+  if (event.tag !== 'bq-flush') return;
+  event.waitUntil(
+    BQ.flush().then((r) =>
+      self.clients.matchAll().then((cs) => cs.forEach((c) => c.postMessage('bq-outbox'))).then(() => {
+        if (r && r.left > 0 && r.sent === 0) throw new Error('retry later');   // ask the browser to retry
+      })
+    )
   );
 });
