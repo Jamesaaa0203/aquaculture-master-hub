@@ -25,7 +25,11 @@ const fmtD = ymd => ymd ? new Date(String(ymd).slice(0, 10) + 'T00:00:00').toLoc
 const n0 = v => (+v || 0).toLocaleString();
 const loading = root => { root.innerHTML = '<div class="loading">Loading…</div>'; };
 function fail(root, e) { root.innerHTML = `<div class="banner bad">Could not load. ${C.esc(e.message)}</div><button class="btn secondary" onclick="location.reload()">Retry</button>`; }
-function title(t) { C.setTop(t, true); }
+function title(t) {
+  const pg = PAGES.find(p => '#/mgr/' + p.id === location.hash);
+  C.setTone(pg ? pg.c : null, pg ? 'Manager · ' + pg.ko : 'Manager');
+  C.setTop(t, true);
+}
 async function act(btn, fn, okMsg) {
   btn.disabled = true;
   try { const r = await fn(); C.toast(okMsg(r), 'good'); return r; }
