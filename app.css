@@ -256,8 +256,9 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 .st-just { background: #fff; color: #1F7A43; border-color: #1F7A43; }
 .st-next { background: #7C3AED; color: #fff; }
 .st-empty { background: #fff; color: #9AA1AB; border-color: #E2DDD5; }
-/* not part of the cycle: faded */
-.st-diatom, .st-brood { background: repeating-linear-gradient(135deg, #EEF1F4 0 4px, #F7F8FA 4px 8px); color: #B4BAC2; font-weight: 600; }
+/* not part of the cycle: soft, visible, lighter than the cycle colours */
+.st-diatom { background: #DCEBFB; color: #1D5FA8; }
+.st-brood { background: #FBEBCF; color: #94600F; }
 .tchips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
 .tchips button {
   display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 11px; border-radius: 999px;

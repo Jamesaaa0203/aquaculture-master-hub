@@ -71,16 +71,17 @@ function mapHtml(opts = {}) {
   return `<div class="tmap">${list.map(t => {
     const sel = opts.selected && opts.selected.has(t.tank);
     const dis = opts.only && !opts.only(t);
-    const dim = opts.filter && (opts.filter === 'other' ? CYCLE.includes(t.state) : t.state !== opts.filter);
+    const grp = CYCLE.includes(t.state) || t.state === 'diatom' ? t.state : 'other';
+    const dim = opts.filter && grp !== opts.filter;
     return `<button class="tile ${(STATE[t.state] || STATE.empty)[1]} ${sel ? 'sel' : ''} ${dis ? 'dis' : ''} ${dim ? 'dim' : ''}" data-t="${t.tank}" ${dis ? 'disabled' : ''}>${parseInt(t.tank.slice(1), 10)}</button>`;
   }).join('')}</div>`;
 }
 /* Tappable counts that double as the legend */
 function chipsHtml(filter) {
-  const cnt = {}; tanks().forEach(t => { const k = CYCLE.includes(t.state) ? t.state : 'other'; cnt[k] = (cnt[k] || 0) + 1; });
-  const items = [['stocked', 'Ada stok'], ['just', 'Baru stok'], ['next', 'Next trial'], ['empty', 'Kosong'], ['other', 'Diatom & lain']];
+  const cnt = {}; tanks().forEach(t => { const k = CYCLE.includes(t.state) || t.state === 'diatom' ? t.state : 'other'; cnt[k] = (cnt[k] || 0) + 1; });
+  const items = [['stocked', 'Ada stok'], ['just', 'Baru stok'], ['next', 'Next trial'], ['empty', 'Kosong'], ['diatom', 'Diatom'], ['other', 'Induk / Inkubasi']];
   return `<div class="tchips">${items.map(([k, t]) =>
-    `<button data-fk="${k}" class="${filter === k ? 'on' : ''}"><i class="${k === 'other' ? 'st-diatom' : STATE[k][1]}"></i>${t} <b>${cnt[k] || 0}</b></button>`).join('')}</div>`;
+    `<button data-fk="${k}" class="${filter === k ? 'on' : ''}"><i class="${k === 'other' ? 'st-brood' : STATE[k][1]}"></i>${t} <b>${cnt[k] || 0}</b></button>`).join('')}</div>`;
 }
 
 /* ---------- home ---------- */
