@@ -147,7 +147,7 @@ function tankSheet(id) {
       (a === 'next' ? 'Next trial ' : 'Batal next trial ') + id);
     C.closeSheet();
     resultToast(r, a === 'next' ? 'Next trial' : 'Batal');
-    if (r.sent || r.queued) { await loadDash(); home(document.getElementById('view')); }
+    if (r.sent || r.queued) { await loadDash(); home(document.getElementById('modroot')); }
   };
 }
 

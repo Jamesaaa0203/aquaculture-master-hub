@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#F6F3EE">
+  <meta name="theme-color" content="#FFFFFF">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Bon Aqua Ops">
@@ -11,33 +11,62 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icon-64.png">
   <link rel="apple-touch-icon" href="./icon-192.png">
-  <link rel="stylesheet" href="./app.css?v=2.1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Noto+Sans+KR:wght@500;700&display=swap">
+  <link rel="stylesheet" href="./app.css?v=2.2.6">
+  <script>
+    /* apply the saved theme before anything paints (no flash) */
+    (function () {
+      var t = localStorage.getItem('bq_theme') || 'system';
+      var dark = t === 'dark' || (t === 'system' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+      if (dark) document.documentElement.classList.add('dark');
+    })();
+  </script>
 </head>
 <body>
   <header class="topbar">
     <button class="icon-btn" id="backBtn" aria-label="Back" hidden>
       <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
-    <div class="brand" id="topTitle">Bon Aqua Ops</div>
+    <img class="logo" id="logo" src="./icon-192.png" alt="Bon Aqua Farm" width="36" height="36">
+    <div class="brandbox">
+      <div class="wordmark" id="topTitle">Bon Aqua <span class="sub">Ops</span></div>
+      <div class="eyebrow" id="topSub">System · Light</div>
+    </div>
     <div class="top-actions">
-      <button class="pill" id="outboxBtn" hidden aria-label="Outbox">
-        <span class="dot"></span><span id="outboxCount">0</span>
+      <button class="pill warn" id="outboxBtn" hidden aria-label="Outbox"><span class="dot"></span><span id="outboxCount">0</span></button>
+      <button class="round-btn" id="themeBtn" aria-label="Theme">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
       </button>
-      <button class="pill ghost" id="specsBtn" aria-label="Farm Specs">Specs</button>
-      <button class="pill ghost" id="whoBtn" hidden></button>
+      <button class="round-btn accent" id="specsBtn" aria-label="Farm Specs">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+      </button>
+      <span class="clock" id="clock"><i></i><b id="clockTxt">--:--</b></span>
     </div>
   </header>
 
-  <div class="offline-bar" id="offlineBar" hidden>Offline. Records are saved on the phone and send automatically.</div>
+  <div class="offline-bar" id="offlineBar" hidden>Offline · Rekod disimpan dalam telefon dan dihantar automatik.</div>
 
   <main id="view" class="view"></main>
+
+  <nav class="bottomnav" id="bottomNav">
+    <a href="#/" id="navHome">
+      <svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+      <span>Ops Home</span>
+    </a>
+    <a href="#/mgr" id="navMgr">
+      <svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
+      <span>Manager</span>
+    </a>
+  </nav>
 
   <div class="sheet-backdrop" id="sheetBackdrop" hidden></div>
   <section class="sheet" id="sheet" hidden aria-modal="true" role="dialog"></section>
 
   <div class="toast" id="toast" hidden></div>
 
-  <script src="./queue.js?v=2.1.0"></script>
-  <script type="module" src="./app.js?v=2.1.0"></script>
+  <script src="./queue.js?v=2.2.6"></script>
+  <script type="module" src="./app.js?v=2.2.6"></script>
 </body>
 </html>

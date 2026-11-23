@@ -2,7 +2,7 @@
    - setup (6-digit code), worker name, All Modules list
    - talks to the router (reads via JSONP, sends via the outbox)
    - loads each module file only when it is opened */
-const APP_VERSION = '2.1.0';
+const APP_VERSION = '2.2.6';
 const ROUTER_DEFAULT = 'https://script.google.com/macros/s/AKfycbwoUa5pXp58jSSN4xaBtHsiRe6FgG7BX3VXT_zKGoy7C7myxSvAmbDcqqukbUqfyQ7c/exec';
 
 const K = { cfg: 'bq_cfg', code: 'bq_code', worker: 'bq_worker' };
@@ -22,22 +22,30 @@ const I = {
   lock: '<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
   folder: '<svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
   chev: '<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',
-  ext: '<svg viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>'
+  ext: '<svg viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>',
+  flask: '<svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-9V3"/><path d="M7.5 15h9"/></svg>',
+  grid: '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>',
+  people: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="9.5" r="2.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0zM15.5 20h6a4.5 4.5 0 0 0-6.6-4"/></svg>',
+  badge: '<svg viewBox="0 0 24 24"><path d="M12 2.5l2.4 1.8 3-.2.9 2.9 2.4 1.8-1 2.8 1 2.8-2.4 1.8-.9 2.9-3-.2L12 21.5l-2.4-1.8-3 .2-.9-2.9-2.4-1.8 1-2.8-1-2.8 2.4-1.8.9-2.9 3 .2z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>',
+  sun: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  monitor: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>'
 };
 
 /* ---------- module list (Kevin: simple, straight to the point) ---------- */
 const RECORD = [
-  { id: 'landfarm',   name: 'Land Farm',   sub: 'Tank map, mortality, transfers', perm: 'landfarm',    icon: I.tank },
-  { id: 'seacage',    name: 'Sea Cage',    sub: 'Mortality, stock in',            perm: 'seacage',     icon: I.wave },
-  { id: 'maint',      name: 'Maintenance', sub: 'Daily checklist, other logs',    perm: 'maintenance', icon: I.wrench },
-  { id: 'nightguard', name: 'Night Guard', sub: 'Shift, patrol, incidents',       perm: 'nightguard',  icon: I.moon }
+  { id: 'landfarm',   name: 'Land Farm',     eb: 'Ladang Daratan',       sub: 'Peta tangki, kematian & pemindahan', perm: 'landfarm',    icon: I.flask,  c: '#10B981' },
+  { id: 'seacage',    name: 'Sea Cage Ops',  eb: 'Operasi Sangkar Laut', sub: 'Kematian & stok masuk',              perm: 'seacage',     icon: I.grid,   c: '#0EA5E9' },
+  { id: 'maint',      name: 'Maintenance',   eb: 'Penyelenggaraan',      sub: 'Semakan harian & log lain',          perm: 'maintenance', icon: I.wrench, c: '#F97316' },
+  { id: 'nightguard', name: 'Night Guard',   eb: 'Pengawal Malam',       sub: 'Syif, rondaan & laporan insiden',    perm: 'nightguard',  icon: I.badge,  c: '#8B5CF6' }
 ];
 const OTHER_APPS = [
-  { key: 'wq_app_page',         name: 'Water Quality',   icon: I.drop },
-  { key: 'spawning_app_page',   name: 'Spawning',        icon: I.egg },
-  { key: 'processing_app_page', name: 'Processing',      icon: I.box },
-  { key: 'hr_app_page',         name: 'HR: OT & Leave',  icon: I.user }
+  { key: 'wq_app_page',         name: 'Water Quality',       eb: 'Kualiti Air',    sub: 'Bacaan DO, suhu, saliniti & pH', icon: I.drop,   c: '#06B6D4' },
+  { key: 'spawning_app_page',   name: 'Spawning & Purchase', eb: 'Pemijahan',      sub: 'Trial pemijahan & pembelian induk', icon: I.egg,  c: '#EC4899' },
+  { key: 'processing_app_page', name: 'Processing Log',      eb: 'Pemprosesan',    sub: 'Batch pemprosesan & hasil',      icon: I.box,    c: '#F59E0B' },
+  { key: 'hr_app_page',         name: 'Hatchery HR Suite',   eb: 'Sumber Manusia', sub: 'OT, cuti & baki cuti',           icon: I.people, c: '#6366F1' }
 ];
+/* which permission each router action needs (for the name check before sending) */
+const ACTION_PERM = { sc_: 'seacage', maint: 'maintenance', ng: 'nightguard', lf_: 'landfarm' };
 
 /* ---------- state ---------- */
 const S = {
@@ -48,13 +56,13 @@ const S = {
 };
 function load(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
 function routerUrl() { return (S.cfg && S.cfg.links && S.cfg.links.router_gas) || ROUTER_DEFAULT; }
-function me() { return S.cfg && S.cfg.workers.find(w => w.name === S.worker); }
-function canUse(perm) {
-  const w = me();
+function workerCan(name, perm) {
+  const w = S.cfg && S.cfg.workers.find(x => x.name === name);
   if (!w) return false;
   const mods = String(w.modules).toLowerCase().split(',').map(s => s.trim());
   return mods.includes('all') || mods.includes(perm);
 }
+const workersFor = perm => ((S.cfg && S.cfg.workers) || []).filter(w => workerCan(w.name, perm));
 
 /* ---------- router calls ---------- */
 function jsonp(params, timeout = 25000) {
@@ -95,6 +103,12 @@ const api = {
 
   /* Field records: always go through the outbox, so nothing is lost offline. */
   async send(action, data, label) {
+    const perm = Object.keys(ACTION_PERM).find(k => action.startsWith(k));
+    if (!S.worker || (perm && !workerCan(S.worker, ACTION_PERM[perm]))) {
+      const nb = document.querySelector('.namebar');
+      if (nb) { nb.classList.add('need'); nb.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      return { sent: false, error: 'Pilih nama dulu (choose your name at the top)' };
+    }
     const item = {
       client_id: (crypto.randomUUID ? crypto.randomUUID() : 'c' + Date.now() + Math.random().toString(36).slice(2)),
       action, worker: S.worker, data, label: label || action, created: Date.now(), status: 'waiting'
@@ -113,7 +127,7 @@ const api = {
   async manager(action, data) {
     const r = await fetch(routerUrl(), {
       method: 'POST', credentials: 'omit',
-      body: JSON.stringify({ action, pin: S.pin, worker: S.worker, client_id: 'm' + Date.now() + Math.random().toString(36).slice(2), data })
+      body: JSON.stringify({ action, pin: S.pin, worker: 'Manager', client_id: 'm' + Date.now() + Math.random().toString(36).slice(2), data })
     }).then(x => x.json());
     if (!r.ok) {
       if (/manager PIN/i.test(r.error || '') && S.pin) forgetPin();
@@ -202,11 +216,38 @@ function openSheet(html) {
 function closeSheet() { $('#sheet').hidden = true; $('#sheetBackdrop').hidden = true; $('#sheet').onclick = null; }
 $('#sheetBackdrop').onclick = closeSheet;
 function setTop(title, back) {
-  $('#topTitle').textContent = title;
+  const top = $('.topbar');
+  top.classList.toggle('inmod', !!back);
   $('#backBtn').hidden = !back;
-  $('#whoBtn').hidden = !S.worker || back;
-  $('#whoBtn').textContent = S.worker;
+  if (back) { $('#topTitle').textContent = title; $('#topSub').textContent = 'Bon Aqua Ops'; }
+  else { $('#topTitle').innerHTML = 'Bon Aqua <span class="sub">Ops</span>'; showTheme(); }
 }
+
+/* ---------- theme: system / light / dark (like v1) ---------- */
+function themePref() { return localStorage.getItem('bq_theme') || 'system'; }
+function applyTheme() {
+  const t = themePref();
+  const dark = t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.classList.toggle('dark', dark);
+  document.querySelector('meta[name=theme-color]').content = dark ? '#0F1B38' : '#FFFFFF';
+  $('#themeBtn').innerHTML = t === 'system' ? I.monitor : t === 'dark' ? I.moon : I.sun;
+  showTheme();
+}
+function showTheme() {
+  if ($('.topbar').classList.contains('inmod')) return;
+  const t = themePref(), dark = document.documentElement.classList.contains('dark');
+  $('#topSub').textContent = (t === 'system' ? 'System · ' : '') + (dark ? 'Dark' : 'Light');
+}
+$('#themeBtn').onclick = () => {
+  const order = ['system', 'light', 'dark'];
+  localStorage.setItem('bq_theme', order[(order.indexOf(themePref()) + 1) % 3]);
+  applyTheme();
+};
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+
+/* ---------- clock ---------- */
+function tick() { $('#clockTxt').textContent = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); }
+setInterval(tick, 15000);
 function today() { return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kuala_Lumpur' }); }
 
 /* ---------- config ---------- */
@@ -227,8 +268,7 @@ async function refreshConfig() {
   try {
     const cfg = await fetchConfig(S.code);
     saveConfig(cfg, S.code);
-    if (S.worker && !me()) { S.worker = ''; localStorage.removeItem(K.worker); route(); }
-  } catch (e) {
+    } catch (e) {
     if (/setup code/i.test(e.message)) { S.codeChanged = true; if ((location.hash || '#/') === '#/') screenHome(); }
   }
 }
@@ -254,7 +294,8 @@ function screenSetup() {
     try {
       const cfg = await fetchConfig(inp.value);
       saveConfig(cfg, inp.value);
-      location.hash = '#/who';
+      location.hash = '#/';
+      route();
     } catch (e) {
       $('#err').textContent = /setup code/i.test(e.message) ? 'That code is not right. Check with James.' : 'Could not connect. Check signal and try again.';
       $('#err').hidden = false;
@@ -263,86 +304,98 @@ function screenSetup() {
   };
 }
 
-function screenWho() {
-  setTop('Who are you?', !!S.worker);
-  view.innerHTML = `
-    <p class="hello">Pick your name. Records you send will be saved under this name.</p>
-    <div class="grid">${S.cfg.workers.map(w => `<button class="chip ${w.name === S.worker ? 'on' : ''}" data-n="${esc(w.name)}">${esc(w.name)}</button>`).join('')}</div>`;
-  view.onclick = e => {
-    const b = e.target.closest('.chip');
-    if (!b) return;
-    S.worker = b.dataset.n;
-    localStorage.setItem(K.worker, S.worker);
-    view.onclick = null;
-    location.hash = '#/';
-  };
-}
-
 function screenHome() {
-  setTop('Bon Aqua Ops', false);
-  const rec = RECORD.filter(m => canUse(m.perm));
+  setTop('', false);
   const links = (S.cfg && S.cfg.links) || {};
-  const apps = OTHER_APPS.filter(a => links[a.key]);
-  const row = (o, cls, href, ext) => `
-    <a class="row ${cls || ''}" href="${href}" ${ext ? 'target="_blank" rel="noopener"' : ''}>
-      <span class="ic">${o.icon}</span>
-      <span class="tx"><span class="t">${esc(o.name)}</span>${o.sub ? `<span class="s">${esc(o.sub)}</span>` : ''}</span>
+  const card = (o, href, ext) => `
+    <a class="mcard" style="--c:${o.c}" href="${href}" ${ext ? 'target="_blank" rel="noopener"' : ''}>
+      <span class="mi">${o.icon}</span>
+      <span class="mt"><span class="eb">${esc(o.eb)}</span><span class="t">${esc(o.name)}</span><span class="s">${esc(o.sub)}</span></span>
       <span class="chev">${ext ? I.ext : I.chev}</span>
     </a>`;
   view.innerHTML = `
     ${S.codeChanged ? '<button class="banner warn" id="reSetup" style="width:100%;text-align:left;border:0">The setup code has changed. <b>Tap here to enter the new code.</b></button>' : ''}
-    <div class="section-title">Record</div>
-    <div class="list">${rec.map(m => row(m, '', '#/m/' + m.id)).join('') || '<div class="row"><span class="tx muted">No modules for your name.</span></div>'}</div>
-    ${apps.length ? `<div class="section-title">Other apps</div>
-    <div class="list">${apps.map(a => row(a, 'ext', links[a.key], true)).join('')}</div>` : ''}
-    <div class="section-title">Manager</div>
-    <div class="list">
-      ${row({ name: 'Manager pages', sub: 'Spawning, processing, HR, water, month-end', icon: I.lock }, 'mgr', '#/mgr')}
-      ${links.documents_url ? row({ name: 'Documents', sub: 'Company Shared Drive', icon: I.folder }, 'ext', links.documents_url, true) : ''}
-    </div>
-    <div class="foot">v${APP_VERSION} · ${esc(S.worker)}</div>`;
+    <div class="sec-h"><span>Worker entry · Modul kerja</span><span>Tap · Tekan</span></div>
+    ${RECORD.map(m => card(m, '#/m/' + m.id)).join('')}
+    ${OTHER_APPS.filter(a => links[a.key]).map(a => card(a, links[a.key], true)).join('')}
+    ${links.documents_url ? card({ name: 'Documents', eb: 'Dokumen', sub: 'Company Shared Drive', icon: I.folder, c: '#64748B' }, links.documents_url, true) : ''}
+    <div class="foot">v${APP_VERSION}</div>`;
   const rs = $('#reSetup');
   if (rs) rs.onclick = () => { S.code = ''; S.codeChanged = false; localStorage.removeItem(K.code); route(); };
+}
+
+/* Name box shown at the top of every worker screen (option A: remembered, changeable) */
+function nameBar(perm) {
+  const list = workersFor(perm), ok = list.some(w => w.name === S.worker);
+  return `<label class="namebar ${ok ? '' : 'need'}"><span>Nama</span>
+    <select id="nameSel">${ok ? '' : '<option value="">Pilih nama…</option>'}${list.map(w =>
+      `<option ${w.name === S.worker ? 'selected' : ''}>${esc(w.name)}</option>`).join('')}</select></label>`;
+}
+function wireNameBar() {
+  const sel = $('#nameSel'); if (!sel) return;
+  sel.onchange = () => {
+    S.worker = sel.value; localStorage.setItem(K.worker, S.worker);
+    sel.closest('.namebar').classList.toggle('need', !S.worker);
+    const blank = sel.querySelector('option[value=""]'); if (blank && S.worker) blank.remove();
+    toast('Nama: ' + S.worker);
+  };
 }
 
 async function screenModule(path) {
   const [id, sub] = path.split('/');
   const m = RECORD.find(x => x.id === id);
-  if (!m || !canUse(m.perm)) { location.hash = '#/'; return; }
+  if (!m) { location.hash = '#/'; return; }
   setTop(m.name, true);
-  view.innerHTML = '<div class="loading">Loading…</div>';
+  view.innerHTML = nameBar(m.perm) + '<div id="modroot"><div class="loading">Loading…</div></div>';
+  wireNameBar();
+  const root = $('#modroot');
   try {
     const mod = await import(`./modules/${id}.js?v=${APP_VERSION}`);
-    await mod.render(view, ctx(), sub || '');
+    await mod.render(root, ctx(), sub || '');
   } catch (e) {
-    view.innerHTML = `<div class="banner bad">Could not open ${esc(m.name)}. ${esc(e.message)}</div>`;
+    root.innerHTML = `<div class="banner bad">Could not open ${esc(m.name)}. ${esc(e.message)}</div>`;
   }
 }
 
 function screenManager(sub) {
-  setTop('Manager', true);
+  setTop(sub ? 'Manager' : '', !!sub);
   if (!S.pin) {
+    let pin = '';
     view.innerHTML = `
-      <div class="card">
-        <h2>Manager PIN</h2>
-        <label class="field"><input class="input code" id="pin" type="password" inputmode="numeric" maxlength="8" placeholder="••••"></label>
-        <button class="btn" id="go">Open</button>
-        <p class="banner bad" id="err" hidden></p>
+      <div class="pinpad">
+        <div class="lock">${I.lock}</div>
+        <h2>Manager Terminal</h2>
+        <p>Enter your operational PIN</p>
+        <div class="dots" id="dots"></div>
+        <div class="keys">
+          ${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button data-k="${n}">${n}</button>`).join('')}
+          <button class="clr" data-k="c">Clear</button><button data-k="0">0</button><button class="ok" data-k="ok">Enter</button>
+        </div>
+        <div class="err" id="err"></div>
       </div>`;
-    const go = $('#go');
-    $('#pin').focus();
-    go.onclick = async () => {
-      S.pin = $('#pin').value.trim();
-      go.disabled = true; go.textContent = 'Checking…';
-      try {
-        await api.mgr('wq');                    // light call, just to check the PIN
-        sessionStorage.setItem('bq_pin', S.pin);
-        screenManager(sub);
-      } catch (e) {
-        S.pin = '';
-        $('#err').textContent = e.message; $('#err').hidden = false;
-        go.disabled = false; go.textContent = 'Open';
+    const paint = () => { $('#dots').innerHTML = Array.from({ length: Math.max(4, pin.length) }, (_, i) => `<i class="${i < pin.length ? 'on' : ''}"></i>`).join(''); };
+    paint();
+    view.querySelector('.keys').onclick = async e => {
+      const b = e.target.closest('button'); if (!b) return;
+      const k = b.dataset.k;
+      $('#err').textContent = '';
+      if (k === 'c') pin = '';
+      else if (k !== 'ok') { if (pin.length < 8) pin += k; }
+      else {
+        if (pin.length < 4) { $('#err').textContent = 'PIN at least 4 digits'; return; }
+        b.disabled = true; b.textContent = '…';
+        S.pin = pin;
+        try {
+          await api.mgr('wq');                    // light call, just to check the PIN
+          sessionStorage.setItem('bq_pin', S.pin);
+          return screenManager(sub);
+        } catch (err) {
+          S.pin = ''; pin = '';
+          $('#err').textContent = /manager PIN/i.test(err.message) ? 'Wrong PIN' : err.message;
+          b.disabled = false; b.textContent = 'Enter';
+        }
       }
+      paint();
     };
     return;
   }
@@ -369,19 +422,22 @@ function route() {
   closeSheet();
   view.onclick = view.oninput = view.onchange = null;   // modules attach these; clear on every screen change
   const h = location.hash || '#/';
+  const top = h === '#/' || h === '#/mgr' || h === '#/who';
+  document.body.classList.toggle('no-nav', !top || !S.cfg || !S.code);
+  $('#navHome').classList.toggle('on', !h.startsWith('#/mgr'));
+  $('#navMgr').classList.toggle('on', h.startsWith('#/mgr'));
+  window.scrollTo(0, 0);
   if (!S.cfg || !S.code) return screenSetup();
-  if (!S.worker || h === '#/who') return screenWho();
   if (h.startsWith('#/m/')) return screenModule(h.slice(4));
   if (h === '#/mgr' || h.startsWith('#/mgr/')) return screenManager(h.slice(6));
   return screenHome();
 }
 window.addEventListener('hashchange', route);
 $('#backBtn').onclick = () => { if (history.length > 1) history.back(); else location.hash = '#/'; };
-$('#whoBtn').onclick = () => { location.hash = '#/who'; };
 $('#outboxBtn').onclick = openOutbox;
 
 /* ---------- online / offline ---------- */
-function netState() { $('#offlineBar').hidden = navigator.onLine; }
+function netState() { $('#offlineBar').hidden = navigator.onLine; $('#clock').classList.toggle('off', !navigator.onLine); }
 window.addEventListener('online', () => { netState(); flushNow(); });
 window.addEventListener('offline', netState);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') flushNow(); });
@@ -394,6 +450,8 @@ if ('serviceWorker' in navigator) {
 }
 
 /* ---------- start ---------- */
+applyTheme();
+tick();
 netState();
 route();
 refreshOutbox();
