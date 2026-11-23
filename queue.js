@@ -59,7 +59,7 @@
             chain = chain.then(function () {
               if (stop || it.status === 'failed') return;
               return fetch(url, {
-                method: 'POST',
+                method: 'POST', credentials: 'omit',
                 body: JSON.stringify({
                   action: it.action, worker: it.worker, client_id: it.client_id,
                   data: it.data, pin: it.pin

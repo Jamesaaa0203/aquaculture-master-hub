@@ -69,9 +69,19 @@ function jsonp(params, timeout = 25000) {
     document.head.appendChild(s);
   });
 }
+/* Read from the router WITHOUT sending Google sign-in cookies (like incognito).
+   Signed-in browsers can otherwise get redirected and fail. JSONP stays as a backup. */
+async function routerGet(params) {
+  try {
+    const res = await fetch(routerUrl() + '?' + new URLSearchParams(params), { credentials: 'omit', redirect: 'follow' });
+    return await res.json();
+  } catch (e) {
+    return jsonp(params);
+  }
+}
 const api = {
   async get(action, params = {}) {
-    const r = await jsonp({ action, ...params });
+    const r = await routerGet({ action, ...params });
     if (!r || !r.ok) throw new Error((r && r.error) || 'Failed');
     return r;
   },
@@ -98,7 +108,7 @@ const api = {
   /* Manager actions: online only, PIN required, reply shown directly. */
   async manager(action, data) {
     const r = await fetch(routerUrl(), {
-      method: 'POST',
+      method: 'POST', credentials: 'omit',
       body: JSON.stringify({ action, pin: S.pin, client_id: 'm' + Date.now() + Math.random().toString(36).slice(2), data })
     }).then(x => x.json());
     if (!r.ok) throw new Error(r.error || 'Failed');
@@ -190,7 +200,7 @@ function today() { return new Date().toLocaleDateString('en-CA', { timeZone: 'As
 
 /* ---------- config ---------- */
 async function fetchConfig(code) {
-  const r = await jsonp({ action: 'config', code });
+  const r = await routerGet({ action: 'config', code });
   if (!r || !r.ok) throw new Error((r && r.error) || 'Failed');
   return r;
 }
