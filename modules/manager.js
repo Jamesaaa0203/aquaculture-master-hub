@@ -85,7 +85,7 @@ async function landfarm(root) {
     <div class="card">
       <h2>This month</h2>
       <div class="stats">
-        <div class="stat"><div class="n">${n0(s.spatConfirmed)}</div><div class="l">Spat confirmed</div></div>
+        <div class="stat"><div class="n">${n0(s.spatConfirmed)}</div><div class="l">Spat produced</div></div>
         <div class="stat"><div class="n">${n0(s.seaCageTransfer)}</div><div class="l">Sent to sea cage</div></div>
         <div class="stat"><div class="n">${n0(s.spatRemoved)}</div><div class="l">Removed with plates</div></div>
         <div class="stat"><div class="n">${s.sankinaKg || 0}</div><div class="l">To Sankina (kg)</div></div>
@@ -99,6 +99,10 @@ async function landfarm(root) {
         `<button data-fk="${k}"><i class="${k === 'other' ? 'st-brood' : TSTATE[k][1]}"></i>${k === 'other' ? 'Broodstock / incubation' : TSTATE[k][0]} <b>${cnt[k] || 0}</b></button>`).join('')}</div>
       <div class="tmap">${list.map(t => `<button class="tile ${(TSTATE[t.state] || TSTATE.empty)[1]}" data-t="${t.tank}" data-g="${TSTATE[t.state] && !['broodstock', 'incubation'].includes(t.state) ? t.state : 'other'}">${parseInt(t.tank.slice(1), 10)}</button>`).join('')}</div>
     </div>
+    ${(d.spatByMonth || []).length ? `<div class="section-title">Spat produced by month · ${d.spatByMonth[0].month.slice(0, 4)}</div>
+    <div class="card" style="padding:6px 14px">${d.spatByMonth.slice().reverse().map(m => `<div class="spec-row"><span>${new Date(m.month + '-15').toLocaleDateString('en-GB', { month: 'long' })}
+      <small class="muted">${m.src === 'newsletter' ? 'Monthly newsletter' : 'Spawning trial counts'}</small></span><b>${n0(m.count)}</b></div>`).join('')}
+      <div class="spec-row"><span><b>Total this year</b></span><b>${n0(d.spatByMonth.reduce((a, m) => a + m.count, 0))}</b></div></div>` : ''}
     ${top.length ? `<div class="section-title">Tanks with stock (${top.length})</div>
     <div class="card" style="padding:6px 14px">${top.map(t => `<div class="spec-row"><span>${t.tank} <small class="muted">${(TSTATE[t.state] || TSTATE.empty)[0]}${t.since ? ' · since ' + fmtD(t.since) : ''}</small></span><b>${n0(t.count)}</b></div>`).join('')}</div>` : ''}`;
   /* tap a status to highlight only those tanks; tap again to show all */
