@@ -2,7 +2,7 @@
    Router actions: lf_mortality, lf_count, lf_tank, lf_form.
    Map colours: next = purple, just = light green, stocked = dark green, diatom = blue, empty = grey. */
 
-import { lengthForm } from './bio.js';
+import { lengthForm, seaweedFor, fmtGrams, daysSince } from './bio.js';
 
 const STATE = {
   next: ['Next trial', 'st-next'], just: ['Baru stok', 'st-just'], stocked: ['Ada stok', 'st-stocked'],
@@ -10,6 +10,8 @@ const STATE = {
 };
 const SIZES = ['0.5 - 0.8', '0.9 ke atas'];
 const FORMS = [
+  { id: 'makan', name: 'Pemberian Makanan', sub: 'Senarai rumpai laut setiap tangki · rekod pusingan' },
+  { id: 'plat', name: 'Tukar Plat Diatom', sub: 'Seminggu sekali setiap tangki' },
   { id: 'mati', name: 'Rekod Kematian Tangki', sub: 'Semua tangki berstok sekaligus' },
   { id: 'next', name: 'Tanda Next Trial', sub: 'Pilih tangki untuk trial seterusnya' },
   { id: 'cuci', name: 'Cuci Tangki', sub: 'Pilih tangki yang dicuci' },
@@ -28,6 +30,7 @@ export async function render(root, ctx, sub) {
   C = ctx;
   if (!dash) await loadDash();
   const f = {
+    makan: feedForm, plat: plateForm,
     mati: mortality, next: pickForm('next'), cuci: pickForm('cuci'), keluar: removeForm, kira: countForm,
     pindah: transferForm, seacage: seaCageForm, sankina: sankinaForm, produk: productForm,
     panjang: r => lengthForm(r, { C, action: 'lf_length', title: 'Ukur Panjang', sites: [{ id: 'LF', name: 'Tangki',
@@ -133,6 +136,9 @@ function tankSheet(id) {
   if (t.count) rows.push(['Bilangan spat', n0(t.count) + (t.census ? ' (bancian)' : '')]);
   if (t.removed !== undefined) rows.push(['Dikeluarkan', n0(t.removed) + (t.to ? ' → ' + C.esc(t.to) : '')]);
   if (t.len) rows.push(['Panjang', t.len + ' cm · ' + fmtD(t.lenDate)]);
+  const sw = dash && seaweedFor(t, dash.feed, dash.wl);
+  if (sw) rows.push(['Rumpai laut / hari', sw.g ? fmtGrams(sw.g) : sw.why === 'len' ? 'Ukur panjang dulu' : 'Plat diatom sahaja']);
+  if (+t.count > 0) rows.push(['Plat ditukar', t.plates ? fmtD(t.plates) + ' · ' + daysSince(t.plates) + ' hari lalu' : 'Belum direkod']);
   rows.push(['Cuci terakhir', t.cleaned ? fmtD(t.cleaned) : '—']);
   rows.push(['Kematian terakhir', t.lastDead ? fmtD(t.lastDead.date) + ' · ' + t.lastDead.qty : '—']);
   const isSpat = t.type === 'Spat';
@@ -482,4 +488,101 @@ function productForm(root) {
     const r = await C.api.send('lf_form', { date: getDate(root), items: [{ tab: 'FinishedProduct', values: { raw_kg: +v('raw'), yield_kg: +v('yld') } }] }, `Produk siap · ${v('raw')} kg`);
     if (!(await afterSend(r, 'Produk siap'))) ev.target.disabled = false;
   };
+}
+
+/* ---------- feeding: per-tank seaweed list + record one round ---------- */
+function feedList() {
+  const feed = (dash && dash.feed) || {}, wl = (dash && dash.wl) || [];
+  return spatTanks().filter(t => +t.count > 0)
+    .sort((a, b) => parseInt(a.tank.slice(1), 10) - parseInt(b.tank.slice(1), 10))
+    .map(t => ({ t, sw: seaweedFor(t, feed, wl) }));
+}
+function feedForm(root) {
+  C.setTop('Pemberian Makanan', true);
+  const feed = (dash && dash.feed) || {}, list = feedList();
+  const fed = list.filter(x => x.sw && x.sw.g), total = fed.reduce((a, x) => a + x.sw.g, 0);
+  const noLen = list.filter(x => x.sw && x.sw.why === 'len'), plate = list.filter(x => x.sw && x.sw.why === 'plate');
+  const st = { session: new Date().getHours() < 12 ? 'Pagi' : 'Petang' };
+  const last = feed.last;
+  root.innerHTML = `
+    <div class="card" style="padding:6px 14px">
+      <div class="spec-row"><span><b>Rumpai laut hari ini</b><small class="muted">${feed.ratePct || 10}% berat badan · ${fed.length} tangki</small></span><b>${fmtGrams(total)}</b></div>
+      ${fed.map(x => `<div class="spec-row"><span>${x.t.tank} <small class="muted">${n0(x.t.count)} spat · ${x.t.len} cm</small></span><b>${fmtGrams(x.sw.g)}</b></div>`).join('')}
+      ${plate.length ? `<div class="spec-row"><span>Plat diatom sahaja <small class="muted">bawah ${feed.fromCm || 1} cm</small></span><b class="small">${plate.map(x => x.t.tank).join(', ')}</b></div>` : ''}
+      ${noLen.length ? `<div class="spec-row"><span>Ukur panjang dulu <small class="muted">tiada panjang lagi</small></span><b class="small">${noLen.map(x => x.t.tank).join(', ')}</b></div>` : ''}
+    </div>
+    <button class="btn secondary" id="wa">Kongsi ke WhatsApp</button>
+    ${last ? `<p class="muted small" style="margin:10px 4px 0">Pusingan terakhir: ${fmtD(last.date)} ${C.esc(last.session)} · ${n0(last.grams)} g${last.worker ? ' · ' + C.esc(last.worker) : ''}</p>` : ''}
+    <div class="section-title">Rekod pusingan ini</div>
+    <div class="card">
+      ${dateField()}
+      <div class="seg" id="sess" style="margin:6px 0 4px">${['Pagi', 'Petang'].map(x => `<button data-s="${x}" class="${x === st.session ? 'on' : ''}">${x}</button>`).join('')}</div>
+      <label class="field"><span>Jumlah rumpai laut diberi (gram)</span><input class="input" id="grams" inputmode="numeric" value="${total || ''}"></label>
+      <label class="field"><span>Nota (jika ada)</span><input class="input" id="note" placeholder="cth: T44 banyak lebihan"></label>
+    </div>
+    <div class="sticky-bar"><button class="btn" id="go">Hantar</button></div>`;
+  root.querySelector('#sess').onclick = e => {
+    const b = e.target.closest('[data-s]'); if (!b) return;
+    st.session = b.dataset.s;
+    root.querySelectorAll('#sess button').forEach(x => x.classList.toggle('on', x === b));
+  };
+  root.querySelector('#wa').onclick = () => {
+    const L = [`*Rumpai laut ${fmtD(C.today())}* (${feed.ratePct || 10}% berat badan)`];
+    fed.forEach(x => L.push(`${x.t.tank}: ${fmtGrams(x.sw.g)}`));
+    L.push(`*Jumlah: ${fmtGrams(total)}*`);
+    if (plate.length) L.push('', 'Plat diatom sahaja: ' + plate.map(x => x.t.tank).join(', '));
+    if (noLen.length) L.push('Ukur panjang dulu: ' + noLen.map(x => x.t.tank).join(', '));
+    const text = L.join('\n');
+    if (navigator.share) navigator.share({ text }).catch(() => {});
+    else window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  };
+  const g = root.querySelector('#grams');
+  g.oninput = () => { g.value = g.value.replace(/\D/g, '').slice(0, 6); };
+  root.querySelector('#go').onclick = async ev => {
+    if (!intOk(g.value, 100000)) return C.toast('Isi jumlah gram', 'bad');
+    ev.target.disabled = true;
+    const r = await C.api.send('lf_form', { date: getDate(root), items: [{ tab: 'FeedingLog',
+      values: { session: st.session, seaweed_grams: +g.value, notes: root.querySelector('#note').value.trim() } }] },
+      `Makan ${st.session} · ${n0(g.value)} g`);
+    if (!(await afterSend(r, 'Pemberian makanan'))) ev.target.disabled = false;
+  };
+}
+
+/* ---------- diatom plate rotation: once a week per stocked tank ---------- */
+function plateForm(root) {
+  C.setTop('Tukar Plat Diatom', true);
+  const sel = new Set();
+  const list = spatTanks().filter(t => +t.count > 0).map(t => ({ t, d: daysSince(t.plates) }))
+    .sort((a, b) => (b.d == null ? 1e9 : b.d) - (a.d == null ? 1e9 : a.d) || parseInt(a.t.tank.slice(1), 10) - parseInt(b.t.tank.slice(1), 10));
+  const late = list.filter(x => x.d == null || x.d > 7);
+  function paint() {
+    root.innerHTML = `
+      <div class="card">${dateField()}
+        <p class="small" style="margin:6px 2px 0">${late.length ? `<b style="color:var(--bad)">${late.length} tangki lewat</b> (lebih 7 hari atau belum direkod)` : '<b style="color:var(--good)">Semua tangki dalam 7 hari ✓</b>'}</p>
+        ${late.length ? '<button class="link-btn" id="allLate">Pilih semua yang lewat</button>' : ''}
+      </div>
+      <div class="card" style="padding:10px">
+        <div class="tchips" id="pl">${list.map(x => {
+          const lateX = x.d == null || x.d > 7;
+          return `<button data-t="${x.t.tank}" class="${sel.has(x.t.tank) ? 'on' : ''}" style="${lateX ? 'color:var(--bad)' : ''}">${x.t.tank} <b style="${lateX ? 'color:var(--bad)' : ''}">${x.d == null ? 'belum' : x.d + ' hari'}</b></button>`;
+        }).join('')}</div>
+        <p class="muted small" style="margin:0 2px">Tekan tangki yang platnya ditukar hari ini.</p>
+      </div>
+      <div class="sticky-bar"><button class="btn" id="go" ${sel.size ? '' : 'disabled'}>${sel.size ? `Hantar (${sel.size} tangki)` : 'Pilih tangki'}</button></div>`;
+    root.querySelector('#pl').onclick = e => {
+      const b = e.target.closest('[data-t]'); if (!b) return;
+      const d = root.querySelector('#fDate').value;
+      sel.has(b.dataset.t) ? sel.delete(b.dataset.t) : sel.add(b.dataset.t); paint(); root.querySelector('#fDate').value = d;
+    };
+    const al = root.querySelector('#allLate');
+    if (al) al.onclick = () => { const d = root.querySelector('#fDate').value; late.forEach(x => sel.add(x.t.tank)); paint(); root.querySelector('#fDate').value = d; };
+    root.querySelector('#go').onclick = async ev => {
+      const tanksSel = [...sel].sort();
+      ev.target.disabled = true;
+      const r = await C.api.send('lf_form', { date: getDate(root), items: tanksSel.map(t => ({ tab: 'DiatomPlateLog', values: { tank_id: t } })) },
+        'Plat diatom · ' + tanksSel.join(', '));
+      if (!(await afterSend(r, 'Tukar plat'))) ev.target.disabled = false;
+    };
+  }
+  paint();
 }

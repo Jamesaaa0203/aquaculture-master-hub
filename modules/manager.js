@@ -1,7 +1,7 @@
 /* Manager pages (English, PIN). Router reads: mgr spawning|processing|hr|wq, dash maint.
    Actions: hr_leave, sp_outcome, sp_discard (manager PIN), lf_form stock counts (PIN). */
 
-import { kgOf, weightG, fmtKg, fmtG } from './bio.js';
+import { kgOf, weightG, fmtKg, fmtG, seaweedFor, fmtGrams, survivalPct, daysSince } from './bio.js';
 
 const PAGES = [   // James's order
   { id: 'landfarm',   href: '#/mgr/landfarm',     ko: '육상 양식장 현황',   name: 'Land Farm',            sub: 'Tank map, stock & this month',                  icon: 'flask',  c: '#10B981' },
@@ -87,6 +87,12 @@ async function landfarm(root) {
   top.forEach(t => { if (t.len) t.kg = kgOf(t.count, t.len, wl); });
   const measured = top.filter(t => t.kg), lfKg = measured.reduce((a, t) => a + t.kg, 0);
   const lastLen = list.filter(t => t.lenDate).map(t => t.lenDate).sort().pop();
+  const feed = d.feed || {}, fedT = top.map(t => ({ t, sw: seaweedFor(t, feed, wl) })).filter(x => x.sw && x.sw.g);
+  const swTotal = fedT.reduce((a, x) => a + x.sw.g, 0);
+  const lateP = top.map(t => ({ t, d: daysSince(t.plates) })).filter(x => x.d == null || x.d > 7)
+    .sort((a, b) => (b.d == null ? 1e9 : b.d) - (a.d == null ? 1e9 : a.d));
+  const deadM = list.reduce((a, t) => a + (+t.deadMonth || 0), 0), liveM = top.reduce((a, t) => a + (+t.count || 0), 0);
+  const lfSurv = survivalPct(liveM, deadM);
   /* batches: tanks grouped by the spawning date their spat came from (newest first) */
   const bkey = t => t.batch || 'older';
   const bmap = {}; top.forEach(t => { const k = bkey(t); (bmap[k] = bmap[k] || { k, tanks: [], n: 0 }); bmap[k].tanks.push(t); bmap[k].n += +t.count || 0; });
@@ -119,8 +125,20 @@ async function landfarm(root) {
         <div class="stat"><div class="n">${measured.length ? fmtKg(lfKg) : '—'}</div><div class="l">kg in measured tanks</div></div>
         <div class="stat"><div class="n">${measured.length}/${top.length}</div><div class="l">Stocked tanks measured</div></div>
         <div class="stat"><div class="n">${lastLen ? fmtD(lastLen) : '—'}</div><div class="l">Latest length</div></div>
+        <div class="stat"><div class="n">${lfSurv == null ? '—' : lfSurv + '%'}</div><div class="l">Survival this month</div></div>
       </div>
       ${top.length > measured.length ? `<p class="muted small" style="margin:10px 2px 0">${top.length - measured.length} stocked tank${top.length - measured.length === 1 ? ' has' : 's have'} no length yet, so ${top.length - measured.length === 1 ? 'it is' : 'they are'} not in the total.</p>` : ''}
+    </div>
+    <div class="card">
+      <h2>Feeding &amp; plates</h2>
+      <div class="stats">
+        <div class="stat"><div class="n">${fedT.length ? fmtGrams(swTotal) : '—'}</div><div class="l">Seaweed per day · ${feed.ratePct || 10}% body weight</div></div>
+        <div class="stat"><div class="n">${feed.seaweedMonthG ? fmtGrams(feed.seaweedMonthG) : '0'}</div><div class="l">Seaweed fed this month</div></div>
+        <div class="stat"><div class="n" style="${lateP.length ? 'color:var(--bad)' : ''}">${lateP.length}</div><div class="l">Tanks overdue for plates (&gt;7 days)</div></div>
+      </div>
+      <div class="spec-row" style="margin-top:10px"><span>Last feeding round</span><b>${feed.last ? fmtD(feed.last.date) + ' ' + C.esc(feed.last.session) + ' · ' + n0(feed.last.grams) + ' g' + (feed.last.worker ? ' · ' + C.esc(feed.last.worker) : '') : 'None recorded'}</b></div>
+      ${lateP.length ? `<details style="margin-top:6px"><summary class="small"><b>Overdue tanks</b></summary>
+        ${lateP.map(x => `<div class="spec-row"><span>${x.t.tank}</span><b class="small">${x.d == null ? 'never recorded' : x.d + ' days'}</b></div>`).join('')}</details>` : ''}
     </div>
     ${(d.spatByMonth || []).length ? `<div class="section-title">Spat produced by month · ${d.spatByMonth[0].month.slice(0, 4)}</div>
     <div class="card" style="padding:6px 14px">${d.spatByMonth.slice().reverse().map(m => `<div class="spec-row"><span>${new Date(m.month + '-15').toLocaleDateString('en-GB', { month: 'long' })}
@@ -152,7 +170,14 @@ async function landfarm(root) {
       rows.push(['Length', t.len + ' cm · ' + fmtD(t.lenDate) + (t.lenSrc === 'check' ? (t.lenN ? ' · ' + t.lenN + ' measured' : '') + (t.lenBy ? ' by ' + C.esc(t.lenBy) : '') : ' · census')]);
       rows.push(['Weight each', fmtG(weightG(t.len, wl)) + ' g']);
       if (t.kg) rows.push(['Biomass', fmtKg(t.kg) + ' kg']);
+      const sw = seaweedFor(t, feed, wl);
+      if (sw) rows.push(['Seaweed per day', sw.g ? fmtGrams(sw.g) : sw.why === 'plate' ? 'Diatom plates only' : '—']);
     } else if (+t.count > 0) rows.push(['Length', 'Not measured yet']);
+    if (+t.count > 0) {
+      rows.push(['Plates rotated', t.plates ? fmtD(t.plates) + ' · ' + daysSince(t.plates) + ' days ago' : 'Not recorded']);
+      const sv = survivalPct(t.count, t.deadMonth);
+      rows.push(['Survival this month', sv == null ? '—' : sv + '%' + (t.deadMonth ? ' · ' + n0(t.deadMonth) + ' dead' : '')]);
+    }
     rows.push(['Last cleaned', t.cleaned ? fmtD(t.cleaned) : '—']);
     rows.push(['Last mortality', t.lastDead ? fmtD(t.lastDead.date) + ' · ' + t.lastDead.qty : '—']);
     C.openSheet(`<h3>${t.tank} <span class="badge ${st[1]}">${st[0]}</span></h3>
@@ -174,6 +199,8 @@ async function seacage(root) {
   stocked.forEach(u => { if (u.len) u.kg = kgOf(u.count, u.len, wl); });
   const meas = stocked.filter(u => u.kg), scKg = meas.reduce((a, u) => a + u.kg, 0);
   const siteKg = s => meas.filter(u => u.site === s).reduce((a, u) => a + u.kg, 0);
+  const svOf = us => survivalPct(us.reduce((a, u) => a + (+u.count || 0), 0), us.reduce((a, u) => a + (+u.deadMonth || 0), 0));
+  const fmtSv = v => v == null ? '—' : v + '%';
   const bio = d.bio && (d.bio.classes || []).length ? d.bio : null;
   const bioRows = bio ? bio.classes.map(c => ({ len: +c.length, n: +c.count, kg: kgOf(c.count, c.length, wl) })) : [];
   root.innerHTML = `
@@ -194,9 +221,13 @@ async function seacage(root) {
         ${['KR', 'MY', 'KRB'].map(s => `<div class="stat"><div class="n">${meas.some(u => u.site === s) ? fmtKg(siteKg(s)) : '—'}</div><div class="l">kg · ${site[s]}</div></div>`).join('')}
         <div class="stat"><div class="n">${meas.length}/${stocked.length}</div><div class="l">Units measured</div></div>
       </div>
+      <div class="stats" style="margin-top:8px">
+        <div class="stat"><div class="n">${fmtSv(svOf(stocked))}</div><div class="l">Survival this month · all sites</div></div>
+        ${['KR', 'MY', 'KRB'].map(s => `<div class="stat"><div class="n">${fmtSv(svOf(stocked.filter(u => u.site === s)))}</div><div class="l">Survival · ${site[s]}</div></div>`).join('')}
+      </div>
       ${stocked.length > meas.length ? `<p class="muted small" style="margin:10px 2px 0">Units with no length yet are not in the total.</p>` : ''}
       ${stocked.length ? `<details style="margin-top:10px"><summary class="small"><b>Each unit</b></summary>
-        ${stocked.map(u => `<div class="spec-row"><span>${C.esc(uname(u))} <small class="muted">${n0(u.count)} pcs${u.len ? ' · ' + u.len + ' cm · ' + fmtD(u.lenDate) : ' · no length'}</small></span><b>${u.kg ? fmtKg(u.kg) + ' kg' : '—'}</b></div>`).join('')}
+        ${stocked.map(u => `<div class="spec-row"><span>${C.esc(uname(u))} <small class="muted">${n0(u.count)} pcs${u.len ? ' · ' + u.len + ' cm · ' + fmtD(u.lenDate) : ' · no length'} · survival ${fmtSv(survivalPct(u.count, u.deadMonth))}</small></span><b>${u.kg ? fmtKg(u.kg) + ' kg' : '—'}</b></div>`).join('')}
       </details>` : ''}
       ${bio ? `<details style="margin-top:6px"><summary class="small"><b>Size classes, whole sea cage</b> · ${fmtD(bio.date)} · ${fmtKg(bioRows.reduce((a, r) => a + r.kg, 0))} kg</summary>
         ${bioRows.map(r => `<div class="spec-row"><span>${r.len} cm <small class="muted">${n0(r.n)} pcs · ${fmtG(weightG(r.len, wl))} g each</small></span><b>${fmtKg(r.kg)} kg</b></div>`).join('')}
