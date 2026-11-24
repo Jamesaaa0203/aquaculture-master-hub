@@ -2,6 +2,8 @@
    Router actions: lf_mortality, lf_count, lf_tank, lf_form.
    Map colours: next = purple, just = light green, stocked = dark green, diatom = blue, empty = grey. */
 
+import { lengthForm } from './bio.js';
+
 const STATE = {
   next: ['Next trial', 'st-next'], just: ['Baru stok', 'st-just'], stocked: ['Ada stok', 'st-stocked'],
   empty: ['Kosong', 'st-empty'], diatom: ['Diatom', 'st-diatom'], broodstock: ['Broodstock', 'st-brood'], incubation: ['Inkubasi', 'st-brood']
@@ -13,6 +15,7 @@ const FORMS = [
   { id: 'cuci', name: 'Cuci Tangki', sub: 'Pilih tangki yang dicuci' },
   { id: 'keluar', name: 'Keluarkan dengan Plat', sub: 'Tangki dikosongkan, plat ke tangki diatom' },
   { id: 'kira', name: 'Kiraan Spat', sub: 'Kira semula stok tangki' },
+  { id: 'panjang', name: 'Ukur Panjang', sub: 'Panjang abalone setiap tangki' },
   { id: 'pindah', name: 'Pindah Tangki', sub: 'Tangki ke tangki' },
   { id: 'seacage', name: 'Hantar ke Sea Cage', sub: 'Spat ke sangkar laut' },
   { id: 'sankina', name: 'Hantar ke Sankina', sub: 'Berat, suhu, sampel' },
@@ -26,7 +29,9 @@ export async function render(root, ctx, sub) {
   if (!dash) await loadDash();
   const f = {
     mati: mortality, next: pickForm('next'), cuci: pickForm('cuci'), keluar: removeForm, kira: countForm,
-    pindah: transferForm, seacage: seaCageForm, sankina: sankinaForm, produk: productForm
+    pindah: transferForm, seacage: seaCageForm, sankina: sankinaForm, produk: productForm,
+    panjang: r => lengthForm(r, { C, action: 'lf_length', title: 'Ukur Panjang', sites: [{ id: 'LF', name: 'Tangki',
+      units: spatTanks().map(t => ({ unit: t.tank, label: t.tank + (+t.count ? ' · ' + n0(t.count) + ' spat' : '') + (t.len ? ' · ' + t.len + ' cm' : '') })) }] })
   }[sub];
   return f ? f(root) : home(root);
 }
@@ -127,6 +132,7 @@ function tankSheet(id) {
   if (t.trial) rows.push(['Trial', C.esc(t.trial)]);
   if (t.count) rows.push(['Bilangan spat', n0(t.count) + (t.census ? ' (bancian)' : '')]);
   if (t.removed !== undefined) rows.push(['Dikeluarkan', n0(t.removed) + (t.to ? ' → ' + C.esc(t.to) : '')]);
+  if (t.len) rows.push(['Panjang', t.len + ' cm · ' + fmtD(t.lenDate)]);
   rows.push(['Cuci terakhir', t.cleaned ? fmtD(t.cleaned) : '—']);
   rows.push(['Kematian terakhir', t.lastDead ? fmtD(t.lastDead.date) + ' · ' + t.lastDead.qty : '—']);
   const isSpat = t.type === 'Spat';

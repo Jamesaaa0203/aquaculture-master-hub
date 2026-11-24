@@ -1,6 +1,8 @@
 /* Sea Cage — Rekod Kematian (mortality) + Stok Masuk (stock in)
    Sends through the outbox: sc_mortality, sc_stock. */
 
+import { lengthForm } from './bio.js';
+
 const SITES = [
   { id: 'KR',  name: 'Kolam Korea', section: 'Kolam Korea' },
   { id: 'MY',  name: 'Baby (MY)',   section: 'Baby' },
@@ -19,6 +21,8 @@ export async function render(root, ctx, sub) {
   C = ctx;
   if (sub === 'mati') return mortality(root);
   if (sub === 'stok') return stockIn(root);
+  if (sub === 'panjang') return lengthForm(root, { C, action: 'sc_length', title: 'Ukur Panjang',
+    sites: SITES.map(s => ({ id: s.id, name: s.name, units: units(s.id).map(u => ({ unit: u.unit, petak: u.petak, label: label(s.id, u) })) })) });
   return home(root);
 }
 
@@ -67,6 +71,11 @@ async function home(root) {
       <a class="row" href="#/m/seacage/stok">
         <span class="ic">${C.I.box}</span>
         <span class="tx"><span class="t">Stok Masuk</span><span class="s">New stock into a cage</span></span>
+        <span class="chev">${C.I.chev}</span>
+      </a>
+      <a class="row" href="#/m/seacage/panjang">
+        <span class="ic">${C.I.grid}</span>
+        <span class="tx"><span class="t">Ukur Panjang</span><span class="s">Shell length per cage</span></span>
         <span class="chev">${C.I.chev}</span>
       </a>
     </div>

@@ -1,6 +1,8 @@
 /* Manager pages (English, PIN). Router reads: mgr spawning|processing|hr|wq, dash maint.
    Actions: hr_leave, sp_outcome, sp_discard (manager PIN), lf_form stock counts (PIN). */
 
+import { kgOf, weightG, fmtKg, fmtG } from './bio.js';
+
 const PAGES = [   // James's order
   { id: 'landfarm',   href: '#/mgr/landfarm',     ko: '육상 양식장 현황',   name: 'Land Farm',            sub: 'Tank map, stock & this month',                  icon: 'flask',  c: '#10B981' },
   { id: 'seacage',    href: '#/mgr/seacage',      ko: '가두리 운영 현황',   name: 'Sea Cage Ops',         sub: 'Mortality & stock movements',           icon: 'grid',   c: '#0EA5E9' },
@@ -81,6 +83,10 @@ async function landfarm(root) {
   const cnt = {}; list.forEach(t => { const k = TSTATE[t.state] && !['broodstock', 'incubation'].includes(t.state) ? t.state : 'other'; cnt[k] = (cnt[k] || 0) + 1; });
   const live = list.filter(t => ['stocked', 'just'].includes(t.state)).reduce((a, t) => a + (+t.count || 0), 0);
   const top = list.filter(t => +t.count > 0).sort((a, b) => b.count - a.count);
+  const wl = d.wl || [];
+  top.forEach(t => { if (t.len) t.kg = kgOf(t.count, t.len, wl); });
+  const measured = top.filter(t => t.kg), lfKg = measured.reduce((a, t) => a + t.kg, 0);
+  const lastLen = list.filter(t => t.lenDate).map(t => t.lenDate).sort().pop();
   /* batches: tanks grouped by the spawning date their spat came from (newest first) */
   const bkey = t => t.batch || 'older';
   const bmap = {}; top.forEach(t => { const k = bkey(t); (bmap[k] = bmap[k] || { k, tanks: [], n: 0 }); bmap[k].tanks.push(t); bmap[k].n += +t.count || 0; });
@@ -107,13 +113,22 @@ async function landfarm(root) {
       ${batches.length ? `<div class="map-h" style="margin-top:12px"><b>By batch</b><span class="muted small">tap a batch to highlight its tanks</span></div>
       <div class="tchips">${batches.map(b => `<button data-fk="b:${b.k}">${bname(b.k)} <b>${b.tanks.length}</b></button>`).join('')}</div>` : ''}
     </div>
+    <div class="card">
+      <h2>Biomass</h2>
+      <div class="stats">
+        <div class="stat"><div class="n">${measured.length ? fmtKg(lfKg) : '—'}</div><div class="l">kg in measured tanks</div></div>
+        <div class="stat"><div class="n">${measured.length}/${top.length}</div><div class="l">Stocked tanks measured</div></div>
+        <div class="stat"><div class="n">${lastLen ? fmtD(lastLen) : '—'}</div><div class="l">Latest length</div></div>
+      </div>
+      ${top.length > measured.length ? `<p class="muted small" style="margin:10px 2px 0">${top.length - measured.length} stocked tank${top.length - measured.length === 1 ? ' has' : 's have'} no length yet, so ${top.length - measured.length === 1 ? 'it is' : 'they are'} not in the total.</p>` : ''}
+    </div>
     ${(d.spatByMonth || []).length ? `<div class="section-title">Spat produced by month · ${d.spatByMonth[0].month.slice(0, 4)}</div>
     <div class="card" style="padding:6px 14px">${d.spatByMonth.slice().reverse().map(m => `<div class="spec-row"><span>${new Date(m.month + '-15').toLocaleDateString('en-GB', { month: 'long' })}
       <small class="muted">${m.src === 'newsletter' ? 'Monthly newsletter' : 'Spawning trial counts'}</small></span><b>${n0(m.count)}</b></div>`).join('')}
       <div class="spec-row"><span><b>Total this year</b></span><b>${n0(d.spatByMonth.reduce((a, m) => a + m.count, 0))}</b></div></div>` : ''}
     ${batches.map(b => `<div class="section-title">${bname(b.k)}${b.k !== 'older' ? ' · ' + ageD(b.k) + ' days old' : ''}</div>
-    <div class="card" style="padding:6px 14px">${b.tanks.map(t => `<div class="spec-row"><span>${t.tank} <small class="muted">${(TSTATE[t.state] || TSTATE.empty)[0]}</small></span><b>${n0(t.count)}</b></div>`).join('')}
-      <div class="spec-row"><span><b>${b.tanks.length} tank${b.tanks.length === 1 ? '' : 's'}</b></span><b>${n0(b.n)}</b></div></div>`).join('')}`;
+    <div class="card" style="padding:6px 14px">${b.tanks.map(t => `<div class="spec-row"><span>${t.tank} <small class="muted">${(TSTATE[t.state] || TSTATE.empty)[0]}${t.len ? ' · ' + t.len + ' cm' : ''}</small></span><b>${n0(t.count)}${t.kg ? `<small class="muted"> · ${fmtKg(t.kg)} kg</small>` : ''}</b></div>`).join('')}
+      <div class="spec-row"><span><b>${b.tanks.length} tank${b.tanks.length === 1 ? '' : 's'}</b></span><b>${n0(b.n)}${b.tanks.some(t => t.kg) ? `<small class="muted"> · ${fmtKg(b.tanks.reduce((a, t) => a + (t.kg || 0), 0))} kg</small>` : ''}</b></div></div>`).join('')}`;
   /* tap a status to highlight only those tanks; tap again to show all */
   let filter = '';
   root.querySelector('.tchips').onclick = e => {
@@ -133,6 +148,11 @@ async function landfarm(root) {
     if (t.trial) rows.push(['Trial', C.esc(t.trial)]);
     if (t.count) rows.push(['Spat count', n0(t.count) + (t.census ? ' (census)' : '')]);
     if (t.removed !== undefined) rows.push(['Removed', n0(t.removed) + (t.to ? ' → ' + C.esc(t.to) : '')]);
+    if (t.len) {
+      rows.push(['Length', t.len + ' cm · ' + fmtD(t.lenDate) + (t.lenSrc === 'check' ? (t.lenN ? ' · ' + t.lenN + ' measured' : '') + (t.lenBy ? ' by ' + C.esc(t.lenBy) : '') : ' · census')]);
+      rows.push(['Weight each', fmtG(weightG(t.len, wl)) + ' g']);
+      if (t.kg) rows.push(['Biomass', fmtKg(t.kg) + ' kg']);
+    } else if (+t.count > 0) rows.push(['Length', 'Not measured yet']);
     rows.push(['Last cleaned', t.cleaned ? fmtD(t.cleaned) : '—']);
     rows.push(['Last mortality', t.lastDead ? fmtD(t.lastDead.date) + ' · ' + t.lastDead.qty : '—']);
     C.openSheet(`<h3>${t.tank} <span class="badge ${st[1]}">${st[0]}</span></h3>
@@ -149,6 +169,13 @@ async function seacage(root) {
   const site = { KR: 'Kolam Korea', MY: 'Baby (MY)', KRB: 'Baby KK' };
   const uname = u => `${site[u.site] || u.site} ${u.unit}${u.site === 'MY' && u.petak ? '/' + u.petak : ''}`;
   const recent = (d.units || []).filter(u => u.lastDead && u.lastDead.date).sort((a, b) => b.lastDead.date.localeCompare(a.lastDead.date)).slice(0, 12);
+  const wl = d.wl || [], SO = { KR: 0, MY: 1, KRB: 2 };
+  const stocked = (d.units || []).filter(u => +u.count > 0).sort((a, b) => (SO[a.site] - SO[b.site]) || a.unit - b.unit || a.petak - b.petak);
+  stocked.forEach(u => { if (u.len) u.kg = kgOf(u.count, u.len, wl); });
+  const meas = stocked.filter(u => u.kg), scKg = meas.reduce((a, u) => a + u.kg, 0);
+  const siteKg = s => meas.filter(u => u.site === s).reduce((a, u) => a + u.kg, 0);
+  const bio = d.bio && (d.bio.classes || []).length ? d.bio : null;
+  const bioRows = bio ? bio.classes.map(c => ({ len: +c.length, n: +c.count, kg: kgOf(c.count, c.length, wl) })) : [];
   root.innerHTML = `
     <div class="card">
       <h2>This month</h2>
@@ -159,6 +186,22 @@ async function seacage(root) {
         <div class="stat"><div class="n">${n0(m.KRB)}</div><div class="l">Dead · Baby KK</div></div>
         <div class="stat"><div class="n">${n0(d.stockInMonth)}</div><div class="l">Stock in</div></div>
       </div>
+    </div>
+    <div class="card">
+      <h2>Biomass</h2>
+      <div class="stats">
+        <div class="stat"><div class="n">${meas.length ? fmtKg(scKg) : '—'}</div><div class="l">kg · all sites</div></div>
+        ${['KR', 'MY', 'KRB'].map(s => `<div class="stat"><div class="n">${meas.some(u => u.site === s) ? fmtKg(siteKg(s)) : '—'}</div><div class="l">kg · ${site[s]}</div></div>`).join('')}
+        <div class="stat"><div class="n">${meas.length}/${stocked.length}</div><div class="l">Units measured</div></div>
+      </div>
+      ${stocked.length > meas.length ? `<p class="muted small" style="margin:10px 2px 0">Units with no length yet are not in the total.</p>` : ''}
+      ${stocked.length ? `<details style="margin-top:10px"><summary class="small"><b>Each unit</b></summary>
+        ${stocked.map(u => `<div class="spec-row"><span>${C.esc(uname(u))} <small class="muted">${n0(u.count)} pcs${u.len ? ' · ' + u.len + ' cm · ' + fmtD(u.lenDate) : ' · no length'}</small></span><b>${u.kg ? fmtKg(u.kg) + ' kg' : '—'}</b></div>`).join('')}
+      </details>` : ''}
+      ${bio ? `<details style="margin-top:6px"><summary class="small"><b>Size classes, whole sea cage</b> · ${fmtD(bio.date)} · ${fmtKg(bioRows.reduce((a, r) => a + r.kg, 0))} kg</summary>
+        ${bioRows.map(r => `<div class="spec-row"><span>${r.len} cm <small class="muted">${n0(r.n)} pcs · ${fmtG(weightG(r.len, wl))} g each</small></span><b>${fmtKg(r.kg)} kg</b></div>`).join('')}
+        <div class="spec-row"><span><b>Total</b> <small class="muted">${n0(bioRows.reduce((a, r) => a + r.n, 0))} pcs</small></span><b>${fmtKg(bioRows.reduce((a, r) => a + r.kg, 0))} kg</b></div>
+      </details>` : ''}
     </div>
     ${recent.length ? `<div class="section-title">Latest mortality records</div>
     <div class="card" style="padding:6px 14px">${recent.map(u => `<div class="spec-row"><span>${C.esc(uname(u))} <small class="muted">${fmtD(u.lastDead.date)}</small></span><b>${n0(u.lastDead.qty)}</b></div>`).join('')}</div>` : ''}
