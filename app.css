@@ -436,3 +436,15 @@ a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible
 .schouse { margin-top: 18px; border: 2px dashed rgba(245,158,11,.5); border-radius: 12px; padding: 10px 4px; text-align: center; font-size: 10px; font-weight: 800; color: #B45309; line-height: 1.5; }
 .scgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
 [data-theme="dark"] .sct.live { color: #7DD3FC; }
+details.card.fold { padding: 12px 14px; }
+details.card.fold > summary { display: flex; justify-content: space-between; align-items: center; gap: 10px; cursor: pointer; list-style: none; }
+details.card.fold > summary::-webkit-details-marker { display: none; }
+details.card.fold > summary::after { content: '›'; font-size: 20px; color: var(--muted, #94a3b8); transition: transform .15s; }
+details.card.fold[open] > summary::after { transform: rotate(90deg); }
+details.card.fold > summary .small { margin-left: auto; }
+details.card.fold[open] > summary { margin-bottom: 6px; }
+.ocean { background: linear-gradient(180deg, rgba(14,165,233,.30), rgba(14,165,233,.06)); border-radius: 12px 12px 4px 4px; padding: 7px; text-align: center; font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #0284C7; margin-bottom: 6px; }
+.scgrid.kr { grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.sct.kr { height: auto; aspect-ratio: 1; }
+.sct.kr b { font-size: 15px; }
+.mycages { margin-top: 6px; text-align: right; font-size: 10px; font-weight: 800; color: #2563EB; }

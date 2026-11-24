@@ -148,13 +148,12 @@ async function landfarm(root) {
         <div class="stat"><div class="n">${s.finishedYieldKg || 0}</div><div class="l">Finished yield (kg)</div></div>
       </div>
     </div>
-    ${(d.spatByMonth || []).length ? `<div class="section-title">Spat produced by month · ${d.spatByMonth[0].month.slice(0, 4)}</div>
-    <div class="card" style="padding:6px 14px">${d.spatByMonth.slice().reverse().map(m => `<div class="spec-row"><span>${new Date(m.month + '-15').toLocaleDateString('en-GB', { month: 'long' })}
-      <small class="muted">${m.src === 'newsletter' ? 'Monthly newsletter' : 'Spawning trial counts'}</small></span><b>${n0(m.count)}</b></div>`).join('')}
-      <div class="spec-row"><span><b>Total this year</b></span><b>${n0(d.spatByMonth.reduce((a, m) => a + m.count, 0))}</b></div></div>` : ''}
-    ${batches.map(b => `<div class="section-title">${bname(b.k)}${b.k !== 'older' ? ' · ' + ageD(b.k) + ' days old' : ''}</div>
-    <div class="card" style="padding:6px 14px">${b.tanks.map(t => `<div class="spec-row"><span>${t.tank} <small class="muted">${(TSTATE[t.state] || TSTATE.empty)[0]}${t.len ? ' · ' + t.len + ' cm' : ''}</small></span><b>${n0(t.count)}${t.kg ? `<small class="muted"> · ${fmtKg(t.kg)} kg</small>` : ''}</b></div>`).join('')}
-      <div class="spec-row"><span><b>${b.tanks.length} tank${b.tanks.length === 1 ? '' : 's'}</b></span><b>${n0(b.n)}${b.tanks.some(t => t.kg) ? `<small class="muted"> · ${fmtKg(b.tanks.reduce((a, t) => a + (t.kg || 0), 0))} kg</small>` : ''}</b></div></div>`).join('')}`;
+    ${(d.spatByMonth || []).length ? `<details class="card fold"><summary><b>Spat produced by month · ${d.spatByMonth[0].month.slice(0, 4)}</b><span class="muted small">${n0(d.spatByMonth.reduce((a, m) => a + m.count, 0))} this year</span></summary>
+      ${d.spatByMonth.slice().reverse().map(m => `<div class="spec-row"><span>${new Date(m.month + '-15').toLocaleDateString('en-GB', { month: 'long' })}
+      <small class="muted">${m.src === 'newsletter' ? 'Monthly newsletter' : 'Spawning trial counts'}</small></span><b>${n0(m.count)}</b></div>`).join('')}</details>` : ''}
+    ${batches.length ? `<div class="section-title">Stock by batch</div>` : ''}
+    ${batches.map(b => `<details class="card fold"><summary><b>${bname(b.k)}</b><span class="muted small">${b.k !== 'older' ? ageD(b.k) + ' days · ' : ''}${b.tanks.length} tank${b.tanks.length === 1 ? '' : 's'} · ${n0(b.n)}${b.tanks.some(t => t.kg) ? ' · ' + fmtKg(b.tanks.reduce((a, t) => a + (t.kg || 0), 0)) + ' kg' : ''}</span></summary>
+      ${b.tanks.map(t => `<div class="spec-row"><span>${t.tank} <small class="muted">${(TSTATE[t.state] || TSTATE.empty)[0]}${t.len ? ' · ' + t.len + ' cm' : ''}</small></span><b>${n0(t.count)}${t.kg ? `<small class="muted"> · ${fmtKg(t.kg)} kg</small>` : ''}</b></div>`).join('')}</details>`).join('')}`;
   /* tap a status to highlight only those tanks; tap again to show all */
   let filter = '';
   root.querySelector('.tchips').onclick = e => {
@@ -198,7 +197,7 @@ async function seacage(root) {
   title('Sea Cage Ops');
   loading(root);
   let d; try { d = await C.api.dash('seacage'); } catch (e) { return fail(root, e); }
-  const wl = d.wl || [], SITE = { MY: 'Malaysia', KR: 'Korea', KRB: 'Baby KK' };
+  const wl = d.wl || [], SITE = { MY: 'Malaysia', KR: 'Korea', KRB: 'Korean Cage – Baby Trial' }, SHORT = { MY: 'Malaysia', KR: 'Korea', KRB: 'Baby Trial' };
   const units = (d.units || []).map(u => Object.assign({}, u, { kg: (+u.count > 0 && u.len) ? kgOf(u.count, u.len, wl) : 0 }));
   const daysOf = u => u.stockDate ? daysSince(u.stockDate) : null;
   const pct = (a, b) => b > 0 ? Math.round(a / b * 1000) / 10 : null;
@@ -246,8 +245,17 @@ async function seacage(root) {
       ${['left', 'middle', 'right'].map(c => `<div class="col"><div class="colh">${c}</div>${COLS[c].map(id => tile('MY', id, g[id])).join('')}</div>`).join('')}
       <div class="schouse">Security<br>house</div></div>`;
     const ids = Object.keys(g).map(Number).sort((a, b) => a - b);
-    if (!ids.length) return '<p class="muted center small">No units recorded.</p>';
-    return `<div class="scgrid">${ids.map(id => tile(mapSite, id, g[id], mapSite === 'KR' ? 'Set ' + id : 'U' + id)).join('')}</div>`;
+    if (!ids.length) return '<p class="muted center small">No units recorded yet.</p>';
+    if (mapSite !== 'KR') return `<div class="scgrid">${ids.map(id => tile(mapSite, id, g[id], 'U' + id)).join('')}</div>`;
+    // Korea (same as the old app): Set 1 at the corner nearest the open ocean and the Malaysian cages,
+    // rows of 5 numbered right-to-left, new rows added below
+    const rows = []; for (let i = 0; i < ids.length; i += 5) rows.push(ids.slice(i, i + 5).reverse());
+    const krTile = id => { const arr = g[id], lv = liveOf(arr);
+      return `<button class="sct kr ${lv > 0 ? 'live' : ''}" data-s="KR" data-u="${id}"><b>${id}</b><small>${lv > 0 ? n0(lv) + ' live' : 'SET'}</small></button>`; };
+    return `<div class="ocean">Open ocean</div>
+      <div class="scgrid kr">${rows.map(r => Array(5 - r.length).fill('<span></span>').join('') + r.map(krTile).join('')).join('')}</div>
+      <div class="mycages">Malaysian cages →</div>
+      <p class="muted small" style="margin-top:8px">${ids.length} sets. Set 1 is the corner nearest the open ocean and the Malaysian cages. Tap a set to see its cages.</p>`;
   };
   const bio = d.bio && (d.bio.classes || []).length ? d.bio : null;
   const bioRows = bio ? bio.classes.map(c => ({ len: +c.length, n: +c.count, kg: kgOf(c.count, c.length, wl) })) : [];
@@ -257,7 +265,7 @@ async function seacage(root) {
     ${units.some(u => u.site === 'KRB') ? siteCard('KRB', '#0EA5E9') : ''}
     <div class="card" style="padding:14px 12px">
       <div class="map-h"><b>Map</b><span class="muted small">tap a unit for details</span></div>
-      <div class="seg" id="mSite" style="margin-bottom:12px">${['MY', 'KR', 'KRB'].map(x => `<button data-m="${x}" class="${x === mapSite ? 'on' : ''}">${SITE[x]}</button>`).join('')}</div>
+      <div class="seg" id="mSite" style="margin-bottom:12px">${['MY', 'KR', 'KRB'].map(x => `<button data-m="${x}" class="${x === mapSite ? 'on' : ''}">${SHORT[x]}</button>`).join('')}</div>
       <div id="mapBox">${mapHtml()}</div>
     </div>
     ${d.recentStock && d.recentStock.length ? `<details class="card" style="padding:12px 14px"><summary class="small"><b>Latest stock movements</b> · ${n0(d.stockInMonth)} in this month</summary>
