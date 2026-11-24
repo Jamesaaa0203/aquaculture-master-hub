@@ -81,6 +81,12 @@ async function landfarm(root) {
   const cnt = {}; list.forEach(t => { const k = TSTATE[t.state] && !['broodstock', 'incubation'].includes(t.state) ? t.state : 'other'; cnt[k] = (cnt[k] || 0) + 1; });
   const live = list.filter(t => ['stocked', 'just'].includes(t.state)).reduce((a, t) => a + (+t.count || 0), 0);
   const top = list.filter(t => +t.count > 0).sort((a, b) => b.count - a.count);
+  /* batches: tanks grouped by the spawning date their spat came from (newest first) */
+  const bkey = t => t.batch || 'older';
+  const bmap = {}; top.forEach(t => { const k = bkey(t); (bmap[k] = bmap[k] || { k, tanks: [], n: 0 }); bmap[k].tanks.push(t); bmap[k].n += +t.count || 0; });
+  const batches = Object.values(bmap).sort((a, b) => a.k === 'older' ? 1 : b.k === 'older' ? -1 : b.k.localeCompare(a.k));
+  const bname = k => k === 'older' ? 'Older batch' : fmtD(k) + ' batch';
+  const ageD = k => k === 'older' ? '' : Math.max(0, Math.round((new Date(C.today() + 'T00:00:00') - new Date(k + 'T00:00:00')) / 86400000));
   root.innerHTML = `
     <div class="card">
       <h2>This month</h2>
@@ -97,27 +103,33 @@ async function landfarm(root) {
       <div class="map-h"><b>Tank map</b><span class="muted small">${n0(live)} spat in tanks · tap a tank</span></div>
       <div class="tchips">${['stocked', 'just', 'next', 'empty', 'diatom', 'other'].map(k =>
         `<button data-fk="${k}"><i class="${k === 'other' ? 'st-brood' : TSTATE[k][1]}"></i>${k === 'other' ? 'Broodstock / incubation' : TSTATE[k][0]} <b>${cnt[k] || 0}</b></button>`).join('')}</div>
-      <div class="tmap">${list.map(t => `<button class="tile ${(TSTATE[t.state] || TSTATE.empty)[1]}" data-t="${t.tank}" data-g="${TSTATE[t.state] && !['broodstock', 'incubation'].includes(t.state) ? t.state : 'other'}">${parseInt(t.tank.slice(1), 10)}</button>`).join('')}</div>
+      <div class="tmap">${list.map(t => `<button class="tile ${(TSTATE[t.state] || TSTATE.empty)[1]}" data-t="${t.tank}" data-g="${TSTATE[t.state] && !['broodstock', 'incubation'].includes(t.state) ? t.state : 'other'}" data-b="${+t.count > 0 ? bkey(t) : ''}">${parseInt(t.tank.slice(1), 10)}</button>`).join('')}</div>
+      ${batches.length ? `<div class="map-h" style="margin-top:12px"><b>By batch</b><span class="muted small">tap a batch to highlight its tanks</span></div>
+      <div class="tchips">${batches.map(b => `<button data-fk="b:${b.k}">${bname(b.k)} <b>${b.tanks.length}</b></button>`).join('')}</div>` : ''}
     </div>
     ${(d.spatByMonth || []).length ? `<div class="section-title">Spat produced by month · ${d.spatByMonth[0].month.slice(0, 4)}</div>
     <div class="card" style="padding:6px 14px">${d.spatByMonth.slice().reverse().map(m => `<div class="spec-row"><span>${new Date(m.month + '-15').toLocaleDateString('en-GB', { month: 'long' })}
       <small class="muted">${m.src === 'newsletter' ? 'Monthly newsletter' : 'Spawning trial counts'}</small></span><b>${n0(m.count)}</b></div>`).join('')}
       <div class="spec-row"><span><b>Total this year</b></span><b>${n0(d.spatByMonth.reduce((a, m) => a + m.count, 0))}</b></div></div>` : ''}
-    ${top.length ? `<div class="section-title">Tanks with stock (${top.length})</div>
-    <div class="card" style="padding:6px 14px">${top.map(t => `<div class="spec-row"><span>${t.tank} <small class="muted">${(TSTATE[t.state] || TSTATE.empty)[0]}${t.since ? ' · since ' + fmtD(t.since) : ''}</small></span><b>${n0(t.count)}</b></div>`).join('')}</div>` : ''}`;
+    ${batches.map(b => `<div class="section-title">${bname(b.k)}${b.k !== 'older' ? ' · ' + ageD(b.k) + ' days old' : ''}</div>
+    <div class="card" style="padding:6px 14px">${b.tanks.map(t => `<div class="spec-row"><span>${t.tank} <small class="muted">${(TSTATE[t.state] || TSTATE.empty)[0]}</small></span><b>${n0(t.count)}</b></div>`).join('')}
+      <div class="spec-row"><span><b>${b.tanks.length} tank${b.tanks.length === 1 ? '' : 's'}</b></span><b>${n0(b.n)}</b></div></div>`).join('')}`;
   /* tap a status to highlight only those tanks; tap again to show all */
   let filter = '';
   root.querySelector('.tchips').onclick = e => {
     const b = e.target.closest('[data-fk]'); if (!b) return;
     filter = filter === b.dataset.fk ? '' : b.dataset.fk;
     root.querySelectorAll('.tchips [data-fk]').forEach(x => x.classList.toggle('on', x.dataset.fk === filter));
-    root.querySelectorAll('.tmap .tile').forEach(x => x.classList.toggle('dim', !!filter && x.dataset.g !== filter));
+    root.querySelectorAll('.tmap .tile').forEach(x => x.classList.toggle('dim', !!filter &&
+      (filter.startsWith('b:') ? x.dataset.b !== filter.slice(2) : x.dataset.g !== filter)));
   };
+  root.querySelectorAll('.tchips').forEach(c => { c.onclick = root.querySelector('.tchips').onclick; });
   root.querySelector('.tmap').onclick = e => {
     const b = e.target.closest('.tile'); if (!b) return;
     const t = list.find(x => x.tank === b.dataset.t) || {}, st = TSTATE[t.state] || TSTATE.empty;
     const rows = [];
-    if (t.since) rows.push(['Since', fmtD(t.since)]);
+    if (+t.count > 0) rows.push(['Batch', t.batch ? fmtD(t.batch) + ' · ' + ageD(t.batch) + ' days' : 'Older batch']);
+    else if (t.since) rows.push(['Since', fmtD(t.since)]);
     if (t.trial) rows.push(['Trial', C.esc(t.trial)]);
     if (t.count) rows.push(['Spat count', n0(t.count) + (t.census ? ' (census)' : '')]);
     if (t.removed !== undefined) rows.push(['Removed', n0(t.removed) + (t.to ? ' → ' + C.esc(t.to) : '')]);
