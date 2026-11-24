@@ -83,3 +83,21 @@ export function lengthForm(root, opts) {
   }
   paint();
 }
+
+/* ---------- feeding + survival ---------- */
+// feed = dash.feed { ratePct, fromCm }. Returns { g } or { why } for one tank.
+export function seaweedFor(t, feed, wl) {
+  if (!(+t.count > 0)) return null;
+  if (!t.len) return { why: 'len' };
+  if (+t.len < ((feed && feed.fromCm) || 1)) return { why: 'plate' };
+  const g = (+t.count) * weightG(t.len, wl) * (((feed && feed.ratePct) || 10) / 100);
+  return { g: Math.max(10, Math.round(g / 10) * 10) };
+}
+export const fmtGrams = g => g >= 1000 ? (Math.round(g / 100) / 10).toLocaleString() + ' kg' : Math.round(g).toLocaleString() + ' g';
+// survival this month = count now / (count now + deaths this month)
+export function survivalPct(count, dead) {
+  const c = +count || 0, d = +dead || 0;
+  if (!(c + d > 0) || !d) return c > 0 ? 100 : null;
+  return Math.round(c / (c + d) * 1000) / 10;
+}
+export const daysSince = ymd => ymd ? Math.floor((Date.now() - new Date(ymd + 'T00:00:00').getTime()) / 86400000) : null;
