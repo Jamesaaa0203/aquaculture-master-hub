@@ -5,13 +5,13 @@
    - Outbox: sent in the background on Android (Background Sync). */
 importScripts('./queue.js');
 
-const CACHE_VERSION = 'bonaqua-v26';
+const CACHE_VERSION = 'bonaqua-v27';
 const SHELL = [
   './',
   './index.html',
-  './app.css?v=2.3.4',
-  './app.js?v=2.3.4',
-  './queue.js?v=2.3.4',
+  './app.css?v=2.3.5',
+  './app.js?v=2.3.5',
+  './queue.js?v=2.3.5',
   './manifest.webmanifest',
   './icon-192.png',
   './icon-512.png',

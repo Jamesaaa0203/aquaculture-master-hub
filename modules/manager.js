@@ -100,15 +100,15 @@ async function landfarm(root) {
   const bname = k => k === 'older' ? 'Older batch' : fmtD(k) + ' batch';
   const ageD = k => k === 'older' ? '' : Math.max(0, Math.round((new Date(C.today() + 'T00:00:00') - new Date(k + 'T00:00:00')) / 86400000));
   root.innerHTML = `
-    <div class="card">
-      <h2>This month</h2>
+    <div class="card hero">
+      <h2>Land Farm now</h2>
       <div class="stats">
-        <div class="stat"><div class="n">${n0(s.spatConfirmed)}</div><div class="l">Spat produced</div></div>
-        <div class="stat"><div class="n">${n0(s.seaCageTransfer)}</div><div class="l">Sent to sea cage</div></div>
+        <div class="stat"><div class="n">${n0(live)}</div><div class="l">Spat in tanks</div></div>
+        <div class="stat"><div class="n">${top.length}</div><div class="l">Stocked tanks</div></div>
+        <div class="stat"><div class="n">${lfSurv == null ? '—' : lfSurv + '%'}</div><div class="l">Survival this month</div></div>
+        <div class="stat"><div class="n">${measured.length ? fmtKg(lfKg) + ' kg' : '—'}</div><div class="l">Biomass · ${measured.length}/${top.length} tanks measured</div></div>
+        <div class="stat"><div class="n">${n0(s.spatConfirmed)}</div><div class="l">Spat produced this month</div></div>
         <div class="stat"><div class="n">${n0(s.spatRemoved)}</div><div class="l">Removed with plates</div></div>
-        <div class="stat"><div class="n">${s.sankinaKg || 0}</div><div class="l">To Sankina (kg)</div></div>
-        <div class="stat"><div class="n">${s.finishedRawKg || 0}</div><div class="l">Finished raw (kg)</div></div>
-        <div class="stat"><div class="n">${s.finishedYieldKg || 0}</div><div class="l">Finished yield (kg)</div></div>
       </div>
     </div>
     <div class="card" style="padding:14px 12px">
@@ -125,7 +125,6 @@ async function landfarm(root) {
         <div class="stat"><div class="n">${measured.length ? fmtKg(lfKg) : '—'}</div><div class="l">kg in measured tanks</div></div>
         <div class="stat"><div class="n">${measured.length}/${top.length}</div><div class="l">Stocked tanks measured</div></div>
         <div class="stat"><div class="n">${lastLen ? fmtD(lastLen) : '—'}</div><div class="l">Latest length</div></div>
-        <div class="stat"><div class="n">${lfSurv == null ? '—' : lfSurv + '%'}</div><div class="l">Survival this month</div></div>
       </div>
       ${top.length > measured.length ? `<p class="muted small" style="margin:10px 2px 0">${top.length - measured.length} stocked tank${top.length - measured.length === 1 ? ' has' : 's have'} no length yet, so ${top.length - measured.length === 1 ? 'it is' : 'they are'} not in the total.</p>` : ''}
     </div>
@@ -139,6 +138,15 @@ async function landfarm(root) {
       <div class="spec-row" style="margin-top:10px"><span>Last feeding round</span><b>${feed.last ? fmtD(feed.last.date) + ' ' + C.esc(feed.last.session) + ' · ' + n0(feed.last.grams) + ' g' + (feed.last.worker ? ' · ' + C.esc(feed.last.worker) : '') : 'None recorded'}</b></div>
       ${lateP.length ? `<details style="margin-top:6px"><summary class="small"><b>Overdue tanks</b></summary>
         ${lateP.map(x => `<div class="spec-row"><span>${x.t.tank}</span><b class="small">${x.d == null ? 'never recorded' : x.d + ' days'}</b></div>`).join('')}</details>` : ''}
+    </div>
+    <div class="card">
+      <h2>This month</h2>
+      <div class="stats">
+        <div class="stat"><div class="n">${n0(s.seaCageTransfer)}</div><div class="l">Sent to sea cage</div></div>
+        <div class="stat"><div class="n">${s.sankinaKg || 0}</div><div class="l">To Sankina (kg)</div></div>
+        <div class="stat"><div class="n">${s.finishedRawKg || 0}</div><div class="l">Finished raw (kg)</div></div>
+        <div class="stat"><div class="n">${s.finishedYieldKg || 0}</div><div class="l">Finished yield (kg)</div></div>
+      </div>
     </div>
     ${(d.spatByMonth || []).length ? `<div class="section-title">Spat produced by month · ${d.spatByMonth[0].month.slice(0, 4)}</div>
     <div class="card" style="padding:6px 14px">${d.spatByMonth.slice().reverse().map(m => `<div class="spec-row"><span>${new Date(m.month + '-15').toLocaleDateString('en-GB', { month: 'long' })}
@@ -190,56 +198,102 @@ async function seacage(root) {
   title('Sea Cage Ops');
   loading(root);
   let d; try { d = await C.api.dash('seacage'); } catch (e) { return fail(root, e); }
-  const m = d.deadMonth || {}, total = (m.KR || 0) + (m.MY || 0) + (m.KRB || 0);
-  const site = { KR: 'Kolam Korea', MY: 'Baby (MY)', KRB: 'Baby KK' };
-  const uname = u => `${site[u.site] || u.site} ${u.unit}${u.site === 'MY' && u.petak ? '/' + u.petak : ''}`;
-  const recent = (d.units || []).filter(u => u.lastDead && u.lastDead.date).sort((a, b) => b.lastDead.date.localeCompare(a.lastDead.date)).slice(0, 12);
-  const wl = d.wl || [], SO = { KR: 0, MY: 1, KRB: 2 };
-  const stocked = (d.units || []).filter(u => +u.count > 0).sort((a, b) => (SO[a.site] - SO[b.site]) || a.unit - b.unit || a.petak - b.petak);
-  stocked.forEach(u => { if (u.len) u.kg = kgOf(u.count, u.len, wl); });
-  const meas = stocked.filter(u => u.kg), scKg = meas.reduce((a, u) => a + u.kg, 0);
-  const siteKg = s => meas.filter(u => u.site === s).reduce((a, u) => a + u.kg, 0);
-  const svOf = us => survivalPct(us.reduce((a, u) => a + (+u.count || 0), 0), us.reduce((a, u) => a + (+u.deadMonth || 0), 0));
-  const fmtSv = v => v == null ? '—' : v + '%';
+  const wl = d.wl || [], SITE = { MY: 'Malaysia', KR: 'Korea', KRB: 'Baby KK' };
+  const units = (d.units || []).map(u => Object.assign({}, u, { kg: (+u.count > 0 && u.len) ? kgOf(u.count, u.len, wl) : 0 }));
+  const daysOf = u => u.stockDate ? daysSince(u.stockDate) : null;
+  const pct = (a, b) => b > 0 ? Math.round(a / b * 1000) / 10 : null;
+  function stats(us, site) {
+    const st = us.filter(u => +u.stocked > 0 || +u.count > 0);
+    const stocked = st.reduce((a, u) => a + (+u.stocked || 0), 0), live = st.reduce((a, u) => a + (+u.count || 0), 0);
+    const ds = st.map(daysOf).filter(x => x != null);
+    let lw = 0, ln = 0; st.forEach(u => { if (u.len && +u.count > 0) { lw += u.len * u.count; ln += +u.count; } });
+    const meas = st.filter(u => u.kg);
+    return { n: st.length, stocked, live, surv: pct(live, stocked), days: ds.length ? Math.round(ds.reduce((a, b) => a + b, 0) / ds.length) : null,
+      dead: (d.deadMonth || {})[site] || 0, len: ln ? Math.round(lw / ln * 100) / 100 : null, kg: meas.reduce((a, u) => a + u.kg, 0), meas: meas.length };
+  }
+  const siteCard = (site, color) => {
+    const x = stats(units.filter(u => u.site === site), site);
+    return `<div class="card" style="border-top:3px solid ${color}">
+      <div class="map-h"><b style="color:${color}">${SITE[site]}</b><span class="muted small">${x.n} ${site === 'KR' ? 'cage' : 'unit'}${x.n === 1 ? '' : 's'} stocked</span></div>
+      <div class="stats">
+        <div class="stat"><div class="n">${n0(x.stocked)}</div><div class="l">Stocked</div></div>
+        <div class="stat"><div class="n">${n0(x.live)}</div><div class="l">Live now</div></div>
+        <div class="stat"><div class="n">${x.surv == null ? '—' : x.surv + '%'}</div><div class="l">Survival</div></div>
+        <div class="stat"><div class="n">${n0(x.dead)}</div><div class="l">Dead this month</div></div>
+        <div class="stat"><div class="n">${x.days == null ? '—' : x.days + ' d'}</div><div class="l">Days stocked (avg)</div></div>
+        <div class="stat"><div class="n">${x.len == null ? '—' : x.len + ' cm'}</div><div class="l">Avg length</div></div>
+        <div class="stat"><div class="n">${x.meas ? fmtKg(x.kg) + ' kg' : '—'}</div><div class="l">Biomass</div></div>
+      </div>
+    </div>`;
+  };
+  // group petaks / cages under their unit or set
+  const groupOf = site => {
+    const g = {};
+    units.filter(u => u.site === site).forEach(u => { (g[u.unit] = g[u.unit] || []).push(u); });
+    return g;
+  };
+  const liveOf = arr => (arr || []).reduce((a, u) => a + (+u.count || 0), 0);
+  const tile = (site, id, arr, lbl) => {
+    const lv = liveOf(arr), has = arr && arr.length;
+    return `<button class="sct ${lv > 0 ? 'live' : ''} ${has ? '' : 'dim'}" data-s="${site}" data-u="${id}" ${has ? '' : 'disabled'}>
+      <span class="u">${lbl || 'U' + id}</span><b>${has ? n0(lv) : '—'}</b><small>${has ? 'LIVE' : 'NONE'}</small></button>`;
+  };
+  const COLS = { left: [9, 10, 11, 12, 13, 14, 15, 16], middle: [1, 2, 3, 4, 17, 18, 19, 20], right: [5, 6, 7, 8, 21, 22, 23, 24] };
+  let mapSite = 'MY';
+  const mapHtml = () => {
+    const g = groupOf(mapSite);
+    if (mapSite === 'MY') return `<div class="scmap">
+      ${['left', 'middle', 'right'].map(c => `<div class="col"><div class="colh">${c}</div>${COLS[c].map(id => tile('MY', id, g[id])).join('')}</div>`).join('')}
+      <div class="schouse">Security<br>house</div></div>`;
+    const ids = Object.keys(g).map(Number).sort((a, b) => a - b);
+    if (!ids.length) return '<p class="muted center small">No units recorded.</p>';
+    return `<div class="scgrid">${ids.map(id => tile(mapSite, id, g[id], mapSite === 'KR' ? 'Set ' + id : 'U' + id)).join('')}</div>`;
+  };
   const bio = d.bio && (d.bio.classes || []).length ? d.bio : null;
   const bioRows = bio ? bio.classes.map(c => ({ len: +c.length, n: +c.count, kg: kgOf(c.count, c.length, wl) })) : [];
   root.innerHTML = `
-    <div class="card">
-      <h2>This month</h2>
-      <div class="stats">
-        <div class="stat"><div class="n">${n0(total)}</div><div class="l">Dead · all sites</div></div>
-        <div class="stat"><div class="n">${n0(m.KR)}</div><div class="l">Dead · Kolam Korea</div></div>
-        <div class="stat"><div class="n">${n0(m.MY)}</div><div class="l">Dead · Baby (MY)</div></div>
-        <div class="stat"><div class="n">${n0(m.KRB)}</div><div class="l">Dead · Baby KK</div></div>
-        <div class="stat"><div class="n">${n0(d.stockInMonth)}</div><div class="l">Stock in</div></div>
-      </div>
+    ${siteCard('MY', '#2563EB')}
+    ${siteCard('KR', '#7C3AED')}
+    ${units.some(u => u.site === 'KRB') ? siteCard('KRB', '#0EA5E9') : ''}
+    <div class="card" style="padding:14px 12px">
+      <div class="map-h"><b>Map</b><span class="muted small">tap a unit for details</span></div>
+      <div class="seg" id="mSite" style="margin-bottom:12px">${['MY', 'KR', 'KRB'].map(x => `<button data-m="${x}" class="${x === mapSite ? 'on' : ''}">${SITE[x]}</button>`).join('')}</div>
+      <div id="mapBox">${mapHtml()}</div>
     </div>
-    <div class="card">
-      <h2>Biomass</h2>
-      <div class="stats">
-        <div class="stat"><div class="n">${meas.length ? fmtKg(scKg) : '—'}</div><div class="l">kg · all sites</div></div>
-        ${['KR', 'MY', 'KRB'].map(s => `<div class="stat"><div class="n">${meas.some(u => u.site === s) ? fmtKg(siteKg(s)) : '—'}</div><div class="l">kg · ${site[s]}</div></div>`).join('')}
-        <div class="stat"><div class="n">${meas.length}/${stocked.length}</div><div class="l">Units measured</div></div>
-      </div>
-      <div class="stats" style="margin-top:8px">
-        <div class="stat"><div class="n">${fmtSv(svOf(stocked))}</div><div class="l">Survival this month · all sites</div></div>
-        ${['KR', 'MY', 'KRB'].map(s => `<div class="stat"><div class="n">${fmtSv(svOf(stocked.filter(u => u.site === s)))}</div><div class="l">Survival · ${site[s]}</div></div>`).join('')}
-      </div>
-      ${stocked.length > meas.length ? `<p class="muted small" style="margin:10px 2px 0">Units with no length yet are not in the total.</p>` : ''}
-      ${stocked.length ? `<details style="margin-top:10px"><summary class="small"><b>Each unit</b></summary>
-        ${stocked.map(u => `<div class="spec-row"><span>${C.esc(uname(u))} <small class="muted">${n0(u.count)} pcs${u.len ? ' · ' + u.len + ' cm · ' + fmtD(u.lenDate) : ' · no length'} · survival ${fmtSv(survivalPct(u.count, u.deadMonth))}</small></span><b>${u.kg ? fmtKg(u.kg) + ' kg' : '—'}</b></div>`).join('')}
-      </details>` : ''}
-      ${bio ? `<details style="margin-top:6px"><summary class="small"><b>Size classes, whole sea cage</b> · ${fmtD(bio.date)} · ${fmtKg(bioRows.reduce((a, r) => a + r.kg, 0))} kg</summary>
-        ${bioRows.map(r => `<div class="spec-row"><span>${r.len} cm <small class="muted">${n0(r.n)} pcs · ${fmtG(weightG(r.len, wl))} g each</small></span><b>${fmtKg(r.kg)} kg</b></div>`).join('')}
-        <div class="spec-row"><span><b>Total</b> <small class="muted">${n0(bioRows.reduce((a, r) => a + r.n, 0))} pcs</small></span><b>${fmtKg(bioRows.reduce((a, r) => a + r.kg, 0))} kg</b></div>
-      </details>` : ''}
-    </div>
-    ${recent.length ? `<div class="section-title">Latest mortality records</div>
-    <div class="card" style="padding:6px 14px">${recent.map(u => `<div class="spec-row"><span>${C.esc(uname(u))} <small class="muted">${fmtD(u.lastDead.date)}</small></span><b>${n0(u.lastDead.qty)}</b></div>`).join('')}</div>` : ''}
-    ${d.recentStock && d.recentStock.length ? `<div class="section-title">Latest stock movements</div>
-    <div class="card" style="padding:6px 14px">${d.recentStock.map(r => `<div class="spec-row"><span>${fmtD(r.date)} · ${C.esc(uname(r))}
+    ${d.recentStock && d.recentStock.length ? `<details class="card" style="padding:12px 14px"><summary class="small"><b>Latest stock movements</b> · ${n0(d.stockInMonth)} in this month</summary>
+      ${d.recentStock.map(r => `<div class="spec-row"><span>${fmtD(r.date)} · ${C.esc(SITE[r.site] || r.site)} ${C.esc(r.unit)}${r.site === 'MY' ? '/' + C.esc(r.petak) : ''}
       <small class="muted">${C.esc(r.source)}${r.supplier ? ' · ' + C.esc(r.supplier) : ''}</small></span>
-      <b style="color:${r.qty < 0 ? 'var(--bad)' : 'var(--good)'}">${r.qty > 0 ? '+' : ''}${n0(r.qty)}</b></div>`).join('')}</div>` : ''}`;
+      <b style="color:${r.qty < 0 ? 'var(--bad)' : 'var(--good)'}">${r.qty > 0 ? '+' : ''}${n0(r.qty)}</b></div>`).join('')}</details>` : ''}
+    ${bio ? `<details class="card" style="padding:12px 14px"><summary class="small"><b>Size classes, whole sea cage</b> · ${fmtD(bio.date)} · ${fmtKg(bioRows.reduce((a, r) => a + r.kg, 0))} kg</summary>
+      ${bioRows.map(r => `<div class="spec-row"><span>${r.len} cm <small class="muted">${n0(r.n)} pcs · ${fmtG(weightG(r.len, wl))} g each</small></span><b>${fmtKg(r.kg)} kg</b></div>`).join('')}</details>` : ''}`;
+  root.querySelector('#mSite').onclick = e => {
+    const b = e.target.closest('[data-m]'); if (!b) return;
+    mapSite = b.dataset.m;
+    root.querySelectorAll('#mSite button').forEach(x => x.classList.toggle('on', x === b));
+    root.querySelector('#mapBox').innerHTML = mapHtml();
+  };
+  root.querySelector('#mapBox').onclick = e => {
+    const b = e.target.closest('.sct'); if (!b || b.disabled) return;
+    const site = b.dataset.s, id = +b.dataset.u, arr = (groupOf(site)[id] || []).slice().sort((a, b2) => a.petak - b2.petak);
+    const part = u => site === 'MY' ? 'Petak ' + u.petak : site === 'KR' ? 'Cage ' + u.petak : (arr.length > 1 ? 'Petak ' + u.petak : 'Unit');
+    const tot = arr.reduce((a, u) => ({ live: a.live + (+u.count || 0), st: a.st + (+u.stocked || 0), kg: a.kg + (u.kg || 0), dead: a.dead + (+u.deadMonth || 0) }), { live: 0, st: 0, kg: 0, dead: 0 });
+    const rowsFor = u => {
+      const r = [['Live / stocked', n0(u.count) + ' / ' + n0(u.stocked)]];
+      const sv = pct(+u.count || 0, +u.stocked || 0); r.push(['Survival', sv == null ? '—' : sv + '%']);
+      const dd = daysOf(u); r.push(['Days stocked', dd == null ? '—' : dd + ' days' + (u.stockDate ? ' · since ' + fmtD(u.stockDate) : '')]);
+      r.push(['Length', u.len ? u.len + ' cm · ' + fmtD(u.lenDate) : '—']);
+      r.push(['Biomass', u.kg ? fmtKg(u.kg) + ' kg' : '—']);
+      r.push(['Dead this month', n0(u.deadMonth)]);
+      r.push(['Last mortality', u.lastDead ? fmtD(u.lastDead.date) + ' · ' + u.lastDead.qty : '—']);
+      return r;
+    };
+    C.openSheet(`<h3>${SITE[site]} · ${site === 'KR' ? 'Set ' + id : 'Unit ' + id}</h3>
+      ${arr.length > 1 ? `<div class="card" style="padding:6px 14px"><div class="spec-row"><span><b>Total</b> <small class="muted">${arr.length} ${site === 'KR' ? 'cages' : 'petak'}</small></span><b>${n0(tot.live)} live · ${pct(tot.live, tot.st) == null ? '—' : pct(tot.live, tot.st) + '%'}${tot.kg ? ' · ' + fmtKg(tot.kg) + ' kg' : ''}</b></div>
+        <div class="spec-row"><span>Dead this month</span><b>${n0(tot.dead)}</b></div></div>` : ''}
+      ${arr.length > 6 && site === 'KR'
+        ? `<div class="card" style="padding:6px 14px">${arr.map(u => `<div class="spec-row"><span>${part(u)} <small class="muted">${n0(u.count)}/${n0(u.stocked)} · ${u.len ? u.len + ' cm' : 'no length'}${u.deadMonth ? ' · ' + u.deadMonth + ' dead' : ''}</small></span><b>${pct(+u.count || 0, +u.stocked || 0) == null ? '—' : pct(+u.count || 0, +u.stocked || 0) + '%'}</b></div>`).join('')}</div>`
+        : arr.map(u => `<div class="section-title">${part(u)}</div><div class="card" style="padding:6px 14px">${rowsFor(u).map(r => `<div class="spec-row"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('')}</div>`).join('')}`);
+  };
 }
 
 /* ---------- HR ---------- */
