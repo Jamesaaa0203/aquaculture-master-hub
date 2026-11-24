@@ -418,3 +418,21 @@ a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible
 .sheet h3 { letter-spacing: -.01em; }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
+
+/* hero card: first thing on a manager page */
+.card.hero { border-top: 3px solid var(--mc, var(--brand)); }
+.card.hero .stat .n { font-size: 22px; }
+.card.hero .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* sea cage map */
+.scmap { display: grid; grid-template-columns: 1fr 1fr 1fr 64px; gap: 7px; align-items: start; }
+.scmap .col { display: flex; flex-direction: column; gap: 7px; }
+.scmap .colh { font-size: 10px; font-weight: 700; text-align: center; color: var(--ink-3, var(--muted)); text-transform: uppercase; letter-spacing: .06em; }
+.sct { position: relative; height: 64px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--surface-2); display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Space Grotesk', sans-serif; }
+.sct.live { border-color: rgba(14,165,233,.45); background: rgba(14,165,233,.10); color: #0369A1; }
+.sct .u { position: absolute; top: 5px; left: 8px; font-size: 10px; font-weight: 800; opacity: .6; }
+.sct b { font-size: 17px; font-weight: 800; line-height: 1; }
+.sct small { font-size: 9px; font-weight: 700; opacity: .65; margin-top: 2px; }
+.sct.dim { opacity: .45; }
+.schouse { margin-top: 18px; border: 2px dashed rgba(245,158,11,.5); border-radius: 12px; padding: 10px 4px; text-align: center; font-size: 10px; font-weight: 800; color: #B45309; line-height: 1.5; }
+.scgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+[data-theme="dark"] .sct.live { color: #7DD3FC; }
